@@ -40,6 +40,7 @@ export const GITNEXUS_SCRIPT_GATES = [
       "gitnexus:fallback": "node scripts/gitnexus-agent.mjs fallback",
       "gitnexus:fallback:off": "node scripts/gitnexus-agent.mjs fallback:off",
       "gitnexus:fallback-log": "node scripts/gitnexus-agent.mjs fallback-log",
+      "gitnexus:northstars": "node scripts/gitnexus-agent.mjs northstars",
     },
   },
   {

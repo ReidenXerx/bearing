@@ -22,6 +22,7 @@ export function sessionPaths(root) {
     scorecardFile: path.join(stateDir, '.gitnexus-scorecard.json'),
     fallbackFlag: path.join(stateDir, '.gitnexus-fallback.json'),
     pressureNudgedFlag: path.join(stateDir, '.gitnexus-pressure-nudged.flag'),
+    northStarCounter: path.join(stateDir, '.gitnexus-northstar-counter.json'),
   };
 }
 
@@ -53,6 +54,87 @@ export function taskCoreAgeMs(root) {
   } catch {
     return Infinity;
   }
+}
+
+// ── NORTH-STARS (user-owned semantic anchor) ─────────────────────────────────
+// The fixed point that stops SEMANTIC drift: a short, numbered, falsifiable statement of what
+// this project IS — invariants, exact term meanings, settled decisions, and the graveyard of
+// tried/rejected ideas. Distinct from the other two memories:
+//   task-core  — AGENT-authored, ephemeral, THIS task, gitignored session state.
+//   MEMORY.md  — running cross-session notes.
+//   northstars — USER-owned, permanent, whole-project, TRACKED (committed, team-shared) and
+//                AUTHORITATIVE: it outranks every other doc, and the agent may PROPOSE edits but
+//                never silently make them — otherwise drift contaminates the anchor itself.
+// Note the filename has NO dot prefix: the managed .gitignore covers `.gnkit/.gitnexus-*`, so a
+// dotted name would be ignored. This one is meant to be committed.
+
+/** @param {string} root */
+export function northStarsPath(root) {
+  return path.join(root, '.gnkit', 'gitnexus-northstars.md');
+}
+
+/** @param {string} root @returns {boolean} does a north-stars doc exist + have content? */
+export function northStarsExists(root) {
+  try {
+    return fs.statSync(northStarsPath(root)).size > 0;
+  } catch {
+    return false;
+  }
+}
+
+/** @param {string} root @returns {string} full north-stars text ('' if none) */
+export function readNorthStars(root) {
+  try {
+    return fs.readFileSync(northStarsPath(root), 'utf8');
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * The re-anchor payload: just the numbered `NS-#` propositions, verbatim. Re-injecting the WHOLE
+ * doc every N tool calls would be expensive and would train the agent to skim it; the numbered
+ * lines alone are the citable anchor, so they stay cheap enough to repeat mid-session.
+ * @param {string} root
+ * @param {number} max cap the number of lines returned (0 = no cap)
+ * @returns {string[]} e.g. ['NS-1 — Backtest stop model MUST match the live order.', …]
+ */
+export function northStarsDigest(root, max = 0) {
+  const out = [];
+  for (const raw of readNorthStars(root).split('\n')) {
+    // Tolerant of markdown noise: "- **NS-3** — …", "NS-3. …", "* NS-3: …"
+    if (!/^\s*(?:[-*+]\s*)?\**\s*NS-\d+\b/.test(raw)) continue;
+    const line = raw.replace(/^\s*(?:[-*+]\s*)?/, '').replace(/\*\*/g, '').trim();
+    if (line) out.push(line);
+    if (max > 0 && out.length >= max) break;
+  }
+  return out;
+}
+
+/**
+ * Count tool calls since the last re-anchor, so the anchor hook can fire every N calls.
+ * @param {string} root
+ * @param {boolean} reset start the count over (called right after an anchor is emitted)
+ * @returns {number} the count AFTER this call
+ */
+export function bumpNorthStarCounter(root, reset = false) {
+  const { stateDir, northStarCounter } = sessionPaths(root);
+  let n = 0;
+  if (!reset) {
+    try {
+      n = JSON.parse(fs.readFileSync(northStarCounter, 'utf8')).n || 0;
+    } catch {
+      n = 0;
+    }
+  }
+  const next = reset ? 0 : n + 1;
+  try {
+    fs.mkdirSync(stateDir, { recursive: true });
+    fs.writeFileSync(northStarCounter, JSON.stringify({ n: next }));
+  } catch {
+    /* best-effort — a missing counter just means we anchor again sooner */
+  }
+  return next;
 }
 
 /** @param {string} root @param {boolean} on — remember we already nudged this pressure zone. */
@@ -485,6 +567,7 @@ export function clearSessionState(root) {
     scorecardFile,
     fallbackFlag,
     pressureNudgedFlag,
+    northStarCounter,
   } = sessionPaths(root);
   fs.mkdirSync(stateDir, { recursive: true });
   // Archive the finishing session's tally BEFORE wiping the scorecard.
@@ -499,7 +582,10 @@ export function clearSessionState(root) {
     stalenessCacheFile,
     scorecardFile,
     fallbackFlag,
+    // NB the north-stars DOC itself is never touched here (it's user-owned + committed) — only the
+    // per-session anchor counter, so a new session re-anchors promptly.
     pressureNudgedFlag,
+    northStarCounter,
   ]) {
     try {
       fs.unlinkSync(f);

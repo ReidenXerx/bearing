@@ -24,6 +24,10 @@ const {
   fallbackGrant,
   appendFallbackReport,
   readFallbackReports,
+  northStarsPath,
+  northStarsExists,
+  northStarsDigest,
+  readNorthStars,
   bumpScore,
 } = await import(
   pathToFileURL(path.join(ROOT, ".gnkit/lib/session-primer.mjs")).href
@@ -106,6 +110,30 @@ if (cmd === "fallback-log") {
   }
   if (reports.length > 30) console.log(`\n(showing last 30 of ${reports.length}; --json for all)`);
   console.log("\nExport for the GitNexus developers: npm run gitnexus:fallback-log -- --json");
+  process.exit(0);
+}
+
+if (cmd === "northstars") {
+  const nsp = northStarsPath(ROOT);
+  if (!northStarsExists(ROOT)) {
+    console.log(`No north-stars yet — create ${nsp}.`);
+    console.log(
+      "\nIt is the project's SEMANTIC anchor: short, numbered, falsifiable propositions (NS-1, NS-2, …)",
+    );
+    console.log(
+      "stating invariants, exact term meanings, settled decisions, and rejected ideas. It outranks every",
+    );
+    console.log("other doc. Format + routine: the `gitnexus-northstars` skill.");
+    process.exit(0);
+  }
+  const lines = northStarsDigest(ROOT);
+  if (process.argv.includes("--full")) {
+    console.log(readNorthStars(ROOT));
+    process.exit(0);
+  }
+  console.log(`Project north-stars — ${lines.length} proposition(s) · ${nsp}\n`);
+  for (const l of lines) console.log(`  ${l}`);
+  console.log("\nFull document: npm run gitnexus:northstars -- --full");
   process.exit(0);
 }
 
