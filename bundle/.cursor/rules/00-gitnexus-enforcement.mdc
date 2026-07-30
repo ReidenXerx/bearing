@@ -155,6 +155,19 @@ Enforcement is **polyglot** — JS/TS, Python, Rust, Go, Java, and more count as
 
 At a **milestone** — feature done / big-task checkpoint / shared-code refactor / pre-ship, or "audit / find real bugs / is this solid?" — **and** only when the work is *substantial* (multi-file or high `impact` blast-radius): run a **microscope-waves** pass → load the `gitnexus-microscope` skill. Multi-lens, opinionated (not just defects), adversarially verified, iterated in waves. Skip it for small localized changes.
 
+## Project north-stars — the semantic anchor (highest authority)
+
+*(Distinct from the graph-first "North star" above: those are the kit's reasoning rules; these are **this project's** fixed points.)*
+
+If **`.gnkit/gitnexus-northstars.md`** exists, it is the project's **authoritative** statement of what this project IS: numbered, falsifiable propositions (`NS-1`, `NS-2`, …) covering **INVARIANTS** (must always hold), **SEMANTICS** (exact meaning of load-bearing terms), **EVIDENCE** (what counts as proof here), **SETTLED** decisions, and a **GRAVEYARD** of tried-and-rejected / validated ideas.
+
+- **READ IT FIRST** — before forming any premise, at session start and on every recovery. A PostToolUse hook re-anchors you on it periodically and right after you write a doc; that is a *reminder*, not a substitute for reading it.
+- **It outranks everything**: every other doc, README, code comment, and your own inference. Repos accumulate stale and mutually contradictory docs — when any source conflicts with a north-star, **the north-star wins and the other source is stale**. Say so instead of silently averaging them.
+- **CITE the `NS-#`** when you make a consequential claim, choose a direction, or reject an idea. If you cannot cite one for a load-bearing conclusion, **you may be drifting — say so explicitly** rather than proceeding confidently.
+- **Never silently edit a north-star, and never quietly work around one.** If one looks wrong, missing, or outdated, state that plainly and **propose the change to the user** — the anchor only works if drift can't rewrite it.
+- **The GRAVEYARD is settled**: do not re-propose a rejected idea without new evidence that addresses *why* it was rejected, and do not discard a VALIDATED one without evidence that overturns it.
+- Print them anytime: `npm run gitnexus:northstars`. Format + maintenance routine: the **`gitnexus-northstars`** skill.
+
 ## Durable memory (survives compaction + sessions)
 
 Maintain your **Claude Code project memory** — `~/.claude/projects/<this-project>/memory/MEMORY.md` (Claude Code's native memory; **all agents share this one file** — Claude refers to its own, other agents mirror it). Record task, key decisions, findings, open items, important `file:line`. Update it at milestones and whenever you conclude something that must outlive the current transcript. Context compaction and new sessions drop the conversation; this file does not. On recovery (post-compaction/resume) READ it first and reconcile it with reality — **nothing important may be lost.**

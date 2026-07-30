@@ -26,6 +26,8 @@ const {
   fallbackGrant,
   taskCorePath,
   taskCoreExists,
+  northStarsPath,
+  northStarsExists,
 } = await lib("session-primer.mjs");
 
 const source = input.source || "startup";
@@ -41,6 +43,13 @@ const staleLine = grant
   : ctx.phase !== "fresh"
     ? "Index is STALE — run `npm run gitnexus:agent-refresh` before graph calls (hooks block until refreshed)."
     : "Index is fresh — hooks redirect symbol Grep / large Read / blind edits to the graph.";
+
+// NORTH-STARS come FIRST on every session type (fresh, compact, resume). They're the project's
+// fixed points — the semantic anchor that outranks every other doc — so they must be in the window
+// BEFORE the agent forms any premise. The PostToolUse anchor hook keeps them there mid-session.
+const nsLine = northStarsExists(root)
+  ? `⚑ READ THE NORTH-STARS FIRST — \`${northStarsPath(root)}\`: the project's numbered, authoritative fixed points (invariants, exact term meanings, settled decisions, rejected ideas). They OUTRANK every other doc and your own inference — a conclusion that conflicts with one is wrong. Cite the relevant NS-# when you make a consequential claim, propose a direction, or reject an idea; never silently edit or work around one — propose the change to the user instead.`
+  : "";
 
 let lines;
 if (recovering) {
@@ -70,4 +79,5 @@ if (recovering) {
     staleLine,
   ];
 }
+if (nsLine) lines.unshift(nsLine);
 emitContext(lines.join(" "), "SessionStart");

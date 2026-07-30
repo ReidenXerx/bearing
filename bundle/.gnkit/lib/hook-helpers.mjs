@@ -103,6 +103,10 @@ export function loadHookConfig(root) {
     // model. Precedence: this default < gitnexus-hooks.json < .local.json < env. 0 threshold disables.
     contextWindowTokens: 200000,
     contextPressureThreshold: 0.9,
+    // NORTH-STARS re-anchor: re-inject the numbered NS-# propositions verbatim every N tool calls
+    // (and always right after the agent writes a doc/conclusion). Loading them once at session
+    // start loses to 100k+ tokens of drift, so the anchor has to RECUR. 0 disables.
+    northStarAnchorEvery: 25,
   };
 
   // Shared team config first, then the gitignored per-machine override (each present file wins over
@@ -139,6 +143,8 @@ function applyHookConfigFile(cfg, cfgPath) {
       cfg.contextWindowTokens = file.contextWindowTokens;
     if (typeof file.contextPressureThreshold === "number")
       cfg.contextPressureThreshold = file.contextPressureThreshold;
+    if (typeof file.northStarAnchorEvery === "number")
+      cfg.northStarAnchorEvery = file.northStarAnchorEvery;
     if (Array.isArray(file.sourceGlobs) && file.sourceGlobs.length) {
       cfg.sourcePathRes = file.sourceGlobs.map((g) => globToRegExp(g));
     }
