@@ -44,7 +44,10 @@ const wroteDoc = /^(Write|Edit|NotebookEdit)$/.test(tool) && /\.(md|mdx|txt)$/i.
 const n = bumpNorthStarCounter(root);
 if (!wroteDoc && n < every) process.exit(0);
 
-const MAX_LINES = 40; // safety valve — the doc is meant to be ~1 page of propositions
+// Safety valve. Sized so a genuinely complex project (a mature repo consolidating dozens of
+// contradictory docs) re-anchors in FULL rather than silently truncating its tail — the OPEN and
+// STALE sections live at the end and are exactly the ones an agent must not lose.
+const MAX_LINES = 60;
 const all = northStarsDigest(root);
 if (!all.length) process.exit(0); // file exists but has no NS-# lines yet
 
