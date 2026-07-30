@@ -44,14 +44,21 @@ const wroteDoc = /^(Write|Edit|NotebookEdit)$/.test(tool) && /\.(md|mdx|txt)$/i.
 const n = bumpNorthStarCounter(root);
 if (!wroteDoc && n < every) process.exit(0);
 
-// Safety valve. Sized so a genuinely complex project (a mature repo consolidating dozens of
-// contradictory docs) re-anchors in FULL rather than silently truncating its tail — the OPEN and
-// STALE sections live at the end and are exactly the ones an agent must not lose.
-const MAX_LINES = 60;
+// The re-anchor carries the CLAIM of every north-star, not its evidence. A rich proposition
+// ("rejected BECAUSE <mechanism> <numbers> <citation>") is right for reading the file, but
+// re-injecting all of it every N tool calls costs thousands of tokens per anchor and buys nothing —
+// the agent only needs the claims present in-window to notice it's contradicting one. Full text is
+// always one Read away. So: keep EVERY proposition (truncating the list would silently drop the
+// OPEN/STALE sections at the end), but clip each to its opening claim.
+const MAX_LINES = Number(config.northStarAnchorMaxLines) > 0 ? Number(config.northStarAnchorMaxLines) : 80;
+const MAX_LINE_CHARS = 200;
 const all = northStarsDigest(root);
 if (!all.length) process.exit(0); // file exists but has no NS-# lines yet
 
-const shown = all.slice(0, MAX_LINES);
+const shown = all.slice(0, MAX_LINES).map((l) => {
+  if (l.length <= MAX_LINE_CHARS) return l;
+  return l.slice(0, MAX_LINE_CHARS).replace(/\s+\S*$/, "") + " …";
+});
 const more =
   all.length > shown.length
     ? `\n…+${all.length - shown.length} more — read \`.gnkit/gitnexus-northstars.md\`.`
@@ -64,6 +71,8 @@ emitContext(
     "the north-star.\n\n" +
     shown.join("\n") +
     more +
+    "\n\n(Claims only — each is clipped; read `.gnkit/gitnexus-northstars.md` for the full text, " +
+    "evidence and sources before citing one.)" +
     "\n\nDiscipline: (1) cite the relevant **NS-#** when you make a consequential claim, propose a " +
     "direction, or reject an idea — if you cannot cite one, you may be drifting; (2) if you believe " +
     "a north-star is wrong or missing, say so EXPLICITLY and propose the edit to the user — never " +

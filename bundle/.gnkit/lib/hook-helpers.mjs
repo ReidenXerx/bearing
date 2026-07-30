@@ -107,6 +107,9 @@ export function loadHookConfig(root) {
     // (and always right after the agent writes a doc/conclusion). Loading them once at session
     // start loses to 100k+ tokens of drift, so the anchor has to RECUR. 0 disables.
     northStarAnchorEvery: 25,
+    // Cap on how many NS-# propositions the re-anchor repeats. Each is clipped to its opening
+    // claim, so the whole set normally fits; raise this only for an unusually large north-stars doc.
+    northStarAnchorMaxLines: 80,
   };
 
   // Shared team config first, then the gitignored per-machine override (each present file wins over
@@ -145,6 +148,8 @@ function applyHookConfigFile(cfg, cfgPath) {
       cfg.contextPressureThreshold = file.contextPressureThreshold;
     if (typeof file.northStarAnchorEvery === "number")
       cfg.northStarAnchorEvery = file.northStarAnchorEvery;
+    if (typeof file.northStarAnchorMaxLines === "number")
+      cfg.northStarAnchorMaxLines = file.northStarAnchorMaxLines;
     if (Array.isArray(file.sourceGlobs) && file.sourceGlobs.length) {
       cfg.sourcePathRes = file.sourceGlobs.map((g) => globToRegExp(g));
     }
