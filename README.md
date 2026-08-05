@@ -9,7 +9,7 @@ Cognitive routines that keep an agent anchored to what your project actually is 
 [![Node](https://img.shields.io/badge/node-%3E%3D22.9.0-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](LICENSE)
 
-Works with **Claude Code**, **Cursor**, and **Zed**.
+Works with **Claude Code**, **Cursor**, **Zed**, and **Codex**.
 
 </div>
 
@@ -47,10 +47,23 @@ npx bearing install . --runtime claude --features northstars,taskcore
 npx bearing install /path/to/repo --runtime all --features all
 ```
 
-`--runtime` — `claude` · `cursor` · `zed` · `all`
+`--runtime` — `claude` · `cursor` · `zed` · `codex` · `all`
 `--features` — `northstars` · `taskcore` · `microscope` · `gitnexus` · `all`
 
 Then restart your IDE and open a new agent chat.
+
+### Not every runtime enforces the same way
+
+Enforcement needs tool-interception hooks, and only some runtimes have them.
+
+| | Claude Code | Cursor | Zed | Codex |
+|---|---|---|---|---|
+| Contract (`CLAUDE.md` / `AGENTS.md`) | ✅ | ✅ | ✅ | ✅ |
+| Hard gates (redirect grep, block stale reads) | ✅ | ✅ | — | — |
+| North-stars **re-anchored** mid-session | ✅ | — | — | — |
+| Task-core (survive compaction) | ✅ | — | — | — |
+
+On Zed and Codex the north-stars are **read at session start but not continuously reinforced** — and that recurring re-injection is what stops an anchor decaying over a long session. They still help; they just work as instruction rather than enforcement.
 
 ## How north-stars work
 
