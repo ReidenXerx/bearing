@@ -49,7 +49,7 @@ Four independent modules. **Pick any combination — each works alone, none depe
 |---|---|
 | **North-stars** | Numbered, authoritative claims about what your project *is* — invariants, exact term meanings, settled decisions, ideas already rejected and why. **Outranks every other doc**, re-injected as the session runs. → *No more re-litigating decisions you made months ago.* |
 | **Task-core** | A dense save-state of the *current task*, written **before** compaction drops the detail and read back on recovery. → *A four-hour task doesn't forget its own goal at hour three.* |
-| **Microscope** | Milestone review through several independent lenses, adversarially verified, iterated in waves. → *Catches what a single confident pass always misses.* |
+| **Microscope** | Milestone review that first **adopts the expert role your project implies** (trading repo → quant trader), then spawns lenses per slice — correctness *and* judgment — adversarially verified in waves. → *Catches code that runs perfectly and is still the wrong thing.* |
 | **GitNexus** | Hard gates that redirect symbol greps to a real code knowledge graph and demand impact analysis before edits. → *The agent stops guessing at your architecture.* Requires the [GitNexus](https://github.com/abhigyanpatwari/GitNexus) MCP server. |
 
 ## Install
@@ -139,27 +139,33 @@ flowchart LR
 
 Written **before** the summary lands, not after — by then the detail is already gone.
 
-### 🔬 Microscope — many lenses, adversarially checked
+### 🔬 Microscope — reviewed by an expert in *your* domain, not a linter
 
-One review pass finds what one reviewer thinks to look for. Microscope runs several independent lenses, then **tries to refute its own findings** before reporting them.
+Most review asks *"is this code correct?"* — a question a linter can ask. Microscope first **adopts the expert role your project implies**, then asks the question that actually costs you money: *is this the right thing to have built?*
+
+In a trading repo it reviews as a **senior quant trader**. In a payments repo, as a **ledger engineer**. It infers the role from your README, `CLAUDE.md` and the code's own structure — or you pin it in `.bearing/domain.json`.
 
 ```mermaid
 flowchart LR
-    W["milestone reached"] --> L1["lens: correctness"]
-    W --> L2["lens: security"]
-    W --> L3["lens: simplification"]
-    L1 --> V{"adversarially<br/>verify"}
-    L2 --> V
-    L3 --> V
+    P["🎭 ADOPT THE ROLE<br/>trading repo → quant trader<br/>payments repo → ledger engineer"] --> M["map the target:<br/>flows · layers · seams"]
+    M --> L["spawn a lens<br/>per slice"]
+    L --> A["KIND A — is it RIGHT?<br/>logic · edge cases · races<br/>contracts · taint · cost"]
+    L --> B["KIND B — is it the RIGHT THING?<br/>necessity · soundness · intent<br/>proportionality · conceptual fit"]
+    A --> V{"verify against<br/>REAL logic"}
+    B --> V
     V -->|"survives"| K["✅ real finding"]
     V -->|"refuted"| X["dropped — no noise"]
-    K --> N["next wave"]
+    K --> W["🔁 next wave"]
 
+    style P fill:#3c2a4d,stroke:#9f7aea,color:#fff
+    style B fill:#1a365d,stroke:#4299e1,color:#fff
     style K fill:#14401f,stroke:#38a169,color:#fff
     style X fill:#2d3748,stroke:#718096,color:#fff
 ```
 
-Findings that can't survive an attack never reach you.
+**Kind B is the part a linter can never do.** It asks *why does this exist?*, *is this the wrong abstraction?*, *is the complexity worth it?* — and the domain role is what makes it catch **semantic** wrongness: *"this fee is computed on gross, should be net"*, *"win-rate is not a profitability claim"*. Code that runs perfectly and is still wrong.
+
+Lenses aren't a fixed checklist — they're spawned per meaningful slice of the target, important ones get both kinds, and findings that can't survive an adversarial pass never reach you.
 
 ### 🕸 GitNexus — the agent stops guessing
 
