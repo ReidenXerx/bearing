@@ -193,8 +193,15 @@ export function repoName(root) {
  * @param {string} filePath
  * @param {ReturnType<typeof loadHookConfig>} config
  */
-export function isSourceCodePath(filePath, config) {
-  const norm = (filePath ?? "").replace(/\\/g, "/");
+export function isSourceCodePath(filePath, config, root) {
+  let norm = (filePath ?? "").replace(/\\/g, "/");
+  // Match against the REPO-RELATIVE path. sourceGlobs like `src/**` compile to patterns that match
+  // "/src/" anywhere in the string, so an absolute path made enforcement depend on where the repo
+  // happens to live: a checkout under ~/src or ~/go/src had EVERY file classified as source, so
+  // every large Read and every Edit was gated repo-wide, with nothing in the message explaining why.
+  const base = (root ?? "").replace(/\\/g, "/").replace(/\/+$/, "");
+  if (base && norm.startsWith(base + "/")) norm = norm.slice(base.length + 1);
+  norm = norm.replace(/^\.\//, "");
   if (!config.sourceExtRe.test(norm)) return false;
   return config.sourcePathRes.some((re) => re.test(norm));
 }
@@ -213,7 +220,7 @@ export function isBroadSourceGlob(pattern, config) {
  * @param {ReturnType<typeof loadHookConfig>} config
  * @returns {EditSensitivity}
  */
-export function editSensitivity(filePath, config) {
+export function editSensitivity(filePath, config, root) {
   const norm = (filePath ?? "").replace(/\\/g, "/");
   if (!norm) return "none";
   if (
@@ -226,7 +233,7 @@ export function editSensitivity(filePath, config) {
     return "light";
   if (/(?:^|\/)tests?\//.test(norm)) return "medium";
   if (/(?:^|\/)scripts\//.test(norm)) return "medium";
-  if (isSourceCodePath(norm, config)) return "full";
+  if (isSourceCodePath(norm, config, root)) return "full";
   if (/(?:^|\/)apps\//.test(norm) && config.sourceExtRe.test(norm))
     return "full";
   return "none";

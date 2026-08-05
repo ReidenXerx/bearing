@@ -56,10 +56,11 @@ function isDeclSearch(t) {
  * if the term looks like an identifier — so this takes precedence over symbol shape.
  * @param {string} pathArg
  * @param {ClassifyCtx['config']} config
+ * @param {string} [root] repo root, so classification is location-independent
  */
-export function isNonSourcePath(pathArg, config) {
+export function isNonSourcePath(pathArg, config, root) {
   const pa = String(pathArg || "").replace(/\\/g, "/");
-  if (!pa || helpers.isSourceCodePath(pa, config)) return false;
+  if (!pa || helpers.isSourceCodePath(pa, config, root)) return false;
   return (
     /\.(json|jsonl|ya?ml|toml|ini|cfg|conf|lock|csv|tsv|env|md|mdc|txt|log|rst|html?|css|scss|less|svg)$/i.test(
       pa,
@@ -199,7 +200,7 @@ export function classifyGrep(req, ctx) {
   const pathArg = ti.path ?? ti.glob ?? "";
   if (!pattern) return { decision: "allow" };
 
-  const nonSource = isNonSourcePath(pathArg, config);
+  const nonSource = isNonSourcePath(pathArg, config, ctx?.root);
   const literal = nonSource || isLiteralPattern(pattern);
 
   if (phase === "must_refresh") {
@@ -231,6 +232,16 @@ export function classifyGrep(req, ctx) {
   // nor literal. If any branch names a symbol, redirect on the first one.
   const altSym = symbolish ? null : symbolFromAlternation(pattern);
   if (altSym) symbolish = true;
+
+  // LITERAL beats plain-identifier SHAPE, but never beats an explicit symbol alternation. A marker
+  // like TODO/FIXME is a plain identifier by shape, so the symbolish branch used to win and deny it
+  // — redirecting to gitnexus_context({name:"TODO"}), which resolves to nothing, and making the
+  // TODO|FIXME|HACK|XXX carve-out in isLiteralPattern unreachable for single-token patterns.
+  // The !altSym guard matters: a decl alternation ("isScaleIn =|const oppStop") contains a space,
+  // so isLiteralPattern calls it literal — it is still a symbol search.
+  if (literal && !altSym) {
+    return { decision: "allow", agentMessage: "Grep OK — literal/config/doc search." };
+  }
 
   if (symbolish) {
     if (altSym) {
@@ -343,7 +354,7 @@ export function classifyRead(req, ctx) {
   // fresh
   if (!filePath) return { decision: "allow" };
   const hasRange = ti.offset !== undefined || ti.limit !== undefined;
-  const isCode = helpers.isSourceCodePath(norm, config);
+  const isCode = helpers.isSourceCodePath(norm, config, ctx.root);
   const isTest = /(?:^|\/)tests?\//.test(norm);
   if (hasRange || isSmallConfig || isGeneratedSkill || isTest || !isCode) {
     return { decision: "allow" };
@@ -397,7 +408,7 @@ export function classifyEdit(req, ctx) {
   const { toolInput: ti = {} } = req;
   const { phase, config, repo } = ctx;
   const filePath = (ti.path ?? ti.file_path ?? "").replace(/\\/g, "/");
-  const sensitivity = helpers.editSensitivity(filePath, config);
+  const sensitivity = helpers.editSensitivity(filePath, config, ctx.root);
   const staleDetail = ctx.staleDetail || "GitNexus index is not fresh.";
   // Rename is detected by an old→new identifier swap, regardless of which edit
   // tool fired it (Cursor StrReplace or Claude Edit).
@@ -600,6 +611,7 @@ function shellSegments(command) {
  * @param {{ args: string[], piped: boolean }} seg
  */
 function segSearch(seg) {
+  const piped = Boolean(seg?.piped);
   const a = seg.args;
   if (!a.length) return null;
   let tool = a[0];
@@ -641,7 +653,13 @@ function segSearch(seg) {
   const pattern = patternFromE ?? positionals.shift();
   if (pattern == null) return null;
   const paths = positionals;
-  // grep-family with no path and not recursive = a stdin filter, not a file search.
+  // A search with NO PATH that is fed by a pipe reads STDIN — it is filtering command output, not
+  // searching the repo, so the graph cannot answer it and a redirect is unfollowable advice. This
+  // applied only to grep/egrep/fgrep before: rg/ag/ack are "recursive by default", so
+  // `npm run build 2>&1 | rg error` and `kubectl get pods | rg gateway` were denied and the agent
+  // was handed a Cypher query for a log filter.
+  if (piped && paths.length === 0) return null;
+  // Unpiped grep-family with no path is also a stdin filter (it would hang otherwise).
   if (GREP_FAMILY_RE.test(tool) && !recursive && paths.length === 0) return null;
   return { tool, pattern, path: paths[0] ?? "" };
 }
