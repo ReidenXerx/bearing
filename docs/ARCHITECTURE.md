@@ -234,6 +234,33 @@ flowchart TD
 
 ---
 
+## 8. Semantic drift — the failure tests cannot catch
+
+Modes 0–7 are all *code* failures: wrong tool, stale graph, missed blast radius. This one is different. The agent reads a stale doc, adopts a premise you abandoned, and every conclusion after it inherits the error — fluently, confidently, and without erroring. Tests pass. The work is wrong.
+
+Three modules address it, and none of them needs GitNexus:
+
+| Module | Failure it closes | Mechanism |
+| --- | --- | --- |
+| **north-stars** | "which source is authoritative?" — docs contradict each other and the agent picks whichever it read last | A user-owned, numbered, *falsifiable* statement of the project that **outranks every other source**. Agents cite `NS-#`; a conflicting doc is declared stale, not averaged in. Re-anchored every N tool calls **and** right after a doc is written. |
+| **task-core** | Compaction summarizes the transcript and drops the goal, the decisions, and what was already tried | A dense save-state written **before** the summary lands (trigger reads real transcript token usage), read back first on recovery. Carries `GOTCHAS` — approaches already tried that failed. |
+| **microscope** | "it runs" reviewed as "it's right" | Adopts the **expert role the project implies** (trading repo → quant trader), spawns lenses per slice in two kinds — correctness *and* judgment — and adversarially verifies before reporting. |
+
+**Precedence is the load-bearing idea.** north-stars > operator > backend constants > docs/UI > observed live state. Without a declared order, "what this project is" degrades into whichever document was read most recently.
+
+## Feature modules — two orthogonal axes
+
+Installation resolves **runtime** (which IDE) and **feature** (which capability) independently.
+
+```
+runtime:  cursor · zed · claude · codex · both · all
+feature:  northstars · taskcore · microscope · gitnexus · all
+```
+
+`lib/features.mjs` owns `featureOf(rel)`, mapping every bundle file to its module; unclaimed files are **core** and always ship. The rule that keeps this honest: **a core module may never import a feature module** — otherwise the feature's absence breaks core. That invariant is not hand-maintained, it is computed (`coreLibClosure()` walks the real import graph), because it silently broke twice when it was a hand-written list.
+
+Why it matters concretely: without the feature axis, installing *anything* installed the enforcement gates — and in a repo with no GitNexus those gates **deny Grep** and instruct the user to run a command that does not exist there.
+
 ## Component map
 
 | Agent failure mode | Kit component |
