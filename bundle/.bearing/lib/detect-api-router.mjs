@@ -8,7 +8,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { repoName } from './hook-helpers.mjs';
 
-export const API_PROFILE_FILE = '.gnkit/gitnexus-api-profile.json';
+export const API_PROFILE_FILE = '.bearing/gitnexus-api-profile.json';
 
 const FRAMEWORK_RES = [
   /\bexpress\s*\(/,

@@ -8,7 +8,7 @@ const action = process.argv[3] ?? 'status';
 const detail = process.argv[4] ?? '';
 
 const { setRefreshPending, isRefreshPending, setRefreshFailed, isRefreshFailed } = await import(
-  pathToFileURL(path.join(root, '.gnkit/lib/session-primer.mjs')).href
+  pathToFileURL(path.join(root, '.bearing/lib/session-primer.mjs')).href
 );
 
 if (action === 'set') {

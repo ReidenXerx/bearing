@@ -12,7 +12,7 @@ import {
 const root = process.argv[2] ?? process.cwd();
 
 try {
-  fs.unlinkSync(path.join(root, '.gnkit', SESSION_USER_NOTIFIED_FLAG));
+  fs.unlinkSync(path.join(root, '.bearing', SESSION_USER_NOTIFIED_FLAG));
 } catch {
   /* ignore */
 }

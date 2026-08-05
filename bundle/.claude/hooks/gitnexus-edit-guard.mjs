@@ -13,7 +13,7 @@ try {
 }
 const root = process.env.CLAUDE_PROJECT_DIR || input.cwd || process.cwd();
 const lib = (rel) =>
-  import(pathToFileURL(path.join(root, ".gnkit/lib", rel)).href);
+  import(pathToFileURL(path.join(root, ".bearing/lib", rel)).href);
 
 const { classifyEdit } = await lib("classify.mjs");
 const { gnContext, emitVerdict } = await lib("claude-emit.mjs");

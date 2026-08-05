@@ -11,7 +11,7 @@ Install with:
 
 | Artifact | Purpose |
 | --- | --- |
-| `.agents/skills/*` | Symlinks → `.gnkit/skills/` (20 playbooks incl. `gitnexus-local`) |
+| `.agents/skills/*` | Symlinks → `.bearing/skills/` (20 playbooks incl. `gitnexus-local`) |
 | `.zed/settings.json` | `context_servers.gitnexus` + **Zed + GitNexus** agent profile (grep off) |
 | `AGENTS.md` | Always-on graph-first instructions |
 | npm `gitnexus:*` gates | Same playbook as Cursor installs |

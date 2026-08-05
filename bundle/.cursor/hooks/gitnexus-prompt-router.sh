@@ -16,7 +16,7 @@ const root = process.env.GITNEXUS_ROOT;
 
 // Single source of truth for "what counts as a source file" — the hook config's
 // sourceExtRe (built-in polyglot default, overridable in gitnexus-hooks.json).
-const helpers = await import(pathToFileURL(path.join(root, '.gnkit/lib/hook-helpers.mjs')).href);
+const helpers = await import(pathToFileURL(path.join(root, '.bearing/lib/hook-helpers.mjs')).href);
 const sourceExtRe = helpers.loadHookConfig(root).sourceExtRe;
 
 const architecture =
@@ -55,7 +55,7 @@ const callChainMatch = prompt.match(/\b(?:call chain|callers?|shortest path|trac
 const traceMatch = prompt.match(/\b(?:trace|path)\s+(?:from\s+)?[`'"]?([A-Za-z_$][\w$]*)[`'"]?\s+(?:to|->|→)\s+[`'"]?([A-Za-z_$][\w$]*)[`'"]?/i);
 const overrideMatch = prompt.match(/\b(?:override|overrides)\s+(?:of|for|on)\s+[`'"]?([A-Za-z_$][\w$]*)[`'"]?/i);
 const processMatch = prompt.match(/\b(?:process|flow)\s+[`'"]?([^"'`]+)[`'"]?/i);
-const renameParsed = (await import(pathToFileURL(path.join(root, '.gnkit/lib/rename-helpers.mjs')).href)).parseRenameFromPrompt(prompt);
+const renameParsed = (await import(pathToFileURL(path.join(root, '.bearing/lib/rename-helpers.mjs')).href)).parseRenameFromPrompt(prompt);
 const dataFlow = /\b(data flow|data dependence|field flow|property flow|who (reads|writes)|readers?|writers?|mutat|getter|setter|where does .+ flow)\b/i.test(prompt);
 const pdgControl = /\b(PDG|control flow|control dependence|what guards|guarded by|under what condition|why does .+ run)\b/i.test(prompt);
 const pdgImpact = /\b(PDG impact|precise impact|genuinely affected|control.data affected)\b/i.test(prompt);
@@ -63,7 +63,7 @@ const taint = /\b(taint|injection|sql injection|command injection|code injection
 const variableMatch = prompt.match(/\b(?:variable|var|binding)\s+[`'"]?([A-Za-z_$][\w$]*)[`'"]?/i);
 
 const { writePromptHint } = await import(
-  pathToFileURL(path.join(root, '.gnkit/lib/session-primer.mjs')).href
+  pathToFileURL(path.join(root, '.bearing/lib/session-primer.mjs')).href
 );
 
 writePromptHint(root, {

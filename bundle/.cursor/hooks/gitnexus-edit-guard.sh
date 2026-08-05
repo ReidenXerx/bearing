@@ -4,8 +4,8 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 export GITNEXUS_HOOK_INPUT="$(cat)"
-export GITNEXUS_STALENESS="$(node "$ROOT/.gnkit/lib/load-staleness.mjs" "$ROOT" 2>/dev/null || echo '{"fresh":false,"reason":"check_failed"}')"
-export GITNEXUS_FIRST_NUDGE="$(node "$ROOT/.gnkit/lib/first-nudge.mjs" "$ROOT" 2>/dev/null || true)"
+export GITNEXUS_STALENESS="$(node "$ROOT/.bearing/lib/load-staleness.mjs" "$ROOT" 2>/dev/null || echo '{"fresh":false,"reason":"check_failed"}')"
+export GITNEXUS_FIRST_NUDGE="$(node "$ROOT/.bearing/lib/first-nudge.mjs" "$ROOT" 2>/dev/null || true)"
 export GITNEXUS_STALENESS_MODE="${GITNEXUS_STALENESS_MODE:-block}"
 export GITNEXUS_ROOT="$ROOT"
 
@@ -14,7 +14,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const root = process.env.GITNEXUS_ROOT || '';
-const imp = (rel) => import(pathToFileURL(path.join(root, '.gnkit/lib', rel)).href);
+const imp = (rel) => import(pathToFileURL(path.join(root, '.bearing/lib', rel)).href);
 const helpers = await imp('hook-helpers.mjs');
 const { isImpactUsed } = await imp('session-primer.mjs');
 const { evaluateStalePolicy } = await imp('stale-policy.mjs');

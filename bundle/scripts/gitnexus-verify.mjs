@@ -12,7 +12,7 @@ const jsonOut = process.argv.includes('--json');
 
 const ZED_PROFILE_KEY = 'zed-gitnexus';
 const ZED_PROFILE_NAME = 'Zed + GitNexus';
-const SKILLS_STORE = '.gnkit/skills';
+const SKILLS_STORE = '.bearing/skills';
 
 function readRuntime() {
   for (const rel of ['.gitnexus/agent-kit-manifest.json', '.cursor/gn-kit-manifest.json']) {
@@ -164,8 +164,8 @@ function checkZed() {
 const CURSOR_CRITICAL = [
   '.cursor/rules/00-gitnexus-enforcement.mdc',
   '.cursor/hooks.json',
-  '.gnkit/lib/hook-helpers.mjs',
-  '.gnkit/lib/stale-policy.mjs',
+  '.bearing/lib/hook-helpers.mjs',
+  '.bearing/lib/stale-policy.mjs',
   'scripts/gitnexus-agent.mjs',
   'scripts/gitnexus-verify.mjs',
 ];
@@ -206,7 +206,7 @@ export async function verifyInstall(repoRoot) {
 
   let health = { healthy: true, checks: [] };
   try {
-    const auditPath = path.join(repoRoot, '.gnkit/lib/session-health-audit.mjs');
+    const auditPath = path.join(repoRoot, '.bearing/lib/session-health-audit.mjs');
     if (fs.existsSync(auditPath)) {
       const mod = await import(pathToFileURL(auditPath).href);
       health = mod.auditKitHealth(repoRoot);

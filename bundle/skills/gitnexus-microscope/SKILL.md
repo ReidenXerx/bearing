@@ -50,7 +50,7 @@ Kind B is what separates this from cascade review — a linter never asks *"why 
 
 The judgment lenses need a domain expert, not a generic reviewer. **Adopt "a senior engineer expert in *this project's* domain."**
 
-- **Pinned?** If `.gnkit/domain.json` exists (e.g. `{ "domain": "payments", "persona": "staff payments/ledger engineer" }`), use it.
+- **Pinned?** If `.bearing/domain.json` exists (e.g. `{ "domain": "payments", "persona": "staff payments/ledger engineer" }`), use it.
 - **Else infer** the domain from `README`, `package.json` description, `CLAUDE.md`, and the GitNexus `clusters`/`processes` names — then state the persona you adopted in one line before reviewing.
 
 An expert in the domain catches *semantic* wrongness ("this fee is computed on gross, should be net") and *taste* issues ("this whole abstraction is unnecessary") that a language-only reviewer never sees.

@@ -4,7 +4,7 @@ import path from 'node:path';
 
 const root = process.argv[2] ?? process.cwd();
 const lib = pathToFileURL(
-  path.join(root, '.gnkit/lib/session-primer.mjs')
+  path.join(root, '.bearing/lib/session-primer.mjs')
 ).href;
 const { clearSessionState, setRefreshPending } = await import(lib);
 clearSessionState(root);

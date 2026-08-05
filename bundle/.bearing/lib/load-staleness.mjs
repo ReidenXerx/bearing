@@ -4,7 +4,7 @@
  * stdout: JSON from check-staleness.mjs, or { fresh: false, reason: 'check_failed', detail }
  *
  * Perf: a single tool call triggers staleness twice (guard + first-nudge). A short TTL cache
- * (.gnkit/.gitnexus-staleness-cache.json) collapses those + rapid tool loops into one git pass.
+ * (.bearing/.gitnexus-staleness-cache.json) collapses those + rapid tool loops into one git pass.
  * The cache is invalidated on refresh (gitnexus-agent) and on session start (clear-session).
  */
 import fs from 'node:fs';
@@ -24,11 +24,11 @@ const FAIL = {
     'Agent MUST run npm run gitnexus:agent-refresh autonomously (required_permissions: ["all"]).',
 };
 
-const cachePath = path.join(root, '.gnkit', '.gitnexus-staleness-cache.json');
+const cachePath = path.join(root, '.bearing', '.gitnexus-staleness-cache.json');
 
 function ttlMs() {
   try {
-    const cfg = JSON.parse(fs.readFileSync(path.join(root, '.gnkit/gitnexus-hooks.json'), 'utf8'));
+    const cfg = JSON.parse(fs.readFileSync(path.join(root, '.bearing/gitnexus-hooks.json'), 'utf8'));
     if (typeof cfg.stalenessCacheTtlMs === 'number') return cfg.stalenessCacheTtlMs;
   } catch {
     /* default */

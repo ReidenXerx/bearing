@@ -15,4 +15,4 @@ if [[ "$composer_mode" == "ask" ]]; then
   exit 0
 fi
 
-node "$ROOT/.gnkit/lib/session-health-context.mjs" "$ROOT"
+node "$ROOT/.bearing/lib/session-health-context.mjs" "$ROOT"

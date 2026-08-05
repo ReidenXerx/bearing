@@ -41,11 +41,11 @@ export {
   playbookRenameForHint,
 } from "./rename-helpers.mjs";
 
-export const CONFIG_FILE = ".gnkit/gitnexus-hooks.json";
+export const CONFIG_FILE = ".bearing/gitnexus-hooks.json";
 // Gitignored per-machine override — same shape as CONFIG_FILE, wins over it. Lets one dev tune the
 // window / mode / thresholds (e.g. contextWindowTokens for a 1M session) without editing the
 // team-shared file. Precedence: defaults < CONFIG_FILE < LOCAL_CONFIG_FILE < env.
-export const LOCAL_CONFIG_FILE = ".gnkit/gitnexus-hooks.local.json";
+export const LOCAL_CONFIG_FILE = ".bearing/gitnexus-hooks.local.json";
 
 /** @typedef {'enforce' | 'guide'} HookMode */
 /** @typedef {'none' | 'light' | 'medium' | 'full'} EditSensitivity */
@@ -68,7 +68,7 @@ const DEFAULT_BROAD_GLOB_RES = [
 ];
 
 // Polyglot: GitNexus indexes many languages — enforcement should not be JS/TS-only.
-// Override in .gnkit/gitnexus-hooks.json via "sourceExts": ["js","py","rs", …].
+// Override in .bearing/gitnexus-hooks.json via "sourceExts": ["js","py","rs", …].
 const DEFAULT_SOURCE_EXT_RE =
   /\.(js|mjs|cjs|jsx|ts|tsx|mts|cts|py|pyi|rb|go|rs|java|kt|kts|swift|php|cs|cpp|cc|cxx|hpp|hh|c|h|cu|cuh|scala|m|mm|dart|lua|ex|exs|clj)$/i;
 
@@ -98,7 +98,7 @@ export function loadHookConfig(root) {
     driftRefreshThreshold: 3,
     // TASK-CORE compaction migration: nudge the agent to refresh its task-core once context
     // reaches contextPressureThreshold of contextWindowTokens. The window is model-specific, so
-    // scope 1000000 per-machine — a gitignored .gnkit/gitnexus-hooks.local.json (repo-scoped) or the
+    // scope 1000000 per-machine — a gitignored .bearing/gitnexus-hooks.local.json (repo-scoped) or the
     // GITNEXUS_CONTEXT_WINDOW env — instead of committing it to a repo where teammates run a 200k
     // model. Precedence: this default < gitnexus-hooks.json < .local.json < env. 0 threshold disables.
     contextWindowTokens: 200000,
@@ -222,7 +222,7 @@ export function editSensitivity(filePath, config) {
   ) {
     return "light";
   }
-  if (/(\.cursor\/hooks|\.claude\/hooks|\.gnkit)\//.test(norm) || /(?:^|\/)bundle\//.test(norm))
+  if (/(\.cursor\/hooks|\.claude\/hooks|\.bearing)\//.test(norm) || /(?:^|\/)bundle\//.test(norm))
     return "light";
   if (/(?:^|\/)tests?\//.test(norm)) return "medium";
   if (/(?:^|\/)scripts\//.test(norm)) return "medium";
@@ -324,7 +324,7 @@ const DENY_CACHE_FILE = ".gitnexus-deny-cache.json";
 
 /** @param {string} root */
 function denyCachePath(root) {
-  return path.join(root, ".gnkit", DENY_CACHE_FILE);
+  return path.join(root, ".bearing", DENY_CACHE_FILE);
 }
 
 /** @param {string} root */

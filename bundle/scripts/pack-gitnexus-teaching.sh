@@ -57,32 +57,32 @@ BUNDLE_PATHS=(
   .cursor/hooks/gitnexus-commit-guard.sh
   .cursor/hooks/gitnexus-mcp-allowlist.sh
   .cursor/hooks/gitnexus-after-git-commit.sh
-  .gnkit/lib/check-staleness.mjs
-  .gnkit/lib/load-staleness.mjs
-  .gnkit/lib/classify.mjs
-  .gnkit/lib/cursor-emit.mjs
-  .gnkit/lib/claude-emit.mjs
-  .gnkit/lib/session-primer.mjs
-  .gnkit/lib/context-pressure.mjs
-  .gnkit/lib/first-nudge.mjs
-  .gnkit/lib/clear-session.mjs
-  .gnkit/lib/set-refresh-pending.mjs
-  .gnkit/lib/hook-helpers.mjs
-  .gnkit/lib/cypher-helpers.mjs
-  .gnkit/lib/rename-helpers.mjs
-  .gnkit/lib/stale-policy.mjs
-  .gnkit/lib/cypher-cli.mjs
-  .gnkit/lib/generate-arch-doc.mjs
-  .gnkit/lib/stabilize-agent-docs.mjs
-  .gnkit/lib/commit-message.mjs
-  .gnkit/lib/detect-api-router.mjs
-  .gnkit/lib/graph-smoke.mjs
-  .gnkit/lib/agent-brief.mjs
-  .gnkit/lib/agent-health.mjs
-  .gnkit/lib/session-health-audit.mjs
-  .gnkit/lib/session-health-context.mjs
-  .gnkit/lib/verify-kit.mjs
-  .gnkit/gitnexus-hooks.json
+  .bearing/lib/check-staleness.mjs
+  .bearing/lib/load-staleness.mjs
+  .bearing/lib/classify.mjs
+  .bearing/lib/cursor-emit.mjs
+  .bearing/lib/claude-emit.mjs
+  .bearing/lib/session-primer.mjs
+  .bearing/lib/context-pressure.mjs
+  .bearing/lib/first-nudge.mjs
+  .bearing/lib/clear-session.mjs
+  .bearing/lib/set-refresh-pending.mjs
+  .bearing/lib/hook-helpers.mjs
+  .bearing/lib/cypher-helpers.mjs
+  .bearing/lib/rename-helpers.mjs
+  .bearing/lib/stale-policy.mjs
+  .bearing/lib/cypher-cli.mjs
+  .bearing/lib/generate-arch-doc.mjs
+  .bearing/lib/stabilize-agent-docs.mjs
+  .bearing/lib/commit-message.mjs
+  .bearing/lib/detect-api-router.mjs
+  .bearing/lib/graph-smoke.mjs
+  .bearing/lib/agent-brief.mjs
+  .bearing/lib/agent-health.mjs
+  .bearing/lib/session-health-audit.mjs
+  .bearing/lib/session-health-context.mjs
+  .bearing/lib/verify-kit.mjs
+  .bearing/gitnexus-hooks.json
   scripts/gitnexus-verify.mjs
   scripts/gitnexus-setup.sh
   scripts/sync-cursor-gitnexus-teaching.sh
@@ -131,19 +131,19 @@ cat > "$BUNDLE_ROOT/gitignore.snippet" <<'SNIP'
 .cursor/gitnexus-teaching-bundle.json
 .cursor/gn-kit-manifest.json
 .gitnexus/agent-kit-manifest.json
-.gnkit/.gitnexus-session-edits.flag
-.gnkit/.gitnexus-session-primed.flag
-.gnkit/.gitnexus-prompt-hint.json
-.gnkit/.gitnexus-refresh-pending.flag
-.gnkit/.gitnexus-refresh-failed.flag
-.gnkit/.gitnexus-mcp-used.flag
-.gnkit/.gitnexus-impact-used.flag
-.gnkit/.gitnexus-detect-used.flag
-.gnkit/.gitnexus-staleness-cache.json
-.gnkit/.gitnexus-scorecard.json
-.gnkit/.gitnexus-deny-cache.json
-.gnkit/.gitnexus-session-health.json
-.gnkit/.gitnexus-session-user-notified.flag
+.bearing/.gitnexus-session-edits.flag
+.bearing/.gitnexus-session-primed.flag
+.bearing/.gitnexus-prompt-hint.json
+.bearing/.gitnexus-refresh-pending.flag
+.bearing/.gitnexus-refresh-failed.flag
+.bearing/.gitnexus-mcp-used.flag
+.bearing/.gitnexus-impact-used.flag
+.bearing/.gitnexus-detect-used.flag
+.bearing/.gitnexus-staleness-cache.json
+.bearing/.gitnexus-scorecard.json
+.bearing/.gitnexus-deny-cache.json
+.bearing/.gitnexus-session-health.json
+.bearing/.gitnexus-session-user-notified.flag
 .cursor/gitnexus-api-profile.json
 SNIP
 

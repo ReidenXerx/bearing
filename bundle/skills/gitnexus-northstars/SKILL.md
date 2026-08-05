@@ -1,6 +1,6 @@
 ---
 name: gitnexus-northstars
-description: Read, cite, and maintain the project's north-stars — the authoritative numbered fixed points (invariants, exact term meanings, evidence standards, settled decisions, graveyard) that outrank every other doc and stop semantic drift. Use when starting work on a project that has .gnkit/gitnexus-northstars.md, when a re-anchor fires, when a doc/code conflicts with a north-star, when proposing or rejecting an idea, or when drafting/updating the north-stars themselves.
+description: Read, cite, and maintain the project's north-stars — the authoritative numbered fixed points (invariants, exact term meanings, evidence standards, settled decisions, graveyard) that outrank every other doc and stop semantic drift. Use when starting work on a project that has .bearing/gitnexus-northstars.md, when a re-anchor fires, when a doc/code conflicts with a north-star, when proposing or rejecting an idea, or when drafting/updating the north-stars themselves.
 ---
 
 # North-stars — the project's semantic anchor
@@ -16,7 +16,7 @@ Mature repos make this *certain*, not merely possible: docs accumulate, contradi
 go stale, while the code moves on. Without a declared fixed point, "what this project is" becomes
 whichever document you happened to read last.
 
-**The north-stars are that fixed point.** `.gnkit/gitnexus-northstars.md` — short, numbered,
+**The north-stars are that fixed point.** `.bearing/gitnexus-northstars.md` — short, numbered,
 falsifiable propositions. User-owned, committed, authoritative.
 
 ## The rules

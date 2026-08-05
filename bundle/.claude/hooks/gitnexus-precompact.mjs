@@ -19,7 +19,7 @@ try {
 }
 const root = process.env.CLAUDE_PROJECT_DIR || input.cwd || process.cwd();
 const lib = (rel) =>
-  import(pathToFileURL(path.join(root, ".gnkit/lib", rel)).href);
+  import(pathToFileURL(path.join(root, ".bearing/lib", rel)).href);
 
 const { gnContext } = await lib("claude-emit.mjs");
 const { appendMemoryCheckpoint, isImpactUsed, isDetectUsed, bumpScore } =
