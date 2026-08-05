@@ -1,24 +1,21 @@
 {
-  "name": "gitnexus-agent-kit",
-  "version": "1.2.0",
+  "name": "bearing",
+  "version": "1.0.0",
   "description": "Intel layer for AI coding agents — cognitive routines that keep agents anchored: semantic north-stars, task-core save-state across compaction, deep multi-lens review. Cursor, Zed, Claude Code.",
   "type": "module",
   "private": false,
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ReidenXerx/gitnexus-agent-kit.git"
+    "url": "git+https://github.com/ReidenXerx/bearing.git"
   },
   "homepage": "https://github.com/ReidenXerx/gitnexus-agent-kit#readme",
   "bugs": {
     "url": "https://github.com/ReidenXerx/gitnexus-agent-kit/issues"
   },
   "bin": {
-    "gn-kit": "./bin/cli.mjs",
-    "gn-kit-update": "./bin/cli.mjs",
-    "gn-kit-uninstall": "./bin/cli.mjs",
-    "gn-agent-kit": "./bin/cli.mjs",
-    "gn-agent-kit-update": "./bin/cli.mjs",
-    "gn-agent-kit-uninstall": "./bin/cli.mjs"
+    "bearing": "./bin/cli.mjs",
+    "bearing-update": "./bin/cli.mjs",
+    "bearing-uninstall": "./bin/cli.mjs"
   },
   "engines": {
     "node": ">=22.9.0"
