@@ -7,8 +7,9 @@ All notable changes to `bearing` are documented here.
 ### Fixed
 
 - **README diagrams rendered as raw code on npmjs.com.** npm does not execute mermaid, so five
-  `flowchart` blocks displayed as literal text to anyone arriving via npm. Redrawn with box-drawing
-  characters, which render identically on npm, GitHub, and a terminal — and cannot silently break.
+  `flowchart` blocks displayed as literal text to anyone arriving via npm. Replaced with generated
+  SVG (`npm run gen:diagrams`) served over absolute raw URLs, so they render on npm and GitHub
+  alike — no external renderer, and no reliance on npm's relative-link rewriting.
 - Package `description` and `keywords` were stale: missing the Codex runtime and still carrying the
   pre-rename framing. Added `homepage` and `bugs` links.
 - The version assertion in the test suite pinned a literal string, which would have failed on every

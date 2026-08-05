@@ -25,7 +25,7 @@ Every answer stays fluent. Confident. Subtly wrong.
 
 **And it never fails loudly.** A drifted agent doesn't crash — it writes a convincing paragraph, you nod, and you find out three days later that the premise was dead on arrival.
 
-<img src="docs/assets/drift.svg" alt="Without bearing: a stale doc becomes a dead premise, every later conclusion inherits it, discovered days later. With bearing: it contradicts NS-4, the north-star wins, caught in one line." width="100%">
+<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/drift.svg" alt="Without bearing: a stale doc becomes a dead premise, every later conclusion inherits it, discovered days later. With bearing: it contradicts NS-4, the north-star wins, caught in one line." width="100%">
 
 That failure has a name — **losing your bearings**. `bearing` gives an agent fixed points it can't drift away from, and makes the drift *visible in one line* when it happens.
 
@@ -79,7 +79,7 @@ Enforcement needs tool-interception hooks, and only some runtimes expose them. E
 
 Docs rot. Comments lie. An agent's own inference fills the gaps. North-stars are the **fixed point** that settles every conflict — and the agent has to *cite* them.
 
-<img src="docs/assets/northstars.svg" alt="Docs, README, code comments and the agent's own guess all feed a conflict; the north-star wins and the other source is declared stale." width="100%">
+<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/northstars.svg" alt="Docs, README, code comments and the agent's own guess all feed a conflict; the north-star wins and the other source is declared stale." width="100%">
 
 Write them as numbered claims a conclusion could actually **violate**:
 
@@ -116,7 +116,7 @@ Only the north-stars outrank anything. The other two are the agent's working mem
 
 Long sessions get **compacted**: the transcript is summarized and thrown away. Detail dies there — the goal, the decisions, the thing you told it *not* to do at hour one.
 
-<img src="docs/assets/taskcore.svg" alt="Session starts, context fills, at ~90% the agent writes the task-core before compaction, then reads it back with goal and decisions intact." width="100%">
+<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/taskcore.svg" alt="Session starts, context fills, at ~90% the agent writes the task-core before compaction, then reads it back with goal and decisions intact." width="100%">
 
 Written **before** the summary lands, not after — by then the detail is already gone. The pressure trigger reads the *actual* token usage from the transcript rather than guessing.
 
@@ -128,7 +128,7 @@ Most review asks *"is this code correct?"* — a question a linter can ask. Micr
 
 In a trading repo it reviews as a **senior quant trader**. In a payments repo, as a **ledger engineer**. It infers the role from your README, `CLAUDE.md` and the code's own structure — or you pin it in `.bearing/domain.json`.
 
-<img src="docs/assets/microscope.svg" alt="Adopt the domain expert role, map the target, spawn Kind A correctness lenses and Kind B judgment lenses, verify against real logic, keep survivors." width="100%">
+<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/microscope.svg" alt="Adopt the domain expert role, map the target, spawn Kind A correctness lenses and Kind B judgment lenses, verify against real logic, keep survivors." width="100%">
 
 **Kind B is the part a linter can never do.** It asks *why does this exist?*, *is this the wrong abstraction?*, *is the complexity worth it?* — and the domain role is what makes it catch **semantic** wrongness: *"this fee is computed on gross, should be net"*, *"win-rate is not a profitability claim"*. Code that runs perfectly and is still wrong.
 
@@ -138,7 +138,7 @@ Lenses aren't a fixed checklist — they're spawned per meaningful slice of the 
 
 Grepping a symbol gives you 40 text matches and no structure. The graph knows what actually calls what.
 
-<img src="docs/assets/gitnexus.svg" alt="A grep is gated: a stale index or a drifted working tree blocks until re-indexed, otherwise it becomes a graph query returning callers, callees and flows." width="100%">
+<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/gitnexus.svg" alt="A grep is gated: a stale index or a drifted working tree blocks until re-indexed, otherwise it becomes a graph query returning callers, callees and flows." width="100%">
 
 **Two gates, not one.** A stale index blocks until refreshed — and so does *working-tree drift*: edit a few source files and graph queries are held until you re-index, because the graph would otherwise answer about code you already changed.
 
