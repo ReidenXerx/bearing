@@ -212,7 +212,12 @@ export function classifyGrep(req, ctx) {
   const normPath = String(pathArg).replace(/\\/g, "/");
   const scopedToOneFile = /\.[A-Za-z0-9]+$/.test(normPath) && !/[*?]/.test(normPath);
   const inTests = /(?:^|\/)(?:tests?|__tests__|spec|specs)(?:\/|$)/.test(normPath);
-  const counting = (ti.output_mode ?? "") === "count";
+  // Count mode ONLY counts as scoped when a path is given. Claude's `output_mode: "count"` returns
+  // per-FILE counts, so a repo-wide count is `files_with_matches` (denied) plus a number — it
+  // answers "which files contain this symbol", which is discovery. Allowing it unconditionally
+  // handed every agent a one-flag bypass of the symbol gate. The reported case — counting a field
+  // in the file just written — still passes, because it names a path.
+  const counting = (ti.output_mode ?? "") === "count" && Boolean(normPath);
   const scoped = scopedToOneFile || inTests || counting;
 
   const literal = nonSource || scoped || isLiteralPattern(pattern);

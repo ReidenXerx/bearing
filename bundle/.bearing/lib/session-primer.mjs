@@ -424,9 +424,11 @@ export function diagnoseEnforcement(counts = {}) {
         `Enforcement is ${Math.round((redirects / (redirects + graphCalls)) * 100)}% of graph interaction: ` +
         `${redirects} redirects vs ${graphCalls} graph calls.`,
       advice:
-        'The gates are the dominant interaction, which usually means they are firing on work the ' +
-        'graph cannot answer. Check `npm run bearing:fallback-log` for what agents distrusted, and ' +
-        'consider `"mode": "guide"` in .bearing/hooks.json to downgrade blocks to nudges.',
+        'This reads two ways and the log tells you which: the gates may be firing on work the graph ' +
+        'cannot answer (a real misfit), OR they may be doing exactly their job on an agent that ' +
+        'keeps reaching for grep first (working as intended). Check `npm run bearing:fallback-log` ' +
+        '— recurring distrust of the same tool is the first case and is worth reporting upstream; ' +
+        'an empty log points at the second. Only downgrade to `"mode": "guide"` for the first.',
     });
   }
   if (n('classicalFallbackGranted') >= 3) {
