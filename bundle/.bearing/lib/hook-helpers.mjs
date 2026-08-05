@@ -211,7 +211,28 @@ export function isSourceCodePath(filePath, config, root) {
  * @param {ReturnType<typeof loadHookConfig>} config
  */
 export function isBroadSourceGlob(pattern, config) {
-  const norm = (pattern ?? "").replace(/\\/g, "/");
+  const norm = (pattern ?? "").replace(/\\/g, "/").trim();
+  if (!norm) return false;
+  // The question is whether this sweeps source BROADLY, but the regexes below only ask "does it
+  // start in a source directory / end in a source extension". Those are different questions, and
+  // the gap ran both ways: `src/order.js` was blocked and `**/*` was allowed.
+
+  // No wildcard at all → a literal path. Glob is being used to check whether one known file
+  // exists, and `query` cannot answer a question about a path you already have. Blocking it is a
+  // false deny with advice the agent cannot act on (NS-5).
+  if (!/[*?{[]/.test(norm)) return false;
+
+  // Catch-alls sweep every source file in the repo while naming no directory and no extension —
+  // so the prefix/extension rules missed precisely the broadest patterns that exist.
+  if (/^(?:\.\/)?(?:\*{1,2}|\*\*\/\*)$/.test(norm)) return true;
+
+  // `**/*.{ts,tsx}` is as broad as `**/*.ts`; the single-extension rule alone never matched the
+  // brace form, which is the way most people actually write a multi-language sweep.
+  const brace = norm.match(/^\*\*\/\*\.\{([^}]+)\}$/);
+  if (brace) {
+    return brace[1].split(",").some((e) => config.sourceExtRe.test(`x.${e.trim()}`));
+  }
+
   return config.broadGlobRes.some((re) => re.test(norm));
 }
 

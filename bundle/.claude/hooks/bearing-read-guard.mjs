@@ -68,8 +68,13 @@ const verdict = classifyRead(
     readLines: () => {
       try {
         const abs = path.resolve(root, filePath);
+        // ctx.config, NOT a bare `config` — no such binding exists in this file. The ReferenceError
+        // it threw was swallowed by this very catch and reported as "0 lines", so no file was ever
+        // large enough to gate and the read guard never fired once. Same shape as the shell guard's
+        // swallowed ReferenceError: a throw inside a fail-open path is indistinguishable from a
+        // clean allow, so the gate dies silently while every allow-case test keeps passing.
         return fs.existsSync(abs)
-          ? countLinesBounded(abs, config.readLineThreshold)
+          ? countLinesBounded(abs, ctx.config.readLineThreshold)
           : 0;
       } catch {
         return 0;
