@@ -18,7 +18,10 @@ export const c = {
 };
 
 export function banner(title, subtitle = '') {
-  const w = 62;
+  // Width follows the CONTENT. A fixed 62 padded short lines but never grew for long ones, so
+  // adding one runtime to the subtitle pushed it past the border and the box stopped closing —
+  // on the first screen of `npx bearing`, which is the worst place to look broken.
+  const w = Math.max(62, title.length + 2, subtitle.length + 2);
   const line = '═'.repeat(w);
   console.log('');
   console.log(`${c.cyan}╔${line}╗${c.reset}`);

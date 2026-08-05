@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Install bearing into a target git repo (interactive if no path given).
-# Usage: ./bin/install.sh [/path/to/repo] [--runtime cursor|zed|claude|both|all] [--quick] [--no-setup]
-#   runtime: cursor · zed · claude · both (=cursor+zed, default) · all (=cursor+zed+claude) · comma-list e.g. cursor,claude
+# Usage: ./bin/install.sh [/path/to/repo] [--runtime cursor|zed|claude|codex|both|all] [--quick] [--no-setup]
+#   runtime: cursor · zed · claude · codex · both (=cursor+zed, default) · all (=cursor+zed+claude+codex) · comma-list e.g. cursor,claude
 set -euo pipefail
 
 KIT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -15,7 +15,7 @@ if [[ -z "$TARGET" ]] || [[ "$TARGET" == "--interactive" ]] || [[ "$TARGET" == "
     echo "  $0                              # interactive (pick IDE + repo path)"
     echo "  $0 --interactive                # interactive"
     echo "  $0 ../my-service"
-    echo "  $0 ../my-app --runtime all              # Cursor + Zed + Claude Code"
+    echo "  $0 ../my-app --runtime all              # Cursor + Zed + Claude Code + Codex"
     echo "  $0 ../my-app --runtime claude --no-setup"
     echo "  $0 ../my-app --runtime both --repo-name my-app"
     exit 0

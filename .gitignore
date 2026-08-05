@@ -34,6 +34,8 @@ __pycache__/
 # dogfood`. Committing the render invites editing it instead of the source it comes from.
 CLAUDE.md
 AGENTS.md
+# npm pack artifacts
+*.tgz
 
 # bearing — generated local state (safe to remove via bearing-uninstall)
 .gitnexus/
@@ -44,6 +46,3 @@ AGENTS.md
 docs/ARCHITECTURE.gitnexus.md
 .claude/skills/
 # --- end bearing ---
-
-# npm pack artifacts
-*.tgz
