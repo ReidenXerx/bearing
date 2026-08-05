@@ -35,10 +35,18 @@ const source = input.source || "startup";
 const recovering = !shouldClearOnSource(source);
 if (!recovering) clearSessionState(root);
 
-const ctx = gnContext(root);
+// FEATURE PROBE: the GitNexus enforcement module owns check-staleness.mjs, so the file's presence
+// IS the feature flag — config can never drift from what is actually installed. With the module
+// absent this repo has no graph, and every graph-first instruction below would be advice the agent
+// cannot follow (worse: the guards would point at npm scripts that do not exist here).
+const graphEnabled = existsSync(path.join(root, ".gnkit/lib/check-staleness.mjs"));
+
+const ctx = graphEnabled ? gnContext(root) : { phase: "fresh" };
 const mp = memoryPath(root); // Claude Code's native project memory
 const grant = fallbackGrant(root);
-const staleLine = grant
+const staleLine = !graphEnabled
+  ? ""
+  : grant
   ? `⚠ CLASSICAL FALLBACK active (${grant.reason || "GitNexus distrusted"}) — classical Grep/Read/shell allowed for ~${Math.max(1, Math.round(grant.remainingMs / 60000))} min. RE-CONFIRM findings with the graph once GitNexus is reliable; end early with \`npm run gitnexus:fallback:off\`.`
   : ctx.phase !== "fresh"
     ? "Index is STALE — run `npm run gitnexus:agent-refresh` before graph calls (hooks block until refreshed)."
@@ -57,14 +65,22 @@ if (recovering) {
   const hasCore = taskCoreExists(root);
   const tcp = taskCorePath(root);
   lines = [
-    `GitNexus: context was ${source === "compact" ? "COMPACTED" : "resumed"} — the task CONTINUES; enforcement and this session's satisfied gates are PRESERVED.`,
+    `Context was ${source === "compact" ? "COMPACTED" : "resumed"} — the task CONTINUES${graphEnabled ? "; enforcement and this session's satisfied gates are PRESERVED" : ""}.`,
     hasCore
       ? `READ your TASK-CORE FIRST — \`${tcp}\`: a dense save-state of THIS task (goal/constraints/decisions/state/anchors/gotchas/next). Reconstruct from it, verify against reality, then continue — do not re-derive what it already settles.`
       : `No TASK-CORE saved — reconstruct THIS task (goal/decisions/state/next) from your memory + the code before acting, and write \`.gnkit/.gitnexus-task-core.md\` next time so compaction can't drift you.`,
     // Graph-first discipline MUST be re-stated here, not only on fresh start: post-compaction is
     // exactly where agents drift back to grep/blind-read. "Gates preserved" ≠ "stop using the graph".
-    "Graph-first STILL applies — do NOT fall back to grep or blind Read: orient with gitnexus_query, drill with gitnexus_context, cypher for structure, impact before edits, detect_changes before commit.",
-    `Gates already satisfied: impact ${isImpactUsed(root) ? "✓ done" : "pending"}, detect_changes ${isDetectUsed(root) ? "✓ done" : "pending"} — don't redo those for work you ALREADY analyzed, but DO run impact before any NEW edit and detect_changes before every commit.`,
+    // Graph-first discipline MUST be re-stated here, not only on fresh start: post-compaction is
+    // exactly where agents drift back to grep/blind-read. Omitted entirely when the graph module
+    // isn't installed — telling an agent to "orient with gitnexus_query" in a repo with no GitNexus
+    // is an instruction it cannot follow.
+    graphEnabled
+      ? "Graph-first STILL applies — do NOT fall back to grep or blind Read: orient with gitnexus_query, drill with gitnexus_context, cypher for structure, impact before edits, detect_changes before commit."
+      : "",
+    graphEnabled
+      ? `Gates already satisfied: impact ${isImpactUsed(root) ? "✓ done" : "pending"}, detect_changes ${isDetectUsed(root) ? "✓ done" : "pending"} — don't redo those for work you ALREADY analyzed, but DO run impact before any NEW edit and detect_changes before every commit.`
+      : "",
     hasMem
       ? `RECOVER from your project memory (${mp}): reconcile it with reality NOW and fill gaps — decisions, requirements, open bugs, user intent, key file:line.`
       : `Record the task state you still hold in your project memory (${mp}) — decisions, requirements, open items, key file:line — before continuing.`,
@@ -73,11 +89,15 @@ if (recovering) {
   ];
 } else {
   lines = [
-    "GitNexus enforcement active (Claude Code). Graph-first on EVERY task — see CLAUDE.md.",
-    "Orient with gitnexus_query; drill with gitnexus_context; cypher for structure; impact before edits; detect_changes before commit.",
+    graphEnabled
+      ? "GitNexus enforcement active (Claude Code). Graph-first on EVERY task — see CLAUDE.md."
+      : "",
+    graphEnabled
+      ? "Orient with gitnexus_query; drill with gitnexus_context; cypher for structure; impact before edits; detect_changes before commit."
+      : "",
     `Keep your project memory current as you work (${mp}) — it survives compaction + sessions; the transcript does not.`,
     staleLine,
   ];
 }
 if (nsLine) lines.unshift(nsLine);
-emitContext(lines.join(" "), "SessionStart");
+emitContext(lines.filter(Boolean).join(" "), "SessionStart");
