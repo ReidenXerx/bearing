@@ -28,7 +28,8 @@
     "eval": "node eval/run-eval.mjs",
     "gen:contract": "node scripts/gen-contract.mjs",
     "test": "node --test lib/kit.test.mjs",
-    "sync:meta": "node scripts/sync-repo-meta.mjs"
+    "sync:meta": "node scripts/sync-repo-meta.mjs",
+    "gen:diagrams": "node scripts/gen-diagrams.mjs"
   },
   "keywords": [
     "ai",
