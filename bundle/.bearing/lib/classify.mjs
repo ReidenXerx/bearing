@@ -290,7 +290,18 @@ export function classifyGrep(req, ctx) {
       const call = helpers.cypherFieldAccess(seg, repo);
       return {
         decision: "deny",
-        agentMessage: `Field grep blocked → ${schema} → ${call}${tail}\n${helpers.cypherMidSessionNudge()}`,
+        // ACCESSES covers class fields; for plain-object shapes — option bags, config objects,
+        // destructured params, object literals — it returns [] for fields that are read on every
+        // request. Prescribing it without saying that turns the block into a dead end: the agent
+        // runs the query, gets nothing, and has no sanctioned next step (NS-6).
+        agentMessage:
+          `Field grep blocked → ${schema} → ${call}${tail}\n` +
+          `If that returns [] it is a known coverage gap, NOT proof the field is unused: ACCESSES ` +
+          `indexes class fields, and plain-object properties (option bags, config objects, ` +
+          `destructured params) often produce no rows. Then re-run this grep scoped to a file or ` +
+          `directory — that is allowed — and report the gap: ` +
+          `npm run bearing:fallback -- "ACCESSES returned [] for <field> but grep finds N".\n` +
+          `${helpers.cypherMidSessionNudge()}`,
         userKey: "block.grep.field",
         userVars: { symbol: seg },
         scoreEvent: "grepRedirects",
@@ -397,6 +408,19 @@ export function classifyRead(req, ctx) {
   const lineCount = typeof ctx.readLines === "function" ? ctx.readLines() : 0;
   const threshold = config.readLineThreshold ?? 60;
   if (lineCount <= threshold) return { decision: "allow" };
+
+  // The index is built at HEAD, so an UNTRACKED file is not in it and never was. Redirecting the
+  // read to `query`/`context` sends the agent to tools that return nothing for it — the block has
+  // no alternative, which is the worst kind (NS-5/NS-6). Reported repeatedly during refactors that
+  // scaffold new modules. Checked lazily and only here, on the path we were about to deny, so the
+  // common allow case still costs nothing (NS-7).
+  if (ctx.isUntracked?.()) {
+    return {
+      decision: "allow",
+      agentMessage:
+        "Read OK — this file is untracked, so the index (built at HEAD) cannot contain it and the graph has nothing to say about it.",
+    };
+  }
 
   const rel = norm;
   const base = rel.replace(/^.*\//, "").replace(/\.[^.]+$/, "");

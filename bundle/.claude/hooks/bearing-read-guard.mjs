@@ -3,6 +3,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { createRequire } from "node:module";
+const require = createRequire(import.meta.url);
 
 /**
  * Count lines only until the threshold is exceeded. The guard just needs "is this bigger than N",
@@ -65,6 +67,21 @@ const verdict = classifyRead(
   {
     ...ctx,
     promptHint: readPromptHint(root),
+    // Called ONLY when the guard is about to block, so this git call never touches the fast path.
+    isUntracked: () => {
+      try {
+        const { spawnSync } = require("node:child_process");
+        const rel = path.relative(root, path.resolve(root, filePath));
+        if (!rel || rel.startsWith("..")) return false; // outside the repo — not our business
+        const r = spawnSync("git", ["ls-files", "--error-unmatch", "--", rel], {
+          cwd: root,
+          encoding: "utf8",
+        });
+        return r.status !== 0; // non-zero → git does not track it → the index cannot hold it
+      } catch {
+        return false; // unknown → keep the gate (fail closed on the graph, NS-8)
+      }
+    },
     readLines: () => {
       try {
         const abs = path.resolve(root, filePath);
