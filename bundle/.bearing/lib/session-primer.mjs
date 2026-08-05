@@ -7,6 +7,41 @@ import os from 'node:os';
 import path from 'node:path';
 import { playbookForHint, mcpReadContext, repoName, clearDenyCache } from './hook-helpers.mjs';
 
+/**
+ * Which feature modules the user actually chose, per the install manifest.
+ *
+ * The manifest is the ONLY authoritative record. Probing for a lib file instead does not work:
+ * `session-primer.mjs` (needed by north-stars and task-core) imports `check-staleness.mjs`, so
+ * `coreLibClosure()` absorbs the whole staleness chain into core and ships it even when GitNexus
+ * was declined. File presence therefore says "core pulled this in", never "the user wants this".
+ *
+ * @returns {Set<string>|null} chosen features, or null when unknowable (no manifest, unreadable,
+ *   or a pre-1.0.3 manifest with no `features` field) — callers must then fall back, never assume.
+ */
+export function installedFeatures(root) {
+  for (const rel of ['.gitnexus/agent-kit-manifest.json', '.bearing/manifest.json']) {
+    try {
+      const m = JSON.parse(fs.readFileSync(path.join(root, rel), 'utf8'));
+      if (Array.isArray(m.features)) return new Set(m.features);
+    } catch {
+      /* missing or malformed → try the next location, then fall back */
+    }
+  }
+  return null;
+}
+
+/**
+ * Is the GitNexus enforcement module installed? Manifest first; for pre-1.0.3 installs (no
+ * `features` field) fall back to the file probe, which was accurate back when every install
+ * included GitNexus. Fail toward ENABLED: an old GitNexus repo silently losing graph-first
+ * discipline is a worse regression than an intel-only repo seeing one stale line.
+ */
+export function graphFeatureEnabled(root) {
+  const features = installedFeatures(root);
+  if (features) return features.has('gitnexus');
+  return fs.existsSync(path.join(root, '.bearing/lib/check-staleness.mjs'));
+}
+
 export function sessionPaths(root) {
   const stateDir = path.join(root, '.bearing');
   return {

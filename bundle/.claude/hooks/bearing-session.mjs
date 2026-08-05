@@ -28,6 +28,7 @@ const {
   taskCoreExists,
   northStarsPath,
   northStarsExists,
+  graphFeatureEnabled,
 } = await lib("session-primer.mjs");
 
 const source = input.source || "startup";
@@ -35,11 +36,13 @@ const source = input.source || "startup";
 const recovering = !shouldClearOnSource(source);
 if (!recovering) clearSessionState(root);
 
-// FEATURE PROBE: the GitNexus enforcement module owns check-staleness.mjs, so the file's presence
-// IS the feature flag — config can never drift from what is actually installed. With the module
-// absent this repo has no graph, and every graph-first instruction below would be advice the agent
-// cannot follow (worse: the guards would point at npm scripts that do not exist here).
-const graphEnabled = existsSync(path.join(root, ".bearing/lib/check-staleness.mjs"));
+// FEATURE PROBE: read the install MANIFEST — the only authoritative record of what the user chose.
+// (The previous probe tested for check-staleness.mjs on the theory that a feature-owned file's
+// presence IS the flag. It isn't: session-primer imports that module, so the core closure absorbs
+// it into every install and the probe was always true — an intel-only repo got the full graph-first
+// briefing, including `npm run bearing:agent-refresh`, a script it does not have.)
+// With the module absent every graph-first instruction below is advice the agent cannot follow.
+const graphEnabled = graphFeatureEnabled(root);
 
 const ctx = graphEnabled ? gnContext(root) : { phase: "fresh" };
 const mp = memoryPath(root); // Claude Code's native project memory

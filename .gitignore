@@ -15,5 +15,28 @@ __pycache__/
 *.db
 *.sqlite
 
-# test residue (the suite runs hooks with cwd = this repo)
-.bearing/
+# test residue (the suite runs hooks with cwd = this repo). Narrow on purpose: a blanket
+# `.bearing/` would also hide the north-stars, which are meant to be committed and team-shared.
+.bearing/.gitnexus-*
+.bearing/.bearing-*
+.bearing/.task-core.md
+.bearing/skills/
+
+# We dogfood bearing in its own repo (`npm run dogfood`), but the INSTALLED runtime artifacts stay
+# untracked: they are byte-copies of bundle/, and a committed second copy invites editing the copy
+# that never ships. bundle/ is the single source of truth; re-run the installer to refresh.
+.bearing/lib/
+.bearing/hooks.json
+.claude/hooks/
+.claude/settings.json
+.vscode/
+
+# bearing — generated local state (safe to remove via bearing-uninstall)
+.gitnexus/
+.tmp-agent/
+.bearing/.gitnexus-*
+.bearing/gitnexus-api-profile.json
+.bearing/hooks.local.json
+docs/ARCHITECTURE.gitnexus.md
+.claude/skills/
+# --- end bearing ---
