@@ -2,6 +2,63 @@
 
 All notable changes to `bearing` are documented here.
 
+## 1.0.4 — dogfooding, a broken uninstall, two dead gates, and field feedback
+
+Installing `bearing` into its own repo for the first time, then auditing the paths dogfooding
+doesn't reach, then acting on a report from an agent using the kit in a live project.
+**Anyone on 1.0.3 should upgrade — it cannot uninstall.**
+
+### Fixed — critical
+
+- **`uninstall` crashed partway through.** It threw whenever no backup was recorded (the normal
+  case) and, being the first adapter in the cleanup loop, took the rest with it: hooks stayed
+  registered against deleted files, the MCP server stayed configured, and the manifest survived so
+  the repo still looked installed.
+- **`uninstall` and module-deselection deleted files they had overwritten.** Install stashes a
+  colliding `.githooks/pre-commit` or `.vscode/settings.json` beside itself; removing ours without
+  restoring theirs left a hole with the content stranded in a `.bearing-backup`. Both now put the
+  original back.
+- **Deselecting a module removed nothing.** Re-installing with fewer features left every file,
+  hook, MCP entry and npm script in place — so turning GitNexus off left its gates enforcing.
+- **The large-source-read gate had never fired once.** It referenced an unbound `config`; the
+  `ReferenceError` was swallowed by its own fail-open catch and reported as "0 lines", so no file
+  was ever large enough to gate.
+
+### Fixed — the tool blocking legitimate work
+
+- **A stale index was a total lockout.** One commit of drift and the agent could not run `ls`, tail
+  a log, read a `.csv`, or run tests until a full reindex. Staleness now gates only what a stale
+  *graph* would have answered.
+- **`Glob` was inverted.** `**/*` — the broadest sweep there is — was allowed, while `src/order.js`
+  was denied and told to use `query` with a concept, which cannot find a file you named by path.
+- **Scoped searches were denied and sent to a tool that can't answer them**: a grep in one named
+  file, a search in `tests/`, and counting occurrences, all redirected to `cypher ACCESSES`.
+- **A blocked shell command implied the rest of it ran.** A denied Bash call blocks the *whole*
+  line, but the message named only the offending segment — so `python3 edit.py && grep …` read as
+  "the edit landed". Sequenced commands now say outright that nothing executed.
+
+### Added — the kit distrusts the graph, and itself
+
+- **Unreliable `impact` verdicts are flagged.** When the pre-edit gate grades a change `risk: LOW`
+  but resolved no callers — or only test files — the agent is told to treat it as unknown blast
+  radius and confirm classically. It warns rather than blocks: re-running `impact` returns the same
+  empty answer.
+- **"A graph ZERO is not evidence of absence"** is now part of the always-on contract. Positives
+  are strong evidence; zeros mean *unknown* and must be confirmed before any "dead code" call.
+- **The kit audits its own enforcement.** `bearing:scorecard` and the session brief report whether
+  the gates are earning their keep, and name the evidence that distinguishes "gates misfiring" from
+  "gates working on a grep-happy agent".
+
+### Fixed — first-run experience
+
+- **`npx bearing` advertised the wrong product.** Six strings still listed three runtimes after
+  Codex shipped, including the runtime picker's "All" option — so choosing All looked like it
+  excluded Codex.
+- **The banner box stopped closing** once the greeting grew, and the installer asked "quick or full
+  index?" in installs with no indexer.
+- **`update-all` claimed "Index built"** for repos with no GitNexus module, and reported a failed
+  reindex as the whole update failing.
+
 ## 1.0.3 — 20 defects fixed after an adversarial review
 
 Two independent reviewers audited the install/migration core and the runtime hooks, reproducing

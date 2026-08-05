@@ -146,15 +146,37 @@ Beyond redirecting greps, agents get the full surface: `cypher` for structural q
 
 #### When the graph is *wrong*
 
-Enforcement that can't be escaped is a trap. If the index is fresh but the answer is suspect, the agent takes a bounded escape hatch — and **that becomes a bug report**:
+A code graph's coverage limits are fine. **Presenting a coverage limit as a factual negative is not** — and that's the failure this module is built to survive.
+
+`impact` and `context` can return *zero callers* for a function wired to a live HTTP route, because calls through factory-returned objects and destructured DI bindings don't always resolve. A confident zero is worse than no answer: it looks like knowledge, so the agent concludes "dead code, safe to change" and is wrong exactly where it was deciding whether a change was safe.
+
+So the contract is asymmetric, and the agent is told so in as many words:
+
+> **A positive result is strong evidence — what it found is really there. A zero is not a finding.** Never conclude "dead code", "no callers" or "safe to delete" from an empty graph result alone; confirm it classically and say which check you ran.
+
+**Three things enforce that instead of hoping:**
+
+**1. Unreliable `impact` verdicts get flagged, not trusted.** `impact` is the pre-edit safety gate. When it grades a change `risk: LOW` but resolved *no* callers — or only test files — the kit says so the moment the result lands, before the edit:
+
+> ⚠ **IMPACT VERDICT IS UNRELIABLE** — it resolved NO callers and graded the change `risk: LOW`. Treat this as **UNKNOWN blast radius, not LOW** … confirm the caller set classically and say which check you ran.
+
+It warns rather than blocks — re-running `impact` returns the same empty answer, so a block would be a trap.
+
+**2. Distrust becomes a bug report.** If the index is fresh but the answer is suspect, the agent takes a bounded escape hatch:
 
 ```bash
 bearing:fallback -- "impact returned 0 callers for OrderService but grep finds 3"
 ```
 
-~15 minutes of classical tools, auto-resuming. The reason is logged with the graph state it distrusted (version, node/edge counts, indexed commit) into a durable report you can review with `bearing:fallback-log` — or export as JSON and send to the graph's maintainers.
+~15 minutes of classical tools, auto-resuming. The reason is logged with the graph state it distrusted (version, node/edge counts, indexed commit) into a durable report — review it with `bearing:fallback-log`, or export JSON and send it to the graph's maintainers. One real project accumulated 93 reports across 47 indexed commits; that corpus is what the rules above are calibrated against.
 
-*The tool keeps a record of its own failures instead of hiding them.*
+**3. The kit audits its own enforcement.** Gates that fire more than they help are worth knowing about, so `bearing:scorecard` and the session brief say it outright:
+
+> ⚠ Enforcement is 49% of graph interaction: 57 redirects vs 60 graph calls.
+
+…along with the two readings — gates misfiring on questions the graph can't answer, or gates correctly catching an agent that keeps reaching for grep — and which evidence tells them apart.
+
+*The tool keeps a record of its own failures instead of hiding them, and tells you when it's the problem.*
 
 The only module that can **block** a tool outright rather than advise. Requires the GitNexus MCP server and an index — the one prerequisite in the set.
 
