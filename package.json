@@ -27,7 +27,8 @@
     "uninstall:target": "./bin/uninstall.sh",
     "eval": "node eval/run-eval.mjs",
     "gen:contract": "node scripts/gen-contract.mjs",
-    "test": "node --test lib/kit.test.mjs"
+    "test": "node --test lib/kit.test.mjs",
+    "sync:meta": "node scripts/sync-repo-meta.mjs"
   },
   "keywords": [
     "ai",
