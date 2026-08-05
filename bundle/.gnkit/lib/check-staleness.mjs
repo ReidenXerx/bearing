@@ -30,7 +30,10 @@ function countDrift(at, sourceExtRe) {
     // -c core.quotePath=false → real UTF-8 paths (no octal escaping) so non-ASCII source
     // names still stat. No .trim() on the output — the leading-space status column (" M path")
     // must keep its alignment for slice(3).
-    porcelain = execSync('git -c core.quotePath=false status --porcelain', {
+    // -uall → list untracked FILES individually. Without it git collapses a new directory into a
+    // single "?? path/" entry, which carries no source extension and therefore matches nothing —
+    // so scaffolding a whole new module in a new folder produced ZERO drift (silent blind spot).
+    porcelain = execSync('git -c core.quotePath=false status --porcelain -uall', {
       cwd: root,
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'ignore'],
