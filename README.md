@@ -85,9 +85,26 @@ Enforcement needs tool-interception hooks, and only some runtimes expose them. E
 
 **Claude Code gets everything.** Elsewhere the north-stars are read at session start but not continuously reinforced — and that re-injection is what stops an anchor decaying across a long session.
 
-## How north-stars work
+## How each module works
 
-Write down what your project *is*, as numbered claims that a conclusion could actually violate:
+### ⚑ North-stars — one source of truth that outranks the rest
+
+Docs rot. Comments lie. An agent's own inference fills the gaps. North-stars are the **fixed point** that settles every conflict — and the agent has to *cite* them.
+
+```mermaid
+flowchart LR
+    D1["docs/"] --> X{"conflict?"}
+    D2["README"] --> X
+    D3["code comments"] --> X
+    D4["agent's own<br/>inference"] --> X
+    X --> NS["⚑ NORTH-STAR WINS<br/>the other source is stale"]
+    NS --> C["agent cites NS-4<br/>and says which doc is wrong"]
+
+    style NS fill:#1a365d,stroke:#4299e1,color:#fff
+    style C fill:#14401f,stroke:#38a169,color:#fff
+```
+
+Write them as numbered claims a conclusion could actually **violate**:
 
 ```markdown
 - **NS-1** — The backtest stop model MUST match the live order's stop model.
@@ -97,11 +114,70 @@ Write down what your project *is*, as numbered claims that a conclusion could ac
               weaker cases (adverse selection). Don't re-propose without new evidence.
 ```
 
-Vague guidance is useless here — *"be careful with risk"* can't be violated, so it can't catch anything. A north-star has to be falsifiable.
+*"Be careful with risk"* can't be violated, so it can't catch anything. **Falsifiable or it's decoration.**
 
-From then on the agent **cites them** (`per NS-4, ranking by win-rate is invalid here`), and when a doc contradicts one, **the north-star wins and the doc is stale**. If it can't cite one for a load-bearing claim, it says so — which is your signal that it may be drifting. It can propose changes, but never edit them silently: an anchor that drift can rewrite isn't an anchor.
+If the agent can't cite one for a load-bearing claim, it says so — that's your drift alarm. It can propose changes, but never edit them silently: an anchor that drift can rewrite isn't an anchor.
 
 > Built for a real codebase where 81 documents had come to contradict each other on live production parameters — including a `CLAUDE.md` that routed every agent to a design doc marked superseded.
+
+### 💾 Task-core — the task survives the summary
+
+Long sessions get **compacted**: the transcript is summarized and thrown away. Detail dies there — the goal, the decisions, the thing you told it *not* to do at hour one.
+
+```mermaid
+flowchart LR
+    A["session starts"] --> B["work…<br/>context fills"]
+    B --> C["⚠️ ~90% full<br/>agent writes task-core"]
+    C --> D["💥 COMPACTION<br/>transcript summarized"]
+    D --> E["reads task-core back"]
+    E --> F["✅ continues with goal,<br/>decisions, next step intact"]
+
+    style D fill:#4a1515,stroke:#c53030,color:#fff
+    style C fill:#4a3a15,stroke:#d69e2e,color:#fff
+    style F fill:#14401f,stroke:#38a169,color:#fff
+```
+
+Written **before** the summary lands, not after — by then the detail is already gone.
+
+### 🔬 Microscope — many lenses, adversarially checked
+
+One review pass finds what one reviewer thinks to look for. Microscope runs several independent lenses, then **tries to refute its own findings** before reporting them.
+
+```mermaid
+flowchart LR
+    W["milestone reached"] --> L1["lens: correctness"]
+    W --> L2["lens: security"]
+    W --> L3["lens: simplification"]
+    L1 --> V{"adversarially<br/>verify"}
+    L2 --> V
+    L3 --> V
+    V -->|"survives"| K["✅ real finding"]
+    V -->|"refuted"| X["dropped — no noise"]
+    K --> N["next wave"]
+
+    style K fill:#14401f,stroke:#38a169,color:#fff
+    style X fill:#2d3748,stroke:#718096,color:#fff
+```
+
+Findings that can't survive an attack never reach you.
+
+### 🕸 GitNexus — the agent stops guessing *(optional)*
+
+Grepping a symbol gives you 40 text matches and no structure. The graph knows what actually calls what.
+
+```mermaid
+flowchart LR
+    G["🔍 grep 'handleOrder'"] --> GATE{"gate"}
+    GATE -->|"index stale"| R["refresh first<br/>— blocked until fresh"]
+    GATE -->|"index fresh"| Q["→ graph query"]
+    Q --> A["✅ callers, callees,<br/>execution flows"]
+    R --> Q
+
+    style A fill:#14401f,stroke:#38a169,color:#fff
+    style R fill:#4a3a15,stroke:#d69e2e,color:#fff
+```
+
+The only module needing an external dependency — and the only one that can *block* a tool rather than advise.
 
 ## Requirements
 
