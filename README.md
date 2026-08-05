@@ -17,11 +17,29 @@ Works with **Claude Code**, **Cursor**, **Zed**, and **Codex**.
 
 ## The problem
 
-Your tests catch code that breaks. Nothing catches an agent that has quietly drifted about what the code *means*.
+Your tests catch code that breaks. **Nothing catches an agent that has drifted about what the code *means*.**
 
-It reads a stale doc and adopts a premise you abandoned months ago. It re-proposes a feature you already measured and rejected — because the refutation lives in a changelog it didn't read. Two hundred thousand tokens in, it's optimising for a goal you never set. Every answer stays fluent, confident, and subtly wrong, and the only way to catch it is to read the wall of text yourself.
+It reads a doc you abandoned in March. It re-proposes the feature you already measured and killed — because the refutation lives in a changelog it never opened. Two hundred thousand tokens in, it's optimising for a goal you never set.
 
-That failure has a name — **losing your bearings** — and it compounds silently. `bearing` gives an agent fixed points it can't drift away from.
+Every answer stays fluent. Confident. Subtly wrong.
+
+**And it never fails loudly.** A drifted agent doesn't crash — it writes a convincing paragraph, you nod, and you find out three days later that the premise was dead on arrival.
+
+```mermaid
+flowchart LR
+    A["📄 Agent reads<br/>a stale doc"] --> B{"anchored?"}
+    B -->|"no"| C["adopts a<br/>dead premise"]
+    C --> D["every later conclusion<br/>inherits the error"]
+    D --> E["🔥 you find out<br/>three days later"]
+    B -->|"yes"| F["it contradicts<br/>NS-4"]
+    F --> G["north-star wins,<br/>doc flagged stale,<br/>agent says so"]
+    G --> H["✅ caught in<br/>one line"]
+
+    style E fill:#4a1515,stroke:#c53030,color:#fff
+    style H fill:#14401f,stroke:#38a169,color:#fff
+```
+
+That failure has a name — **losing your bearings**. `bearing` gives an agent fixed points it can't drift away from, and makes the drift *visible in one line* when it happens.
 
 ## What you get
 
@@ -29,10 +47,10 @@ Four independent modules. Pick any combination; each works alone.
 
 | Module | What it does |
 |---|---|
-| **North-stars** | A short, numbered, authoritative statement of what your project *is* — invariants, exact term meanings, settled decisions, ideas already rejected and why. It **outranks every other doc**, and is re-injected periodically so a long session can't drift off it. |
-| **Task-core** | A dense save-state of the *current task*. When the context window fills, the agent writes it **before** compaction drops the detail — and reads it back on recovery, instead of reconstructing from a summary. |
-| **Microscope** | A milestone review routine: several independent lenses, adversarially verified, iterated in waves. Opinionated, not just defect-hunting. |
-| **GitNexus** *(optional)* | Hard gates that redirect symbol greps and blind reads to a real code knowledge graph, keep the index fresh, and require impact analysis before edits. The deepest module — and the only one needing an external dependency. |
+| **North-stars** | Numbered, authoritative claims about what your project *is* — invariants, exact term meanings, settled decisions, ideas already rejected and why. **Outranks every other doc**, re-injected as the session runs. → *No more re-litigating decisions you made months ago.* |
+| **Task-core** | A dense save-state of the *current task*, written **before** compaction drops the detail and read back on recovery. → *A four-hour task doesn't forget its own goal at hour three.* |
+| **Microscope** | Milestone review through several independent lenses, adversarially verified, iterated in waves. → *Catches what a single confident pass always misses.* |
+| **GitNexus** *(optional)* | Hard gates that redirect symbol greps to a real code knowledge graph and demand impact analysis before edits. → *The agent stops guessing at your architecture.* Needs the GitNexus MCP server. |
 
 ## Install
 
@@ -52,18 +70,20 @@ npx bearing install /path/to/repo --runtime all --features all
 
 Then restart your IDE and open a new agent chat.
 
-### Not every runtime enforces the same way
+### Module support by runtime
 
-Enforcement needs tool-interception hooks, and only some runtimes have them.
+Enforcement needs tool-interception hooks, and only some runtimes expose them. Everything still *works* everywhere — the difference is whether a rule is **enforced** or merely **instructed**.
 
 | | Claude Code | Cursor | Zed | Codex |
-|---|---|---|---|---|
-| Contract (`CLAUDE.md` / `AGENTS.md`) | ✅ | ✅ | ✅ | ✅ |
-| Hard gates (redirect grep, block stale reads) | ✅ | ✅ | — | — |
-| North-stars **re-anchored** mid-session | ✅ | — | — | — |
-| Task-core (survive compaction) | ✅ | — | — | — |
+|---|:---:|:---:|:---:|:---:|
+| **North-stars** — loaded as authority | ✅ | ✅ | ✅ | ✅ |
+| **North-stars** — re-anchored mid-session | ✅ | — | — | — |
+| **Task-core** — survives compaction | ✅ | — | — | — |
+| **Microscope** — deep review routine | ✅ | ✅ | ✅ | — |
+| **GitNexus** — graph contract | ✅ | ✅ | ✅ | ✅ |
+| **GitNexus** — hard gates (grep redirected) | ✅ | ✅ | — | — |
 
-On Zed and Codex the north-stars are **read at session start but not continuously reinforced** — and that recurring re-injection is what stops an anchor decaying over a long session. They still help; they just work as instruction rather than enforcement.
+**Claude Code gets everything.** Elsewhere the north-stars are read at session start but not continuously reinforced — and that re-injection is what stops an anchor decaying across a long session.
 
 ## How north-stars work
 
