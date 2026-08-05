@@ -34,12 +34,16 @@ alwaysApply: true
 ---
 `;
 
+// The product is `bearing`; GitNexus is one module inside it. A contract titled "GitNexus agent
+// kit" told every agent otherwise, including in repos that installed no GitNexus at all.
+export const CONTRACT_TITLE = "bearing — always-on instructions";
+
 const GENERATED_NOTE =
   "<!-- GENERATED from scripts/contract/enforcement-contract.md by scripts/gen-contract.mjs — edit there, run `npm run gen:contract`. -->";
 
 /** @param {string} body canonical contract markdown */
 export function renderCursorRule(body) {
-  return `${CURSOR_FRONTMATTER}\n${GENERATED_NOTE}\n\n# GitNexus enforcement\n\n${body.trim()}\n`;
+  return `${CURSOR_FRONTMATTER}\n${GENERATED_NOTE}\n\n# bearing\n\n${body.trim()}\n`;
 }
 
 /** @param {string} body @param {string} footer @param {string} title */
@@ -49,12 +53,12 @@ function renderWithFooter(body, footer, title) {
 
 /** @param {string} body @param {string} zedFooter */
 export function renderAgents(body, zedFooter) {
-  return renderWithFooter(body, zedFooter, "GitNexus agent kit — always-on instructions");
+  return renderWithFooter(body, zedFooter, CONTRACT_TITLE);
 }
 
 /** @param {string} body @param {string} claudeFooter */
 export function renderClaude(body, claudeFooter) {
-  return renderWithFooter(body, claudeFooter, "GitNexus agent kit — always-on instructions");
+  return renderWithFooter(body, claudeFooter, CONTRACT_TITLE);
 }
 
 export function renderAll() {

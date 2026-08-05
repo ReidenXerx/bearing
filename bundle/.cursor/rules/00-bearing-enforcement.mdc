@@ -5,14 +5,16 @@ alwaysApply: true
 
 <!-- GENERATED from scripts/contract/enforcement-contract.md by scripts/gen-contract.mjs — edit there, run `npm run gen:contract`. -->
 
-# GitNexus enforcement
+# bearing
 
+<!-- feature: gitnexus -->
 ## North star
 
 > **GitNexus is the default reasoning layer for every task — not a fallback when code is unfamiliar.** Prefer graph + embeddings when the index is fresh. Use `query` to orient (BM25 + vectors). Use `cypher` for precise structural graph questions. Refresh autonomously when stale or embeddings are missing. Classical tools only **after refresh fails** or GN is wrong — say why.
 
 **Model tiers:** the graph + gates improve **every** agent — budget/local models gain the most *relative* lift; flagship models waste fewer tokens and follow the same enforced loop. Local LLM / zero API cost: rebuild context freely; do not skip gates for speed.
 
+<!-- feature: gitnexus -->
 ## Every task (not “unfamiliar code only”)
 
 Use the graph for **all** agent work — explore, debug, fix, refactor, review, rename, commit — not only architecture questions.
@@ -30,6 +32,7 @@ Use the graph for **all** agent work — explore, debug, fix, refactor, review, 
 
 **Anti-patterns:** reserving GitNexus for big exploratory prompts; grep/read from memory on “familiar” files; grepping field names instead of `cypher`; **StrReplace/find-and-replace for symbol renames** instead of `rename` dry_run; skipping `impact` on “small” edits; jumping to `context`/`impact`/`grep` without `query` first (skips embeddings). `SemanticSearch` is blocked — use `query`.
 
+<!-- feature: gitnexus -->
 ## Graph + embeddings + cypher (layered)
 
 | Need | Tool | Why |
@@ -57,6 +60,7 @@ READ `bearing://repo/__GITNEXUS_REPO__/schema` before ad-hoc Cypher.
 
 Refresh always includes `--embeddings` (`bearing:refresh` / `agent-refresh`). Missing embeddings = stale (same as commit behind).
 
+<!-- feature: gitnexus -->
 ## Deep precision — PDG, taint, trace
 
 When `cypher` isn't enough, escalate to statement-level tools (require a PDG index — `bearing:pdg`):
@@ -69,6 +73,7 @@ When `cypher` isn't enough, escalate to statement-level tools (require a PDG ind
 | Source → sink path between two symbols | `trace` |
 | Taint review — injection, path traversal, XSS | `explain` |
 
+<!-- feature: gitnexus -->
 ## Full tool surface — reach for the right one
 
 Know every tool and *when* it wins (single-repo; cross-repo `group_*` is out of scope for this kit). Don't stop at `query`/`context` — the advanced tools answer in one call what takes many manual hops.
@@ -93,6 +98,7 @@ Know every tool and *when* it wins (single-repo; cross-repo `group_*` is out of 
 
 Cheap resource reads (prefer before heavy tools): `READ bearing://repo/__GITNEXUS_REPO__/{context|schema|clusters|processes|process/<name>}`.
 
+<!-- feature: gitnexus -->
 ## MCP defaults (generous — local LLM)
 
 Run hook copy-paste calls verbatim; expand freely when needed:
@@ -108,12 +114,14 @@ Run hook copy-paste calls verbatim; expand freely when needed:
 | `rename` | `dry_run: true` first | Coordinated multi-file symbol rename |
 | `detect_changes` | `scope: unstaged` | Pre-commit → `staged`; PR → `compare` |
 
+<!-- feature: gitnexus -->
 ## Session (autonomous Shell)
 
 New chat: run session health ritual if injected — `npm run bearing:agent-status`, one-sentence confirm to user.
 
 `npm run bearing:agent-brief` or READ `bearing://repo/__GITNEXUS_REPO__/context`. Stale or missing embeddings → **`npm run bearing:agent-refresh` first** (`required_permissions: ["all"]`). Hooks **block** Grep/Read/MCP/shell until refresh succeeds; classical tools only if refresh **fails** (say why). Never ask user to analyze.
 
+<!-- feature: gitnexus -->
 ## Stale loop (mandatory)
 
 ```
@@ -127,6 +135,7 @@ Session start runs auto-refresh when stale. Do **not** grep/read “while refres
 
 **Mid-session drift (your own edits):** commit-equality can't see uncommitted edits, so after you change a few source files the graph silently falls behind your working tree. Don't wait for the block — once you've edited code and are about to `query`/`context`/`impact`/`cypher`/`pdg_query` again, run **`npm run bearing:refresh`** (**incremental** — reindexes only your changed files; quick for a few edits, longer on large batches / first run) so graph answers reflect your changes. Graph query tools hard-block past a small drift threshold until you do.
 
+<!-- feature: gitnexus -->
 ## Gates (do not skip — every task)
 
 ```
@@ -141,6 +150,7 @@ Session start runs auto-refresh when stale. Do **not** grep/read “while refres
 
 HIGH/CRITICAL impact → warn before proceeding.
 
+<!-- feature: gitnexus -->
 ## When fresh — hooks block (enforced, not advisory)
 
 Symbol grep → `context`. **Field/property grep → READ schema → `cypher` (`ACCESSES`).** SemanticSearch/broad Glob → `query`. Large source Read → `query` → `context` → Read offset/limit; **data-flow / model reads → `cypher` first.** Symbol **StrReplace rename** → `rename` dry_run.
@@ -151,10 +161,12 @@ Symbol grep → `context`. **Field/property grep → READ schema → `cypher` (`
 
 Enforcement is **polyglot** — JS/TS, Python, Rust, Go, Java, and more count as source (configure `sourceExts` in `.bearing/hooks.json`).
 
+<!-- feature: microscope -->
 ## Deep review (intel layer)
 
 At a **milestone** — feature done / big-task checkpoint / shared-code refactor / pre-ship, or "audit / find real bugs / is this solid?" — **and** only when the work is *substantial* (multi-file or high `impact` blast-radius): run a **microscope-waves** pass → load the `bearing-microscope` skill. Multi-lens, opinionated (not just defects), adversarially verified, iterated in waves. Skip it for small localized changes.
 
+<!-- feature: northstars -->
 ## Project north-stars — the semantic anchor (highest authority)
 
 *(Distinct from the graph-first "North star" above: those are the kit's reasoning rules; these are **this project's** fixed points.)*
@@ -172,6 +184,7 @@ If **`.bearing/northstars.md`** exists, it is the project's **authoritative** st
 
 Maintain your **Claude Code project memory** — `~/.claude/projects/<this-project>/memory/MEMORY.md` (Claude Code's native memory; **all agents share this one file** — Claude refers to its own, other agents mirror it). Record task, key decisions, findings, open items, important `file:line`. Update it at milestones and whenever you conclude something that must outlive the current transcript. Context compaction and new sessions drop the conversation; this file does not. On recovery (post-compaction/resume) READ it first and reconcile it with reality — **nothing important may be lost.**
 
+<!-- feature: taskcore -->
 ## Task-core (survive compaction without drift)
 
 Long tasks get **compacted** — the transcript is summarized and dropped, and detail drifts. Keep a **task-core**: a dense, **AI-facing** save-state of the CURRENT TASK at **`.bearing/.task-core.md`**. When a PostToolUse nudge says context is filling (~90%), or at a milestone / before a risky pivot, **write or refresh it** — terse, for *you* not humans, no prose tax:
@@ -184,6 +197,7 @@ GOTCHAS <failed approaches, traps, non-obvious> · OPEN-Qs · USER-PREFS(this ta
 
 On recovery **READ the task-core FIRST** and reconstruct from it — it's the one thing guaranteed to survive with full detail. It's distinct from `MEMORY.md` (durable, cross-session, human-shared): the task-core is the *hot working-set for THIS task*, overwritten when the task changes. Full routine: the **`bearing-taskcore`** skill.
 
+<!-- feature: gitnexus -->
 ## Fallback
 
 **Stale index** → run `agent-refresh` first; classical Grep/Read stay denied until it succeeds. **If refresh fails** (or MCP down): classical Grep/Read OK — one-sentence why.

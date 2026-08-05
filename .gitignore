@@ -30,6 +30,10 @@ __pycache__/
 .claude/hooks/
 .claude/settings.json
 .vscode/
+# Rendered from scripts/contract/ — edit the contract, run `npm run gen:contract`, then `npm run
+# dogfood`. Committing the render invites editing it instead of the source it comes from.
+CLAUDE.md
+AGENTS.md
 
 # bearing — generated local state (safe to remove via bearing-uninstall)
 .gitnexus/
