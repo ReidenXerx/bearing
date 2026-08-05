@@ -87,7 +87,7 @@ Or use the standalone kit (recommended):
 
 1. **Restart your IDE** (MCP + hooks / Zed profile)
 2. `npm run bearing:agent-status` — index fresh?
-3. Start Agent chats with: *"Read gitnexus-workspace skill, then …"*
+3. Start Agent chats with: *"Read bearing-workspace skill, then …"*
 
 **Auto-refresh:** On Agent session start, hooks run `npm run bearing:agent-refresh` if the index is behind HEAD (skip with `GITNEXUS_SKIP_SESSION_REFRESH=1`). While stale, a shell guard blocks non-gitnexus commands until refresh succeeds — agents must not tell users to run analyze manually.
 

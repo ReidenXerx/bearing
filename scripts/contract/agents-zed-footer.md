@@ -1,7 +1,7 @@
 ## Zed + local models (Ollama)
 
 - Select the **Zed + GitNexus** agent profile (grep disabled; gitnexus MCP enabled).
-- Invoke `/gitnexus-enforcement` or `/gitnexus-workspace` when starting a hard task.
+- Invoke `/bearing-enforcement` or `/bearing-workspace` when starting a hard task.
 - Local models: keep MCP calls small (`query` limit 5, `impact` summaryOnly when exploring).
 
 ## npm gates

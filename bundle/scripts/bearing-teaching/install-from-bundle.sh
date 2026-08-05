@@ -16,15 +16,15 @@ REPO_NAME="${GITNEXUS_REPO_NAME:-$(basename "$ROOT")}"
 
 info "Target repo: $REPO_NAME"
 
-if grep -rq '__GITNEXUS_REPO__' .cursor/rules .cursor/hooks .bearing/skills/gitnexus-workspace .bearing/skills/gitnexus-enforcement 2>/dev/null; then
+if grep -rq '__GITNEXUS_REPO__' .cursor/rules .cursor/hooks .bearing/skills/bearing-workspace .bearing/skills/bearing-enforcement 2>/dev/null; then
   warn "Bundle still references __GITNEXUS_REPO__ — set GITNEXUS_REPO_NAME and re-run substitution:"
   warn "  GITNEXUS_REPO_NAME=$REPO_NAME bash scripts/bearing-teaching/install-from-bundle.sh"
   if [[ "${GITNEXUS_SKIP_RENAME:-}" != "1" ]]; then
     info "Replacing __GITNEXUS_REPO__ → $REPO_NAME in rules/hooks/skills"
-    find .cursor/rules .cursor/hooks .bearing/skills/gitnexus-workspace .bearing/skills/gitnexus-enforcement \
+    find .cursor/rules .cursor/hooks .bearing/skills/bearing-workspace .bearing/skills/bearing-enforcement \
       -type f \( -name '*.mdc' -o -name '*.sh' -o -name '*.mjs' -o -name 'SKILL.md' \) \
       -exec sed -i '' "s/__GITNEXUS_REPO__/$REPO_NAME/g" {} + 2>/dev/null \
-      || find .cursor/rules .cursor/hooks .bearing/skills/gitnexus-workspace .bearing/skills/gitnexus-enforcement \
+      || find .cursor/rules .cursor/hooks .bearing/skills/bearing-workspace .bearing/skills/bearing-enforcement \
       -type f \( -name '*.mdc' -o -name '*.sh' -o -name '*.mjs' -o -name 'SKILL.md' \) \
       -exec sed -i "s/__GITNEXUS_REPO__/$REPO_NAME/g" {} +
     ok "Repo name substituted"

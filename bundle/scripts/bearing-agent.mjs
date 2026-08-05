@@ -123,7 +123,7 @@ if (cmd === "northstars") {
     console.log(
       "stating invariants, exact term meanings, settled decisions, and rejected ideas. It outranks every",
     );
-    console.log("other doc. Format + routine: the `gitnexus-northstars` skill.");
+    console.log("other doc. Format + routine: the `bearing-northstars` skill.");
     process.exit(0);
   }
   const lines = northStarsDigest(ROOT);
@@ -454,7 +454,7 @@ if (cmd === "review" || cmd === "pr-impact") {
     "3) If GitNexus has multi-branch indexes for base + head, use the branch parameter consistently.",
   );
   lines.push(
-    "4) HIGH/CRITICAL or security-sensitive changes → PDG impact + gitnexus-security-review.",
+    "4) HIGH/CRITICAL or security-sensitive changes → PDG impact + bearing-security-review.",
   );
   lines.push(
     "5) Confirm affected_processes match PR intent; verify tests cover them.",

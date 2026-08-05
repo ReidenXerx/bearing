@@ -140,24 +140,24 @@ Symbol grep → `context`. **Field/property grep → READ schema → `cypher` (`
 - **Edit runtime source** → blocked until one `impact` (or `rename`) call this session. Run blast radius first; warn on HIGH/CRITICAL.
 - **`git commit`** → blocked until one `detect_changes` call this session. Confirm affected processes match intent.
 
-Enforcement is **polyglot** — JS/TS, Python, Rust, Go, Java, and more count as source (configure `sourceExts` in `.bearing/gitnexus-hooks.json`).
+Enforcement is **polyglot** — JS/TS, Python, Rust, Go, Java, and more count as source (configure `sourceExts` in `.bearing/hooks.json`).
 
 ## Deep review (intel layer)
 
-At a **milestone** — feature done / big-task checkpoint / shared-code refactor / pre-ship, or "audit / find real bugs / is this solid?" — **and** only when the work is *substantial* (multi-file or high `impact` blast-radius): run a **microscope-waves** pass → load the `gitnexus-microscope` skill. Multi-lens, opinionated (not just defects), adversarially verified, iterated in waves. Skip it for small localized changes.
+At a **milestone** — feature done / big-task checkpoint / shared-code refactor / pre-ship, or "audit / find real bugs / is this solid?" — **and** only when the work is *substantial* (multi-file or high `impact` blast-radius): run a **microscope-waves** pass → load the `bearing-microscope` skill. Multi-lens, opinionated (not just defects), adversarially verified, iterated in waves. Skip it for small localized changes.
 
 ## Project north-stars — the semantic anchor (highest authority)
 
 *(Distinct from the graph-first "North star" above: those are the kit's reasoning rules; these are **this project's** fixed points.)*
 
-If **`.bearing/gitnexus-northstars.md`** exists, it is the project's **authoritative** statement of what this project IS: numbered, falsifiable propositions (`NS-1`, `NS-2`, …) covering **INVARIANTS** (must always hold), **SEMANTICS** (exact meaning of load-bearing terms), **EVIDENCE** (what counts as proof here), **SETTLED** decisions, and a **GRAVEYARD** of tried-and-rejected / validated ideas.
+If **`.bearing/northstars.md`** exists, it is the project's **authoritative** statement of what this project IS: numbered, falsifiable propositions (`NS-1`, `NS-2`, …) covering **INVARIANTS** (must always hold), **SEMANTICS** (exact meaning of load-bearing terms), **EVIDENCE** (what counts as proof here), **SETTLED** decisions, and a **GRAVEYARD** of tried-and-rejected / validated ideas.
 
 - **READ IT FIRST** — before forming any premise, at session start and on every recovery. A PostToolUse hook re-anchors you on it periodically and right after you write a doc; that is a *reminder*, not a substitute for reading it.
 - **It outranks everything**: every other doc, README, code comment, and your own inference. Repos accumulate stale and mutually contradictory docs — when any source conflicts with a north-star, **the north-star wins and the other source is stale**. Say so instead of silently averaging them.
 - **CITE the `NS-#`** when you make a consequential claim, choose a direction, or reject an idea. If you cannot cite one for a load-bearing conclusion, **you may be drifting — say so explicitly** rather than proceeding confidently.
 - **Never silently edit a north-star, and never quietly work around one.** If one looks wrong, missing, or outdated, state that plainly and **propose the change to the user** — the anchor only works if drift can't rewrite it.
 - **The GRAVEYARD is settled**: do not re-propose a rejected idea without new evidence that addresses *why* it was rejected, and do not discard a VALIDATED one without evidence that overturns it.
-- Print them anytime: `npm run bearing:northstars`. Format + maintenance routine: the **`gitnexus-northstars`** skill.
+- Print them anytime: `npm run bearing:northstars`. Format + maintenance routine: the **`bearing-northstars`** skill.
 
 ## Durable memory (survives compaction + sessions)
 
@@ -165,7 +165,7 @@ Maintain your **Claude Code project memory** — `~/.claude/projects/<this-proje
 
 ## Task-core (survive compaction without drift)
 
-Long tasks get **compacted** — the transcript is summarized and dropped, and detail drifts. Keep a **task-core**: a dense, **AI-facing** save-state of the CURRENT TASK at **`.bearing/.gitnexus-task-core.md`**. When a PostToolUse nudge says context is filling (~90%), or at a milestone / before a risky pivot, **write or refresh it** — terse, for *you* not humans, no prose tax:
+Long tasks get **compacted** — the transcript is summarized and dropped, and detail drifts. Keep a **task-core**: a dense, **AI-facing** save-state of the CURRENT TASK at **`.bearing/.task-core.md`**. When a PostToolUse nudge says context is filling (~90%), or at a milestone / before a risky pivot, **write or refresh it** — terse, for *you* not humans, no prose tax:
 
 ```
 GOAL <what "done" is> · CONSTRAINTS <must/never> · DECISIONS <choice→why (settled)>
@@ -173,7 +173,7 @@ STATE done<✓+anchor> / now / NEXT<exact> / todo<ordered> · ANCHORS <file:line
 GOTCHAS <failed approaches, traps, non-obvious> · OPEN-Qs · USER-PREFS(this task)
 ```
 
-On recovery **READ the task-core FIRST** and reconstruct from it — it's the one thing guaranteed to survive with full detail. It's distinct from `MEMORY.md` (durable, cross-session, human-shared): the task-core is the *hot working-set for THIS task*, overwritten when the task changes. Full routine: the **`gitnexus-taskcore`** skill.
+On recovery **READ the task-core FIRST** and reconstruct from it — it's the one thing guaranteed to survive with full detail. It's distinct from `MEMORY.md` (durable, cross-session, human-shared): the task-core is the *hot working-set for THIS task*, overwritten when the task changes. Full routine: the **`bearing-taskcore`** skill.
 
 ## Fallback
 
@@ -181,4 +181,4 @@ On recovery **READ the task-core FIRST** and reconstruct from it — it's the on
 
 **GitNexus fresh but wrong / suspicious / incomplete?** Don't silently fight the gate — take the escape hatch: `npm run bearing:fallback -- "<why>"`, which opens ~15 min where classical Grep/Read/shell are allowed (auto-resumes; end early with `npm run bearing:fallback:off`). **Make `<why>` specific and actionable** — which GN tool, expected vs actual (e.g. `impact returned 0 callers for OrderService but grep finds 3`) — because it's appended as a **GitNexus failure report** (`npm run bearing:fallback-log`), captured with the graph state, for the GitNexus developers. Re-confirm findings with the graph once GN is reliable; repeated reports pinpoint where GN needs fixing.
 
-Optional: `GITNEXUS_MODE=guide` (nudge-only). Paths: `.bearing/gitnexus-hooks.json`. Playbooks: `gitnexus-enforcement` skill.
+Optional: `GITNEXUS_MODE=guide` (nudge-only). Paths: `.bearing/hooks.json`. Playbooks: `bearing-enforcement` skill.

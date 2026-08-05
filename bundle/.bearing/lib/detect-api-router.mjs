@@ -106,18 +106,18 @@ export function detectApiRouterProfile(root, repoArg) {
     : null;
 
   let profile = 'unknown';
-  let recommendation = 'query + context on handler symbols; try api_impact then gitnexus-api-routes if empty';
+  let recommendation = 'query + context on handler symbols; try api_impact then bearing-api-routes if empty';
 
   if (routeNodes != null && routeNodes > 0) {
     profile = 'framework';
     recommendation = 'api_impact / route_map / shape_check — indexed Route nodes present';
   } else if (heur.custom > heur.framework && heur.custom > 0) {
     profile = 'custom';
-    recommendation = 'gitnexus-api-routes skill — no indexed Route nodes; use context on dispatcher symbols';
+    recommendation = 'bearing-api-routes skill — no indexed Route nodes; use context on dispatcher symbols';
   } else if (heur.framework > 0) {
     profile = 'framework-likely';
     recommendation =
-      'Try api_impact first; if empty after refresh, treat as custom router (gitnexus-api-routes)';
+      'Try api_impact first; if empty after refresh, treat as custom router (bearing-api-routes)';
   } else if (routeNodes === 0) {
     profile = 'none';
     recommendation = 'No HTTP routes detected — skip api_impact unless adding an API layer';

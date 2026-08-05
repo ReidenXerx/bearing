@@ -115,12 +115,12 @@ CORE_SOURCES=(
   "scripts/bearing-gate-hint.mjs"
   "scripts/bearing-teaching/script-gates.mjs"
   "scripts/lib/setup-ui.mjs"
-  ".bearing/skills/gitnexus-workspace/SKILL.md"
-  ".bearing/skills/gitnexus-enforcement/SKILL.md"
+  ".bearing/skills/bearing-workspace/SKILL.md"
+  ".bearing/skills/bearing-enforcement/SKILL.md"
 )
 
 CURSOR_SOURCES=(
-  ".cursor/rules/00-gitnexus-enforcement.mdc"
+  ".cursor/rules/00-bearing-enforcement.mdc"
   ".cursor/hooks.json"
   ".cursor/hooks/bearing-grep-guard.sh"
   ".bearing/lib/hook-helpers.mjs"

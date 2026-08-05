@@ -28,7 +28,7 @@ const cachePath = path.join(root, '.bearing', '.gitnexus-staleness-cache.json');
 
 function ttlMs() {
   try {
-    const cfg = JSON.parse(fs.readFileSync(path.join(root, '.bearing/gitnexus-hooks.json'), 'utf8'));
+    const cfg = JSON.parse(fs.readFileSync(path.join(root, '.bearing/hooks.json'), 'utf8'));
     if (typeof cfg.stalenessCacheTtlMs === 'number') return cfg.stalenessCacheTtlMs;
   } catch {
     /* default */

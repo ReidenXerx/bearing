@@ -41,9 +41,9 @@ ok()   { printf '\033[1;32m    ✓\033[0m %s\n' "$*"; }
 
 # Paths relative to repo root — keep in sync with scripts/bearing-setup.sh TEACHING_SOURCES
 BUNDLE_PATHS=(
-  .cursor/rules/00-gitnexus-enforcement.mdc
-  .cursor/rules/gitnexus.mdc
-  .cursor/rules/gitnexus-first.mdc
+  .cursor/rules/00-bearing-enforcement.mdc
+  .cursor/rules/bearing.mdc
+  .cursor/rules/bearing-first.mdc
   .cursor/hooks.json
   .cursor/hooks/bearing-session-primer.sh
   .cursor/hooks/bearing-session-health.sh
@@ -82,7 +82,7 @@ BUNDLE_PATHS=(
   .bearing/lib/session-health-audit.mjs
   .bearing/lib/session-health-context.mjs
   .bearing/lib/verify-kit.mjs
-  .bearing/gitnexus-hooks.json
+  .bearing/hooks.json
   scripts/bearing-verify.mjs
   scripts/bearing-setup.sh
   scripts/sync-cursor-bearing-teaching.sh

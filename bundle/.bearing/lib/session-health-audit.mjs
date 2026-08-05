@@ -84,13 +84,13 @@ export function auditKitHealth(root) {
       : "Missing gitnexus MCP entry",
   });
 
-  const rulePath = path.join(root, ".cursor/rules/00-gitnexus-enforcement.mdc");
+  const rulePath = path.join(root, ".cursor/rules/00-bearing-enforcement.mdc");
   const ruleOk = fs.existsSync(rulePath);
   checks.push({
     id: "rule",
     ok: ruleOk,
     label: "Enforcement rule",
-    detail: ruleOk ? "00-gitnexus-enforcement.mdc" : "Missing north-star rule",
+    detail: ruleOk ? "00-bearing-enforcement.mdc" : "Missing north-star rule",
   });
 
   const helpersOk =

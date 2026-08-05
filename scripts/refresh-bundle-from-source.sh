@@ -21,7 +21,7 @@ info "Refreshing bundle from $SRC"
 
 # NOTE: bundle/skills/ and bundle/docs/ are kit-owned sources of truth and are
 # NOT derived from $SRC. Never `rm -rf bundle` wholesale — that would wipe the
-# canonical skill store (incl. gitnexus-local) and the team docs. We only
+# canonical skill store (incl. bearing-local) and the team docs. We only
 # refresh the subtrees that genuinely come from the source repo.
 rm -rf \
   "$KIT_ROOT/bundle/.cursor" \

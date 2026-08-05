@@ -39,12 +39,12 @@ if (p.over) {
     const kt = Math.round(p.tokens / 1000);
     emitContext(
       `⚠ CONTEXT ~${pct}% full (~${kt}k tok) — auto-compaction is NEAR. Refresh your TASK-CORE ` +
-        "**now**, before the summary drops load-bearing detail: write `.bearing/.gitnexus-task-core.md` " +
+        "**now**, before the summary drops load-bearing detail: write `.bearing/.task-core.md` " +
         "as a DENSE, AI-facing save-state of THIS TASK — GOAL · CONSTRAINTS · DECISIONS(+why) · " +
         "STATE(done/now/NEXT/todo) · ANCHORS(file:line) · GOTCHAS(failed approaches, traps) · " +
         "OPEN-Qs · this-task USER-PREFS. Terse, no prose — it's for you, not humans. It is the ONE " +
         "thing guaranteed to survive compaction; SessionStart reads it back on recovery. " +
-        "(Format: the `gitnexus-taskcore` skill.)",
+        "(Format: the `bearing-taskcore` skill.)",
       "PostToolUse",
     );
     setPressureNudged(root, true);

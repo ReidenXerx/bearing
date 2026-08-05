@@ -53,7 +53,7 @@ HOOK_LIBS=(
   ".bearing/lib/session-health-audit.mjs"
   ".bearing/lib/session-health-context.mjs"
   ".bearing/lib/verify-kit.mjs"
-  ".bearing/gitnexus-hooks.json"
+  ".bearing/hooks.json"
   "scripts/bearing-agent.mjs"
   "scripts/bearing-gate-hint.mjs"
   "scripts/bearing-teaching/script-gates.mjs"
@@ -162,14 +162,14 @@ const manifest = {
   },
   components: {
     rules: [
-      '.cursor/rules/00-gitnexus-enforcement.mdc',
-      '.cursor/rules/gitnexus.mdc',
-      '.cursor/rules/gitnexus-first.mdc',
+      '.cursor/rules/00-bearing-enforcement.mdc',
+      '.cursor/rules/bearing.mdc',
+      '.cursor/rules/bearing-first.mdc',
     ],
     hooks: '.cursor/hooks.json',
     mcp: '.cursor/mcp.json',
-    masterSkill: '.agents/skills/gitnexus-workspace/SKILL.md',
-    enforcementSkill: '.agents/skills/gitnexus-enforcement/SKILL.md',
+    masterSkill: '.agents/skills/bearing-workspace/SKILL.md',
+    enforcementSkill: '.agents/skills/bearing-enforcement/SKILL.md',
     gitnexusSkills: listSkills('.bearing/skills').filter((n) => n.startsWith('gitnexus-')),
     generatedAreaSkills: listSkills('.cursor/skills/generated'),
   },
@@ -198,8 +198,8 @@ NODE
 info "Installing GitNexus agent kit teaching bundle (runtime: ${GITNEXUS_RUNTIME:-both})"
 
 info "  [1/5] Cursor rules (single always-on contract)"
-verify_always_apply_rule ".cursor/rules/00-gitnexus-enforcement.mdc"
-for ref_rule in ".cursor/rules/gitnexus.mdc" ".cursor/rules/gitnexus-first.mdc"; do
+verify_always_apply_rule ".cursor/rules/00-bearing-enforcement.mdc"
+for ref_rule in ".cursor/rules/bearing.mdc" ".cursor/rules/bearing-first.mdc"; do
   [[ -f "$ref_rule" ]] || fail "Missing rule: $ref_rule"
   ok "Reference rule present: $ref_rule (load on demand)"
 done
@@ -263,7 +263,7 @@ fi
 
 echo ""
 ok "Teaching bundle v2 installed (enforcement hooks active)"
-echo "    Enforcement:   00-gitnexus-enforcement.mdc + grep/read/edit hooks (staleness block)"
-echo "    Graph imaging: gitnexus-imaging skill"
-echo "    Master skill:  gitnexus-workspace"
-echo "    If blocked:    gitnexus-enforcement skill"
+echo "    Enforcement:   00-bearing-enforcement.mdc + grep/read/edit hooks (staleness block)"
+echo "    Graph imaging: bearing-imaging skill"
+echo "    Master skill:  bearing-workspace"
+echo "    If blocked:    bearing-enforcement skill"

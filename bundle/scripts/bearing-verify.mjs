@@ -75,7 +75,7 @@ function checkPackageGates() {
 }
 
 function checkSkillsStore() {
-  const store = path.join(root, SKILLS_STORE, 'gitnexus-workspace/SKILL.md');
+  const store = path.join(root, SKILLS_STORE, 'bearing-workspace/SKILL.md');
   return {
     id: 'skills_store',
     ok: fs.existsSync(store),
@@ -85,8 +85,8 @@ function checkSkillsStore() {
 }
 
 function checkSkillSymlinks(runtime) {
-  const cursorOk = fs.existsSync(path.join(root, '.cursor/skills/gitnexus-workspace/SKILL.md'));
-  const zedOk = fs.existsSync(path.join(root, '.agents/skills/gitnexus-workspace/SKILL.md'));
+  const cursorOk = fs.existsSync(path.join(root, '.cursor/skills/bearing-workspace/SKILL.md'));
+  const zedOk = fs.existsSync(path.join(root, '.agents/skills/bearing-workspace/SKILL.md'));
   let ok = false;
   let detail = 'not linked';
   if (wantsCursor(runtime) && wantsZed(runtime)) {
@@ -162,7 +162,7 @@ function checkZed() {
 }
 
 const CURSOR_CRITICAL = [
-  '.cursor/rules/00-gitnexus-enforcement.mdc',
+  '.cursor/rules/00-bearing-enforcement.mdc',
   '.cursor/hooks.json',
   '.bearing/lib/hook-helpers.mjs',
   '.bearing/lib/stale-policy.mjs',

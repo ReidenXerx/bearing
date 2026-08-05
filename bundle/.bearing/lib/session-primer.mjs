@@ -35,7 +35,7 @@ export function sessionPaths(root) {
 
 /** @param {string} root */
 export function taskCorePath(root) {
-  return path.join(root, '.bearing', '.gitnexus-task-core.md');
+  return path.join(root, '.bearing', '.task-core.md');
 }
 
 /** @param {string} root @returns {boolean} does a task-core exist + have content? */
@@ -70,7 +70,7 @@ export function taskCoreAgeMs(root) {
 
 /** @param {string} root */
 export function northStarsPath(root) {
-  return path.join(root, '.bearing', 'gitnexus-northstars.md');
+  return path.join(root, '.bearing', 'northstars.md');
 }
 
 /** @param {string} root @returns {boolean} does a north-stars doc exist + have content? */
