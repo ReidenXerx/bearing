@@ -1,16 +1,16 @@
 {
   "name": "bearing",
-  "version": "1.0.0",
-  "description": "Intel layer for AI coding agents — cognitive routines that keep agents anchored: semantic north-stars, task-core save-state across compaction, deep multi-lens review. Cursor, Zed, Claude Code.",
+  "version": "1.0.1",
+  "description": "An intel layer for AI coding agents — cognitive routines that keep them anchored to what your project actually is: authoritative north-stars, task-core across compaction, domain-expert review. Claude Code, Cursor, Zed, Codex.",
   "type": "module",
   "private": false,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ReidenXerx/bearing.git"
   },
-  "homepage": "https://github.com/ReidenXerx/gitnexus-agent-kit#readme",
+  "homepage": "https://github.com/ReidenXerx/bearing#readme",
   "bugs": {
-    "url": "https://github.com/ReidenXerx/gitnexus-agent-kit/issues"
+    "url": "https://github.com/ReidenXerx/bearing/issues"
   },
   "bin": {
     "bearing": "./bin/cli.mjs",
@@ -31,16 +31,17 @@
   },
   "keywords": [
     "ai",
-    "agent",
+    "ai-agents",
+    "agentic-ai",
     "claude",
     "claude-code",
     "cursor",
     "zed",
-    "mcp",
+    "codex",
     "llm",
+    "mcp",
     "code-review",
-    "context",
-    "ai-agents",
+    "context-engineering",
     "developer-tools"
   ],
   "license": "ISC",

@@ -25,18 +25,15 @@ Every answer stays fluent. Confident. Subtly wrong.
 
 **And it never fails loudly.** A drifted agent doesn't crash — it writes a convincing paragraph, you nod, and you find out three days later that the premise was dead on arrival.
 
-```mermaid
-flowchart LR
-    A["📄 Agent reads<br/>a stale doc"] --> B{"anchored?"}
-    B -->|"no"| C["adopts a<br/>dead premise"]
-    C --> D["every later conclusion<br/>inherits the error"]
-    D --> E["🔥 you find out<br/>three days later"]
-    B -->|"yes"| F["it contradicts<br/>NS-4"]
-    F --> G["north-star wins,<br/>doc flagged stale,<br/>agent says so"]
-    G --> H["✅ caught in<br/>one line"]
-
-    style E fill:#4a1515,stroke:#c53030,color:#fff
-    style H fill:#14401f,stroke:#38a169,color:#fff
+```text
+                          ┌─  WITHOUT  ─→  adopts a dead premise
+                          │                   └─→ every later conclusion inherits it
+   agent reads a          │                          └─→  🔥 you find out three days later
+   stale doc  ────────────┤
+                          │
+                          └─  WITH  ─────→  it contradicts NS-4
+                                              └─→ north-star wins, doc flagged stale
+                                                     └─→  ✅ caught in one line
 ```
 
 That failure has a name — **losing your bearings**. `bearing` gives an agent fixed points it can't drift away from, and makes the drift *visible in one line* when it happens.
@@ -91,17 +88,12 @@ Enforcement needs tool-interception hooks, and only some runtimes expose them. E
 
 Docs rot. Comments lie. An agent's own inference fills the gaps. North-stars are the **fixed point** that settles every conflict — and the agent has to *cite* them.
 
-```mermaid
-flowchart LR
-    D1["docs/"] --> X{"conflict?"}
-    D2["README"] --> X
-    D3["code comments"] --> X
-    D4["agent's own<br/>inference"] --> X
-    X --> NS["⚑ NORTH-STAR WINS<br/>the other source is stale"]
-    NS --> C["agent cites NS-4<br/>and says which doc is wrong"]
-
-    style NS fill:#1a365d,stroke:#4299e1,color:#fff
-    style C fill:#14401f,stroke:#38a169,color:#fff
+```text
+   docs/      ─┐
+   README     ─┤                                    ⚑ NORTH-STAR WINS          agent cites NS-4
+   comments   ─┼──→   conflict?   ──────────→        the other source     ──→   and names the
+   the agent's │                                     is declared STALE          stale doc
+   own guess  ─┘
 ```
 
 Write them as numbered claims a conclusion could actually **violate**:
@@ -139,17 +131,13 @@ Only the north-stars outrank anything. The other two are the agent's working mem
 
 Long sessions get **compacted**: the transcript is summarized and thrown away. Detail dies there — the goal, the decisions, the thing you told it *not* to do at hour one.
 
-```mermaid
-flowchart LR
-    A["session starts"] --> B["work…<br/>context fills"]
-    B --> C["⚠️ ~90% full<br/>agent writes task-core"]
-    C --> D["💥 COMPACTION<br/>transcript summarized"]
-    D --> E["reads task-core back"]
-    E --> F["✅ continues with goal,<br/>decisions, next step intact"]
-
-    style D fill:#4a1515,stroke:#c53030,color:#fff
-    style C fill:#4a3a15,stroke:#d69e2e,color:#fff
-    style F fill:#14401f,stroke:#38a169,color:#fff
+```text
+   session      work…            ⚠ ~90% full        💥 COMPACTION        reads it back
+   starts  ──→  context   ──→    agent writes  ──→  transcript      ──→  first        ──→  ✅ goal,
+                fills            the task-core      summarized,          on recovery       decisions,
+                                 ↑                  detail gone                            next step
+                          BEFORE, not after —                                              intact
+                          after, it's already gone
 ```
 
 Written **before** the summary lands, not after — by then the detail is already gone. The pressure trigger reads the *actual* token usage from the transcript rather than guessing.
@@ -162,22 +150,17 @@ Most review asks *"is this code correct?"* — a question a linter can ask. Micr
 
 In a trading repo it reviews as a **senior quant trader**. In a payments repo, as a **ledger engineer**. It infers the role from your README, `CLAUDE.md` and the code's own structure — or you pin it in `.bearing/domain.json`.
 
-```mermaid
-flowchart LR
-    P["🎭 ADOPT THE ROLE<br/>trading repo → quant trader<br/>payments repo → ledger engineer"] --> M["map the target:<br/>flows · layers · seams"]
-    M --> L["spawn a lens<br/>per slice"]
-    L --> A["KIND A — is it RIGHT?<br/>logic · edge cases · races<br/>contracts · taint · cost"]
-    L --> B["KIND B — is it the RIGHT THING?<br/>necessity · soundness · intent<br/>proportionality · conceptual fit"]
-    A --> V{"verify against<br/>REAL logic"}
-    B --> V
-    V -->|"survives"| K["✅ real finding"]
-    V -->|"refuted"| X["dropped — no noise"]
-    K --> W["🔁 next wave"]
-
-    style P fill:#3c2a4d,stroke:#9f7aea,color:#fff
-    style B fill:#1a365d,stroke:#4299e1,color:#fff
-    style K fill:#14401f,stroke:#38a169,color:#fff
-    style X fill:#2d3748,stroke:#718096,color:#fff
+```text
+   🎭 ADOPT THE ROLE              ┌──→  KIND A — is it RIGHT? ────┐
+   trading repo → quant trader    │     logic · edges · races      │
+   payments repo → ledger eng.    │     contracts · taint · cost   │      verify against
+            │                     │                                ├──→   REAL logic
+            ↓                     │                                │           │
+     map the target ──→ spawn ────┤                                │           ├─ survives → ✅ finding
+     flows · layers · seams       │                                │           └─ refuted  → ✗ dropped
+                                  └──→  KIND B — the RIGHT THING? ─┘                    │
+                                        necessity · soundness                           ↓
+                                        proportionality · fit                      🔁 next wave
 ```
 
 **Kind B is the part a linter can never do.** It asks *why does this exist?*, *is this the wrong abstraction?*, *is the complexity worth it?* — and the domain role is what makes it catch **semantic** wrongness: *"this fee is computed on gross, should be net"*, *"win-rate is not a profitability claim"*. Code that runs perfectly and is still wrong.
@@ -188,16 +171,12 @@ Lenses aren't a fixed checklist — they're spawned per meaningful slice of the 
 
 Grepping a symbol gives you 40 text matches and no structure. The graph knows what actually calls what.
 
-```mermaid
-flowchart LR
-    G["🔍 grep 'handleOrder'"] --> GATE{"gate"}
-    GATE -->|"index stale"| R["refresh first<br/>— blocked until fresh"]
-    GATE -->|"index fresh"| Q["→ graph query"]
-    Q --> A["✅ callers, callees,<br/>execution flows"]
-    R --> Q
-
-    style A fill:#14401f,stroke:#38a169,color:#fff
-    style R fill:#4a3a15,stroke:#d69e2e,color:#fff
+```text
+                          ┌─  index STALE?   ──→  refresh first        ─┐
+   grep 'handleOrder' ──→ ├─  tree DRIFTED?  ──→  re-index first       ─┼──→  graph query
+                          └─  fresh ──────────────────────────────────  ┘          │
+                                                                                   ↓
+                                     ✅ callers · callees · execution flows — not 40 text matches
 ```
 
 **Two gates, not one.** A stale index blocks until refreshed — and so does *working-tree drift*: edit a few source files and graph queries are held until you re-index, because the graph would otherwise answer about code you already changed.
