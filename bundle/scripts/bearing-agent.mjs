@@ -54,13 +54,28 @@ function loadStaleness() {
 }
 
 function run(cmd, args, opts = {}) {
+  return runAllowFail(cmd, args, opts, true);
+}
+
+/**
+ * Like run(), but returns the exit status instead of killing the process when `fatal` is false.
+ * The refresh path MUST use this: exiting on failure skips markRefreshOutcome(false), so the
+ * refresh-failed flag is never written, the stale policy never reaches classical_fallback, and the
+ * session stays fully denied with the agent looping on agent-refresh.
+ */
+function runAllowFail(cmd, args, opts = {}, fatal = false) {
   const env = withProjectTmpEnv(ROOT, opts.env);
   const r = spawnSync(cmd, args, { cwd: ROOT, stdio: "inherit", ...opts, env });
   if (r.error?.code === "ENOSPC") {
     console.error("\n" + enospcHelp(ROOT));
-    process.exit(1);
+    if (fatal) process.exit(1);
+    return r.status ?? 1;
   }
-  if (r.status !== 0) process.exit(r.status ?? 1);
+  if (r.status !== 0) {
+    if (fatal) process.exit(r.status ?? 1);
+    return r.status ?? 1;
+  }
+  return 0;
 }
 
 const cmd = process.argv[2] ?? "status";
@@ -214,7 +229,16 @@ if (cmd === "refresh") {
     // Full --force + PDG: guarantees a complete control/data-dependence + taint
     // layer (pdg_query/explain/impact(mode:pdg)) on every autonomous refresh, same
     // as the pre-commit hook — no partial-incremental PDG risk.
-    run("npm", ["run", "bearing:full-pdg"], { stdio: "inherit" });
+    const rc = runAllowFail("npm", ["run", "bearing:full-pdg"], { stdio: "inherit" });
+    if (rc !== 0) {
+      markRefreshOutcome(false, `analyze exited ${rc} — index could not be refreshed`);
+      console.error(
+        "\n==> Refresh FAILED. Classical Grep/Read are now permitted so you are not stuck.\n" +
+          "    Fix the cause (network, disk, gitnexus install) and re-run: npm run bearing:agent-refresh\n" +
+          "    If GitNexus itself is the problem: npm run bearing:fallback -- \"<what went wrong>\"",
+      );
+      process.exit(rc);
+    }
     if (
       fs.existsSync(path.join(ROOT, "scripts/sync-cursor-bearing-teaching.sh"))
     ) {

@@ -49,6 +49,10 @@ function countDrift(at, sourceExtRe) {
     f = f.trim();
     if (f.startsWith('"') && f.endsWith('"')) f = f.slice(1, -1);
     if (!sourceExtRe.test(f)) continue;
+    // The kit's OWN files are not the user's work. `bearing update` rewrites them without
+    // re-indexing, which otherwise registers as drift and blocks graph queries immediately after
+    // an update — the tool gating itself.
+    if (/^\.bearing\//.test(f) || /^scripts\/bearing-/.test(f) || /^\.claude\/hooks\/bearing-/.test(f) || /^\.cursor\/hooks\/bearing-/.test(f)) continue;
     try {
       if (fs.statSync(path.join(root, f)).mtimeMs > atMs) n++;
     } catch {
@@ -124,6 +128,34 @@ try {
   out.headCommit = git('git rev-parse HEAD');
 } catch {
   out.fresh = false;
+  // A repo with NO COMMITS (fresh `git init`, or an orphan branch) is a legitimate state, not a
+
+  // failure: `git rev-parse HEAD` fails simply because there is nothing to point at. Treating it
+
+  // as not_git denied ls / cat / Read / Grep / Edit with "STALE INDEX — mandatory refresh", and
+
+  // the refresh cannot help because there is nothing to index yet.
+
+  try {
+
+    execSync('git rev-parse --is-inside-work-tree', { cwd: root, stdio: ['ignore', 'pipe', 'ignore'] });
+
+    out.reason = 'no_commits';
+
+    out.fresh = true;
+
+    out.detail = 'Repository has no commits yet — nothing to index; enforcement is inactive.';
+
+    process.stdout.write(JSON.stringify(out));
+
+    process.exit(0);
+
+  } catch {
+
+    /* genuinely not a git worktree — fall through to not_git */
+
+  }
+
   out.reason = 'not_git';
   process.stdout.write(JSON.stringify(out));
   process.exit(0);

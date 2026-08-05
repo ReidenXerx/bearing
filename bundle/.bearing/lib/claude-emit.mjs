@@ -17,7 +17,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import * as helpers from "./hook-helpers.mjs";
 import { bumpScore } from "./session-primer.mjs";
-import { evaluateStalePolicy, staleRefreshAgentMessage } from "./stale-policy.mjs";
+import { evaluateStalePolicy, staleRefreshAgentMessage , ESCAPE_HINT } from "./stale-policy.mjs";
 
 const LIB = path.dirname(fileURLToPath(import.meta.url));
 
@@ -56,7 +56,7 @@ export function gnContext(root) {
     config: helpers.loadHookConfig(root),
     repo: helpers.repoName(root),
     phase: policy.phase,
-    staleMustRefreshMsg: staleMsg,
+    staleMustRefreshMsg: staleMsg + ESCAPE_HINT,
     staleFallbackMsg: staleMsg,
     staleDetail: stale.detail,
     graphUsed: existsFlag(root, ".gitnexus-mcp-used.flag"),

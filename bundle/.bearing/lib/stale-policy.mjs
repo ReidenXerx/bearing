@@ -12,6 +12,11 @@ import { isRefreshFailed, isRefreshPending, fallbackGrant } from './session-prim
  * @param {object} stale from check-staleness / load-staleness
  * @param {string} root repo root
  */
+/** Ways OUT of a block. A blocked session could not discover either, so a failing analyze looked
+ * like a dead end. Kept short so it does not bury the primary instruction. */
+export const ESCAPE_HINT =
+  " If GitNexus itself is wrong/unavailable: `npm run bearing:fallback -- \"<why>\"` (bounded, logged). To downgrade blocks to warnings: set \"mode\":\"guide\" in .bearing/hooks.json.";
+
 export function evaluateStalePolicy(stale, root) {
   // Explicit escape hatch: the agent/user declared GitNexus untrustworthy here
   // (`npm run bearing:fallback "<why>"`) → classical fallback even on a FRESH index.
