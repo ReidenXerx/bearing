@@ -22,7 +22,7 @@ This is the *operate* counterpart to `gitnexus-architecture-review` (which *judg
 ```
 1. Map the layers:
    READ gitnexus://repo/{name}/clusters        → functional areas ≈ layers/modules
-   (HTTP? check .gnkit/gitnexus-api-profile.json → framework vs custom router)
+   (HTTP? check .bearing/gitnexus-api-profile.json → framework vs custom router)
 2. Trace one feature top-to-bottom:
    query({search_query:"<feature>"}) → READ process/<flow>   → the cross-layer chain + step order
    trace({from:"<entry/controller>", to:"<sink/repo/model>"}) → exact path through every layer

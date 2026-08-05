@@ -16,7 +16,7 @@ export const SESSION_USER_NOTIFIED_FLAG =
  * @param {string} root
  */
 export function loadStaleness(root) {
-  const checkPath = path.join(root, ".gnkit/lib/check-staleness.mjs");
+  const checkPath = path.join(root, ".bearing/lib/check-staleness.mjs");
   try {
     const r = spawnSync(process.execPath, [checkPath, root], {
       encoding: "utf8",
@@ -94,8 +94,8 @@ export function auditKitHealth(root) {
   });
 
   const helpersOk =
-    fs.existsSync(path.join(root, ".gnkit/lib/hook-helpers.mjs")) &&
-    fs.existsSync(path.join(root, ".gnkit/lib/cypher-helpers.mjs"));
+    fs.existsSync(path.join(root, ".bearing/lib/hook-helpers.mjs")) &&
+    fs.existsSync(path.join(root, ".bearing/lib/cypher-helpers.mjs"));
   checks.push({
     id: "hook_libs",
     ok: helpersOk,
@@ -212,7 +212,7 @@ export function agentContextForSession(audit) {
  * @param {ReturnType<typeof auditKitHealth>} audit
  */
 export function writeSessionHealthFile(root, audit) {
-  const p = path.join(root, ".gnkit", SESSION_HEALTH_FILE);
+  const p = path.join(root, ".bearing", SESSION_HEALTH_FILE);
   fs.mkdirSync(path.dirname(p), { recursive: true });
   fs.writeFileSync(p, JSON.stringify(audit, null, 2) + "\n");
 }

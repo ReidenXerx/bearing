@@ -1,6 +1,6 @@
 # GitNexus agent skills
 
-Use this index to route agent work to the right reusable playbook. The canonical skill store is installed into target repos at `.gnkit/skills/` and symlinked into Cursor (`.cursor/skills/`) and Zed (`.agents/skills/`) based on runtime.
+Use this index to route agent work to the right reusable playbook. The canonical skill store is installed into target repos at `.bearing/skills/` and symlinked into Cursor (`.cursor/skills/`) and Zed (`.agents/skills/`) based on runtime.
 
 | Skill | Use when | Minimum graph path |
 | --- | --- | --- |

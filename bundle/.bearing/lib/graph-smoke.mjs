@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Post-index graph smoke test — verifies Cypher works and graph has expected structure.
- * Usage: node .gnkit/lib/graph-smoke.mjs [repoRoot]
+ * Usage: node .bearing/lib/graph-smoke.mjs [repoRoot]
  * Exit 0 = OK (warnings allowed); exit 1 = graph/Cypher broken.
  */
 import fs from 'node:fs';

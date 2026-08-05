@@ -19,7 +19,7 @@ const root = process.env.CLAUDE_PROJECT_DIR || input.cwd || process.cwd();
 const transcript = input.transcript_path || "";
 if (!transcript) process.exit(0);
 
-const lib = (rel) => import(pathToFileURL(path.join(root, ".gnkit/lib", rel)).href);
+const lib = (rel) => import(pathToFileURL(path.join(root, ".bearing/lib", rel)).href);
 const { loadHookConfig } = await lib("hook-helpers.mjs");
 const { contextPressure } = await lib("context-pressure.mjs");
 const { emitContext } = await lib("claude-emit.mjs");
@@ -39,7 +39,7 @@ if (p.over) {
     const kt = Math.round(p.tokens / 1000);
     emitContext(
       `⚠ CONTEXT ~${pct}% full (~${kt}k tok) — auto-compaction is NEAR. Refresh your TASK-CORE ` +
-        "**now**, before the summary drops load-bearing detail: write `.gnkit/.gitnexus-task-core.md` " +
+        "**now**, before the summary drops load-bearing detail: write `.bearing/.gitnexus-task-core.md` " +
         "as a DENSE, AI-facing save-state of THIS TASK — GOAL · CONSTRAINTS · DECISIONS(+why) · " +
         "STATE(done/now/NEXT/todo) · ANCHORS(file:line) · GOTCHAS(failed approaches, traps) · " +
         "OPEN-Qs · this-task USER-PREFS. Terse, no prose — it's for you, not humans. It is the ONE " +

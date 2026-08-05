@@ -8,7 +8,7 @@
 //   • every `northStarAnchorEvery` tool calls, and
 //   • immediately after the agent writes a doc/markdown file — the moment conclusions crystallize,
 //     which is exactly when a drifted premise gets written down and becomes "settled".
-// Inert when the repo has no .gnkit/gitnexus-northstars.md.
+// Inert when the repo has no .bearing/gitnexus-northstars.md.
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -23,7 +23,7 @@ try {
 
 const root = process.env.CLAUDE_PROJECT_DIR || input.cwd || process.cwd();
 
-const lib = (rel) => import(pathToFileURL(path.join(root, ".gnkit/lib", rel)).href);
+const lib = (rel) => import(pathToFileURL(path.join(root, ".bearing/lib", rel)).href);
 const { loadHookConfig } = await lib("hook-helpers.mjs");
 const { emitContext } = await lib("claude-emit.mjs");
 const { northStarsExists, northStarsDigest, bumpNorthStarCounter, bumpScore } =
@@ -61,7 +61,7 @@ const shown = all.slice(0, MAX_LINES).map((l) => {
 });
 const more =
   all.length > shown.length
-    ? `\n…+${all.length - shown.length} more — read \`.gnkit/gitnexus-northstars.md\`.`
+    ? `\n…+${all.length - shown.length} more — read \`.bearing/gitnexus-northstars.md\`.`
     : "";
 
 emitContext(
@@ -71,7 +71,7 @@ emitContext(
     "the north-star.\n\n" +
     shown.join("\n") +
     more +
-    "\n\n(Claims only — each is clipped; read `.gnkit/gitnexus-northstars.md` for the full text, " +
+    "\n\n(Claims only — each is clipped; read `.bearing/gitnexus-northstars.md` for the full text, " +
     "evidence and sources before citing one.)" +
     "\n\nDiscipline: (1) cite the relevant **NS-#** when you make a consequential claim, propose a " +
     "direction, or reject an idea — if you cannot cite one, you may be drifting; (2) if you believe " +

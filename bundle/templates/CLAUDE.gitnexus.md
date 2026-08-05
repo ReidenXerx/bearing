@@ -144,7 +144,7 @@ Symbol grep → `context`. **Field/property grep → READ schema → `cypher` (`
 - **Edit runtime source** → blocked until one `impact` (or `rename`) call this session. Run blast radius first; warn on HIGH/CRITICAL.
 - **`git commit`** → blocked until one `detect_changes` call this session. Confirm affected processes match intent.
 
-Enforcement is **polyglot** — JS/TS, Python, Rust, Go, Java, and more count as source (configure `sourceExts` in `.gnkit/gitnexus-hooks.json`).
+Enforcement is **polyglot** — JS/TS, Python, Rust, Go, Java, and more count as source (configure `sourceExts` in `.bearing/gitnexus-hooks.json`).
 
 ## Deep review (intel layer)
 
@@ -154,7 +154,7 @@ At a **milestone** — feature done / big-task checkpoint / shared-code refactor
 
 *(Distinct from the graph-first "North star" above: those are the kit's reasoning rules; these are **this project's** fixed points.)*
 
-If **`.gnkit/gitnexus-northstars.md`** exists, it is the project's **authoritative** statement of what this project IS: numbered, falsifiable propositions (`NS-1`, `NS-2`, …) covering **INVARIANTS** (must always hold), **SEMANTICS** (exact meaning of load-bearing terms), **EVIDENCE** (what counts as proof here), **SETTLED** decisions, and a **GRAVEYARD** of tried-and-rejected / validated ideas.
+If **`.bearing/gitnexus-northstars.md`** exists, it is the project's **authoritative** statement of what this project IS: numbered, falsifiable propositions (`NS-1`, `NS-2`, …) covering **INVARIANTS** (must always hold), **SEMANTICS** (exact meaning of load-bearing terms), **EVIDENCE** (what counts as proof here), **SETTLED** decisions, and a **GRAVEYARD** of tried-and-rejected / validated ideas.
 
 - **READ IT FIRST** — before forming any premise, at session start and on every recovery. A PostToolUse hook re-anchors you on it periodically and right after you write a doc; that is a *reminder*, not a substitute for reading it.
 - **It outranks everything**: every other doc, README, code comment, and your own inference. Repos accumulate stale and mutually contradictory docs — when any source conflicts with a north-star, **the north-star wins and the other source is stale**. Say so instead of silently averaging them.
@@ -169,7 +169,7 @@ Maintain your **Claude Code project memory** — `~/.claude/projects/<this-proje
 
 ## Task-core (survive compaction without drift)
 
-Long tasks get **compacted** — the transcript is summarized and dropped, and detail drifts. Keep a **task-core**: a dense, **AI-facing** save-state of the CURRENT TASK at **`.gnkit/.gitnexus-task-core.md`**. When a PostToolUse nudge says context is filling (~90%), or at a milestone / before a risky pivot, **write or refresh it** — terse, for *you* not humans, no prose tax:
+Long tasks get **compacted** — the transcript is summarized and dropped, and detail drifts. Keep a **task-core**: a dense, **AI-facing** save-state of the CURRENT TASK at **`.bearing/.gitnexus-task-core.md`**. When a PostToolUse nudge says context is filling (~90%), or at a milestone / before a risky pivot, **write or refresh it** — terse, for *you* not humans, no prose tax:
 
 ```
 GOAL <what "done" is> · CONSTRAINTS <must/never> · DECISIONS <choice→why (settled)>
@@ -185,7 +185,7 @@ On recovery **READ the task-core FIRST** and reconstruct from it — it's the on
 
 **GitNexus fresh but wrong / suspicious / incomplete?** Don't silently fight the gate — take the escape hatch: `npm run gitnexus:fallback -- "<why>"`, which opens ~15 min where classical Grep/Read/shell are allowed (auto-resumes; end early with `npm run gitnexus:fallback:off`). **Make `<why>` specific and actionable** — which GN tool, expected vs actual (e.g. `impact returned 0 callers for OrderService but grep finds 3`) — because it's appended as a **GitNexus failure report** (`npm run gitnexus:fallback-log`), captured with the graph state, for the GitNexus developers. Re-confirm findings with the graph once GN is reliable; repeated reports pinpoint where GN needs fixing.
 
-Optional: `GITNEXUS_MODE=guide` (nudge-only). Paths: `.gnkit/gitnexus-hooks.json`. Playbooks: `gitnexus-enforcement` skill.
+Optional: `GITNEXUS_MODE=guide` (nudge-only). Paths: `.bearing/gitnexus-hooks.json`. Playbooks: `gitnexus-enforcement` skill.
 
 ## Claude Code
 

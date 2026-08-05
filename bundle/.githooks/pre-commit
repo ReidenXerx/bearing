@@ -10,7 +10,7 @@ cd "$ROOT"
 npm run gitnexus:full-pdg
 # Keep AGENTS.md/CLAUDE.md free of the volatile GitNexus stats block that
 # full-pdg's analyze re-injects, so commits don't carry machine-specific churn.
-if [[ -f ".gnkit/lib/stabilize-agent-docs.mjs" ]]; then
-  node .gnkit/lib/stabilize-agent-docs.mjs . || true
+if [[ -f ".bearing/lib/stabilize-agent-docs.mjs" ]]; then
+  node .bearing/lib/stabilize-agent-docs.mjs . || true
 fi
 npm run gitnexus:graph-smoke

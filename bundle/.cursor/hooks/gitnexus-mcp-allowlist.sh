@@ -5,7 +5,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 export GITNEXUS_HOOK_INPUT="$(cat)"
 export GITNEXUS_ROOT="$ROOT"
-export GITNEXUS_STALENESS="$(node "$ROOT/.gnkit/lib/load-staleness.mjs" "$ROOT" 2>/dev/null || echo '{"fresh":false,"reason":"check_failed"}')"
+export GITNEXUS_STALENESS="$(node "$ROOT/.bearing/lib/load-staleness.mjs" "$ROOT" 2>/dev/null || echo '{"fresh":false,"reason":"check_failed"}')"
 
 node <<'NODE'
 import fs from 'node:fs';
@@ -19,15 +19,15 @@ const tool = input.tool_name ?? '';
 const url = input.url ?? '';
 const cmd = input.command ?? '';
 
-const helpers = await import(pathToFileURL(path.join(root, '.gnkit/lib/hook-helpers.mjs')).href);
+const helpers = await import(pathToFileURL(path.join(root, '.bearing/lib/hook-helpers.mjs')).href);
 const { evaluateStalePolicy, staleRefreshAgentMessage } = await import(
-  pathToFileURL(path.join(root, '.gnkit/lib/stale-policy.mjs')).href
+  pathToFileURL(path.join(root, '.bearing/lib/stale-policy.mjs')).href
 );
 const { setMcpToolUsed, bumpScore } = await import(
-  pathToFileURL(path.join(root, '.gnkit/lib/session-primer.mjs')).href
+  pathToFileURL(path.join(root, '.bearing/lib/session-primer.mjs')).href
 );
 const { classifyMcpDrift } = await import(
-  pathToFileURL(path.join(root, '.gnkit/lib/classify.mjs')).href
+  pathToFileURL(path.join(root, '.bearing/lib/classify.mjs')).href
 );
 
 const config = helpers.loadHookConfig(root);

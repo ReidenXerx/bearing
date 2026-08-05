@@ -13,12 +13,12 @@ import { pathToFileURL } from 'node:url';
 
 const root = process.env.GITNEXUS_ROOT || '';
 const auditMod = await import(
-  pathToFileURL(path.join(root, '.gnkit/lib/session-health-audit.mjs')).href
+  pathToFileURL(path.join(root, '.bearing/lib/session-health-audit.mjs')).href
 );
 const { auditKitHealth, userMessageForSession, SESSION_HEALTH_FILE, SESSION_USER_NOTIFIED_FLAG } =
   auditMod;
 
-const cursorDir = path.join(root, '.gnkit');
+const cursorDir = path.join(root, '.bearing');
 const notifiedFlag = path.join(cursorDir, SESSION_USER_NOTIFIED_FLAG);
 
 function out(obj) {

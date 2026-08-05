@@ -9,11 +9,11 @@ When a long task runs, Claude Code **compacts**: it summarizes the conversation 
 
 The fix: **you** decide what survives. Keep a **task-core** — a dense, machine-facing save-state of the CURRENT TASK — and read it back on recovery. It's the one artifact guaranteed to survive with full fidelity.
 
-**File:** `.gnkit/.gitnexus-task-core.md` (gitignored; survives compaction *and* new sessions — a task can span both; overwrite it when the task changes).
+**File:** `.bearing/.gitnexus-task-core.md` (gitignored; survives compaction *and* new sessions — a task can span both; overwrite it when the task changes).
 
 ## When to write / refresh it
 
-- **Context-pressure nudge** — a PostToolUse hook estimates the window and, at ~90% (`contextPressureThreshold` × `contextWindowTokens`, tunable in `.gnkit/gitnexus-hooks.json`), tells you compaction is near. **Refresh the core immediately** — this is the last reliable window before the summary lands.
+- **Context-pressure nudge** — a PostToolUse hook estimates the window and, at ~90% (`contextPressureThreshold` × `contextWindowTokens`, tunable in `.bearing/gitnexus-hooks.json`), tells you compaction is near. **Refresh the core immediately** — this is the last reliable window before the summary lands.
 - **Milestones** — a sub-goal done, a decision settled, a pivot. Cheap insurance so a *sudden* auto-compact never catches you with a stale core.
 - **Task start / task shift** — seed a fresh core when a new task begins (don't carry the old one).
 

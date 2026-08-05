@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Session orientation for agents — staleness, index stats, local changes, suggested MCP calls.
- * Usage: node .gnkit/lib/agent-brief.mjs [repoRoot]
+ * Usage: node .bearing/lib/agent-brief.mjs [repoRoot]
  */
 import { execSync } from "node:child_process";
 import fs from "node:fs";
@@ -57,7 +57,7 @@ function symbolFromPath(filePath) {
 }
 
 async function main() {
-  const checkPath = path.join(root, ".gnkit/lib/check-staleness.mjs");
+  const checkPath = path.join(root, ".bearing/lib/check-staleness.mjs");
   let stale = { fresh: false, reason: "check_failed" };
   try {
     const r = execSync(`node "${checkPath}" "${root}"`, { encoding: "utf8" });
@@ -150,7 +150,7 @@ async function main() {
   lines.push(`  ${cypherFieldAccess("<field>", repo)}`);
   lines.push(`  ${cypherCallChain("<Symbol>", repo, 3)}`);
 
-  const apiProfilePath = path.join(root, ".gnkit/gitnexus-api-profile.json");
+  const apiProfilePath = path.join(root, ".bearing/gitnexus-api-profile.json");
   if (fs.existsSync(apiProfilePath)) {
     try {
       const api = JSON.parse(fs.readFileSync(apiProfilePath, "utf8"));

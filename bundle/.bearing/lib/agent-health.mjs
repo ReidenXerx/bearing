@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Human-friendly GitNexus + Cursor kit status (for developers and team leads).
- * Usage: node .gnkit/lib/agent-health.mjs [repoRoot]
+ * Usage: node .bearing/lib/agent-health.mjs [repoRoot]
  */
 import fs from "node:fs";
 import path from "node:path";

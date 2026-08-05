@@ -8,7 +8,7 @@
  * config). The policy itself lives in classify.mjs — this file only knows Claude's
  * wire format, so the same core drives Cursor and Claude Code identically.
  *
- * Lives under .gnkit/lib because that dir is the shared, always-shipped
+ * Lives under .bearing/lib because that dir is the shared, always-shipped
  * hook library; nothing here depends on Cursor.
  */
 import fs from "node:fs";
@@ -64,7 +64,7 @@ export function gnContext(root) {
 }
 
 function existsFlag(root, name) {
-  return fs.existsSync(path.join(root, ".gnkit", name));
+  return fs.existsSync(path.join(root, ".bearing", name));
 }
 
 /**

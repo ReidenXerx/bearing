@@ -6,9 +6,9 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 export GITNEXUS_HOOK_INPUT="$(cat)"
 export GITNEXUS_ROOT="$ROOT"
-export GITNEXUS_STALENESS="$(node "$ROOT/.gnkit/lib/load-staleness.mjs" "$ROOT" 2>/dev/null || echo '{"fresh":false,"reason":"check_failed"}')"
+export GITNEXUS_STALENESS="$(node "$ROOT/.bearing/lib/load-staleness.mjs" "$ROOT" 2>/dev/null || echo '{"fresh":false,"reason":"check_failed"}')"
 # first-nudge reuses GITNEXUS_STALENESS (exported above) instead of recomputing it.
-export GITNEXUS_FIRST_NUDGE="$(node "$ROOT/.gnkit/lib/first-nudge.mjs" "$ROOT" 2>/dev/null || true)"
+export GITNEXUS_FIRST_NUDGE="$(node "$ROOT/.bearing/lib/first-nudge.mjs" "$ROOT" 2>/dev/null || true)"
 
 node <<'NODE'
 import fs from 'node:fs';
@@ -16,7 +16,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const root = process.env.GITNEXUS_ROOT || '';
-const imp = (rel) => import(pathToFileURL(path.join(root, '.gnkit/lib', rel)).href);
+const imp = (rel) => import(pathToFileURL(path.join(root, '.bearing/lib', rel)).href);
 const helpers = await imp('hook-helpers.mjs');
 const { evaluateStalePolicy, staleRefreshAgentMessage } = await imp('stale-policy.mjs');
 const { classifyGrep } = await imp('classify.mjs');
@@ -32,7 +32,7 @@ const verdict = classifyGrep(
   { tool: input.tool_name ?? '', toolInput: input.tool_input ?? {} },
   {
     phase: policy.phase,
-    graphUsed: fs.existsSync(path.join(root, '.gnkit/.gitnexus-mcp-used.flag')),
+    graphUsed: fs.existsSync(path.join(root, '.bearing/.gitnexus-mcp-used.flag')),
     config,
     repo: helpers.repoName(root),
     root,

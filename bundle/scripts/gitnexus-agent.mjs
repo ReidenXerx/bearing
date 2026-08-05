@@ -15,7 +15,7 @@ const { withProjectTmpEnv, tmpSpaceReport, enospcHelp } = await import(
   pathToFileURL(path.join(ROOT, "scripts/lib/project-tmp.mjs")).href
 );
 const { inspectPersistence, classifyPersistenceOutput } = await import(
-  pathToFileURL(path.join(ROOT, ".gnkit/lib/persistence-health.mjs"))
+  pathToFileURL(path.join(ROOT, ".bearing/lib/persistence-health.mjs"))
     .href
 );
 const {
@@ -30,13 +30,13 @@ const {
   readNorthStars,
   bumpScore,
 } = await import(
-  pathToFileURL(path.join(ROOT, ".gnkit/lib/session-primer.mjs")).href
+  pathToFileURL(path.join(ROOT, ".bearing/lib/session-primer.mjs")).href
 );
 
 function loadStaleness() {
   const r = spawnSync(
     process.execPath,
-    [path.join(ROOT, ".gnkit/lib/check-staleness.mjs"), ROOT],
+    [path.join(ROOT, ".bearing/lib/check-staleness.mjs"), ROOT],
     {
       encoding: "utf8",
       env: withProjectTmpEnv(ROOT),
@@ -186,7 +186,7 @@ if (cmd === "status") {
 function markRefreshOutcome(success, detail = "") {
   const setPending = path.join(
     ROOT,
-    ".gnkit/lib/set-refresh-pending.mjs",
+    ".bearing/lib/set-refresh-pending.mjs",
   );
   spawnSync(
     process.execPath,
@@ -199,7 +199,7 @@ function markRefreshOutcome(success, detail = "") {
   );
   // Invalidate the short-TTL staleness cache so the next tool call sees fresh state.
   try {
-    fs.unlinkSync(path.join(ROOT, ".gnkit/.gitnexus-staleness-cache.json"));
+    fs.unlinkSync(path.join(ROOT, ".bearing/.gitnexus-staleness-cache.json"));
   } catch {
     /* ignore */
   }
@@ -234,7 +234,7 @@ if (cmd === "refresh") {
     try {
       const { generateArchDoc } = await import(
         pathToFileURL(
-          path.join(ROOT, ".gnkit/lib/generate-arch-doc.mjs"),
+          path.join(ROOT, ".bearing/lib/generate-arch-doc.mjs"),
         ).href
       );
       const res = generateArchDoc(ROOT, undefined, withProjectTmpEnv(ROOT));
@@ -255,7 +255,7 @@ if (cmd === "refresh") {
 if (cmd === "brief") {
   const r = spawnSync(
     process.execPath,
-    [path.join(ROOT, ".gnkit/lib/agent-brief.mjs"), ROOT],
+    [path.join(ROOT, ".bearing/lib/agent-brief.mjs"), ROOT],
     {
       encoding: "utf8",
       env: withProjectTmpEnv(ROOT),
@@ -269,7 +269,7 @@ if (cmd === "brief") {
 if (cmd === "health") {
   const r = spawnSync(
     process.execPath,
-    [path.join(ROOT, ".gnkit/lib/agent-health.mjs"), ROOT],
+    [path.join(ROOT, ".bearing/lib/agent-health.mjs"), ROOT],
     {
       encoding: "utf8",
       env: withProjectTmpEnv(ROOT),
@@ -283,7 +283,7 @@ if (cmd === "health") {
 if (cmd === "graph-smoke") {
   const r = spawnSync(
     process.execPath,
-    [path.join(ROOT, ".gnkit/lib/graph-smoke.mjs"), ROOT],
+    [path.join(ROOT, ".bearing/lib/graph-smoke.mjs"), ROOT],
     {
       encoding: "utf8",
       env: withProjectTmpEnv(ROOT),
@@ -296,7 +296,7 @@ if (cmd === "graph-smoke") {
 
 if (cmd === "detect-api") {
   const { writeApiRouterProfile } = await import(
-    pathToFileURL(path.join(ROOT, ".gnkit/lib/detect-api-router.mjs"))
+    pathToFileURL(path.join(ROOT, ".bearing/lib/detect-api-router.mjs"))
       .href
   );
   const profile = writeApiRouterProfile(ROOT);
@@ -314,7 +314,7 @@ if (cmd === "detect-api") {
 
 if (cmd === "verify") {
   const verifyPath = path.join(ROOT, "scripts/gitnexus-verify.mjs");
-  const fallback = path.join(ROOT, ".gnkit/lib/verify-kit.mjs");
+  const fallback = path.join(ROOT, ".bearing/lib/verify-kit.mjs");
   const script = fs.existsSync(verifyPath) ? verifyPath : fallback;
   const r = spawnSync(
     process.execPath,
@@ -543,7 +543,7 @@ if (cmd === "doctor") {
 
 if (cmd === "map") {
   const { generateArchDoc } = await import(
-    pathToFileURL(path.join(ROOT, ".gnkit/lib/generate-arch-doc.mjs"))
+    pathToFileURL(path.join(ROOT, ".bearing/lib/generate-arch-doc.mjs"))
       .href
   );
   const res = generateArchDoc(ROOT, undefined, withProjectTmpEnv(ROOT));
@@ -557,7 +557,7 @@ if (cmd === "map") {
 
 if (cmd === "commit-msg") {
   const { draftCommitMessage } = await import(
-    pathToFileURL(path.join(ROOT, ".gnkit/lib/commit-message.mjs")).href
+    pathToFileURL(path.join(ROOT, ".bearing/lib/commit-message.mjs")).href
   );
   const { message } = draftCommitMessage(
     ROOT,
@@ -570,7 +570,7 @@ if (cmd === "commit-msg") {
 
 if (cmd === "scorecard") {
   const { readScorecard } = await import(
-    pathToFileURL(path.join(ROOT, ".gnkit/lib/session-primer.mjs")).href
+    pathToFileURL(path.join(ROOT, ".bearing/lib/session-primer.mjs")).href
   );
   const card = readScorecard(ROOT);
   const counts = card.counts ?? {};
@@ -603,7 +603,7 @@ if (cmd === "scorecard") {
 
 if (cmd === "stats") {
   const { readTelemetry, summarizeTelemetry, readScorecard } = await import(
-    pathToFileURL(path.join(ROOT, ".gnkit/lib/session-primer.mjs")).href
+    pathToFileURL(path.join(ROOT, ".bearing/lib/session-primer.mjs")).href
   );
   const records = readTelemetry(ROOT);
   // Fold in the current (not-yet-archived) session so nothing is missing.
@@ -657,7 +657,7 @@ if (cmd === "stats") {
   console.log(
     `\n  Value: ${redir} lazy-search redirect(s) to the graph, ${gate} pre-edit/commit gate(s) fired.`,
   );
-  console.log(`  Log: ${path.join(".gnkit", ".gitnexus-telemetry.jsonl")}`);
+  console.log(`  Log: ${path.join(".bearing", ".gitnexus-telemetry.jsonl")}`);
   const fb = readFallbackReports(ROOT);
   if (fb.length) {
     console.log(

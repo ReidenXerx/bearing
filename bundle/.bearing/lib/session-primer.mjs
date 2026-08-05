@@ -8,7 +8,7 @@ import path from 'node:path';
 import { playbookForHint, mcpReadContext, repoName, clearDenyCache } from './hook-helpers.mjs';
 
 export function sessionPaths(root) {
-  const stateDir = path.join(root, '.gnkit');
+  const stateDir = path.join(root, '.bearing');
   return {
     stateDir,
     primedFlag: path.join(stateDir, '.gitnexus-session-primed.flag'),
@@ -30,12 +30,12 @@ export function sessionPaths(root) {
 // A dense, AI-facing save-state of the CURRENT TASK (goal/constraints/decisions/state/
 // anchors/gotchas/next). The context-pressure hook nudges the agent to refresh it before
 // auto-compaction; the SessionStart(compact) recovery brief reads it back — so the task
-// survives the summary without drift. Lives under .gnkit/ (gitignored, survives compaction
+// survives the summary without drift. Lives under .bearing/ (gitignored, survives compaction
 // AND new sessions since a task can span both; the agent overwrites it when the task changes).
 
 /** @param {string} root */
 export function taskCorePath(root) {
-  return path.join(root, '.gnkit', '.gitnexus-task-core.md');
+  return path.join(root, '.bearing', '.gitnexus-task-core.md');
 }
 
 /** @param {string} root @returns {boolean} does a task-core exist + have content? */
@@ -65,12 +65,12 @@ export function taskCoreAgeMs(root) {
 //   northstars — USER-owned, permanent, whole-project, TRACKED (committed, team-shared) and
 //                AUTHORITATIVE: it outranks every other doc, and the agent may PROPOSE edits but
 //                never silently make them — otherwise drift contaminates the anchor itself.
-// Note the filename has NO dot prefix: the managed .gitignore covers `.gnkit/.gitnexus-*`, so a
+// Note the filename has NO dot prefix: the managed .gitignore covers `.bearing/.gitnexus-*`, so a
 // dotted name would be ignored. This one is meant to be committed.
 
 /** @param {string} root */
 export function northStarsPath(root) {
-  return path.join(root, '.gnkit', 'gitnexus-northstars.md');
+  return path.join(root, '.bearing', 'gitnexus-northstars.md');
 }
 
 /** @param {string} root @returns {boolean} does a north-stars doc exist + have content? */
@@ -190,7 +190,7 @@ const FALLBACK_LOG_FILE = '.gitnexus-fallback-log.jsonl';
 
 /** @param {string} root — append-only fallback-report log (gitignored, never cleared). */
 export function fallbackLogPath(root) {
-  return path.join(root, '.gnkit', FALLBACK_LOG_FILE);
+  return path.join(root, '.bearing', FALLBACK_LOG_FILE);
 }
 
 /**
@@ -222,7 +222,7 @@ export function appendFallbackReport(root, reason) {
     indexedAt: meta.indexedAt ?? null,
   };
   try {
-    fs.mkdirSync(path.join(root, '.gnkit'), { recursive: true });
+    fs.mkdirSync(path.join(root, '.bearing'), { recursive: true });
     fs.appendFileSync(fallbackLogPath(root), JSON.stringify(rec) + '\n');
     return true;
   } catch {
@@ -369,7 +369,7 @@ const TELEMETRY_FILE = '.gitnexus-telemetry.jsonl';
 
 /** @param {string} root — append-only telemetry log (gitignored, never cleared). */
 export function telemetryPath(root) {
-  return path.join(root, '.gnkit', TELEMETRY_FILE);
+  return path.join(root, '.bearing', TELEMETRY_FILE);
 }
 
 /** Best-effort index stats snapshot for context on a telemetry record. */
@@ -403,7 +403,7 @@ export function flushScorecardToTelemetry(root) {
     startedAt && endedAt ? Math.max(0, Date.parse(endedAt) - Date.parse(startedAt)) : null;
   const rec = { startedAt, endedAt, durationMs, counts: card.counts, index: indexSnapshot(root) };
   try {
-    fs.mkdirSync(path.join(root, '.gnkit'), { recursive: true });
+    fs.mkdirSync(path.join(root, '.bearing'), { recursive: true });
     fs.appendFileSync(telemetryPath(root), JSON.stringify(rec) + '\n');
     return true;
   } catch {

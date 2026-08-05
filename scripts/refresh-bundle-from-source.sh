@@ -58,11 +58,11 @@ cp "$KIT_ROOT/docs/SKILLS.md" "$KIT_ROOT/bundle/docs/GITNEXUS-SKILLS.md"
 
 # Strip region enforcement from refreshed bundle (kit no longer ships regions)
 for f in \
-  bundle/.gnkit/lib/region-edit-check.mjs \
-  bundle/.gnkit/lib/region-infer.mjs \
-  bundle/.gnkit/lib/region-picker-context.mjs \
-  bundle/.gnkit/lib/region-session.mjs \
-  bundle/.gnkit/lib/region-user-guide.mjs \
+  bundle/.bearing/lib/region-edit-check.mjs \
+  bundle/.bearing/lib/region-infer.mjs \
+  bundle/.bearing/lib/region-picker-context.mjs \
+  bundle/.bearing/lib/region-session.mjs \
+  bundle/.bearing/lib/region-user-guide.mjs \
   bundle/docs/AGENT-REGIONS-GUIDE.md \
   bundle/docs/regions.overlay.stub.json \
   bundle/docs/AGENT-PROFILES.stub.md \

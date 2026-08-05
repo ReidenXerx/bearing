@@ -106,7 +106,7 @@ Installed by `npm run gitnexus:setup`:
 - **Enforcement rule** — `.cursor/rules/00-gitnexus-enforcement.mdc` (only `alwaysApply: true` contract)
 - **Reference rules** — `.cursor/rules/gitnexus.mdc` + `gitnexus-first.mdc` (load on demand)
 - **Hooks** — GN-first when fresh; **refresh-first when stale** (classical only after refresh fails); field grep → Cypher; large data-flow Read → Cypher
-- **Skills** — canonical store in `.gnkit/skills/`, symlinked to `.cursor/skills/` (and `.agents/skills/` on Zed)
+- **Skills** — canonical store in `.bearing/skills/`, symlinked to `.cursor/skills/` (and `.agents/skills/` on Zed)
 - **MCP** — `gitnexus` in `.cursor/mcp.json`
 
 Restart Cursor after setup so MCP + hooks load.

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Sync GitNexus teaching bundle into Cursor-native paths (.cursor/skills).
-# Source of truth: .gnkit/skills/ + .cursor/rules/ + .cursor/hooks/
+# Source of truth: .bearing/skills/ + .cursor/rules/ + .cursor/hooks/
 # Run via: npm run gitnexus:setup (or directly)
 set -euo pipefail
 
@@ -28,32 +28,32 @@ HOOK_SCRIPTS=(
 )
 
 HOOK_LIBS=(
-  ".gnkit/lib/check-staleness.mjs"
-  ".gnkit/lib/load-staleness.mjs"
-  ".gnkit/lib/classify.mjs"
-  ".gnkit/lib/cursor-emit.mjs"
-  ".gnkit/lib/claude-emit.mjs"
-  ".gnkit/lib/session-primer.mjs"
-  ".gnkit/lib/context-pressure.mjs"
-  ".gnkit/lib/first-nudge.mjs"
-  ".gnkit/lib/clear-session.mjs"
-  ".gnkit/lib/set-refresh-pending.mjs"
-  ".gnkit/lib/hook-helpers.mjs"
-  ".gnkit/lib/cypher-helpers.mjs"
-  ".gnkit/lib/rename-helpers.mjs"
-  ".gnkit/lib/stale-policy.mjs"
-  ".gnkit/lib/cypher-cli.mjs"
-  ".gnkit/lib/generate-arch-doc.mjs"
-  ".gnkit/lib/stabilize-agent-docs.mjs"
-  ".gnkit/lib/commit-message.mjs"
-  ".gnkit/lib/detect-api-router.mjs"
-  ".gnkit/lib/graph-smoke.mjs"
-  ".gnkit/lib/agent-brief.mjs"
-  ".gnkit/lib/agent-health.mjs"
-  ".gnkit/lib/session-health-audit.mjs"
-  ".gnkit/lib/session-health-context.mjs"
-  ".gnkit/lib/verify-kit.mjs"
-  ".gnkit/gitnexus-hooks.json"
+  ".bearing/lib/check-staleness.mjs"
+  ".bearing/lib/load-staleness.mjs"
+  ".bearing/lib/classify.mjs"
+  ".bearing/lib/cursor-emit.mjs"
+  ".bearing/lib/claude-emit.mjs"
+  ".bearing/lib/session-primer.mjs"
+  ".bearing/lib/context-pressure.mjs"
+  ".bearing/lib/first-nudge.mjs"
+  ".bearing/lib/clear-session.mjs"
+  ".bearing/lib/set-refresh-pending.mjs"
+  ".bearing/lib/hook-helpers.mjs"
+  ".bearing/lib/cypher-helpers.mjs"
+  ".bearing/lib/rename-helpers.mjs"
+  ".bearing/lib/stale-policy.mjs"
+  ".bearing/lib/cypher-cli.mjs"
+  ".bearing/lib/generate-arch-doc.mjs"
+  ".bearing/lib/stabilize-agent-docs.mjs"
+  ".bearing/lib/commit-message.mjs"
+  ".bearing/lib/detect-api-router.mjs"
+  ".bearing/lib/graph-smoke.mjs"
+  ".bearing/lib/agent-brief.mjs"
+  ".bearing/lib/agent-health.mjs"
+  ".bearing/lib/session-health-audit.mjs"
+  ".bearing/lib/session-health-context.mjs"
+  ".bearing/lib/verify-kit.mjs"
+  ".bearing/gitnexus-hooks.json"
   "scripts/gitnexus-agent.mjs"
   "scripts/gitnexus-gate-hint.mjs"
   "scripts/gitnexus-teaching/script-gates.mjs"
@@ -170,7 +170,7 @@ const manifest = {
     mcp: '.cursor/mcp.json',
     masterSkill: '.agents/skills/gitnexus-workspace/SKILL.md',
     enforcementSkill: '.agents/skills/gitnexus-enforcement/SKILL.md',
-    gitnexusSkills: listSkills('.gnkit/skills').filter((n) => n.startsWith('gitnexus-')),
+    gitnexusSkills: listSkills('.bearing/skills').filter((n) => n.startsWith('gitnexus-')),
     generatedAreaSkills: listSkills('.cursor/skills/generated'),
   },
   workflowChain: [
@@ -216,7 +216,7 @@ done
 ok "${#HOOK_SCRIPTS[@]} hook scripts + ${#HOOK_LIBS[@]} lib(s) ready"
 
 info "  [3/5] Link skills (symlinks from canonical store)"
-STORE=".gnkit/skills"
+STORE=".bearing/skills"
 if [[ ! -d "$STORE" ]]; then
   fail "Missing $STORE — run gn-agent-kit install or update first"
 fi
@@ -248,8 +248,8 @@ write_manifest
 
 # Drop the volatile GitNexus stats block from AGENTS.md/CLAUDE.md so committed
 # agent docs stay stable across machines (the `analyze` tool re-adds it each refresh).
-if [[ -f ".gnkit/lib/stabilize-agent-docs.mjs" ]]; then
-  node .gnkit/lib/stabilize-agent-docs.mjs . || true
+if [[ -f ".bearing/lib/stabilize-agent-docs.mjs" ]]; then
+  node .bearing/lib/stabilize-agent-docs.mjs . || true
 fi
 
 info "  [5/5] Quick hook smoke test"

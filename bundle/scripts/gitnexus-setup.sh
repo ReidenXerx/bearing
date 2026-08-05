@@ -115,16 +115,16 @@ CORE_SOURCES=(
   "scripts/gitnexus-gate-hint.mjs"
   "scripts/gitnexus-teaching/script-gates.mjs"
   "scripts/lib/setup-ui.mjs"
-  ".gnkit/skills/gitnexus-workspace/SKILL.md"
-  ".gnkit/skills/gitnexus-enforcement/SKILL.md"
+  ".bearing/skills/gitnexus-workspace/SKILL.md"
+  ".bearing/skills/gitnexus-enforcement/SKILL.md"
 )
 
 CURSOR_SOURCES=(
   ".cursor/rules/00-gitnexus-enforcement.mdc"
   ".cursor/hooks.json"
   ".cursor/hooks/gitnexus-grep-guard.sh"
-  ".gnkit/lib/hook-helpers.mjs"
-  ".gnkit/lib/stale-policy.mjs"
+  ".bearing/lib/hook-helpers.mjs"
+  ".bearing/lib/stale-policy.mjs"
 )
 
 ZED_SOURCES=(
@@ -136,7 +136,7 @@ CLAUDE_SOURCES=(
   ".mcp.json"
   ".claude/settings.json"
   "CLAUDE.md"
-  ".gnkit/lib/classify.mjs"
+  ".bearing/lib/classify.mjs"
 )
 
 for f in "${CORE_SOURCES[@]}"; do require_file "$f"; done

@@ -13,7 +13,7 @@ try {
 }
 const root = process.env.CLAUDE_PROJECT_DIR || input.cwd || process.cwd();
 const lib = (rel) =>
-  import(pathToFileURL(path.join(root, ".gnkit/lib", rel)).href);
+  import(pathToFileURL(path.join(root, ".bearing/lib", rel)).href);
 
 const { existsSync } = await import("node:fs");
 const { gnContext, emitContext } = await lib("claude-emit.mjs");
@@ -39,7 +39,7 @@ if (!recovering) clearSessionState(root);
 // IS the feature flag — config can never drift from what is actually installed. With the module
 // absent this repo has no graph, and every graph-first instruction below would be advice the agent
 // cannot follow (worse: the guards would point at npm scripts that do not exist here).
-const graphEnabled = existsSync(path.join(root, ".gnkit/lib/check-staleness.mjs"));
+const graphEnabled = existsSync(path.join(root, ".bearing/lib/check-staleness.mjs"));
 
 const ctx = graphEnabled ? gnContext(root) : { phase: "fresh" };
 const mp = memoryPath(root); // Claude Code's native project memory
@@ -68,7 +68,7 @@ if (recovering) {
     `Context was ${source === "compact" ? "COMPACTED" : "resumed"} — the task CONTINUES${graphEnabled ? "; enforcement and this session's satisfied gates are PRESERVED" : ""}.`,
     hasCore
       ? `READ your TASK-CORE FIRST — \`${tcp}\`: a dense save-state of THIS task (goal/constraints/decisions/state/anchors/gotchas/next). Reconstruct from it, verify against reality, then continue — do not re-derive what it already settles.`
-      : `No TASK-CORE saved — reconstruct THIS task (goal/decisions/state/next) from your memory + the code before acting, and write \`.gnkit/.gitnexus-task-core.md\` next time so compaction can't drift you.`,
+      : `No TASK-CORE saved — reconstruct THIS task (goal/decisions/state/next) from your memory + the code before acting, and write \`.bearing/.gitnexus-task-core.md\` next time so compaction can't drift you.`,
     // Graph-first discipline MUST be re-stated here, not only on fresh start: post-compaction is
     // exactly where agents drift back to grep/blind-read. "Gates preserved" ≠ "stop using the graph".
     // Graph-first discipline MUST be re-stated here, not only on fresh start: post-compaction is
