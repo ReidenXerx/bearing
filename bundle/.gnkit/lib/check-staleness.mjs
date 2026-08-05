@@ -52,7 +52,17 @@ function countDrift(at, sourceExtRe) {
     try {
       if (fs.statSync(path.join(root, f)).mtimeMs > atMs) n++;
     } catch {
-      /* deleted/renamed source — skip */
+      // The path is GONE → a deleted source file. That is real drift, and arguably worse than an
+      // edit: the graph keeps serving symbols that no longer exist, so results aren't stale-but-close,
+      // they're phantom. There is no file left to stat, so use the PARENT DIRECTORY's mtime as the
+      // deletion timestamp (removing an entry updates it). That keeps the mtime discipline: once the
+      // index is rebuilt, indexedAt overtakes the directory mtime and the deletion stops counting —
+      // otherwise a pending deletion would block every graph query until it was committed.
+      try {
+        if (fs.statSync(path.dirname(path.join(root, f))).mtimeMs > atMs) n++;
+      } catch {
+        n++; // parent gone too (whole folder removed) — unambiguously drift
+      }
     }
   }
   return n;
