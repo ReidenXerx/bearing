@@ -14,3 +14,6 @@ __pycache__/
 # Local databases / graph indexes
 *.db
 *.sqlite
+
+# test residue (the suite runs hooks with cwd = this repo)
+.bearing/

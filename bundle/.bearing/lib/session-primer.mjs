@@ -130,7 +130,12 @@ export function bumpNorthStarCounter(root, reset = false) {
   const next = reset ? 0 : n + 1;
   try {
     fs.mkdirSync(stateDir, { recursive: true });
-    fs.writeFileSync(northStarCounter, JSON.stringify({ n: next }));
+    // Two PostToolUse hooks run per tool call and both touch session state. Write-then-rename so a
+    // concurrent reader never observes a partially-written file. (Lost updates are still possible
+    // and are benign here: the anchor fires a little later than configured.)
+    const tmp = `${northStarCounter}.${process.pid}.tmp`;
+    fs.writeFileSync(tmp, JSON.stringify({ n: next }));
+    fs.renameSync(tmp, northStarCounter);
   } catch {
     /* best-effort — a missing counter just means we anchor again sooner */
   }

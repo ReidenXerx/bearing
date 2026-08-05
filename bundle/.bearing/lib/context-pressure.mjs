@@ -18,7 +18,11 @@ import fs from "node:fs";
 // read / grep / command dump can be MBs) sits at the very end at PostToolUse time and pushes the
 // preceding assistant usage out of a small tail — so 128 KB alone often misses it. Cap the widen
 // so the hook stays cheap; past the cap we report "unknown" rather than guessing.
-const TAIL_STEPS = [131072, 2097152, 8388608]; // 128 KB → 2 MB → 8 MB
+// 128 KB → 2 MB → 8 MB → 32 MB. A single tool result can be many MB and sits at the very tail at
+// PostToolUse time, pushing the last usage record out of a smaller window. Past the final step we
+// report unknown, which reads as "not full" — silent, and correlated with the highest-risk moment —
+// so the cap is generous enough that a realistic giant result still resolves.
+const TAIL_STEPS = [131072, 2097152, 8388608, 33554432];
 
 /**
  * Estimate the current context size in tokens from a Claude Code transcript (JSONL).

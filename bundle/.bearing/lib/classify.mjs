@@ -484,7 +484,12 @@ export function classifyEdit(req, ctx) {
 export function classifyCommit(req, ctx) {
   const command = req.command || "";
   const { phase, repo } = ctx;
-  const isCommit = /\bgit\b[^\n]*\bcommit\b/.test(command) && !/--help|-h\b/.test(command);
+  // `commit` must be the SUBCOMMAND, not any occurrence of the word. As a loose substring this
+  // denied read-only work: `git rev-parse HEAD^{commit}`, `git log --grep=commit`,
+  // `git show <sha> -- src/commit.ts` — all allowed by the shell gate, then blocked here.
+  const isCommit =
+    /\bgit\b(?:\s+\S+)*?\s+commit(?:\s|$)/.test(command) &&
+    !/--help|-h\b/.test(command);
   if (!isCommit) return { decision: "allow" };
 
   if (phase === "must_refresh") {
