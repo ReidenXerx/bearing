@@ -30,6 +30,12 @@ const verdict = classifyShell(
   { command: input.command ?? input.tool_input?.command ?? '' },
   {
     phase: policy.phase,
+    // config + root are REQUIRED: the stale gate classifies the command as a code search, which
+    // needs the source-path rules. Omitting them threw inside the guard, and a hook that throws on
+    // the hot path is a broken tool call, not a decision (NS-8).
+    config,
+    root,
+    repo: helpers.repoName(root),
     staleMustRefreshMsg: staleMsg,
     staleFallbackMsg: staleMsg,
   },

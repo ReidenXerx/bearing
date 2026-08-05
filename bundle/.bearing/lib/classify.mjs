@@ -201,7 +201,21 @@ export function classifyGrep(req, ctx) {
   if (!pattern) return { decision: "allow" };
 
   const nonSource = isNonSourcePath(pathArg, config, ctx?.root);
-  const literal = nonSource || isLiteralPattern(pattern);
+
+  // SCOPE-based allows. Each of these is a question the graph cannot answer better — or at all —
+  // so redirecting them hands the agent a tool that returns nothing and no way forward (NS-5/NS-6).
+  // All three were reported from real use, every one redirected to `cypher ACCESSES`:
+  //   - a path naming ONE file: already scoped. "Is this string in this file" is not a graph query,
+  //     and it is the exact inverse of the broad sweep the gate exists to catch.
+  //   - tests/: which test exercises a name is not a source relationship the graph models.
+  //   - count mode: "how many occurrences" is quantitative; the graph does not count text.
+  const normPath = String(pathArg).replace(/\\/g, "/");
+  const scopedToOneFile = /\.[A-Za-z0-9]+$/.test(normPath) && !/[*?]/.test(normPath);
+  const inTests = /(?:^|\/)(?:tests?|__tests__|spec|specs)(?:\/|$)/.test(normPath);
+  const counting = (ti.output_mode ?? "") === "count";
+  const scoped = scopedToOneFile || inTests || counting;
+
+  const literal = nonSource || scoped || isLiteralPattern(pattern);
 
   if (phase === "must_refresh") {
     if (literal) {
@@ -223,6 +237,16 @@ export function classifyGrep(req, ctx) {
   // when the term is identifier-shaped.
   if (nonSource) {
     return { decision: "allow", agentMessage: "Grep OK — non-source config/doc search." };
+  }
+  if (scoped) {
+    return {
+      decision: "allow",
+      agentMessage: scopedToOneFile
+        ? "Grep OK — scoped to a single file, not a repo-wide sweep."
+        : inTests
+          ? "Grep OK — test-coverage search; the graph does not model which test names a symbol."
+          : "Grep OK — counting occurrences is not a graph question.",
+    };
   }
 
   const token = coreToken(pattern);
@@ -336,11 +360,16 @@ export function classifyRead(req, ctx) {
     return { decision: "allow", agentMessage: ctx.staleFallbackMsg, userKey: "stale.classical" };
   }
   if (phase === "must_refresh") {
-    if (!filePath || isSmallConfig || isGeneratedSkill) {
+    // A stale index says nothing about a file the graph never indexed. The old allow-list was a
+    // handful of extensions (.json/.md/.yaml/.sh), so reading a .csv, a .jsonl log or a .txt was
+    // denied because HEAD had moved one commit — index freshness is irrelevant to all of them
+    // (NS-5). Gate SOURCE reads, which is what the graph would actually have answered.
+    const staleNonSource = filePath && !helpers.isSourceCodePath(norm, config, ctx.root);
+    if (!filePath || isSmallConfig || isGeneratedSkill || staleNonSource) {
       return {
         decision: "allow",
         agentMessage:
-          "Small/config read OK during stale — refresh before large source reads.",
+          "Non-source/config read OK during stale — refresh before source reads.",
       };
     }
     return {
@@ -495,7 +524,7 @@ export function classifyCommit(req, ctx) {
   if (phase === "must_refresh") {
     return {
       decision: "deny",
-      agentMessage: ctx.staleMustRefreshMsg,
+      agentMessage: `${ctx.staleMustRefreshMsg}${compoundNotice(command)}`,
       userKey: "block.shell.stale",
     };
   }
@@ -511,7 +540,10 @@ export function classifyCommit(req, ctx) {
       "This gate clears for the session after one detect_changes call." +
       (noVerify
         ? " NOTE: --no-verify also skips the pre-commit PDG refresh — run npm run bearing:pdg after."
-        : ""),
+        : "") +
+      // `git add -A && git commit -m x` is the most common shape this gate ever sees, and the
+      // whole line is blocked — the staging did NOT happen either.
+      compoundNotice(command),
     userMessageText:
       "Before committing, the agent checks what changed across the graph (affected flows) via GitNexus — not a blind commit.",
     scoreEvent: "commitGate",
@@ -678,6 +710,20 @@ function parseShellSearch(command) {
   return null;
 }
 
+/**
+ * A denied Bash call blocks the ENTIRE command line — no segment of it runs. Naming only the
+ * offending part reads as "the rest executed", so an agent whose `python3 edit.py && grep …` was
+ * blocked believes its edits landed and reports work that never happened. In a repo whose whole
+ * point is not shipping silent failures, that is the worst failure mode available, so say it
+ * outright whenever the command was sequenced.
+ * @param {string} command
+ */
+function compoundNotice(command) {
+  return /(?:&&|\|\||;)/.test(String(command ?? ""))
+    ? "\n\u26a0 NOTHING IN THIS COMMAND RAN \u2014 the WHOLE line was blocked, not just the flagged part. Any earlier steps (edits, writes, installs) did NOT execute. Re-run them separately after the graph call."
+    : "";
+}
+
 export function classifyShell(req, ctx) {
   const command = req.command || "";
   const { phase } = ctx;
@@ -708,7 +754,7 @@ export function classifyShell(req, ctx) {
         return {
           ...g,
           userKey: "block.shell.search",
-          agentMessage: `Shell \`${s.tool}\` for a code symbol bypasses the graph → ${g.agentMessage}`,
+          agentMessage: `Shell \`${s.tool}\` for a code symbol bypasses the graph → ${g.agentMessage}${compoundNotice(command)}`,
         };
       }
     }
@@ -717,9 +763,30 @@ export function classifyShell(req, ctx) {
   if (phase === "classical_fallback") {
     return { decision: "allow", agentMessage: ctx.staleFallbackMsg };
   }
+
+  // must_refresh. Deny only what a STALE GRAPH would have answered — a code search. Everything
+  // else (ls, tail, cat, npm test, a python script) has nothing to do with index freshness, and
+  // blanket-denying it bricked the shell over a single commit of drift: the agent could not run
+  // `ls` or tail a log until a full reindex finished. That is the textbook false deny — it blocks
+  // work the gate was never meant to cover, with advice the agent cannot act on (NS-5).
+  const staleSearch = parseShellSearch(command);
+  if (!staleSearch) return { decision: "allow" };
+  let staleGrep;
+  try {
+    staleGrep = classifyGrep(
+      { tool: "Grep", toolInput: { pattern: staleSearch.pattern, path: staleSearch.path } },
+      ctx,
+    );
+  } catch {
+    // A caller that supplies no config cannot classify paths. Deny the search — it IS a code
+    // search against a stale index — but never take the whole shell down with it
+    // (NS-8: fail open on the hot path, fail closed on the graph).
+    staleGrep = { decision: "deny" };
+  }
+  if (staleGrep.decision !== "deny") return { decision: "allow" };
   return {
     decision: "deny",
-    agentMessage: ctx.staleMustRefreshMsg,
+    agentMessage: `${ctx.staleMustRefreshMsg}${compoundNotice(command)}`,
     userKey: "block.shell.stale",
   };
 }
