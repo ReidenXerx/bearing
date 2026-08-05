@@ -9,7 +9,7 @@
  * This script used to flatten a separate `bundle/.claude/skills/` tree into
  * `bundle/skills/`, wiping the destination first (`rmSync`). That tree was
  * stale and is gone — running the old flow would REGRESS the shipped store and
- * delete `gitnexus-local`. The guard below exists so nobody resurrects it.
+ * delete `bearing-local`. The guard below exists so nobody resurrects it.
  */
 console.error(
   [

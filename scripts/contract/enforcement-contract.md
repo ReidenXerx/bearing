@@ -33,7 +33,7 @@ Use the graph for **all** agent work — explore, debug, fix, refactor, review, 
 
 ### When to escalate to `cypher` (after `query` / `context`)
 
-READ `gitnexus://repo/__GITNEXUS_REPO__/schema` before ad-hoc Cypher.
+READ `bearing://repo/__GITNEXUS_REPO__/schema` before ad-hoc Cypher.
 
 | Question | Cypher edge / pattern |
 | --- | --- |
@@ -46,11 +46,11 @@ READ `gitnexus://repo/__GITNEXUS_REPO__/schema` before ad-hoc Cypher.
 
 **Order:** `query` (orient) → `context` (symbol) → **`cypher`** (structural precision) → `impact` (before edits). Do not start with `cypher` for fuzzy questions — that's what `query` + embeddings are for.
 
-Refresh always includes `--embeddings` (`gitnexus:refresh` / `agent-refresh`). Missing embeddings = stale (same as commit behind).
+Refresh always includes `--embeddings` (`bearing:refresh` / `agent-refresh`). Missing embeddings = stale (same as commit behind).
 
 ## Deep precision — PDG, taint, trace
 
-When `cypher` isn't enough, escalate to statement-level tools (require a PDG index — `gitnexus:pdg`):
+When `cypher` isn't enough, escalate to statement-level tools (require a PDG index — `bearing:pdg`):
 
 | Need | Tool |
 | --- | --- |
@@ -82,7 +82,7 @@ Know every tool and *when* it wins (single-repo; cross-repo `group_*` is out of 
 | `check` | Structural integrity — detect circular File `IMPORTS` cycles (health / CI gate). |
 | `list_repos` | Only when multiple repos are indexed — discover/disambiguate before passing `repo:` to other tools. |
 
-Cheap resource reads (prefer before heavy tools): `READ gitnexus://repo/__GITNEXUS_REPO__/{context|schema|clusters|processes|process/<name>}`.
+Cheap resource reads (prefer before heavy tools): `READ bearing://repo/__GITNEXUS_REPO__/{context|schema|clusters|processes|process/<name>}`.
 
 ## MCP defaults (generous — local LLM)
 
@@ -101,9 +101,9 @@ Run hook copy-paste calls verbatim; expand freely when needed:
 
 ## Session (autonomous Shell)
 
-New chat: run session health ritual if injected — `npm run gitnexus:agent-status`, one-sentence confirm to user.
+New chat: run session health ritual if injected — `npm run bearing:agent-status`, one-sentence confirm to user.
 
-`npm run gitnexus:agent-brief` or READ `gitnexus://repo/__GITNEXUS_REPO__/context`. Stale or missing embeddings → **`npm run gitnexus:agent-refresh` first** (`required_permissions: ["all"]`). Hooks **block** Grep/Read/MCP/shell until refresh succeeds; classical tools only if refresh **fails** (say why). Never ask user to analyze.
+`npm run bearing:agent-brief` or READ `bearing://repo/__GITNEXUS_REPO__/context`. Stale or missing embeddings → **`npm run bearing:agent-refresh` first** (`required_permissions: ["all"]`). Hooks **block** Grep/Read/MCP/shell until refresh succeeds; classical tools only if refresh **fails** (say why). Never ask user to analyze.
 
 ## Stale loop (mandatory)
 
@@ -116,7 +116,7 @@ stale → agent-refresh (Shell, pre-approved)
 
 Session start runs auto-refresh when stale. Do **not** grep/read “while refreshing” — refresh is the next tool, not a background hint.
 
-**Mid-session drift (your own edits):** commit-equality can't see uncommitted edits, so after you change a few source files the graph silently falls behind your working tree. Don't wait for the block — once you've edited code and are about to `query`/`context`/`impact`/`cypher`/`pdg_query` again, run **`npm run gitnexus:refresh`** (**incremental** — reindexes only your changed files; quick for a few edits, longer on large batches / first run) so graph answers reflect your changes. Graph query tools hard-block past a small drift threshold until you do.
+**Mid-session drift (your own edits):** commit-equality can't see uncommitted edits, so after you change a few source files the graph silently falls behind your working tree. Don't wait for the block — once you've edited code and are about to `query`/`context`/`impact`/`cypher`/`pdg_query` again, run **`npm run bearing:refresh`** (**incremental** — reindexes only your changed files; quick for a few edits, longer on large batches / first run) so graph answers reflect your changes. Graph query tools hard-block past a small drift threshold until you do.
 
 ## Gates (do not skip — every task)
 
@@ -140,24 +140,24 @@ Symbol grep → `context`. **Field/property grep → READ schema → `cypher` (`
 - **Edit runtime source** → blocked until one `impact` (or `rename`) call this session. Run blast radius first; warn on HIGH/CRITICAL.
 - **`git commit`** → blocked until one `detect_changes` call this session. Confirm affected processes match intent.
 
-Enforcement is **polyglot** — JS/TS, Python, Rust, Go, Java, and more count as source (configure `sourceExts` in `.bearing/gitnexus-hooks.json`).
+Enforcement is **polyglot** — JS/TS, Python, Rust, Go, Java, and more count as source (configure `sourceExts` in `.bearing/hooks.json`).
 
 ## Deep review (intel layer)
 
-At a **milestone** — feature done / big-task checkpoint / shared-code refactor / pre-ship, or "audit / find real bugs / is this solid?" — **and** only when the work is *substantial* (multi-file or high `impact` blast-radius): run a **microscope-waves** pass → load the `gitnexus-microscope` skill. Multi-lens, opinionated (not just defects), adversarially verified, iterated in waves. Skip it for small localized changes.
+At a **milestone** — feature done / big-task checkpoint / shared-code refactor / pre-ship, or "audit / find real bugs / is this solid?" — **and** only when the work is *substantial* (multi-file or high `impact` blast-radius): run a **microscope-waves** pass → load the `bearing-microscope` skill. Multi-lens, opinionated (not just defects), adversarially verified, iterated in waves. Skip it for small localized changes.
 
 ## Project north-stars — the semantic anchor (highest authority)
 
 *(Distinct from the graph-first "North star" above: those are the kit's reasoning rules; these are **this project's** fixed points.)*
 
-If **`.bearing/gitnexus-northstars.md`** exists, it is the project's **authoritative** statement of what this project IS: numbered, falsifiable propositions (`NS-1`, `NS-2`, …) covering **INVARIANTS** (must always hold), **SEMANTICS** (exact meaning of load-bearing terms), **EVIDENCE** (what counts as proof here), **SETTLED** decisions, and a **GRAVEYARD** of tried-and-rejected / validated ideas.
+If **`.bearing/northstars.md`** exists, it is the project's **authoritative** statement of what this project IS: numbered, falsifiable propositions (`NS-1`, `NS-2`, …) covering **INVARIANTS** (must always hold), **SEMANTICS** (exact meaning of load-bearing terms), **EVIDENCE** (what counts as proof here), **SETTLED** decisions, and a **GRAVEYARD** of tried-and-rejected / validated ideas.
 
 - **READ IT FIRST** — before forming any premise, at session start and on every recovery. A PostToolUse hook re-anchors you on it periodically and right after you write a doc; that is a *reminder*, not a substitute for reading it.
 - **It outranks everything**: every other doc, README, code comment, and your own inference. Repos accumulate stale and mutually contradictory docs — when any source conflicts with a north-star, **the north-star wins and the other source is stale**. Say so instead of silently averaging them.
 - **CITE the `NS-#`** when you make a consequential claim, choose a direction, or reject an idea. If you cannot cite one for a load-bearing conclusion, **you may be drifting — say so explicitly** rather than proceeding confidently.
 - **Never silently edit a north-star, and never quietly work around one.** If one looks wrong, missing, or outdated, state that plainly and **propose the change to the user** — the anchor only works if drift can't rewrite it.
 - **The GRAVEYARD is settled**: do not re-propose a rejected idea without new evidence that addresses *why* it was rejected, and do not discard a VALIDATED one without evidence that overturns it.
-- Print them anytime: `npm run gitnexus:northstars`. Format + maintenance routine: the **`gitnexus-northstars`** skill.
+- Print them anytime: `npm run bearing:northstars`. Format + maintenance routine: the **`bearing-northstars`** skill.
 
 ## Durable memory (survives compaction + sessions)
 
@@ -165,7 +165,7 @@ Maintain your **Claude Code project memory** — `~/.claude/projects/<this-proje
 
 ## Task-core (survive compaction without drift)
 
-Long tasks get **compacted** — the transcript is summarized and dropped, and detail drifts. Keep a **task-core**: a dense, **AI-facing** save-state of the CURRENT TASK at **`.bearing/.gitnexus-task-core.md`**. When a PostToolUse nudge says context is filling (~90%), or at a milestone / before a risky pivot, **write or refresh it** — terse, for *you* not humans, no prose tax:
+Long tasks get **compacted** — the transcript is summarized and dropped, and detail drifts. Keep a **task-core**: a dense, **AI-facing** save-state of the CURRENT TASK at **`.bearing/.task-core.md`**. When a PostToolUse nudge says context is filling (~90%), or at a milestone / before a risky pivot, **write or refresh it** — terse, for *you* not humans, no prose tax:
 
 ```
 GOAL <what "done" is> · CONSTRAINTS <must/never> · DECISIONS <choice→why (settled)>
@@ -173,12 +173,12 @@ STATE done<✓+anchor> / now / NEXT<exact> / todo<ordered> · ANCHORS <file:line
 GOTCHAS <failed approaches, traps, non-obvious> · OPEN-Qs · USER-PREFS(this task)
 ```
 
-On recovery **READ the task-core FIRST** and reconstruct from it — it's the one thing guaranteed to survive with full detail. It's distinct from `MEMORY.md` (durable, cross-session, human-shared): the task-core is the *hot working-set for THIS task*, overwritten when the task changes. Full routine: the **`gitnexus-taskcore`** skill.
+On recovery **READ the task-core FIRST** and reconstruct from it — it's the one thing guaranteed to survive with full detail. It's distinct from `MEMORY.md` (durable, cross-session, human-shared): the task-core is the *hot working-set for THIS task*, overwritten when the task changes. Full routine: the **`bearing-taskcore`** skill.
 
 ## Fallback
 
 **Stale index** → run `agent-refresh` first; classical Grep/Read stay denied until it succeeds. **If refresh fails** (or MCP down): classical Grep/Read OK — one-sentence why.
 
-**GitNexus fresh but wrong / suspicious / incomplete?** Don't silently fight the gate — take the escape hatch: `npm run gitnexus:fallback -- "<why>"`, which opens ~15 min where classical Grep/Read/shell are allowed (auto-resumes; end early with `npm run gitnexus:fallback:off`). **Make `<why>` specific and actionable** — which GN tool, expected vs actual (e.g. `impact returned 0 callers for OrderService but grep finds 3`) — because it's appended as a **GitNexus failure report** (`npm run gitnexus:fallback-log`), captured with the graph state, for the GitNexus developers. Re-confirm findings with the graph once GN is reliable; repeated reports pinpoint where GN needs fixing.
+**GitNexus fresh but wrong / suspicious / incomplete?** Don't silently fight the gate — take the escape hatch: `npm run bearing:fallback -- "<why>"`, which opens ~15 min where classical Grep/Read/shell are allowed (auto-resumes; end early with `npm run bearing:fallback:off`). **Make `<why>` specific and actionable** — which GN tool, expected vs actual (e.g. `impact returned 0 callers for OrderService but grep finds 3`) — because it's appended as a **GitNexus failure report** (`npm run bearing:fallback-log`), captured with the graph state, for the GitNexus developers. Re-confirm findings with the graph once GN is reliable; repeated reports pinpoint where GN needs fixing.
 
-Optional: `GITNEXUS_MODE=guide` (nudge-only). Paths: `.bearing/gitnexus-hooks.json`. Playbooks: `gitnexus-enforcement` skill.
+Optional: `GITNEXUS_MODE=guide` (nudge-only). Paths: `.bearing/hooks.json`. Playbooks: `bearing-enforcement` skill.

@@ -11,7 +11,7 @@ export function sessionPaths(root) {
   const stateDir = path.join(root, '.bearing');
   return {
     stateDir,
-    primedFlag: path.join(stateDir, '.gitnexus-session-primed.flag'),
+    primedFlag: path.join(stateDir, '.bearing-session-primed.flag'),
     promptHint: path.join(stateDir, '.gitnexus-prompt-hint.json'),
     refreshPendingFlag: path.join(stateDir, '.gitnexus-refresh-pending.flag'),
     refreshFailedFlag: path.join(stateDir, '.gitnexus-refresh-failed.flag'),
@@ -35,7 +35,7 @@ export function sessionPaths(root) {
 
 /** @param {string} root */
 export function taskCorePath(root) {
-  return path.join(root, '.bearing', '.gitnexus-task-core.md');
+  return path.join(root, '.bearing', '.task-core.md');
 }
 
 /** @param {string} root @returns {boolean} does a task-core exist + have content? */
@@ -70,7 +70,7 @@ export function taskCoreAgeMs(root) {
 
 /** @param {string} root */
 export function northStarsPath(root) {
-  return path.join(root, '.bearing', 'gitnexus-northstars.md');
+  return path.join(root, '.bearing', 'northstars.md');
 }
 
 /** @param {string} root @returns {boolean} does a north-stars doc exist + have content? */
@@ -363,7 +363,7 @@ export function readScorecard(root) {
 // ── Persistent telemetry ─────────────────────────────────────────────────────
 // The scorecard is per-session (cleared on session start). Before clearing, we
 // archive each finished session's tally to an append-only .jsonl so aggregate
-// trends survive across sessions. Read/aggregate via `npm run gitnexus:stats`.
+// trends survive across sessions. Read/aggregate via `npm run bearing:stats`.
 
 const TELEMETRY_FILE = '.gitnexus-telemetry.jsonl';
 
@@ -593,7 +593,7 @@ export function clearSessionState(root) {
       /* ignore */
     }
   }
-  for (const rel of ['.gitnexus-session-user-notified.flag']) {
+  for (const rel of ['.bearing-session-user-notified.flag']) {
     try {
       fs.unlinkSync(path.join(stateDir, rel));
     } catch {
@@ -639,10 +639,10 @@ export function firstToolNudge(root, stale) {
         ? 'MISSING EMBEDDINGS: semantic query unavailable — '
         : 'STALE INDEX: ';
     parts.push(
-      `${reason}next Shell MUST be npm run gitnexus:agent-refresh (required_permissions: ["all"]). Includes --embeddings. Run yourself — never ask user to analyze.`
+      `${reason}next Shell MUST be npm run bearing:agent-refresh (required_permissions: ["all"]). Includes --embeddings. Run yourself — never ask user to analyze.`
     );
   } else {
-    parts.push(`SESSION: ${mcpReadContext(repo)} OR npm run gitnexus:agent-brief`);
+    parts.push(`SESSION: ${mcpReadContext(repo)} OR npm run bearing:agent-brief`);
   }
 
   const playbook = playbookForHint(hint, repo);

@@ -55,7 +55,7 @@ export function generateArchDoc(root, repoArg, env) {
   lines.push(`# Architecture — ${repo}`);
   lines.push("");
   lines.push(
-    "> Auto-generated from the GitNexus knowledge graph. Do not edit by hand — regenerate with `npm run gitnexus:map`.",
+    "> Auto-generated from the GitNexus knowledge graph. Do not edit by hand — regenerate with `npm run bearing:map`.",
   );
   lines.push(
     `> Generated ${new Date().toISOString()}${lastCommit ? ` @ ${lastCommit.slice(0, 7)}` : ""}.`,

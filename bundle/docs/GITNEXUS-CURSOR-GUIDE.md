@@ -32,7 +32,7 @@ The kit helps **every model tier**. Messaging is honest about where the lift is 
 **Practical tips (all tiers):**
 
 - Prefer **Agent** mode with GitNexus MCP enabled — hooks only fire when the graph is fresh.
-- If results feel shallow, run `npm run gitnexus:health` — stale or missing embeddings hurt every model equally.
+- If results feel shallow, run `npm run bearing:health` — stale or missing embeddings hurt every model equally.
 - Local / zero-API models: rebuild graph context freely; don't skip gates for speed.
 
 You're not paying for model memory of the codebase — you're paying (once) for an index the agent must use. A smarter model still benefits from being **forced** to use it.
@@ -41,14 +41,14 @@ You're not paying for model memory of the codebase — you're paying (once) for 
 
 **New chat:** GitNexus runs a health check when the session starts. On your first message you may see a short notice that the kit is active. The agent’s first reply should confirm health in one sentence (graph fresh, enforcement on).
 
-When the graph is **stale** (behind recent commits or missing embeddings), hooks **block** Grep, Read, MCP, and most Shell until the agent runs **`npm run gitnexus:agent-refresh`**. Classical search is allowed **only if refresh fails** — the agent should say why.
+When the graph is **stale** (behind recent commits or missing embeddings), hooks **block** Grep, Read, MCP, and most Shell until the agent runs **`npm run bearing:agent-refresh`**. Classical search is allowed **only if refresh fails** — the agent should say why.
 
 When the graph is **fresh**, the agent may say it was redirected from grep, SemanticSearch, or a full-file read. **That is expected.**
 
 ## Quick check after install
 
 ```bash
-npm run gitnexus:health
+npm run bearing:health
 ```
 
 Green = graph fresh + embeddings ready + hooks active.
@@ -83,9 +83,9 @@ What did my local changes affect? Am I done?
 |------|---------|
 | Install kit into a repo | `gitnexus-agent-kit/bin/install.sh /path/to/repo` |
 | Update after kit release | `gitnexus-agent-kit/bin/update.sh /path/to/repo` |
-| Human status | `npm run gitnexus:health` |
-| Re-index (humans / CI) | `npm run gitnexus:refresh` |
-| Agent re-index | `npm run gitnexus:agent-refresh` (agents run this autonomously) |
+| Human status | `npm run bearing:health` |
+| Re-index (humans / CI) | `npm run bearing:refresh` |
+| Agent re-index | `npm run bearing:agent-refresh` (agents run this autonomously) |
 
 After install or update: **restart Cursor** on the project.
 
@@ -94,9 +94,9 @@ After install or update: **restart Cursor** on the project.
 | Situation | What to do |
 |-----------|------------|
 | Agent seems “blocked” on grep | Expected when graph is fresh — agent should use GitNexus MCP tools |
-| Graph tools return stale/wrong data | Agent should run `gitnexus:agent-refresh`; or you run `gitnexus:refresh` |
+| Graph tools return stale/wrong data | Agent should run `bearing:agent-refresh`; or you run `bearing:refresh` |
 | Hooks not firing | Restart Cursor; check Hooks enabled in settings |
-| `gitnexus:health` shows missing embeddings | Run `npm run gitnexus:agent-refresh` or full `gitnexus:refresh` |
+| `bearing:health` shows missing embeddings | Run `npm run bearing:agent-refresh` or full `bearing:refresh` |
 
 ## Pitch line (for GitNexus + Cursor)
 

@@ -21,14 +21,14 @@ const FAIL = {
   reason: 'check_failed',
   detail:
     'Staleness check failed — treat index as stale. Hooks block Grep/Read/MCP/shell until refresh succeeds or fails. ' +
-    'Agent MUST run npm run gitnexus:agent-refresh autonomously (required_permissions: ["all"]).',
+    'Agent MUST run npm run bearing:agent-refresh autonomously (required_permissions: ["all"]).',
 };
 
 const cachePath = path.join(root, '.bearing', '.gitnexus-staleness-cache.json');
 
 function ttlMs() {
   try {
-    const cfg = JSON.parse(fs.readFileSync(path.join(root, '.bearing/gitnexus-hooks.json'), 'utf8'));
+    const cfg = JSON.parse(fs.readFileSync(path.join(root, '.bearing/hooks.json'), 'utf8'));
     if (typeof cfg.stalenessCacheTtlMs === 'number') return cfg.stalenessCacheTtlMs;
   } catch {
     /* default */

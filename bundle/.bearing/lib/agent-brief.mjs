@@ -87,7 +87,7 @@ async function main() {
       );
     }
     lines.push(
-      'Next: npm run gitnexus:agent-refresh (required_permissions: ["all"]) — includes --embeddings',
+      'Next: npm run bearing:agent-refresh (required_permissions: ["all"]) — includes --embeddings',
     );
   }
 
@@ -120,27 +120,27 @@ async function main() {
   lines.push("");
   lines.push("Skill routing:");
   lines.push(
-    "  Security/input/auth/db/file/exec/rendering → gitnexus-security-review",
+    "  Security/input/auth/db/file/exec/rendering → bearing-security-review",
   );
-  lines.push("  API route or response payload → gitnexus-api-routes");
-  lines.push("  PR / branch review → gitnexus-pr-review");
-  lines.push("  Rename/refactor → gitnexus-refactoring");
-  lines.push("  Bug/failure path → gitnexus-debugging");
-  lines.push("  Add a feature / new code → gitnexus-feature-dev");
-  lines.push("  What to test / coverage → gitnexus-testing");
-  lines.push("  Slow / hot path → gitnexus-performance");
-  lines.push("  Judge structure (coupling/cycles) → gitnexus-architecture-review");
-  lines.push("  Work across layers → gitnexus-layered-systems");
-  lines.push("  Milestone deep audit (feature done / pre-ship / big refactor) → gitnexus-microscope");
+  lines.push("  API route or response payload → bearing-api-routes");
+  lines.push("  PR / branch review → bearing-pr-review");
+  lines.push("  Rename/refactor → bearing-refactoring");
+  lines.push("  Bug/failure path → bearing-debugging");
+  lines.push("  Add a feature / new code → bearing-feature-dev");
+  lines.push("  What to test / coverage → bearing-testing");
+  lines.push("  Slow / hot path → bearing-performance");
+  lines.push("  Judge structure (coupling/cycles) → bearing-architecture-review");
+  lines.push("  Work across layers → bearing-layered-systems");
+  lines.push("  Milestone deep audit (feature done / pre-ship / big refactor) → bearing-microscope");
   lines.push(
-    "  Unknown feature/codebase map → gitnexus-exploring or gitnexus-imaging",
+    "  Unknown feature/codebase map → bearing-exploring or bearing-imaging",
   );
-  lines.push("  Hook block explanation → gitnexus-enforcement");
+  lines.push("  Hook block explanation → bearing-enforcement");
   lines.push("");
   lines.push("Session start (copy-paste):");
   lines.push(`  ${mcpReadContext(repo)}`);
   lines.push(`  ${mcpReadSchema(repo)}`);
-  lines.push("  npm run gitnexus:agent-brief");
+  lines.push("  npm run bearing:agent-brief");
   lines.push("");
   lines.push("Precision recipes (copy-paste):");
   lines.push(`  ${mcpTrace("<source>", "<target>", repo)}`);

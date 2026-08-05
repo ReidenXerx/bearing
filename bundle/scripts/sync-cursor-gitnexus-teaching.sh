@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Sync GitNexus teaching bundle into Cursor-native paths (.cursor/skills).
 # Source of truth: .bearing/skills/ + .cursor/rules/ + .cursor/hooks/
-# Run via: npm run gitnexus:setup (or directly)
+# Run via: npm run bearing:setup (or directly)
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -13,18 +13,18 @@ warn()  { printf '\033[1;33m    !\033[0m %s\n' "$*"; }
 fail()  { printf '\033[1;31mERROR:\033[0m %s\n' "$*" >&2; exit 1; }
 
 HOOK_SCRIPTS=(
-  ".cursor/hooks/gitnexus-session-primer.sh"
-  ".cursor/hooks/gitnexus-session-health.sh"
-  ".cursor/hooks/gitnexus-session-health-user.sh"
-  ".cursor/hooks/gitnexus-prompt-router.sh"
-  ".cursor/hooks/gitnexus-grep-guard.sh"
-  ".cursor/hooks/gitnexus-read-guard.sh"
-  ".cursor/hooks/gitnexus-edit-guard.sh"
-  ".cursor/hooks/gitnexus-shell-staleness-guard.sh"
-  ".cursor/hooks/gitnexus-shell-allowlist.sh"
-  ".cursor/hooks/gitnexus-commit-guard.sh"
-  ".cursor/hooks/gitnexus-mcp-allowlist.sh"
-  ".cursor/hooks/gitnexus-after-git-commit.sh"
+  ".cursor/hooks/bearing-session-primer.sh"
+  ".cursor/hooks/bearing-session-health.sh"
+  ".cursor/hooks/bearing-session-health-user.sh"
+  ".cursor/hooks/bearing-prompt-router.sh"
+  ".cursor/hooks/bearing-grep-guard.sh"
+  ".cursor/hooks/bearing-read-guard.sh"
+  ".cursor/hooks/bearing-edit-guard.sh"
+  ".cursor/hooks/bearing-shell-staleness-guard.sh"
+  ".cursor/hooks/bearing-shell-allowlist.sh"
+  ".cursor/hooks/bearing-commit-guard.sh"
+  ".cursor/hooks/bearing-mcp-allowlist.sh"
+  ".cursor/hooks/bearing-after-git-commit.sh"
 )
 
 HOOK_LIBS=(
@@ -53,10 +53,10 @@ HOOK_LIBS=(
   ".bearing/lib/session-health-audit.mjs"
   ".bearing/lib/session-health-context.mjs"
   ".bearing/lib/verify-kit.mjs"
-  ".bearing/gitnexus-hooks.json"
-  "scripts/gitnexus-agent.mjs"
-  "scripts/gitnexus-gate-hint.mjs"
-  "scripts/gitnexus-teaching/script-gates.mjs"
+  ".bearing/hooks.json"
+  "scripts/bearing-agent.mjs"
+  "scripts/bearing-gate-hint.mjs"
+  "scripts/bearing-teaching/script-gates.mjs"
   "scripts/lib/setup-ui.mjs"
 )
 
@@ -96,18 +96,18 @@ const hooks = JSON.parse(fs.readFileSync(hooksPath, 'utf8'));
 const h = hooks.hooks ?? {};
 
 const checks = [
-  ['sessionStart', 'gitnexus-session-primer'],
-  ['sessionStart', 'gitnexus-session-health'],
-  ['beforeSubmitPrompt', 'gitnexus-session-health-user'],
-  ['beforeSubmitPrompt', 'gitnexus-prompt-router'],
-  ['preToolUse', 'gitnexus-shell-staleness-guard'],
-  ['preToolUse', 'gitnexus-grep-guard'],
-  ['preToolUse', 'gitnexus-read-guard'],
-  ['preToolUse', 'gitnexus-edit-guard'],
-  ['beforeShellExecution', 'gitnexus-shell-allowlist'],
-  ['beforeShellExecution', 'gitnexus-commit-guard'],
-  ['beforeMCPExecution', 'gitnexus-mcp-allowlist'],
-  ['afterShellExecution', 'gitnexus-after-git-commit'],
+  ['sessionStart', 'bearing-session-primer'],
+  ['sessionStart', 'bearing-session-health'],
+  ['beforeSubmitPrompt', 'bearing-session-health-user'],
+  ['beforeSubmitPrompt', 'bearing-prompt-router'],
+  ['preToolUse', 'bearing-shell-staleness-guard'],
+  ['preToolUse', 'bearing-grep-guard'],
+  ['preToolUse', 'bearing-read-guard'],
+  ['preToolUse', 'bearing-edit-guard'],
+  ['beforeShellExecution', 'bearing-shell-allowlist'],
+  ['beforeShellExecution', 'bearing-commit-guard'],
+  ['beforeMCPExecution', 'bearing-mcp-allowlist'],
+  ['afterShellExecution', 'bearing-after-git-commit'],
 ];
 
 for (const [event, needle] of checks) {
@@ -145,37 +145,37 @@ const manifest = {
     blockedTools: ['Grep(symbols)', 'Grep(fields→cypher)', 'SemanticSearch', 'Glob(broad src)', 'Read(large src, no offset)'],
     gates: ['session status/refresh', 'session health', 'prompt architecture router', 'query/context explore', 'cypher structural', 'staleness pre-edit', 'impact pre-edit', 'detect_changes pre-done'],
     hookScripts: [
-      'gitnexus-session-primer.sh',
-      'gitnexus-session-health.sh',
-      'gitnexus-session-health-user.sh',
-      'gitnexus-prompt-router.sh',
-      'gitnexus-shell-staleness-guard.sh',
-      'gitnexus-grep-guard.sh',
-      'gitnexus-read-guard.sh',
-      'gitnexus-edit-guard.sh',
-      'gitnexus-shell-allowlist.sh',
-      'gitnexus-commit-guard.sh',
-      'gitnexus-mcp-allowlist.sh',
-      'gitnexus-after-git-commit.sh',
+      'bearing-session-primer.sh',
+      'bearing-session-health.sh',
+      'bearing-session-health-user.sh',
+      'bearing-prompt-router.sh',
+      'bearing-shell-staleness-guard.sh',
+      'bearing-grep-guard.sh',
+      'bearing-read-guard.sh',
+      'bearing-edit-guard.sh',
+      'bearing-shell-allowlist.sh',
+      'bearing-commit-guard.sh',
+      'bearing-mcp-allowlist.sh',
+      'bearing-after-git-commit.sh',
     ],
-    agentCli: ['npm run gitnexus:agent-status', 'npm run gitnexus:agent-refresh'],
+    agentCli: ['npm run bearing:agent-status', 'npm run bearing:agent-refresh'],
   },
   components: {
     rules: [
-      '.cursor/rules/00-gitnexus-enforcement.mdc',
-      '.cursor/rules/gitnexus.mdc',
-      '.cursor/rules/gitnexus-first.mdc',
+      '.cursor/rules/00-bearing-enforcement.mdc',
+      '.cursor/rules/bearing.mdc',
+      '.cursor/rules/bearing-first.mdc',
     ],
     hooks: '.cursor/hooks.json',
     mcp: '.cursor/mcp.json',
-    masterSkill: '.agents/skills/gitnexus-workspace/SKILL.md',
-    enforcementSkill: '.agents/skills/gitnexus-enforcement/SKILL.md',
+    masterSkill: '.agents/skills/bearing-workspace/SKILL.md',
+    enforcementSkill: '.agents/skills/bearing-enforcement/SKILL.md',
     gitnexusSkills: listSkills('.bearing/skills').filter((n) => n.startsWith('gitnexus-')),
     generatedAreaSkills: listSkills('.cursor/skills/generated'),
   },
   workflowChain: [
-    'READ gitnexus://repo/__GITNEXUS_REPO__/context',
-    'READ gitnexus://repo/__GITNEXUS_REPO__/schema',
+    'READ bearing://repo/__GITNEXUS_REPO__/context',
+    'READ bearing://repo/__GITNEXUS_REPO__/schema',
     'query({query, task_context, goal})',
     'context({name|uid})',
     'cypher({query, params})',
@@ -186,10 +186,10 @@ const manifest = {
 
 fs.mkdirSync('.cursor', { recursive: true });
 fs.writeFileSync(
-  '.cursor/gitnexus-teaching-bundle.json',
+  '.cursor/bearing-teaching-bundle.json',
   JSON.stringify(manifest, null, 2) + '\n'
 );
-console.log('    ✓ Wrote .cursor/gitnexus-teaching-bundle.json (v2 enforcement)');
+console.log('    ✓ Wrote .cursor/bearing-teaching-bundle.json (v2 enforcement)');
 NODE
 }
 
@@ -198,8 +198,8 @@ NODE
 info "Installing GitNexus agent kit teaching bundle (runtime: ${GITNEXUS_RUNTIME:-both})"
 
 info "  [1/5] Cursor rules (single always-on contract)"
-verify_always_apply_rule ".cursor/rules/00-gitnexus-enforcement.mdc"
-for ref_rule in ".cursor/rules/gitnexus.mdc" ".cursor/rules/gitnexus-first.mdc"; do
+verify_always_apply_rule ".cursor/rules/00-bearing-enforcement.mdc"
+for ref_rule in ".cursor/rules/bearing.mdc" ".cursor/rules/bearing-first.mdc"; do
   [[ -f "$ref_rule" ]] || fail "Missing rule: $ref_rule"
   ok "Reference rule present: $ref_rule (load on demand)"
 done
@@ -254,7 +254,7 @@ fi
 
 info "  [5/5] Quick hook smoke test"
 if printf '%s' '{"tool_name":"SemanticSearch","tool_input":{"query":"test"}}' \
-  | bash .cursor/hooks/gitnexus-grep-guard.sh 2>/dev/null \
+  | bash .cursor/hooks/bearing-grep-guard.sh 2>/dev/null \
   | grep -q 'deny'; then
   ok "SemanticSearch block verified"
 else
@@ -263,7 +263,7 @@ fi
 
 echo ""
 ok "Teaching bundle v2 installed (enforcement hooks active)"
-echo "    Enforcement:   00-gitnexus-enforcement.mdc + grep/read/edit hooks (staleness block)"
-echo "    Graph imaging: gitnexus-imaging skill"
-echo "    Master skill:  gitnexus-workspace"
-echo "    If blocked:    gitnexus-enforcement skill"
+echo "    Enforcement:   00-bearing-enforcement.mdc + grep/read/edit hooks (staleness block)"
+echo "    Graph imaging: bearing-imaging skill"
+echo "    Master skill:  bearing-workspace"
+echo "    If blocked:    bearing-enforcement skill"

@@ -1,9 +1,9 @@
 ## Zed + local models (Ollama)
 
 - Select the **Zed + GitNexus** agent profile (grep disabled; gitnexus MCP enabled).
-- Invoke `/gitnexus-enforcement` or `/gitnexus-workspace` when starting a hard task.
+- Invoke `/bearing-enforcement` or `/bearing-workspace` when starting a hard task.
 - Local models: keep MCP calls small (`query` limit 5, `impact` summaryOnly when exploring).
 
 ## npm gates
 
-Run gated scripts from `package.json` when hooks remind you: `gitnexus.__gate.*` — they document the enforced playbook for this repo.
+Run gated scripts from `package.json` when hooks remind you: `bearing.__gate.*` — they document the enforced playbook for this repo.

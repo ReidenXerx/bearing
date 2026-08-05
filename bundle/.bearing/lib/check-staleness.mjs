@@ -71,7 +71,7 @@ function countDrift(at, sourceExtRe) {
 const staleHookNote =
   'Hooks block Grep/Read/MCP/shell until refresh succeeds or fails.';
 const agentFix =
-  `${staleHookNote} Agent MUST run npm run gitnexus:agent-refresh autonomously (required_permissions: ["all"]).`;
+  `${staleHookNote} Agent MUST run npm run bearing:agent-refresh autonomously (required_permissions: ["all"]).`;
 
 const out = {
   fresh: true,

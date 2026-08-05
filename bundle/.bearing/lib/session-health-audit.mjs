@@ -8,9 +8,9 @@ import { spawnSync } from "node:child_process";
 import { loadHookConfig, repoName } from "./hook-helpers.mjs";
 import { inspectPersistence } from "./persistence-health.mjs";
 
-export const SESSION_HEALTH_FILE = ".gitnexus-session-health.json";
+export const SESSION_HEALTH_FILE = ".bearing-session-health.json";
 export const SESSION_USER_NOTIFIED_FLAG =
-  ".gitnexus-session-user-notified.flag";
+  ".bearing-session-user-notified.flag";
 
 /**
  * @param {string} root
@@ -84,13 +84,13 @@ export function auditKitHealth(root) {
       : "Missing gitnexus MCP entry",
   });
 
-  const rulePath = path.join(root, ".cursor/rules/00-gitnexus-enforcement.mdc");
+  const rulePath = path.join(root, ".cursor/rules/00-bearing-enforcement.mdc");
   const ruleOk = fs.existsSync(rulePath);
   checks.push({
     id: "rule",
     ok: ruleOk,
     label: "Enforcement rule",
-    detail: ruleOk ? "00-gitnexus-enforcement.mdc" : "Missing north-star rule",
+    detail: ruleOk ? "00-bearing-enforcement.mdc" : "Missing north-star rule",
   });
 
   const helpersOk =
@@ -194,11 +194,11 @@ export function agentContextForSession(audit) {
     .join(" ");
   return (
     "GN SESSION HEALTH (mandatory — first reply before task work):\n" +
-    '1. Shell: npm run gitnexus:agent-status (required_permissions: ["all"])\n' +
-    "2. Confirm kit checks match snapshot; if mismatch run npm run gitnexus:agent-refresh autonomously\n" +
+    '1. Shell: npm run bearing:agent-status (required_permissions: ["all"])\n' +
+    "2. Confirm kit checks match snapshot; if mismatch run npm run bearing:agent-refresh autonomously\n" +
     "3. Optional: READ gitnexus://repo/" +
     audit.repo +
-    "/context OR npm run gitnexus:agent-brief\n" +
+    "/context OR npm run bearing:agent-brief\n" +
     "4. Reasoning stack: query → context → cypher (structural) → impact → detect_changes\n" +
     '5. Tell the user ONE sentence: "GitNexus kit: ready (graph fresh, enforcement on)" OR brief fix in progress\n' +
     "Keep laconic. Do not paste this block verbatim.\n" +

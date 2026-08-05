@@ -21,7 +21,7 @@ info "Refreshing bundle from $SRC"
 
 # NOTE: bundle/skills/ and bundle/docs/ are kit-owned sources of truth and are
 # NOT derived from $SRC. Never `rm -rf bundle` wholesale — that would wipe the
-# canonical skill store (incl. gitnexus-local) and the team docs. We only
+# canonical skill store (incl. bearing-local) and the team docs. We only
 # refresh the subtrees that genuinely come from the source repo.
 rm -rf \
   "$KIT_ROOT/bundle/.cursor" \
@@ -36,15 +36,15 @@ cp "$SRC/.cursor/hooks.json" "$KIT_ROOT/bundle/.cursor/"
 cp -a "$SRC/.cursor/hooks" "$KIT_ROOT/bundle/.cursor/"
 # Skills are NOT copied from $SRC. The shipped store is bundle/skills/ — edit it
 # directly. There is no bundle/.claude/skills/ tree anymore.
-mkdir -p "$KIT_ROOT/bundle/.githooks" "$KIT_ROOT/bundle/.vscode" "$KIT_ROOT/bundle/scripts/lib" "$KIT_ROOT/bundle/scripts/gitnexus-teaching" "$KIT_ROOT/bundle/docs"
+mkdir -p "$KIT_ROOT/bundle/.githooks" "$KIT_ROOT/bundle/.vscode" "$KIT_ROOT/bundle/scripts/lib" "$KIT_ROOT/bundle/scripts/bearing-teaching" "$KIT_ROOT/bundle/docs"
 cp "$SRC/.githooks/pre-commit" "$KIT_ROOT/bundle/.githooks/"
 cp "$SRC/.vscode/settings.json" "$KIT_ROOT/bundle/.vscode/"
 cp "$SRC/.gitnexusignore" "$KIT_ROOT/bundle/"
-for f in gitnexus-setup.sh sync-cursor-gitnexus-teaching.sh pack-gitnexus-teaching.sh install-git-hooks.sh gitnexus-agent.mjs run-with-project-tmp.sh clean-project-tmp.sh; do
+for f in gitnexus-setup.sh sync-cursor-bearing-teaching.sh pack-bearing-teaching.sh install-git-hooks.sh gitnexus-agent.mjs run-with-project-tmp.sh clean-project-tmp.sh; do
   cp "$SRC/scripts/$f" "$KIT_ROOT/bundle/scripts/"
 done
 cp "$SRC/scripts/lib/project-tmp.mjs" "$KIT_ROOT/bundle/scripts/lib/"
-cp "$SRC/scripts/gitnexus-teaching/"* "$KIT_ROOT/bundle/scripts/gitnexus-teaching/"
+cp "$SRC/scripts/bearing-teaching/"* "$KIT_ROOT/bundle/scripts/bearing-teaching/"
 # Docs flow ONE WAY: docs/ (current, vendor-neutral) is the source of truth.
 # The bundle ships team handouts under bundle/docs/GITNEXUS-*.md, which are
 # REGENERATED from docs/ here — never copied back over docs/, and never sourced
@@ -66,7 +66,7 @@ for f in \
   bundle/docs/AGENT-REGIONS-GUIDE.md \
   bundle/docs/regions.overlay.stub.json \
   bundle/docs/AGENT-PROFILES.stub.md \
-  bundle/scripts/gitnexus-teaching/generate-regions.mjs; do
+  bundle/scripts/bearing-teaching/generate-regions.mjs; do
   rm -rf "$KIT_ROOT/$f" 2>/dev/null || true
 done
 

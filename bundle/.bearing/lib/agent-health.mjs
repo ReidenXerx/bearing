@@ -64,9 +64,9 @@ async function main() {
   );
   lines.push("");
   lines.push("Commands:");
-  lines.push("  npm run gitnexus:health        this summary");
-  lines.push("  npm run gitnexus:agent-brief   session orientation (agents)");
-  lines.push("  npm run gitnexus:agent-status  staleness check (agents)");
+  lines.push("  npm run bearing:health        this summary");
+  lines.push("  npm run bearing:agent-brief   session orientation (agents)");
+  lines.push("  npm run bearing:agent-status  staleness check (agents)");
   lines.push("");
   lines.push("Team guide: docs/GITNEXUS-CURSOR-GUIDE.md");
 

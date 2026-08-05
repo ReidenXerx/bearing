@@ -105,6 +105,6 @@ export function enospcHelp(root = process.cwd()) {
     '  sudo du -sh /tmp/* 2>/dev/null | sort -hr | head -10\n' +
     '  rm -rf /tmp/cursor-sandbox-cache/*   # often safe\n' +
     `  rm -rf ${path.join(root, DEFAULT_DIR)}/*   # project temp cache\n` +
-    'Then: npm run gitnexus:agent-refresh'
+    'Then: npm run bearing:agent-refresh'
   );
 }

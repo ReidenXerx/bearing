@@ -1,0 +1,7 @@
+{
+  "comment": "Optional hook tuning, TEAM-SHARED (committed). mode: enforce (block) | guide (nudge only). sourceGlobs: gitignore-style roots for graph-first paths. stalenessCacheTtlMs: reuse staleness within N ms to cut per-tool-call latency. sourceExts is intentionally omitted — the built-in polyglot default (see hook-helpers.mjs DEFAULT_SOURCE_EXT_RE) is the single source of truth; add a \"sourceExts\": [\"js\",\"py\", …] array here only to narrow/override it. For PER-MACHINE overrides that shouldn't be committed (e.g. \"contextWindowTokens\": 1000000 for a 1M-context session), create a gitignored .bearing/hooks.local.json with the same shape — it wins over this file (GITNEXUS_CONTEXT_WINDOW env wins over both).",
+  "mode": "enforce",
+  "readLineThreshold": 60,
+  "stalenessCacheTtlMs": 2500,
+  "sourceGlobs": ["src/**", "lib/**", "apps/**", "packages/**"]
+}

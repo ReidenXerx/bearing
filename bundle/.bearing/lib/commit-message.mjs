@@ -78,7 +78,7 @@ export function draftCommitMessage(root, repoArg, env) {
   }
   if (!grounded && symbols.length) {
     lines.push('');
-    lines.push('# (Graph unavailable — flows/modules omitted. Run npm run gitnexus:agent-refresh, then retry.)');
+    lines.push('# (Graph unavailable — flows/modules omitted. Run npm run bearing:agent-refresh, then retry.)');
   }
 
   return { message: lines.join('\n'), grounded };

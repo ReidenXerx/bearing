@@ -14,7 +14,7 @@ import { isRefreshFailed, isRefreshPending, fallbackGrant } from './session-prim
  */
 export function evaluateStalePolicy(stale, root) {
   // Explicit escape hatch: the agent/user declared GitNexus untrustworthy here
-  // (`npm run gitnexus:fallback "<why>"`) → classical fallback even on a FRESH index.
+  // (`npm run bearing:fallback "<why>"`) → classical fallback even on a FRESH index.
   // Bounded (auto-expires), logged, and surfaced so it can't be a silent bypass.
   const grant = fallbackGrant(root);
   if (grant) {
@@ -65,7 +65,7 @@ export function staleRefreshAgentMessage(stale, policy) {
     const pending = policy.refreshPending ? ' Session auto-refresh did not complete.' : '';
     return (
       `STALE INDEX (${detail}) — mandatory refresh BEFORE Grep/Read/MCP/shell.${pending} ` +
-      'Shell NOW: npm run gitnexus:agent-refresh with required_permissions: ["all"]. ' +
+      'Shell NOW: npm run bearing:agent-refresh with required_permissions: ["all"]. ' +
       'Run yourself — never ask the user to run npx gitnexus analyze.'
     );
   }
@@ -77,7 +77,7 @@ export function staleRefreshAgentMessage(stale, policy) {
       return (
         `CLASSICAL FALLBACK active (${why}) — classical Grep/Read/shell OK for ~${mins} min. ` +
         'Re-confirm with the graph once GitNexus is reliable; ' +
-        'end early with npm run gitnexus:fallback:off.'
+        'end early with npm run bearing:fallback:off.'
       );
     }
     return (
