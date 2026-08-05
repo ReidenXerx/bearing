@@ -122,7 +122,7 @@ CORE_SOURCES=(
 CURSOR_SOURCES=(
   ".cursor/rules/00-gitnexus-enforcement.mdc"
   ".cursor/hooks.json"
-  ".cursor/hooks/gitnexus-grep-guard.sh"
+  ".cursor/hooks/bearing-grep-guard.sh"
   ".bearing/lib/hook-helpers.mjs"
   ".bearing/lib/stale-policy.mjs"
 )

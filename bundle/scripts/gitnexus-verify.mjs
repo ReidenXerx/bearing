@@ -171,10 +171,10 @@ const CURSOR_CRITICAL = [
 ];
 
 const HOOK_SCRIPTS = [
-  'gitnexus-session-primer.sh',
-  'gitnexus-grep-guard.sh',
-  'gitnexus-read-guard.sh',
-  'gitnexus-edit-guard.sh',
+  'bearing-session-primer.sh',
+  'bearing-grep-guard.sh',
+  'bearing-read-guard.sh',
+  'bearing-edit-guard.sh',
 ];
 
 function checkHookExecutable(name) {

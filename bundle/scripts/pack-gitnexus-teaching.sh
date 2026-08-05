@@ -45,18 +45,18 @@ BUNDLE_PATHS=(
   .cursor/rules/gitnexus.mdc
   .cursor/rules/gitnexus-first.mdc
   .cursor/hooks.json
-  .cursor/hooks/gitnexus-session-primer.sh
-  .cursor/hooks/gitnexus-session-health.sh
-  .cursor/hooks/gitnexus-session-health-user.sh
-  .cursor/hooks/gitnexus-prompt-router.sh
-  .cursor/hooks/gitnexus-grep-guard.sh
-  .cursor/hooks/gitnexus-read-guard.sh
-  .cursor/hooks/gitnexus-edit-guard.sh
-  .cursor/hooks/gitnexus-shell-staleness-guard.sh
-  .cursor/hooks/gitnexus-shell-allowlist.sh
-  .cursor/hooks/gitnexus-commit-guard.sh
-  .cursor/hooks/gitnexus-mcp-allowlist.sh
-  .cursor/hooks/gitnexus-after-git-commit.sh
+  .cursor/hooks/bearing-session-primer.sh
+  .cursor/hooks/bearing-session-health.sh
+  .cursor/hooks/bearing-session-health-user.sh
+  .cursor/hooks/bearing-prompt-router.sh
+  .cursor/hooks/bearing-grep-guard.sh
+  .cursor/hooks/bearing-read-guard.sh
+  .cursor/hooks/bearing-edit-guard.sh
+  .cursor/hooks/bearing-shell-staleness-guard.sh
+  .cursor/hooks/bearing-shell-allowlist.sh
+  .cursor/hooks/bearing-commit-guard.sh
+  .cursor/hooks/bearing-mcp-allowlist.sh
+  .cursor/hooks/bearing-after-git-commit.sh
   .bearing/lib/check-staleness.mjs
   .bearing/lib/load-staleness.mjs
   .bearing/lib/classify.mjs
@@ -131,8 +131,8 @@ cat > "$BUNDLE_ROOT/gitignore.snippet" <<'SNIP'
 .cursor/gitnexus-teaching-bundle.json
 .cursor/gn-kit-manifest.json
 .gitnexus/agent-kit-manifest.json
-.bearing/.gitnexus-session-edits.flag
-.bearing/.gitnexus-session-primed.flag
+.bearing/.bearing-session-edits.flag
+.bearing/.bearing-session-primed.flag
 .bearing/.gitnexus-prompt-hint.json
 .bearing/.gitnexus-refresh-pending.flag
 .bearing/.gitnexus-refresh-failed.flag
@@ -142,8 +142,8 @@ cat > "$BUNDLE_ROOT/gitignore.snippet" <<'SNIP'
 .bearing/.gitnexus-staleness-cache.json
 .bearing/.gitnexus-scorecard.json
 .bearing/.gitnexus-deny-cache.json
-.bearing/.gitnexus-session-health.json
-.bearing/.gitnexus-session-user-notified.flag
+.bearing/.bearing-session-health.json
+.bearing/.bearing-session-user-notified.flag
 .cursor/gitnexus-api-profile.json
 SNIP
 

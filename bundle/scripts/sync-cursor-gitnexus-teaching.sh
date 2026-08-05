@@ -13,18 +13,18 @@ warn()  { printf '\033[1;33m    !\033[0m %s\n' "$*"; }
 fail()  { printf '\033[1;31mERROR:\033[0m %s\n' "$*" >&2; exit 1; }
 
 HOOK_SCRIPTS=(
-  ".cursor/hooks/gitnexus-session-primer.sh"
-  ".cursor/hooks/gitnexus-session-health.sh"
-  ".cursor/hooks/gitnexus-session-health-user.sh"
-  ".cursor/hooks/gitnexus-prompt-router.sh"
-  ".cursor/hooks/gitnexus-grep-guard.sh"
-  ".cursor/hooks/gitnexus-read-guard.sh"
-  ".cursor/hooks/gitnexus-edit-guard.sh"
-  ".cursor/hooks/gitnexus-shell-staleness-guard.sh"
-  ".cursor/hooks/gitnexus-shell-allowlist.sh"
-  ".cursor/hooks/gitnexus-commit-guard.sh"
-  ".cursor/hooks/gitnexus-mcp-allowlist.sh"
-  ".cursor/hooks/gitnexus-after-git-commit.sh"
+  ".cursor/hooks/bearing-session-primer.sh"
+  ".cursor/hooks/bearing-session-health.sh"
+  ".cursor/hooks/bearing-session-health-user.sh"
+  ".cursor/hooks/bearing-prompt-router.sh"
+  ".cursor/hooks/bearing-grep-guard.sh"
+  ".cursor/hooks/bearing-read-guard.sh"
+  ".cursor/hooks/bearing-edit-guard.sh"
+  ".cursor/hooks/bearing-shell-staleness-guard.sh"
+  ".cursor/hooks/bearing-shell-allowlist.sh"
+  ".cursor/hooks/bearing-commit-guard.sh"
+  ".cursor/hooks/bearing-mcp-allowlist.sh"
+  ".cursor/hooks/bearing-after-git-commit.sh"
 )
 
 HOOK_LIBS=(
@@ -96,18 +96,18 @@ const hooks = JSON.parse(fs.readFileSync(hooksPath, 'utf8'));
 const h = hooks.hooks ?? {};
 
 const checks = [
-  ['sessionStart', 'gitnexus-session-primer'],
-  ['sessionStart', 'gitnexus-session-health'],
-  ['beforeSubmitPrompt', 'gitnexus-session-health-user'],
-  ['beforeSubmitPrompt', 'gitnexus-prompt-router'],
-  ['preToolUse', 'gitnexus-shell-staleness-guard'],
-  ['preToolUse', 'gitnexus-grep-guard'],
-  ['preToolUse', 'gitnexus-read-guard'],
-  ['preToolUse', 'gitnexus-edit-guard'],
-  ['beforeShellExecution', 'gitnexus-shell-allowlist'],
-  ['beforeShellExecution', 'gitnexus-commit-guard'],
-  ['beforeMCPExecution', 'gitnexus-mcp-allowlist'],
-  ['afterShellExecution', 'gitnexus-after-git-commit'],
+  ['sessionStart', 'bearing-session-primer'],
+  ['sessionStart', 'bearing-session-health'],
+  ['beforeSubmitPrompt', 'bearing-session-health-user'],
+  ['beforeSubmitPrompt', 'bearing-prompt-router'],
+  ['preToolUse', 'bearing-shell-staleness-guard'],
+  ['preToolUse', 'bearing-grep-guard'],
+  ['preToolUse', 'bearing-read-guard'],
+  ['preToolUse', 'bearing-edit-guard'],
+  ['beforeShellExecution', 'bearing-shell-allowlist'],
+  ['beforeShellExecution', 'bearing-commit-guard'],
+  ['beforeMCPExecution', 'bearing-mcp-allowlist'],
+  ['afterShellExecution', 'bearing-after-git-commit'],
 ];
 
 for (const [event, needle] of checks) {
@@ -145,18 +145,18 @@ const manifest = {
     blockedTools: ['Grep(symbols)', 'Grep(fields→cypher)', 'SemanticSearch', 'Glob(broad src)', 'Read(large src, no offset)'],
     gates: ['session status/refresh', 'session health', 'prompt architecture router', 'query/context explore', 'cypher structural', 'staleness pre-edit', 'impact pre-edit', 'detect_changes pre-done'],
     hookScripts: [
-      'gitnexus-session-primer.sh',
-      'gitnexus-session-health.sh',
-      'gitnexus-session-health-user.sh',
-      'gitnexus-prompt-router.sh',
-      'gitnexus-shell-staleness-guard.sh',
-      'gitnexus-grep-guard.sh',
-      'gitnexus-read-guard.sh',
-      'gitnexus-edit-guard.sh',
-      'gitnexus-shell-allowlist.sh',
-      'gitnexus-commit-guard.sh',
-      'gitnexus-mcp-allowlist.sh',
-      'gitnexus-after-git-commit.sh',
+      'bearing-session-primer.sh',
+      'bearing-session-health.sh',
+      'bearing-session-health-user.sh',
+      'bearing-prompt-router.sh',
+      'bearing-shell-staleness-guard.sh',
+      'bearing-grep-guard.sh',
+      'bearing-read-guard.sh',
+      'bearing-edit-guard.sh',
+      'bearing-shell-allowlist.sh',
+      'bearing-commit-guard.sh',
+      'bearing-mcp-allowlist.sh',
+      'bearing-after-git-commit.sh',
     ],
     agentCli: ['npm run gitnexus:agent-status', 'npm run gitnexus:agent-refresh'],
   },
@@ -254,7 +254,7 @@ fi
 
 info "  [5/5] Quick hook smoke test"
 if printf '%s' '{"tool_name":"SemanticSearch","tool_input":{"query":"test"}}' \
-  | bash .cursor/hooks/gitnexus-grep-guard.sh 2>/dev/null \
+  | bash .cursor/hooks/bearing-grep-guard.sh 2>/dev/null \
   | grep -q 'deny'; then
   ok "SemanticSearch block verified"
 else

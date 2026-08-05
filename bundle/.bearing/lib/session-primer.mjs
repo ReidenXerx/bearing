@@ -11,7 +11,7 @@ export function sessionPaths(root) {
   const stateDir = path.join(root, '.bearing');
   return {
     stateDir,
-    primedFlag: path.join(stateDir, '.gitnexus-session-primed.flag'),
+    primedFlag: path.join(stateDir, '.bearing-session-primed.flag'),
     promptHint: path.join(stateDir, '.gitnexus-prompt-hint.json'),
     refreshPendingFlag: path.join(stateDir, '.gitnexus-refresh-pending.flag'),
     refreshFailedFlag: path.join(stateDir, '.gitnexus-refresh-failed.flag'),
@@ -593,7 +593,7 @@ export function clearSessionState(root) {
       /* ignore */
     }
   }
-  for (const rel of ['.gitnexus-session-user-notified.flag']) {
+  for (const rel of ['.bearing-session-user-notified.flag']) {
     try {
       fs.unlinkSync(path.join(stateDir, rel));
     } catch {

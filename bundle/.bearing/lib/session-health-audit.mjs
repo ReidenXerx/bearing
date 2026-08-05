@@ -8,9 +8,9 @@ import { spawnSync } from "node:child_process";
 import { loadHookConfig, repoName } from "./hook-helpers.mjs";
 import { inspectPersistence } from "./persistence-health.mjs";
 
-export const SESSION_HEALTH_FILE = ".gitnexus-session-health.json";
+export const SESSION_HEALTH_FILE = ".bearing-session-health.json";
 export const SESSION_USER_NOTIFIED_FLAG =
-  ".gitnexus-session-user-notified.flag";
+  ".bearing-session-user-notified.flag";
 
 /**
  * @param {string} root
