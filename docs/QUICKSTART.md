@@ -1,80 +1,83 @@
 # Quick start
 
-Install **gitnexus-agent-kit** into any git repo. The kit copies hooks, rules, skills, and scripts, merges MCP config (Cursor), wires Zed agent profiles, builds the graph index, and runs a full verification audit.
-
-**Why teams install it:** enforce graph-first agent work on **every model tier** — biggest lift on fast/budget/local models; flagship models run leaner with the same gates. Structure lives in the graph, not in parameter count.
+Install **bearing** into any git repo. It copies hooks, rules and skills, wires your IDE, and — if you choose the GitNexus module — builds the code graph and verifies the stack.
 
 ## Prerequisites
 
 | Requirement | Notes |
 |-------------|--------|
 | Node.js ≥ 22.9.0 | `node -v` |
-| git | Target must be a worktree |
-| bash | macOS / Linux / WSL |
-| Cursor / Zed / Claude Code | Pick runtime at install: `cursor` · `zed` · `claude` · `both` (=cursor+zed, default) · `all` (=cursor+zed+claude) |
+| git | target must be a worktree |
+| An agent runtime | Claude Code · Cursor · Zed · Codex |
+| *(GitNexus module only)* | the [GitNexus](https://github.com/abhigyanpatwari/GitNexus) MCP server |
 
-After `--quick` install, run `npm run gitnexus:agent-refresh` in the **target repo** before graph tools work.
-
-## Install (from this repo)
+## Install
 
 ```bash
-git clone https://github.com/ReidenXerx/gitnexus-agent-kit.git
-cd gitnexus-agent-kit
-
-# Interactive — pick repo path + IDE
-./bin/install.sh
-
-# Full install + index build (few minutes)
-./bin/install.sh /path/to/your-repo --runtime both
-
-# Cursor hooks only
-./bin/install.sh /path/to/your-repo --runtime cursor
-
-# Zed + Ollama profile only
-./bin/install.sh /path/to/your-repo --runtime zed
-
-# Everything — Cursor + Zed + Claude Code
-./bin/install.sh /path/to/your-repo --runtime all
-
-# Claude Code only (hooks + MCP + CLAUDE.md)
-./bin/install.sh /path/to/your-repo --runtime claude
-
-# Hooks/skills only — index later
-./bin/install.sh /path/to/your-repo --quick
-
-# Copy bundle only — skip gitnexus-setup
-./bin/install.sh /path/to/your-repo --no-setup
+npx bearing            # interactive — explains each module, you pick
 ```
 
-Custom GitNexus registry name (when folder basename ≠ indexed repo name):
+Or be explicit:
 
 ```bash
-./bin/install.sh /path/to/your-repo --repo-name my-registered-repo-name
+npx bearing install /path/to/repo --runtime claude --features northstars,taskcore
+npx bearing install /path/to/repo --runtime all    --features all
+```
+
+### Runtimes
+
+`claude` · `cursor` · `zed` · `codex` · `both` (=cursor+zed) · `all` — or a comma list like `cursor,claude`.
+
+Only Claude Code and Cursor expose tool-interception hooks, so only they can *enforce*. On Zed and Codex the same rules arrive as instruction via `AGENTS.md`. See the matrix in the [README](../README.md#module-support-by-runtime).
+
+### Features
+
+`northstars` · `taskcore` · `microscope` · `gitnexus` · `all`
+
+Each module installs and works independently — none depends on another. Choosing fewer ships fewer files: an intel-only install (`northstars,taskcore,microscope`) writes 9 libs, 3 skills and 4 hooks, with no enforcement gates at all.
+
+Your selection is recorded in the manifest and **inherited on update**, so you only pass `--features` to change it.
+
+### Other flags
+
+```bash
+--quick        # skip the graph index build (GitNexus module); build it later
+--no-setup     # copy the bundle only — no setup, no index
+--skip-verify  # skip the post-install audit
+--repo-name X  # when the folder name ≠ the indexed repo name
+```
+
+### From a clone
+
+```bash
+git clone https://github.com/ReidenXerx/bearing.git
+cd bearing
+./bin/install.sh /path/to/repo --runtime all
 ```
 
 ## After install (target repo)
 
 1. **Restart your IDE** on the target project — MCP + hooks (Cursor), agent profile (Zed), or hooks + MCP + `CLAUDE.md` (Claude Code) load on restart.
-2. `npm run gitnexus:verify` — runtime-aware kit audit (also runs at end of install).
-3. `npm run gitnexus:health` — human-friendly status for your team.
+2. `npm run bearing:verify` — runtime-aware kit audit (also runs at end of install).
+3. `npm run bearing:health` — human-friendly status for your team.
 4. Open a **new Agent chat** and describe your task.
 5. Share [`docs/GITNEXUS-CURSOR-GUIDE.md`](../bundle/docs/GITNEXUS-CURSOR-GUIDE.md) with the team (copied to target on install).
 
-> Install overwrites `.cursor/hooks.json` when runtime includes Cursor. Existing file is backed up to `.cursor/hooks.json.gn-kit.bak`. Global `~/.cursor/mcp.json` is not modified.
+> Install overwrites `.cursor/hooks.json` when runtime includes Cursor. Existing file is backed up to `.cursor/hooks.json.bearing.bak`. Global `~/.cursor/mcp.json` is not modified.
 
 ## What install does
 
 ```
-bin/install.sh
+bearing install
   → stepped banner UI (validate → migrate legacy → copy → merge → manifest → setup)
-  → migrate legacy cursor-gitnexus-kit layout (rsync skills, old manifest, zed profile)
+  → migrate legacy bearing layout (rsync skills, old manifest, zed profile)
   → copy bundle (rules, hooks, skills store, scripts, team guide)
   → materialize .bearing/skills/ + symlink into .cursor/ and/or .agents/
-  → merge gated package.json gitnexus:* scripts + .cursor/mcp.json (Cursor)
+  → merge gated package.json bearing:* scripts + .cursor/mcp.json (Cursor)
   → merge .zed/settings.json + AGENTS.md (Zed)
   → gitnexus-setup.sh (--skip-global-mcp)
       → build .gitnexus/ index (unless --quick)
-  → npm run gitnexus:verify
+  → npm run bearing:verify
 ```
 
 Skills live once in `.bearing/skills/` and are **symlinked** — not copied — into IDE skill paths. Updates replace the store and refresh symlinks.
@@ -108,31 +111,31 @@ Restart your IDE after updating.
 ## Daily commands (target repo)
 
 ```bash
-npm run gitnexus:verify          # full kit check (cursor / zed / both)
-npm run gitnexus:health          # team-friendly status
-npm run gitnexus:agent-brief     # session orientation (agents)
-npm run gitnexus:agent-status    # staleness (agents)
-npm run gitnexus:agent-refresh   # re-index when stale
-npm run gitnexus:branch-status   # branch/base summary + branch-aware MCP calls
-npm run gitnexus:pr-impact       # branch-aware PR review playbook
-npm run gitnexus:pdg             # incremental embeddings + skills + PDG (mid-session)
-npm run gitnexus:full-pdg        # full --force rebuild + PDG (pre-commit hook uses this)
-npm run gitnexus:graph-smoke     # Cypher / ACCESSES sanity (CI)
-npm run gitnexus:detect-api      # HTTP router profile
-npm run gitnexus:sync-teaching   # after pulling kit updates
+npm run bearing:verify          # full kit check (cursor / zed / both)
+npm run bearing:health          # team-friendly status
+npm run bearing:agent-brief     # session orientation (agents)
+npm run bearing:agent-status    # staleness (agents)
+npm run bearing:agent-refresh   # re-index when stale
+npm run bearing:branch-status   # branch/base summary + branch-aware MCP calls
+npm run bearing:pr-impact       # branch-aware PR review playbook
+npm run bearing:pdg             # incremental embeddings + skills + PDG (mid-session)
+npm run bearing:full-pdg        # full --force rebuild + PDG (pre-commit hook uses this)
+npm run bearing:graph-smoke     # Cypher / ACCESSES sanity (CI)
+npm run bearing:detect-api      # HTTP router profile
+npm run bearing:sync-teaching   # after pulling kit updates
 ```
 
 ### Gate docs in package.json
 
 ```bash
-npm run gitnexus.__gate.1.session      # Gate 1 — health, brief, status
-npm run gitnexus.__gate.2.orient         # Gate 2–4 — orient + MCP
-npm run gitnexus.__gate.5.index          # Gate 5 — refresh / embeddings
-npm run gitnexus.__gate.6.verify         # Install / CI verification
-npm run gitnexus.__gate.kit.maintainer   # setup, sync, pack, hooks
+npm run bearing.__gate.1.session      # Gate 1 — health, brief, status
+npm run bearing.__gate.2.orient         # Gate 2–4 — orient + MCP
+npm run bearing.__gate.5.index          # Gate 5 — refresh / embeddings
+npm run bearing.__gate.6.verify         # Install / CI verification
+npm run bearing.__gate.kit.maintainer   # setup, sync, pack, hooks
 ```
 
-Source: `scripts/gitnexus-teaching/script-gates.mjs`
+Source: `scripts/bearing-teaching/script-gates.mjs`
 
 ## Advanced capabilities
 
@@ -140,10 +143,10 @@ Source: `scripts/gitnexus-teaching/script-gates.mjs`
 |------------|------------------|
 | **Cypher** | Field ACCESSES, N-hop CALLS — `grep-guard`, `read-guard`, `agent-brief` |
 | **`rename` MCP** | Graph-coordinated rename — `edit-guard`, prompt-router |
-| **API router profile** | `npm run gitnexus:detect-api` → `.cursor/gitnexus-api-profile.json` |
-| **Branch-aware PR review** | `npm run gitnexus:branch-status -- main`; `npm run gitnexus:pr-impact -- main` |
-| **PDG pre-commit refresh** | `.githooks/pre-commit` runs `npm run gitnexus:full-pdg` before `gitnexus:graph-smoke` |
-| **Graph smoke test** | `npm run gitnexus:graph-smoke`; pre-commit after PDG refresh |
+| **API router profile** | `npm run bearing:detect-api` → `.cursor/gitnexus-api-profile.json` |
+| **Branch-aware PR review** | `npm run bearing:branch-status -- main`; `npm run bearing:pr-impact -- main` |
+| **PDG pre-commit refresh** | `.githooks/pre-commit` runs `npm run bearing:full-pdg` before `bearing:graph-smoke` |
+| **Graph smoke test** | `npm run bearing:graph-smoke`; pre-commit after PDG refresh |
 | **Zed + Ollama** | See [ZED.md](./ZED.md) — **Zed + GitNexus** profile, local model hints |
 
 See [Architecture](./ARCHITECTURE.md) for diagrams and failure-mode mapping. See [Skills](./SKILLS.md) for task-to-skill routing.

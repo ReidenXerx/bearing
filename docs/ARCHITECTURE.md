@@ -1,6 +1,6 @@
 # Architecture — why agents ignore GitNexus (and how this kit fixes it)
 
-GitNexus builds the knowledge graph. **gitnexus-agent-kit** is the agent layer for **Cursor, Zed, and Ollama**: hooks (Cursor), agent profiles (Zed), shared symlinked skills, MCP wiring, and install UX so the graph participates in **every task** — not only when code feels unfamiliar.
+GitNexus builds the knowledge graph. **bearing** is the agent layer for **Cursor, Zed, and Ollama**: hooks (Cursor), agent profiles (Zed), shared symlinked skills, MCP wiring, and install UX so the graph participates in **every task** — not only when code feels unfamiliar.
 
 Production-hardened across real repositories. Proposed upstream integration: `gitnexus init --cursor-kit`.
 
@@ -19,7 +19,7 @@ flowchart LR
     G --> A[Act — hit or miss]
   end
 
-  subgraph kit["Any model + gitnexus-agent-kit"]
+  subgraph kit["Any model + bearing"]
     P2[Prompt] --> H[Hooks enforce gate loop]
     H --> GN["query → context → cypher"]
     GN --> I[impact / detect_changes]
@@ -61,7 +61,7 @@ flowchart TB
     T1 -.->|only when lost| GN1["GitNexus (optional)"]
   end
 
-  subgraph every["gitnexus-agent-kit — every task"]
+  subgraph every["bearing — every task"]
     T2["Any task — fix, edit, review, explore"]
     T2 --> B2[session brief + health]
     B2 --> G2{Graph fresh?}
@@ -162,7 +162,7 @@ sequenceDiagram
   Health->>Agent: additional_context — health ritual required
   User->>Cursor: first message
   Cursor->>User: user_message — kit active + status
-  Agent->>Agent: npm run gitnexus:agent-status
+  Agent->>Agent: npm run bearing:agent-status
   Agent->>User: one line — GitNexus kit ready
 ```
 
@@ -187,7 +187,7 @@ flowchart TD
 
 **Problem:** Rules, hooks, MCP, skills, npm scripts, and index build are separate steps — teams skip pieces.
 
-**Our fix:** One installer copies the bundle, **migrates legacy cursor-gitnexus-kit layouts**, materializes a canonical skill store, symlinks into IDE paths, merges gated scripts + MCP (Cursor) or Zed profile, builds the index, runs verification.
+**Our fix:** One installer copies the bundle, **migrates legacy bearing layouts**, materializes a canonical skill store, symlinks into IDE paths, merges gated scripts + MCP (Cursor) or Zed profile, builds the index, runs verification.
 
 ```mermaid
 flowchart TB
@@ -199,9 +199,9 @@ flowchart TB
   MC --> S[gitnexus-setup.sh]
   MZ --> S
   S --> IDX["Build .gitnexus/ + embeddings"]
-  IDX --> V["gitnexus:verify"]
+  IDX --> V["bearing:verify"]
   V --> R[Restart IDE]
-  R --> H["gitnexus:health"]
+  R --> H["bearing:health"]
   H --> C[New Agent chat]
 ```
 
@@ -243,7 +243,7 @@ flowchart TD
 | Grep-first habits | `grep-guard`, `read-guard`, `prompt-router` |
 | Skips embeddings | Blocks SemanticSearch → `query` |
 | Stale / missing vectors | `check-staleness`, session-primer, shell/edit guards |
-| “Is it working?” | `session-health`, `gitnexus:health`, `gitnexus:verify` |
+| “Is it working?” | `session-health`, `bearing:health`, `bearing:verify` |
 | Unsafe edits | `edit-guard`, `impact`, `detect_changes` |
 | Field/property grep | `cypher-helpers`, ACCESSES in `grep-guard` |
 | Blind symbol renames | `rename` MCP + `edit-guard` |
@@ -274,9 +274,9 @@ Agents still **`query` first** for fuzzy work — Cypher is gate #4, not a grep 
 | Cypher integration | `cypher-helpers.mjs`; field grep → ACCESSES |
 | `.bearing/skills/` + symlinks | Canonical skill store → `.cursor/skills/`, `.agents/skills/` |
 | `scripts/gitnexus-*` | Setup, sync, agent CLI, pack, git hooks |
-| `.githooks/pre-commit` | Full PDG re-index on commit (`gitnexus:full-pdg`) |
+| `.githooks/pre-commit` | Full PDG re-index on commit (`bearing:full-pdg`) |
 | `.cursor/mcp.json` | Merges `gitnexus` MCP server (Cursor) |
-| Gated `package.json` scripts | `gitnexus:health`, `gitnexus:verify`, gate docs |
+| Gated `package.json` scripts | `bearing:health`, `bearing:verify`, gate docs |
 
 Per-target repo (built locally): `.gitnexus/` index, `.cursor/skills/generated/` area skills.
 
@@ -288,7 +288,7 @@ Per-target repo (built locally): `.gitnexus/` index, `.cursor/skills/generated/`
 | **zed** | Profile + AGENTS.md (soft vs Cursor hooks) | `.zed/settings.json`, `.agents/skills` → store |
 | **both** (default) | Cursor hard + Zed profile | All of the above |
 
-**Update migration:** every `install` / `update` runs `migrateLegacyInstall` — removes old rsync'd skill copies, `.claude/skills/gitnexus*`, legacy `.cursor/gn-kit-manifest.json`, and renames Zed profile `gitnexus` → `zed-gitnexus`.
+**Update migration:** every `install` / `update` runs `migrateLegacyInstall` — it moves `.gnkit/` → `.bearing/` (preserving north-stars, task-core and per-machine config), renames the data files that dropped their `gitnexus-` prefix, removes old rsync'd skill copies and legacy manifests, and cleans hook entries written under the previous name. Legacy `gitnexus:*` npm scripts are kept as working aliases so user-owned git hooks that call them by name keep working.
 
 ## Bundle layout
 

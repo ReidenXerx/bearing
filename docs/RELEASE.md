@@ -1,6 +1,6 @@
 # Release checklist
 
-Use this checklist before tagging or publishing `gitnexus-agent-kit`.
+Use this checklist before tagging or publishing `bearing`.
 
 ## 1. Version and changelog
 
@@ -43,7 +43,15 @@ Use temporary git repos for each runtime.
 
 - [ ] Fresh install: `--runtime cursor --quick --no-setup`
 - [ ] Fresh install: `--runtime zed --quick --no-setup`
-- [ ] Fresh install: `--runtime both --quick --no-setup`
+- [ ] Fresh install: `--runtime claude --quick --no-setup`
+- [ ] Fresh install: `--runtime codex --quick --no-setup`
+- [ ] Fresh install: `--runtime all --quick --no-setup`
+- [ ] Feature subset: `--features northstars,taskcore,microscope` — assert NO enforcement gates land
+      and every installed hook still runs (a core module must never import a feature module)
+- [ ] Upgrade from a legacy `.gnkit/` install — assert north-stars, task-core and per-machine
+      config all survive, and that legacy `gitnexus:*` script aliases still resolve
+- [ ] `npm pack` → install the tarball in a scratch consumer → run the symlinked binary (catches
+      npm's bin-symlink resolution, which silently broke the old bash wrappers)
 - [ ] Update existing cursor-only → `--runtime both --no-setup --skip-verify`
 - [ ] Update existing zed-only → `--runtime both --no-setup --skip-verify`
 - [ ] `./bin/update.sh --all <tmp-workspace> --runtime both --no-setup --skip-verify`
@@ -62,14 +70,14 @@ In a real target repo after update:
   - `.zed/settings.json`
   - `.agents/skills/gitnexus-workspace`
   - `AGENTS.md`
-- [ ] `npm run gitnexus:health`
-- [ ] `npm run gitnexus:verify`
-- [ ] `npm run gitnexus:branch-status -- main` or repo base branch
+- [ ] `npm run bearing:health`
+- [ ] `npm run bearing:verify`
+- [ ] `npm run bearing:branch-status -- main` or repo base branch
 
 ## 6. GitNexus v1.6.8 capability smoke
 
 - [ ] Agent brief shows routing for `trace`, `pdg_query`, `explain`, and Cypher.
-- [ ] Pre-commit hook calls `npm run gitnexus:full-pdg` before `gitnexus:graph-smoke`.
+- [ ] Pre-commit hook calls `npm run bearing:full-pdg` before `bearing:graph-smoke`.
 - [ ] Security review skill warns that no taint/PDG layer is not proof of safety.
 - [ ] MCP snippets use current parameter names:
   - `gitnexus_query({ search_query: ... })`

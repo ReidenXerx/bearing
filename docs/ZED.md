@@ -14,7 +14,7 @@ Install with:
 | `.agents/skills/*` | Symlinks → `.bearing/skills/` (20 playbooks incl. `gitnexus-local`) |
 | `.zed/settings.json` | `context_servers.gitnexus` + **Zed + GitNexus** agent profile (grep off) |
 | `AGENTS.md` | Always-on graph-first instructions |
-| npm `gitnexus:*` gates | Same playbook as Cursor installs |
+| npm `bearing:*` gates | Same playbook as Cursor installs |
 
 ## First session in Zed
 
@@ -22,7 +22,7 @@ Install with:
 2. Agent panel → **profile: Zed + GitNexus** (your Zed/Ollama model + gitnexus MCP; grep disabled).
 3. Pick your model — for **Ollama**, use a entry with `"supports_tools": true` in `.zed/settings.json` (qwen2.5-coder pre-seeded).
 4. Start chat → invoke `/gitnexus-enforcement` or `/gitnexus-local` on hard tasks.
-5. Stale graph → `npm run gitnexus:agent-refresh` in terminal (agent should run this autonomously per `AGENTS.md`).
+5. Stale graph → `npm run bearing:agent-refresh` in terminal (agent should run this autonomously per `AGENTS.md`).
 
 ## Ollama models
 

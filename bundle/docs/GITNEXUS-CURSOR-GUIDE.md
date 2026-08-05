@@ -81,8 +81,8 @@ What did my local changes affect? Am I done?
 
 | Task | Command |
 |------|---------|
-| Install kit into a repo | `gitnexus-agent-kit/bin/install.sh /path/to/repo` |
-| Update after kit release | `gitnexus-agent-kit/bin/update.sh /path/to/repo` |
+| Install kit into a repo | `bearing/bin/install.sh /path/to/repo` |
+| Update after kit release | `bearing/bin/update.sh /path/to/repo` |
 | Human status | `npm run bearing:health` |
 | Re-index (humans / CI) | `npm run bearing:refresh` |
 | Agent re-index | `npm run bearing:agent-refresh` (agents run this autonomously) |

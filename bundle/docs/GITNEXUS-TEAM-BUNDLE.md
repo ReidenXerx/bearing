@@ -2,7 +2,7 @@
 
 Portable **rules + hooks + skills + scripts** for graph-first agents (Cursor hooks, Zed profiles). Built for this repo; reusable on other projects with one rename step.
 
-> **Standalone installer:** [`gitnexus-agent-kit`](https://github.com/ReidenXerx/gitnexus-agent-kit) — `install` / `update` / `uninstall` scripts for any repo (upstream for this teaching bundle). Updates **migrate** legacy `cursor-gitnexus-kit` layouts automatically.
+> **Standalone installer:** [`bearing`](https://github.com/ReidenXerx/bearing) — `install` / `update` / `uninstall` scripts for any repo (upstream for this teaching bundle). Updates **migrate** legacy `bearing` layouts automatically.
 
 > **Team-facing guide:** `docs/GITNEXUS-CURSOR-GUIDE.md` — plain language for developers (what enforcement feels like, `npm run bearing:health`).
 
@@ -80,7 +80,7 @@ GITNEXUS_REPO_NAME=their-repo-name bash scripts/bearing-teaching/install-from-bu
 Or use the standalone kit (recommended):
 
 ```bash
-/path/to/gitnexus-agent-kit/bin/install.sh /path/to/their-repo --runtime both
+/path/to/bearing/bin/install.sh /path/to/their-repo --runtime both
 ```
 
 ## After install (every dev)

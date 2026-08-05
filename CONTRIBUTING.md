@@ -5,8 +5,8 @@ Thanks for helping make graph-first Cursor agents the default — not the sideca
 ## Quick dev loop
 
 ```bash
-git clone https://github.com/ReidenXerx/cursor-gitnexus-kit.git
-cd cursor-gitnexus-kit
+git clone https://github.com/ReidenXerx/bearing.git
+cd bearing
 npm test
 ```
 
@@ -24,7 +24,7 @@ npm test
 
 1. Edit under `bundle/` (rules, hooks, skills, scripts).
 2. Run `npm test`.
-3. Install into a scratch git repo and run `npm run gitnexus:verify` there.
+3. Install into a scratch git repo and run `npm run bearing:verify` there.
 4. Open a PR with the test plan checklist filled in.
 
 ## Syncing from a production repo
@@ -43,4 +43,4 @@ npm test
 
 ## Questions
 
-Open a [Discussion](https://github.com/ReidenXerx/cursor-gitnexus-kit/discussions) or issue with the **install / hooks / verify** output attached.
+Open a [Discussion](https://github.com/ReidenXerx/bearing/discussions) or issue with the **install / hooks / verify** output attached.
