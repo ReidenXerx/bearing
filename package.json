@@ -1,9 +1,9 @@
 {
   "name": "gitnexus-agent-kit",
   "version": "1.2.0",
-  "description": "Agent enforcement layer for GitNexus \u2014 Cursor, Zed, and Ollama; graph-first agents on every model tier",
+  "description": "Intel layer for AI coding agents — cognitive routines that keep agents anchored: semantic north-stars, task-core save-state across compaction, deep multi-lens review. Cursor, Zed, Claude Code.",
   "type": "module",
-  "private": true,
+  "private": false,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ReidenXerx/gitnexus-agent-kit.git"
@@ -13,12 +13,12 @@
     "url": "https://github.com/ReidenXerx/gitnexus-agent-kit/issues"
   },
   "bin": {
-    "gn-agent-kit": "./bin/install.sh",
-    "gn-agent-kit-update": "./bin/update.sh",
-    "gn-agent-kit-uninstall": "./bin/uninstall.sh",
-    "gn-kit-install": "./bin/install.sh",
-    "gn-kit-update": "./bin/update.sh",
-    "gn-kit-uninstall": "./bin/uninstall.sh"
+    "gn-kit": "./bin/cli.mjs",
+    "gn-kit-update": "./bin/cli.mjs",
+    "gn-kit-uninstall": "./bin/cli.mjs",
+    "gn-agent-kit": "./bin/cli.mjs",
+    "gn-agent-kit-update": "./bin/cli.mjs",
+    "gn-agent-kit-uninstall": "./bin/cli.mjs"
   },
   "engines": {
     "node": ">=22.9.0"
@@ -33,18 +33,26 @@
     "test": "node --test lib/kit.test.mjs"
   },
   "keywords": [
+    "ai",
+    "agent",
+    "claude",
+    "claude-code",
     "cursor",
     "zed",
-    "ollama",
-    "gitnexus",
     "mcp",
+    "llm",
+    "code-review",
+    "context",
     "ai-agents",
-    "agent-skills",
-    "code-intelligence",
-    "knowledge-graph",
-    "cursor-hooks",
-    "cypher",
     "developer-tools"
   ],
-  "license": "ISC"
+  "license": "ISC",
+  "files": [
+    "bin",
+    "lib",
+    "bundle",
+    "README.md",
+    "LICENSE",
+    "!lib/*.test.mjs"
+  ]
 }
