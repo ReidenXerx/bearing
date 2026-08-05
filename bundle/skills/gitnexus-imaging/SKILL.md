@@ -47,10 +47,10 @@ Always tell the user in one sentence when bypassing graph-first imaging.
 ## Mandatory prep
 
 ```
-READ gitnexus://repo/__GITNEXUS_REPO__/context   → staleness first
+READ bearing://repo/__GITNEXUS_REPO__/context   → staleness first
 ```
 
-If stale → **Cursor agents:** `npm run gitnexus:agent-refresh` autonomously. **Humans/CI:** `npm run gitnexus:refresh` (`gitnexus:full-pdg` for pre-commit precision). Hooks block runtime edits until fresh.
+If stale → **Cursor agents:** `npm run bearing:agent-refresh` autonomously. **Humans/CI:** `npm run bearing:refresh` (`bearing:full-pdg` for pre-commit precision). Hooks block runtime edits until fresh.
 
 ---
 
@@ -67,7 +67,7 @@ If stale → **Cursor agents:** `npm run gitnexus:agent-refresh` autonomously. *
      repo: "__GITNEXUS_REPO__"
    })
 3. Pick top 1–3 processes from results
-4. READ gitnexus://repo/__GITNEXUS_REPO__/process/{name} for each
+4. READ bearing://repo/__GITNEXUS_REPO__/process/{name} for each
 5. context({name}) on entry + hub symbols (2–4 symbols max)
 6. Read source ONLY at lines cited by context/process — use offset/limit
 ```
@@ -89,8 +89,8 @@ Modules touched: (cluster names from the graph)
 **Trigger:** "What's in area X?", "Map the <area> module"
 
 ```
-1. READ gitnexus://repo/__GITNEXUS_REPO__/clusters
-2. READ gitnexus://repo/__GITNEXUS_REPO__/cluster/{AreaName}
+1. READ bearing://repo/__GITNEXUS_REPO__/clusters
+2. READ bearing://repo/__GITNEXUS_REPO__/cluster/{AreaName}
 3. query({ search_query: "{AreaName} entry points", task_context: "area map", goal: "entry symbols" })
 4. context on 2–3 entry symbols listed in cluster
 ```
@@ -117,7 +117,7 @@ Stop at process / cluster boundaries, not every leaf.
 **Trigger:** "Who reads/writes `<field>`?", "Where is `<field>` consumed?"
 
 ```
-1. READ gitnexus://repo/__GITNEXUS_REPO__/schema  (if unfamiliar with cypher)
+1. READ bearing://repo/__GITNEXUS_REPO__/schema  (if unfamiliar with cypher)
 2. cypher — ACCESSES edges with reason read/write on field name
 3. context on writers first, then readers
 4. detect_changes if field changed in WIP
@@ -134,8 +134,8 @@ Widen impact with `relationTypes: ["CALLS","IMPORTS","ACCESSES"]` when editing f
 Discover the repo's high-value spines from the graph instead of guessing:
 
 ```
-1. READ gitnexus://repo/__GITNEXUS_REPO__/clusters   → top functional areas
-2. READ gitnexus://repo/__GITNEXUS_REPO__/processes  → longest / most-connected flows
+1. READ bearing://repo/__GITNEXUS_REPO__/clusters   → top functional areas
+2. READ bearing://repo/__GITNEXUS_REPO__/processes  → longest / most-connected flows
 3. query({ search_query: "<feature> end to end", task_context: "cross-module change", goal: "spine processes" })
 ```
 

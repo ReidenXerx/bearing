@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 # Full GitNexus re-index (force) with PDG before each commit; smoke-test graph integrity.
 # Full --force rebuild keeps control/data-dependence + taint flows accurate at commit
-# boundaries (vs. the lighter incremental gitnexus:pdg used mid-session).
+# boundaries (vs. the lighter incremental bearing:pdg used mid-session).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-npm run gitnexus:full-pdg
+npm run bearing:full-pdg
 # Keep AGENTS.md/CLAUDE.md free of the volatile GitNexus stats block that
 # full-pdg's analyze re-injects, so commits don't carry machine-specific churn.
 if [[ -f ".bearing/lib/stabilize-agent-docs.mjs" ]]; then
   node .bearing/lib/stabilize-agent-docs.mjs . || true
 fi
-npm run gitnexus:graph-smoke
+npm run bearing:graph-smoke

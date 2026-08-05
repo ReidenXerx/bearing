@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Sync GitNexus teaching bundle into Cursor-native paths (.cursor/skills).
 # Source of truth: .bearing/skills/ + .cursor/rules/ + .cursor/hooks/
-# Run via: npm run gitnexus:setup (or directly)
+# Run via: npm run bearing:setup (or directly)
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -54,9 +54,9 @@ HOOK_LIBS=(
   ".bearing/lib/session-health-context.mjs"
   ".bearing/lib/verify-kit.mjs"
   ".bearing/gitnexus-hooks.json"
-  "scripts/gitnexus-agent.mjs"
-  "scripts/gitnexus-gate-hint.mjs"
-  "scripts/gitnexus-teaching/script-gates.mjs"
+  "scripts/bearing-agent.mjs"
+  "scripts/bearing-gate-hint.mjs"
+  "scripts/bearing-teaching/script-gates.mjs"
   "scripts/lib/setup-ui.mjs"
 )
 
@@ -158,7 +158,7 @@ const manifest = {
       'bearing-mcp-allowlist.sh',
       'bearing-after-git-commit.sh',
     ],
-    agentCli: ['npm run gitnexus:agent-status', 'npm run gitnexus:agent-refresh'],
+    agentCli: ['npm run bearing:agent-status', 'npm run bearing:agent-refresh'],
   },
   components: {
     rules: [
@@ -174,8 +174,8 @@ const manifest = {
     generatedAreaSkills: listSkills('.cursor/skills/generated'),
   },
   workflowChain: [
-    'READ gitnexus://repo/__GITNEXUS_REPO__/context',
-    'READ gitnexus://repo/__GITNEXUS_REPO__/schema',
+    'READ bearing://repo/__GITNEXUS_REPO__/context',
+    'READ bearing://repo/__GITNEXUS_REPO__/schema',
     'query({query, task_context, goal})',
     'context({name|uid})',
     'cypher({query, params})',
@@ -186,10 +186,10 @@ const manifest = {
 
 fs.mkdirSync('.cursor', { recursive: true });
 fs.writeFileSync(
-  '.cursor/gitnexus-teaching-bundle.json',
+  '.cursor/bearing-teaching-bundle.json',
   JSON.stringify(manifest, null, 2) + '\n'
 );
-console.log('    ✓ Wrote .cursor/gitnexus-teaching-bundle.json (v2 enforcement)');
+console.log('    ✓ Wrote .cursor/bearing-teaching-bundle.json (v2 enforcement)');
 NODE
 }
 

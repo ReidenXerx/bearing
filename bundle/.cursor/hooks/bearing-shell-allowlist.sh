@@ -13,11 +13,11 @@ function out(obj) {
 }
 
 const allowed =
-  /\bnpm run gitnexus:[\w:-]+/.test(command) ||
+  /\bnpm run bearing:[\w:-]+/.test(command) ||
   /\bnode scripts\/gitnexus-agent\.mjs\b/.test(command) ||
   /\bnpx(?:\s+-y)?\s+gitnexus@latest\b/.test(command) ||
   /\bnpx(?:\s+-y)?\s+gitnexus\b/.test(command) ||
-  /\bbash scripts\/(gitnexus-setup|sync-cursor-gitnexus-teaching)\.sh\b/.test(command);
+  /\bbash scripts\/(gitnexus-setup|sync-cursor-bearing-teaching)\.sh\b/.test(command);
 
 if (allowed) {
   out({

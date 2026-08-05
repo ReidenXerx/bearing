@@ -21,7 +21,7 @@ This is the *operate* counterpart to `gitnexus-architecture-review` (which *judg
 
 ```
 1. Map the layers:
-   READ gitnexus://repo/{name}/clusters        → functional areas ≈ layers/modules
+   READ bearing://repo/{name}/clusters        → functional areas ≈ layers/modules
    (HTTP? check .bearing/gitnexus-api-profile.json → framework vs custom router)
 2. Trace one feature top-to-bottom:
    query({search_query:"<feature>"}) → READ process/<flow>   → the cross-layer chain + step order
@@ -35,7 +35,7 @@ This is the *operate* counterpart to `gitnexus-architecture-review` (which *judg
 5. Edit at the owning layer; detect_changes → confirm the ripple stayed within intended layers.
 ```
 
-> Stale index → `npm run gitnexus:agent-refresh` (autonomous). PDG/taint steps need `analyze --pdg`.
+> Stale index → `npm run bearing:agent-refresh` (autonomous). PDG/taint steps need `analyze --pdg`.
 
 ## Moves for layered work
 

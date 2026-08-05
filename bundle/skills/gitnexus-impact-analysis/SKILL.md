@@ -18,7 +18,7 @@ description: "Use when the user wants to know what will break if they change som
 
 ```
 1. impact({target: "X", direction: "upstream"})  → What depends on this
-2. READ gitnexus://repo/{name}/processes                   → Check affected execution flows
+2. READ bearing://repo/{name}/processes                   → Check affected execution flows
 3. detect_changes()                               → Map current git changes to affected flows
 4. Assess risk and report to user
 ```
@@ -97,7 +97,7 @@ detect_changes({scope: "staged"})
    → d=1: loginHandler, apiMiddleware (WILL BREAK)
    → d=2: authRouter, sessionManager (LIKELY AFFECTED)
 
-2. READ gitnexus://repo/my-app/processes
+2. READ bearing://repo/my-app/processes
    → LoginFlow and TokenRefresh touch validateUser
 
 3. Risk: 2 direct callers, 2 processes = MEDIUM

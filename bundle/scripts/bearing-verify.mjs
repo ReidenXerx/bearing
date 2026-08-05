@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Unified gitnexus-agent-kit verification (runtime-aware).
- * Usage: node scripts/gitnexus-verify.mjs [repoRoot] [--json]
+ * Usage: node scripts/bearing-verify.mjs [repoRoot] [--json]
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -60,14 +60,14 @@ function checkPackageGates() {
   try {
     const scripts = JSON.parse(fs.readFileSync(p, 'utf8')).scripts ?? {};
     const ok =
-      Object.keys(scripts).some((k) => k.startsWith('gitnexus.__gate.')) &&
-      scripts['gitnexus:verify'] &&
-      scripts['gitnexus:agent-brief'];
+      Object.keys(scripts).some((k) => k.startsWith('bearing.__gate.')) &&
+      scripts['bearing:verify'] &&
+      scripts['bearing:agent-brief'];
     return {
       id: 'pkg_gates',
       ok,
       label: 'package.json gates',
-      detail: ok ? 'gated gitnexus:* scripts injected' : 'run kit install/update',
+      detail: ok ? 'gated bearing:* scripts injected' : 'run kit install/update',
     };
   } catch {
     return { id: 'pkg_gates', ok: false, label: 'package.json gates', detail: 'invalid JSON' };
@@ -166,8 +166,8 @@ const CURSOR_CRITICAL = [
   '.cursor/hooks.json',
   '.bearing/lib/hook-helpers.mjs',
   '.bearing/lib/stale-policy.mjs',
-  'scripts/gitnexus-agent.mjs',
-  'scripts/gitnexus-verify.mjs',
+  'scripts/bearing-agent.mjs',
+  'scripts/bearing-verify.mjs',
 ];
 
 const HOOK_SCRIPTS = [
@@ -257,16 +257,16 @@ async function printHuman(report) {
     (c) => !c.ok && !['health:graph_fresh', 'health:embeddings'].includes(c.id)
   );
   if (hardFail) {
-    ui.fail('Kit incomplete — run kit update, then npm run gitnexus:verify');
+    ui.fail('Kit incomplete — run kit update, then npm run bearing:verify');
     return 1;
   }
   if (!report.health.healthy) {
-    ui.warn('Graph stale or missing embeddings — npm run gitnexus:agent-refresh');
+    ui.warn('Graph stale or missing embeddings — npm run bearing:agent-refresh');
   } else {
     ui.ok('Kit verified');
   }
 
-  const steps = ['npm run gitnexus:health'];
+  const steps = ['npm run bearing:health'];
   if (wantsCursor(report.runtime)) steps.unshift('Restart Cursor (MCP + hooks)');
   if (wantsZed(report.runtime)) {
     steps.unshift('Restart Zed — trust worktree; profile "Zed + GitNexus"');

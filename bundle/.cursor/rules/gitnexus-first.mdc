@@ -49,4 +49,4 @@ Tell the user in one sentence when bypassing GN-first.
 2. BEFORE committing → `gitnexus_detect_changes`.
 3. NEVER find-and-replace renames → `gitnexus_rename`.
 4. MCP unreachable or clearly wrong graph output → warn user; classical Grep/Read OK (see `gitnexus-enforcement` fallback).
-5. Stale index or missing embeddings → run `npm run gitnexus:agent-refresh` **autonomously** first (hooks block Grep/Read/MCP until refresh succeeds or fails). Classical only if refresh fails.
+5. Stale index or missing embeddings → run `npm run bearing:agent-refresh` **autonomously** first (hooks block Grep/Read/MCP until refresh succeeds or fails). Classical only if refresh fails.

@@ -21,7 +21,7 @@ Use this when a task touches untrusted input, auth/session data, file paths, she
 7. detect_changes({ scope: "unstaged", repo: "__GITNEXUS_REPO__" }) before done
 ```
 
-If PDG/taint returns “no layer”, do **not** call the code safe. Say the repo needs `npm run gitnexus:pdg` / pre-commit PDG refresh, then fall back to graph + targeted reads.
+If PDG/taint returns “no layer”, do **not** call the code safe. Say the repo needs `npm run bearing:pdg` / pre-commit PDG refresh, then fall back to graph + targeted reads.
 
 ## Checklist
 

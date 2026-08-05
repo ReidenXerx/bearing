@@ -44,7 +44,7 @@ Kind B is what separates this from cascade review — a linter never asks *"why 
              repeat until clean. Record each pass to memory as a handoff.
 ```
 
-> Stale index → `npm run gitnexus:agent-refresh` first (the map depends on a fresh graph + PDG).
+> Stale index → `npm run bearing:agent-refresh` first (the map depends on a fresh graph + PDG).
 
 ## Domain persona (generalize, don't hardcode)
 

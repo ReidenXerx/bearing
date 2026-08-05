@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
  * Print GitNexus npm script gate documentation (package.json comment entries).
- * Usage: node scripts/gitnexus-gate-hint.mjs 1-session
+ * Usage: node scripts/bearing-gate-hint.mjs 1-session
  */
-import { GITNEXUS_SCRIPT_GATES, findGate } from './gitnexus-teaching/script-gates.mjs';
+import { GITNEXUS_SCRIPT_GATES, findGate } from './bearing-teaching/script-gates.mjs';
 
 const id = process.argv[2];
 

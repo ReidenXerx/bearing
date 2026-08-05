@@ -2,8 +2,8 @@
 /**
  * Single source of truth for GitNexus npm scripts (re-exports script-gates).
  * Usage:
- *   node scripts/gitnexus-teaching/merge-package-scripts.mjs --write
- *   node scripts/gitnexus-teaching/merge-package-scripts.mjs --snippet
+ *   node scripts/bearing-teaching/merge-package-scripts.mjs --write
+ *   node scripts/bearing-teaching/merge-package-scripts.mjs --snippet
  */
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';

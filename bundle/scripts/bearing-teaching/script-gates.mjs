@@ -7,7 +7,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 const WRAP = "bash scripts/run-with-project-tmp.sh";
-const GATE_HINT = "node scripts/gitnexus-gate-hint.mjs";
+const GATE_HINT = "node scripts/bearing-gate-hint.mjs";
 
 /** @typedef {{ gate: string, name: string, title: string, description: string, scripts: Record<string, string> }} ScriptGate */
 
@@ -20,9 +20,9 @@ export const GITNEXUS_SCRIPT_GATES = [
     description:
       "Before task work: health check, agent brief, staleness. Matches enforcement rule + session-health hooks.",
     scripts: {
-      "gitnexus:health": "node scripts/gitnexus-agent.mjs health",
-      "gitnexus:agent-brief": "node scripts/gitnexus-agent.mjs brief",
-      "gitnexus:agent-status": "node scripts/gitnexus-agent.mjs status",
+      "bearing:health": "node scripts/bearing-agent.mjs health",
+      "bearing:agent-brief": "node scripts/bearing-agent.mjs brief",
+      "bearing:agent-status": "node scripts/bearing-agent.mjs status",
     },
   },
   {
@@ -32,15 +32,15 @@ export const GITNEXUS_SCRIPT_GATES = [
     description:
       "Fuzzy work → query (embeddings). Symbols → context. Structural → cypher. Hooks inject MCP calls — not separate npm scripts.",
     scripts: {
-      "gitnexus:graph-smoke": "node scripts/gitnexus-agent.mjs graph-smoke",
-      "gitnexus:detect-api": "node scripts/gitnexus-agent.mjs detect-api",
-      "gitnexus:scorecard": "node scripts/gitnexus-agent.mjs scorecard",
-      "gitnexus:stats": "node scripts/gitnexus-agent.mjs stats",
-      "gitnexus:map": "node scripts/gitnexus-agent.mjs map",
-      "gitnexus:fallback": "node scripts/gitnexus-agent.mjs fallback",
-      "gitnexus:fallback:off": "node scripts/gitnexus-agent.mjs fallback:off",
-      "gitnexus:fallback-log": "node scripts/gitnexus-agent.mjs fallback-log",
-      "gitnexus:northstars": "node scripts/gitnexus-agent.mjs northstars",
+      "bearing:graph-smoke": "node scripts/bearing-agent.mjs graph-smoke",
+      "bearing:detect-api": "node scripts/bearing-agent.mjs detect-api",
+      "bearing:scorecard": "node scripts/bearing-agent.mjs scorecard",
+      "bearing:stats": "node scripts/bearing-agent.mjs stats",
+      "bearing:map": "node scripts/bearing-agent.mjs map",
+      "bearing:fallback": "node scripts/bearing-agent.mjs fallback",
+      "bearing:fallback:off": "node scripts/bearing-agent.mjs fallback:off",
+      "bearing:fallback-log": "node scripts/bearing-agent.mjs fallback-log",
+      "bearing:northstars": "node scripts/bearing-agent.mjs northstars",
     },
   },
   {
@@ -48,20 +48,20 @@ export const GITNEXUS_SCRIPT_GATES = [
     name: "index",
     title: "Gate 5 — Graph index (fresh embeddings)",
     description:
-      "Humans/CI refresh the graph. Agents run gitnexus:agent-refresh autonomously when stale (hook pre-approved).",
+      "Humans/CI refresh the graph. Agents run bearing:agent-refresh autonomously when stale (hook pre-approved).",
     scripts: {
-      "gitnexus:refresh": `${WRAP} npx gitnexus@latest analyze --embeddings 0 --skills`,
-      "gitnexus:full": `${WRAP} npx gitnexus@latest analyze --force --embeddings 0 --skills`,
-      "gitnexus:pdg": `${WRAP} npx gitnexus@latest analyze --embeddings 0 --skills --pdg`,
-      "gitnexus:full-pdg": `${WRAP} npx gitnexus@latest analyze --force --embeddings 0 --skills --pdg`,
-      "gitnexus:status": `${WRAP} npx gitnexus@latest status`,
-      "gitnexus:agent-refresh": "node scripts/gitnexus-agent.mjs refresh",
-      "gitnexus:agent-review": "node scripts/gitnexus-agent.mjs review",
-      "gitnexus:pr-impact": "node scripts/gitnexus-agent.mjs pr-impact",
-      "gitnexus:branch-status": "node scripts/gitnexus-agent.mjs branch-status",
-      "gitnexus:commit-msg": "node scripts/gitnexus-agent.mjs commit-msg",
-      "gitnexus:clean-tmp": "bash scripts/clean-project-tmp.sh",
-      "gitnexus:list": `${WRAP} npx gitnexus@latest list`,
+      "bearing:refresh": `${WRAP} npx gitnexus@latest analyze --embeddings 0 --skills`,
+      "bearing:full": `${WRAP} npx gitnexus@latest analyze --force --embeddings 0 --skills`,
+      "bearing:pdg": `${WRAP} npx gitnexus@latest analyze --embeddings 0 --skills --pdg`,
+      "bearing:full-pdg": `${WRAP} npx gitnexus@latest analyze --force --embeddings 0 --skills --pdg`,
+      "bearing:status": `${WRAP} npx gitnexus@latest status`,
+      "bearing:agent-refresh": "node scripts/bearing-agent.mjs refresh",
+      "bearing:agent-review": "node scripts/bearing-agent.mjs review",
+      "bearing:pr-impact": "node scripts/bearing-agent.mjs pr-impact",
+      "bearing:branch-status": "node scripts/bearing-agent.mjs branch-status",
+      "bearing:commit-msg": "node scripts/bearing-agent.mjs commit-msg",
+      "bearing:clean-tmp": "bash scripts/clean-project-tmp.sh",
+      "bearing:list": `${WRAP} npx gitnexus@latest list`,
     },
   },
   {
@@ -71,9 +71,9 @@ export const GITNEXUS_SCRIPT_GATES = [
     description:
       "Full kit check + backend probe after install, update, or index build. Run before demoing to GitNexus authors.",
     scripts: {
-      "gitnexus:verify": "node scripts/gitnexus-agent.mjs verify",
-      "gitnexus:doctor": "node scripts/gitnexus-agent.mjs doctor",
-      "gitnexus:ci": "node scripts/gitnexus-ci.mjs",
+      "bearing:verify": "node scripts/bearing-agent.mjs verify",
+      "bearing:doctor": "node scripts/bearing-agent.mjs doctor",
+      "bearing:ci": "node scripts/bearing-ci.mjs",
     },
   },
   {
@@ -83,9 +83,9 @@ export const GITNEXUS_SCRIPT_GATES = [
     description:
       "Re-sync teaching bundle, hooks, and pack for other repos after pulling kit updates.",
     scripts: {
-      "gitnexus:setup": "bash scripts/gitnexus-setup.sh",
-      "gitnexus:sync-teaching": "bash scripts/sync-cursor-gitnexus-teaching.sh",
-      "gitnexus:pack": "bash scripts/pack-gitnexus-teaching.sh",
+      "bearing:setup": "bash scripts/bearing-setup.sh",
+      "bearing:sync-teaching": "bash scripts/sync-cursor-bearing-teaching.sh",
+      "bearing:pack": "bash scripts/pack-bearing-teaching.sh",
       "hooks:install": "bash scripts/install-git-hooks.sh",
     },
   },
@@ -96,15 +96,15 @@ export const GITNEXUS_SCRIPT_GATES = [
     description:
       "Generate repo wiki from the graph (requires OpenAI API key in env).",
     scripts: {
-      "gitnexus:wiki": `${WRAP} npx gitnexus@latest wiki --provider openai --model gpt-4o-mini --base-url https://api.openai.com/v1`,
-      "gitnexus:wiki-force": `${WRAP} npx gitnexus@latest wiki --force --provider openai --model gpt-4o-mini --base-url https://api.openai.com/v1`,
+      "bearing:wiki": `${WRAP} npx gitnexus@latest wiki --provider openai --model gpt-4o-mini --base-url https://api.openai.com/v1`,
+      "bearing:wiki-force": `${WRAP} npx gitnexus@latest wiki --force --provider openai --model gpt-4o-mini --base-url https://api.openai.com/v1`,
     },
   },
 ];
 
 /** Gate comment script key → prints gate title + description when run. */
 export function gateCommentKey(g) {
-  return `gitnexus.__gate.${g.gate}.${g.name}`;
+  return `bearing.__gate.${g.gate}.${g.name}`;
 }
 
 /** Ordered scripts block for package.json (gate hints + commands). */
@@ -113,7 +113,16 @@ export function buildGatedScripts() {
   const out = {};
   for (const g of GITNEXUS_SCRIPT_GATES) {
     out[gateCommentKey(g)] = `${GATE_HINT} ${g.gate}-${g.name}`;
-    Object.assign(out, g.scripts);
+    for (const [key, cmd] of Object.entries(g.scripts)) {
+      out[key] = cmd;
+      // LEGACY ALIAS. The kit was renamed gitnexus-agent-kit -> bearing, but these script names are
+      // not just muscle memory: they are invoked BY NAME from user-owned git hooks (a pre-commit
+      // running `npm run gitnexus:full-pdg`) and from CI. A hard cut would break commits on every
+      // existing install, so both names resolve to the same command. Legacy names are deprecated
+      // and can be dropped once installs have cycled.
+      const legacy = key.replace(/^bearing:/, "gitnexus:");
+      if (legacy !== key) out[legacy] = cmd;
+    }
   }
   return out;
 }

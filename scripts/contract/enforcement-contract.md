@@ -33,7 +33,7 @@ Use the graph for **all** agent work — explore, debug, fix, refactor, review, 
 
 ### When to escalate to `cypher` (after `query` / `context`)
 
-READ `gitnexus://repo/__GITNEXUS_REPO__/schema` before ad-hoc Cypher.
+READ `bearing://repo/__GITNEXUS_REPO__/schema` before ad-hoc Cypher.
 
 | Question | Cypher edge / pattern |
 | --- | --- |
@@ -46,11 +46,11 @@ READ `gitnexus://repo/__GITNEXUS_REPO__/schema` before ad-hoc Cypher.
 
 **Order:** `query` (orient) → `context` (symbol) → **`cypher`** (structural precision) → `impact` (before edits). Do not start with `cypher` for fuzzy questions — that's what `query` + embeddings are for.
 
-Refresh always includes `--embeddings` (`gitnexus:refresh` / `agent-refresh`). Missing embeddings = stale (same as commit behind).
+Refresh always includes `--embeddings` (`bearing:refresh` / `agent-refresh`). Missing embeddings = stale (same as commit behind).
 
 ## Deep precision — PDG, taint, trace
 
-When `cypher` isn't enough, escalate to statement-level tools (require a PDG index — `gitnexus:pdg`):
+When `cypher` isn't enough, escalate to statement-level tools (require a PDG index — `bearing:pdg`):
 
 | Need | Tool |
 | --- | --- |
@@ -82,7 +82,7 @@ Know every tool and *when* it wins (single-repo; cross-repo `group_*` is out of 
 | `check` | Structural integrity — detect circular File `IMPORTS` cycles (health / CI gate). |
 | `list_repos` | Only when multiple repos are indexed — discover/disambiguate before passing `repo:` to other tools. |
 
-Cheap resource reads (prefer before heavy tools): `READ gitnexus://repo/__GITNEXUS_REPO__/{context|schema|clusters|processes|process/<name>}`.
+Cheap resource reads (prefer before heavy tools): `READ bearing://repo/__GITNEXUS_REPO__/{context|schema|clusters|processes|process/<name>}`.
 
 ## MCP defaults (generous — local LLM)
 
@@ -101,9 +101,9 @@ Run hook copy-paste calls verbatim; expand freely when needed:
 
 ## Session (autonomous Shell)
 
-New chat: run session health ritual if injected — `npm run gitnexus:agent-status`, one-sentence confirm to user.
+New chat: run session health ritual if injected — `npm run bearing:agent-status`, one-sentence confirm to user.
 
-`npm run gitnexus:agent-brief` or READ `gitnexus://repo/__GITNEXUS_REPO__/context`. Stale or missing embeddings → **`npm run gitnexus:agent-refresh` first** (`required_permissions: ["all"]`). Hooks **block** Grep/Read/MCP/shell until refresh succeeds; classical tools only if refresh **fails** (say why). Never ask user to analyze.
+`npm run bearing:agent-brief` or READ `bearing://repo/__GITNEXUS_REPO__/context`. Stale or missing embeddings → **`npm run bearing:agent-refresh` first** (`required_permissions: ["all"]`). Hooks **block** Grep/Read/MCP/shell until refresh succeeds; classical tools only if refresh **fails** (say why). Never ask user to analyze.
 
 ## Stale loop (mandatory)
 
@@ -116,7 +116,7 @@ stale → agent-refresh (Shell, pre-approved)
 
 Session start runs auto-refresh when stale. Do **not** grep/read “while refreshing” — refresh is the next tool, not a background hint.
 
-**Mid-session drift (your own edits):** commit-equality can't see uncommitted edits, so after you change a few source files the graph silently falls behind your working tree. Don't wait for the block — once you've edited code and are about to `query`/`context`/`impact`/`cypher`/`pdg_query` again, run **`npm run gitnexus:refresh`** (**incremental** — reindexes only your changed files; quick for a few edits, longer on large batches / first run) so graph answers reflect your changes. Graph query tools hard-block past a small drift threshold until you do.
+**Mid-session drift (your own edits):** commit-equality can't see uncommitted edits, so after you change a few source files the graph silently falls behind your working tree. Don't wait for the block — once you've edited code and are about to `query`/`context`/`impact`/`cypher`/`pdg_query` again, run **`npm run bearing:refresh`** (**incremental** — reindexes only your changed files; quick for a few edits, longer on large batches / first run) so graph answers reflect your changes. Graph query tools hard-block past a small drift threshold until you do.
 
 ## Gates (do not skip — every task)
 
@@ -157,7 +157,7 @@ If **`.bearing/gitnexus-northstars.md`** exists, it is the project's **authorita
 - **CITE the `NS-#`** when you make a consequential claim, choose a direction, or reject an idea. If you cannot cite one for a load-bearing conclusion, **you may be drifting — say so explicitly** rather than proceeding confidently.
 - **Never silently edit a north-star, and never quietly work around one.** If one looks wrong, missing, or outdated, state that plainly and **propose the change to the user** — the anchor only works if drift can't rewrite it.
 - **The GRAVEYARD is settled**: do not re-propose a rejected idea without new evidence that addresses *why* it was rejected, and do not discard a VALIDATED one without evidence that overturns it.
-- Print them anytime: `npm run gitnexus:northstars`. Format + maintenance routine: the **`gitnexus-northstars`** skill.
+- Print them anytime: `npm run bearing:northstars`. Format + maintenance routine: the **`gitnexus-northstars`** skill.
 
 ## Durable memory (survives compaction + sessions)
 
@@ -179,6 +179,6 @@ On recovery **READ the task-core FIRST** and reconstruct from it — it's the on
 
 **Stale index** → run `agent-refresh` first; classical Grep/Read stay denied until it succeeds. **If refresh fails** (or MCP down): classical Grep/Read OK — one-sentence why.
 
-**GitNexus fresh but wrong / suspicious / incomplete?** Don't silently fight the gate — take the escape hatch: `npm run gitnexus:fallback -- "<why>"`, which opens ~15 min where classical Grep/Read/shell are allowed (auto-resumes; end early with `npm run gitnexus:fallback:off`). **Make `<why>` specific and actionable** — which GN tool, expected vs actual (e.g. `impact returned 0 callers for OrderService but grep finds 3`) — because it's appended as a **GitNexus failure report** (`npm run gitnexus:fallback-log`), captured with the graph state, for the GitNexus developers. Re-confirm findings with the graph once GN is reliable; repeated reports pinpoint where GN needs fixing.
+**GitNexus fresh but wrong / suspicious / incomplete?** Don't silently fight the gate — take the escape hatch: `npm run bearing:fallback -- "<why>"`, which opens ~15 min where classical Grep/Read/shell are allowed (auto-resumes; end early with `npm run bearing:fallback:off`). **Make `<why>` specific and actionable** — which GN tool, expected vs actual (e.g. `impact returned 0 callers for OrderService but grep finds 3`) — because it's appended as a **GitNexus failure report** (`npm run bearing:fallback-log`), captured with the graph state, for the GitNexus developers. Re-confirm findings with the graph once GN is reliable; repeated reports pinpoint where GN needs fixing.
 
 Optional: `GITNEXUS_MODE=guide` (nudge-only). Paths: `.bearing/gitnexus-hooks.json`. Playbooks: `gitnexus-enforcement` skill.

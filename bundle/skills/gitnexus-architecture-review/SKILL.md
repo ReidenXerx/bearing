@@ -17,15 +17,15 @@ description: "Use to JUDGE structure — coupling, cohesion, layering violations
 ## Workflow
 
 ```
-1. READ gitnexus://repo/{name}/clusters     → functional areas + cohesion scores (low = poorly factored)
-2. READ gitnexus://repo/{name}/processes    → long/tangled flows = candidate hotspots
+1. READ bearing://repo/{name}/clusters     → functional areas + cohesion scores (low = poorly factored)
+2. READ bearing://repo/{name}/processes    → long/tangled flows = candidate hotspots
 3. check({cycles: true})                    → circular File IMPORTS (hard structural smell)
 4. cypher: cross-cluster CALLS              → coupling + layering violations (lower layer calling higher)
 5. cypher: god objects                      → classes with many HAS_METHOD AND high fan-in
 6. impact on hub symbols                    → load-bearing nodes (high blast radius = architectural risk)
 ```
 
-> Stale index → `npm run gitnexus:agent-refresh` (autonomous).
+> Stale index → `npm run bearing:agent-refresh` (autonomous).
 
 ## What to assess (and how)
 

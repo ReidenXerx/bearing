@@ -6,4 +6,4 @@
 
 ## npm gates
 
-Run gated scripts from `package.json` when hooks remind you: `gitnexus.__gate.*` — they document the enforced playbook for this repo.
+Run gated scripts from `package.json` when hooks remind you: `bearing.__gate.*` — they document the enforced playbook for this repo.

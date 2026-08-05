@@ -363,7 +363,7 @@ export function readScorecard(root) {
 // ── Persistent telemetry ─────────────────────────────────────────────────────
 // The scorecard is per-session (cleared on session start). Before clearing, we
 // archive each finished session's tally to an append-only .jsonl so aggregate
-// trends survive across sessions. Read/aggregate via `npm run gitnexus:stats`.
+// trends survive across sessions. Read/aggregate via `npm run bearing:stats`.
 
 const TELEMETRY_FILE = '.gitnexus-telemetry.jsonl';
 
@@ -639,10 +639,10 @@ export function firstToolNudge(root, stale) {
         ? 'MISSING EMBEDDINGS: semantic query unavailable — '
         : 'STALE INDEX: ';
     parts.push(
-      `${reason}next Shell MUST be npm run gitnexus:agent-refresh (required_permissions: ["all"]). Includes --embeddings. Run yourself — never ask user to analyze.`
+      `${reason}next Shell MUST be npm run bearing:agent-refresh (required_permissions: ["all"]). Includes --embeddings. Run yourself — never ask user to analyze.`
     );
   } else {
-    parts.push(`SESSION: ${mcpReadContext(repo)} OR npm run gitnexus:agent-brief`);
+    parts.push(`SESSION: ${mcpReadContext(repo)} OR npm run bearing:agent-brief`);
   }
 
   const playbook = playbookForHint(hint, repo);

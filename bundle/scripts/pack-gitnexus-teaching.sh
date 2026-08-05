@@ -2,12 +2,12 @@
 # Pack portable GitNexus + Cursor teaching bundle for other repos (tar.gz archive).
 #
 # Usage:
-#   npm run gitnexus:pack
-#   npm run gitnexus:pack -- --output /tmp/my-bundle.tar.gz
+#   npm run bearing:pack
+#   npm run bearing:pack -- --output /tmp/my-bundle.tar.gz
 #
 # Teammates on another project:
 #   tar -xzf gitnexus-cursor-teaching-*.tar.gz -C /path/to/their-repo
-#   cd /path/to/their-repo && bash scripts/gitnexus-teaching/install-from-bundle.sh
+#   cd /path/to/their-repo && bash scripts/bearing-teaching/install-from-bundle.sh
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -28,7 +28,7 @@ done
 STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 VERSION="$(node -e "
   const fs=require('fs');
-  const p='.cursor/gitnexus-teaching-bundle.json';
+  const p='.cursor/bearing-teaching-bundle.json';
   if(fs.existsSync(p)){console.log(JSON.parse(fs.readFileSync(p,'utf8')).version||2)}else{console.log(2)}
 ")"
 BASENAME="gitnexus-cursor-teaching-v${VERSION}-${STAMP}"
@@ -39,7 +39,7 @@ ARCHIVE="${OUTPUT:-$ROOT/${BASENAME}.tar.gz}"
 info() { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
 ok()   { printf '\033[1;32m    ✓\033[0m %s\n' "$*"; }
 
-# Paths relative to repo root — keep in sync with scripts/gitnexus-setup.sh TEACHING_SOURCES
+# Paths relative to repo root — keep in sync with scripts/bearing-setup.sh TEACHING_SOURCES
 BUNDLE_PATHS=(
   .cursor/rules/00-gitnexus-enforcement.mdc
   .cursor/rules/gitnexus.mdc
@@ -83,21 +83,21 @@ BUNDLE_PATHS=(
   .bearing/lib/session-health-context.mjs
   .bearing/lib/verify-kit.mjs
   .bearing/gitnexus-hooks.json
-  scripts/gitnexus-verify.mjs
-  scripts/gitnexus-setup.sh
-  scripts/sync-cursor-gitnexus-teaching.sh
-  scripts/pack-gitnexus-teaching.sh
+  scripts/bearing-verify.mjs
+  scripts/bearing-setup.sh
+  scripts/sync-cursor-bearing-teaching.sh
+  scripts/pack-bearing-teaching.sh
   scripts/install-git-hooks.sh
-  scripts/gitnexus-agent.mjs
-  scripts/gitnexus-ci.mjs
-  scripts/gitnexus-gate-hint.mjs
+  scripts/bearing-agent.mjs
+  scripts/bearing-ci.mjs
+  scripts/bearing-gate-hint.mjs
   scripts/run-with-project-tmp.sh
   scripts/clean-project-tmp.sh
   scripts/lib/project-tmp.mjs
   scripts/lib/setup-ui.mjs
-  scripts/gitnexus-teaching/install-from-bundle.sh
-  scripts/gitnexus-teaching/merge-package-scripts.mjs
-  scripts/gitnexus-teaching/script-gates.mjs
+  scripts/bearing-teaching/install-from-bundle.sh
+  scripts/bearing-teaching/merge-package-scripts.mjs
+  scripts/bearing-teaching/script-gates.mjs
   docs/GITNEXUS-TEAM-BUNDLE.md
   docs/GITNEXUS-CURSOR-GUIDE.md
   .github/workflows/gitnexus-ci.yml
@@ -118,7 +118,7 @@ for rel in "${BUNDLE_PATHS[@]}"; do
 done
 
 # package.json scripts snippet (generated from canonical merge script)
-node scripts/gitnexus-teaching/merge-package-scripts.mjs --snippet > "$BUNDLE_ROOT/package.json.scripts.snippet.json"
+node scripts/bearing-teaching/merge-package-scripts.mjs --snippet > "$BUNDLE_ROOT/package.json.scripts.snippet.json"
 
 # gitignore snippet
 cat > "$BUNDLE_ROOT/gitignore.snippet" <<'SNIP'
@@ -128,7 +128,7 @@ cat > "$BUNDLE_ROOT/gitignore.snippet" <<'SNIP'
 .tmp-agent/
 .cursor/skills/
 .agents/skills/
-.cursor/gitnexus-teaching-bundle.json
+.cursor/bearing-teaching-bundle.json
 .cursor/gn-kit-manifest.json
 .gitnexus/agent-kit-manifest.json
 .bearing/.bearing-session-edits.flag
@@ -157,8 +157,8 @@ const manifest = {
   files: $(node -e "console.log(JSON.stringify(process.argv.slice(1)))" "${BUNDLE_PATHS[@]}" "package.json.scripts.snippet.json" "gitignore.snippet" "MANIFEST.json"),
   notes: [
     'Project-specific: replace __GITNEXUS_REPO__ with target repo name in rules/hooks/skills',
-    'Run scripts/gitnexus-teaching/install-from-bundle.sh after extracting',
-    'Area skills (.claude/skills/generated) are NOT bundled — created by gitnexus:refresh on target repo',
+    'Run scripts/bearing-teaching/install-from-bundle.sh after extracting',
+    'Area skills (.claude/skills/generated) are NOT bundled — created by bearing:refresh on target repo',
   ],
 };
 console.log(JSON.stringify(manifest, null, 2));
@@ -173,6 +173,6 @@ ok "Created $ARCHIVE"
 echo ""
 echo "Send to teammates:"
 echo "  tar -xzf $(basename "$ARCHIVE") -C /path/to/their-repo --strip-components=1"
-echo "  cd /path/to/their-repo && bash scripts/gitnexus-teaching/install-from-bundle.sh"
+echo "  cd /path/to/their-repo && bash scripts/bearing-teaching/install-from-bundle.sh"
 echo ""
 echo "See docs/GITNEXUS-TEAM-BUNDLE.md inside the archive."

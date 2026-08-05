@@ -20,7 +20,7 @@ Run tools in this order — do not skip steps:
 6. gitnexus_detect_changes({ scope})                    → BEFORE committing / PR review
 ```
 
-> **Cursor agents:** stale index → `npm run gitnexus:agent-refresh` autonomously. Humans/CI: `npm run gitnexus:refresh`.
+> **Cursor agents:** stale index → `npm run bearing:agent-refresh` autonomously. Humans/CI: `npm run bearing:refresh`.
 
 ## First move (intent routing)
 
@@ -44,7 +44,7 @@ The kit auto-detects the router style at install (`.cursor/gitnexus-api-profile.
 - **Framework router** (Route nodes indexed) → `api_impact` / `route_map` / `shape_check`.
 - **Custom hand-rolled router** (zero Route nodes) → `context` on the dispatcher/handler symbols + `query`.
 
-Read `.cursor/skills/gitnexus-api-routes/SKILL.md` for the full playbook. Refresh the profile with `npm run gitnexus:detect-api`.
+Read `.cursor/skills/gitnexus-api-routes/SKILL.md` for the full playbook. Refresh the profile with `npm run bearing:detect-api`.
 
 ## When Grep / Glob / SemanticSearch ARE correct
 
@@ -120,7 +120,7 @@ Read `.cursor/skills/gitnexus-scenarios/SKILL.md` for full checklists. Quick map
 
 ## Index freshness (graph + embeddings)
 
-- After meaningful code changes: `npm run gitnexus:refresh` (includes `--embeddings`)
+- After meaningful code changes: `npm run bearing:refresh` (includes `--embeddings`)
 - Pre-commit hook runs a full PDG re-index when hooks installed (`npm run hooks:install`)
 - **Missing embeddings** (`stats.embeddings === 0` with symbols indexed) = stale — `agent-refresh` rebuilds vectors
 - Embeddings preserved on incremental refresh; `--drop-embeddings` only when rebuilding vectors intentionally
@@ -128,21 +128,21 @@ Read `.cursor/skills/gitnexus-scenarios/SKILL.md` for full checklists. Quick map
 
 ## MCP unreachable — warn immediately
 
-If GitNexus MCP fails, tell the user: _"GitNexus MCP is unreachable — impact/detect_changes/graph queries unavailable. Falling back to Grep/Read without structural safety checks."_ Do NOT silently fall back. Confirm backend health with `npm run gitnexus:doctor` (probes the GitNexus CLI + registry).
+If GitNexus MCP fails, tell the user: _"GitNexus MCP is unreachable — impact/detect_changes/graph queries unavailable. Falling back to Grep/Read without structural safety checks."_ Do NOT silently fall back. Confirm backend health with `npm run bearing:doctor` (probes the GitNexus CLI + registry).
 
 ## Kit maintenance commands
 
 | Command | Use |
 | --- | --- |
-| `npm run gitnexus:agent-refresh` | Rebuild graph + embeddings when stale (autonomous) |
-| `npm run gitnexus:doctor` | Probe MCP/CLI backend reachability |
-| `npm run gitnexus:agent-review -- <base>` | PR review playbook: detect_changes(compare) + impact per changed symbol |
-| `npm run gitnexus:commit-msg` | Draft a graph-grounded commit message (affected flows + modules) from staged changes |
-| `npm run gitnexus:map` | Regenerate `docs/ARCHITECTURE.gitnexus.md` from the graph (offline, no API key) |
-| `npm run gitnexus:ci` | Merge-time impact gate (blocks high-blast-radius changes with no tests) — see `.github/workflows/gitnexus-ci.yml` |
-| `npm run gitnexus:scorecard` | Session enforcement tally (grep→graph, impact/commit gates) |
-| `npm run gitnexus:stats` | Persistent telemetry across ALL sessions — totals, per-session averages, trend |
-| `npm run gitnexus:verify` | Full install verification before demoing |
+| `npm run bearing:agent-refresh` | Rebuild graph + embeddings when stale (autonomous) |
+| `npm run bearing:doctor` | Probe MCP/CLI backend reachability |
+| `npm run bearing:agent-review -- <base>` | PR review playbook: detect_changes(compare) + impact per changed symbol |
+| `npm run bearing:commit-msg` | Draft a graph-grounded commit message (affected flows + modules) from staged changes |
+| `npm run bearing:map` | Regenerate `docs/ARCHITECTURE.gitnexus.md` from the graph (offline, no API key) |
+| `npm run bearing:ci` | Merge-time impact gate (blocks high-blast-radius changes with no tests) — see `.github/workflows/gitnexus-ci.yml` |
+| `npm run bearing:scorecard` | Session enforcement tally (grep→graph, impact/commit gates) |
+| `npm run bearing:stats` | Persistent telemetry across ALL sessions — totals, per-session averages, trend |
+| `npm run bearing:verify` | Full install verification before demoing |
 
 ## Workspace contract (non-negotiable)
 

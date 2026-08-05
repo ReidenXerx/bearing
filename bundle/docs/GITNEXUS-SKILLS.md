@@ -8,7 +8,7 @@ Use this index to route agent work to the right reusable playbook. The canonical
 | `gitnexus-enforcement` | Understanding hook blocks and graph-first rules | Follow hook replacement call exactly |
 | `gitnexus-impact-analysis` | Any pre-edit blast-radius question | `impact({ target, direction: "upstream" })` before edit; `detect_changes` before done |
 | `gitnexus-security-review` | Auth/session/input/file/db/exec/rendering/webhook changes | `query` → `context` → `explain` → `pdg_query` → `trace`/PDG impact |
-| `gitnexus-pr-review` | PR or branch review | `npm run gitnexus:branch-status -- <base>` → `detect_changes({ scope: "compare", branch })` |
+| `gitnexus-pr-review` | PR or branch review | `npm run bearing:branch-status -- <base>` → `detect_changes({ scope: "compare", branch })` |
 | `gitnexus-api-routes` | API handler or payload shape changes | `api_impact` before route edits; `shape_check` for payload drift |
 | `gitnexus-debugging` | Bugs, failing flows, “how did we reach this?” | `query` symptom → `context` suspect → `trace`/process/PDG as needed |
 | `gitnexus-refactoring` | Rename/extract/split/move work | `impact` → `context` → `rename({ dry_run: true })` or manual plan |
@@ -31,7 +31,7 @@ Use this index to route agent work to the right reusable playbook. The canonical
 
 ## Non-negotiables
 
-- If the index is stale, refresh first: `npm run gitnexus:agent-refresh`.
+- If the index is stale, refresh first: `npm run bearing:agent-refresh`.
 - Before editing runtime code, run impact analysis.
 - Before commit or “done”, run `detect_changes`.
 - For high-risk runtime/security changes, use PDG tools when available.

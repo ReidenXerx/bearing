@@ -5,7 +5,7 @@
  * Fails a PR when a changed symbol has a large upstream blast radius but the PR
  * touches no tests. Graph-stale repos are flagged too. Pure CLI (no MCP).
  *
- * Usage:  node scripts/gitnexus-ci.mjs [baseRef]
+ * Usage:  node scripts/bearing-ci.mjs [baseRef]
  * Env:
  *   GITNEXUS_CI_MODE=block|warn   (default: block — non-zero exit on violation)
  *   GITNEXUS_CI_HIGH=<n>          (caller threshold for HIGH risk, default 8)

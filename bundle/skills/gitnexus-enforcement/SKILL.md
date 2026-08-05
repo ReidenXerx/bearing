@@ -38,7 +38,7 @@ GitNexus tools are for **reasoning throughout the task**, not only the first loo
 | `trace` | Use when both source and target symbols are known |
 | `pdg_query` | `mode: "flows"` for variables; `mode: "controls"` for guards |
 | `explain` | Taint findings for files/symbols; absence is not proof of safety |
-| `cypher` | READ `gitnexus://repo/__GITNEXUS_REPO__/schema` first; use `$params` |
+| `cypher` | READ `bearing://repo/__GITNEXUS_REPO__/schema` first; use `$params` |
 | `impact` | `summaryOnly: false`, `limit: 100` |
 
 Hooks inject calls with these defaults — run verbatim; expand when needed.
@@ -49,8 +49,8 @@ Hooks inject calls with these defaults — run verbatim; expand when needed.
 START
   │
   ├─ New session / new task?
-  │    └─ npm run gitnexus:agent-brief  OR  READ context + schema (autonomous)
-  │         stale or missing embeddings? → npm run gitnexus:agent-refresh (Shell, required_permissions: ["all"])
+  │    └─ npm run bearing:agent-brief  OR  READ context + schema (autonomous)
+  │         stale or missing embeddings? → npm run bearing:agent-refresh (Shell, required_permissions: ["all"])
   │
   ├─ Reasoning about code (any point in task)?
   │    └─ query({search_query, task_context, goal, repo})   # graph + embeddings
@@ -93,7 +93,7 @@ gitnexus_context({ name: "<symbol>", repo: "__GITNEXUS_REPO__" })
 gitnexus_trace({ from: "<source>", to: "<target>", repo: "__GITNEXUS_REPO__", maxDepth: 10 })
 gitnexus_pdg_query({ mode: "flows", target: "<function-or-file>", variable: "<var>", repo: "__GITNEXUS_REPO__" })
 gitnexus_explain({ target: "<file-or-symbol>", repo: "__GITNEXUS_REPO__" })
-READ gitnexus://repo/__GITNEXUS_REPO__/schema
+READ bearing://repo/__GITNEXUS_REPO__/schema
 gitnexus_cypher({ statement: "MATCH (f)-[r:CodeRelation {type: 'ACCESSES'}]->(p:Property {name: $name}) RETURN f.name, f.filePath, r.reason", params: { name: "<field>" }, repo: "__GITNEXUS_REPO__" })
 gitnexus_impact({ target: "<symbol>", direction: "upstream", repo: "__GITNEXUS_REPO__", summaryOnly: false, limit: 100 })
 ```
@@ -127,9 +127,9 @@ When index is **stale**, hooks **block** classical patterns until refresh succee
 ## Autonomous agent CLI
 
 ```bash
-npm run gitnexus:agent-brief    # session orientation + suggested calls
-npm run gitnexus:agent-status   # exit 1 if stale or embeddings missing
-npm run gitnexus:agent-refresh  # analyze --embeddings + sync — when stale
+npm run bearing:agent-brief    # session orientation + suggested calls
+npm run bearing:agent-status   # exit 1 if stale or embeddings missing
+npm run bearing:agent-refresh  # analyze --embeddings + sync — when stale
 ```
 
 **NEVER** tell the user to run `npx gitnexus analyze` — that is agent work.

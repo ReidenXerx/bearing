@@ -6,7 +6,7 @@ description: "HTTP API route changes. Use api_impact/route_map/shape_check on fr
 # API Routes
 
 The kit auto-detects the router style at install and writes `.cursor/gitnexus-api-profile.json`.
-Run `npm run gitnexus:detect-api` to refresh it after major server changes. Route the work by profile.
+Run `npm run bearing:detect-api` to refresh it after major server changes. Route the work by profile.
 
 | Profile | What it means | Use |
 | --- | --- | --- |
@@ -50,7 +50,7 @@ Find the dispatcher symbol from the profile's `customSymbols`, or query for "req
 ## Checklist
 
 ```
-- [ ] Profile checked (.cursor/gitnexus-api-profile.json or npm run gitnexus:detect-api)
+- [ ] Profile checked (.cursor/gitnexus-api-profile.json or npm run bearing:detect-api)
 - [ ] context on dispatcher (custom) OR api_impact (framework)
 - [ ] impact upstream on the handler symbol
 - [ ] Response envelope / schema preserved (or consumers updated in the same change)

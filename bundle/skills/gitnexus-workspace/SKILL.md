@@ -15,8 +15,8 @@ This repo replaces grep-first navigation with a **knowledge graph + embeddings +
 Do not skip steps:
 
 ```
-READ gitnexus://repo/__GITNEXUS_REPO__/context   # or npm run gitnexus:agent-brief (autonomous)
-READ gitnexus://repo/__GITNEXUS_REPO__/schema    # before ad-hoc Cypher
+READ bearing://repo/__GITNEXUS_REPO__/context   # or npm run bearing:agent-brief (autonomous)
+READ bearing://repo/__GITNEXUS_REPO__/schema    # before ad-hoc Cypher
 → query({search_query, task_context, goal, repo, limit: 5, max_symbols: 12})   # graph + embeddings — orient
 → context({name, include_content: false}) or context({uid, include_content: false})
 → trace({from, to}) or pdg_query({mode})   # known paths, control/data flow when relevant
@@ -27,7 +27,7 @@ READ gitnexus://repo/__GITNEXUS_REPO__/schema    # before ad-hoc Cypher
 
 **Renames:** `impact` → `rename({symbol_name, new_name, dry_run: true})` — never find-and-replace symbols.
 
-Stale, missing embeddings, or wrong graph? **`npm run gitnexus:agent-refresh`** autonomously (Shell, `required_permissions: ["all"]`) — includes `--embeddings`; hook pre-approves, do not ask user.
+Stale, missing embeddings, or wrong graph? **`npm run bearing:agent-refresh`** autonomously (Shell, `required_permissions: ["all"]`) — includes `--embeddings`; hook pre-approves, do not ask user.
 
 ## HTTP API routing (auto-detected at install)
 
@@ -40,7 +40,7 @@ After index build, the kit writes `.cursor/gitnexus-api-profile.json`:
 | `framework-likely` | Try `api_impact`; if empty, fall back to custom playbook |
 | `none` | No HTTP layer detected |
 
-Run `npm run gitnexus:detect-api` to refresh the profile after major server changes.
+Run `npm run bearing:detect-api` to refresh the profile after major server changes.
 
 ## Pick the right skill
 
@@ -101,7 +101,7 @@ Grep **is** correct for: preset JSON, log strings, comments, exact config keys i
 
 ## Persistence in Cursor
 
-Installed by `npm run gitnexus:setup`:
+Installed by `npm run bearing:setup`:
 
 - **Enforcement rule** — `.cursor/rules/00-gitnexus-enforcement.mdc` (only `alwaysApply: true` contract)
 - **Reference rules** — `.cursor/rules/gitnexus.mdc` + `gitnexus-first.mdc` (load on demand)
@@ -123,7 +123,7 @@ Restart Cursor after setup so MCP + hooks load.
 | Class member blast radius | `impact` + `relationTypes: ["CALLS","IMPORTS","ACCESSES"]` |
 | Precise high-risk impact | `impact({ mode: "pdg", direction: "upstream" })` after PDG refresh |
 | Security source→sink review | `explain({target})` + `pdg_query` + `trace` |
-| Branch status / PR setup | `npm run gitnexus:branch-status -- <base>` |
+| Branch status / PR setup | `npm run bearing:branch-status -- <base>` |
 | PR vs main | `detect_changes({scope: "compare", base_ref: "main", branch: "<current>"})` |
-| Graph integrity check | `npm run gitnexus:graph-smoke` |
+| Graph integrity check | `npm run bearing:graph-smoke` |
 | Architecture doc | MCP prompt `generate_map` |

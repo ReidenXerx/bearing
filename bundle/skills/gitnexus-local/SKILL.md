@@ -17,7 +17,7 @@ disable-model-invocation: false
 5. **Control/data:** `pdg_query({mode: "controls"|"flows"})` when relevant
 6. **Structural:** READ schema → `cypher` (field ACCESSES, overrides, process steps)
 7. **Security:** `explain({target})` for taint findings; absence is not proof of safety
-8. **Stale:** `npm run gitnexus:agent-refresh` — never grep instead of refresh
+8. **Stale:** `npm run bearing:agent-refresh` — never grep instead of refresh
 
 ## Zed profile
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Agent-facing GitNexus maintenance CLI (no MCP required).
- * Usage: node scripts/gitnexus-agent.mjs status|refresh|brief|health|verify|doctor|review [base]|pr-impact [base]|branch-status [base]|commit-msg|map|scorecard|stats [--json]|graph-smoke|detect-api|fallback "<why>"|fallback:off|fallback-log [--json]
+ * Usage: node scripts/bearing-agent.mjs status|refresh|brief|health|verify|doctor|review [base]|pr-impact [base]|branch-status [base]|commit-msg|map|scorecard|stats [--json]|graph-smoke|detect-api|fallback "<why>"|fallback:off|fallback-log [--json]
  */
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
@@ -69,8 +69,8 @@ if (cmd === "fallback") {
   const reason = process.argv.slice(3).join(" ").trim();
   if (!reason) {
     console.error(
-      'Usage: npm run gitnexus:fallback -- "<why GitNexus can\'t be trusted here>"\n' +
-        '   or: node scripts/gitnexus-agent.mjs fallback "<why>"',
+      'Usage: npm run bearing:fallback -- "<why GitNexus can\'t be trusted here>"\n' +
+        '   or: node scripts/bearing-agent.mjs fallback "<why>"',
     );
     process.exit(2);
   }
@@ -83,8 +83,8 @@ if (cmd === "fallback") {
   console.log(
     "  Classical Grep/Read/shell are now allowed. Re-confirm findings with the graph once GitNexus is reliable.",
   );
-  console.log("  Logged for review → npm run gitnexus:fallback-log (report these to the GitNexus devs).");
-  console.log("  End early: npm run gitnexus:fallback:off");
+  console.log("  Logged for review → npm run bearing:fallback-log (report these to the GitNexus devs).");
+  console.log("  End early: npm run bearing:fallback:off");
   process.exit(0);
 }
 
@@ -109,7 +109,7 @@ if (cmd === "fallback-log") {
     console.log(`    ${r.reason}`);
   }
   if (reports.length > 30) console.log(`\n(showing last 30 of ${reports.length}; --json for all)`);
-  console.log("\nExport for the GitNexus developers: npm run gitnexus:fallback-log -- --json");
+  console.log("\nExport for the GitNexus developers: npm run bearing:fallback-log -- --json");
   process.exit(0);
 }
 
@@ -133,7 +133,7 @@ if (cmd === "northstars") {
   }
   console.log(`Project north-stars — ${lines.length} proposition(s) · ${nsp}\n`);
   for (const l of lines) console.log(`  ${l}`);
-  console.log("\nFull document: npm run gitnexus:northstars -- --full");
+  console.log("\nFull document: npm run bearing:northstars -- --full");
   process.exit(0);
 }
 
@@ -150,7 +150,7 @@ if (cmd === "status") {
     console.log(
       `⚠ CLASSICAL FALLBACK active (${grant.reason || "GitNexus distrusted"}) — classical tools allowed for ~${mins} min more.`,
     );
-    console.log("  End early: npm run gitnexus:fallback:off\n");
+    console.log("  End early: npm run bearing:fallback:off\n");
   }
   const stale = loadStaleness();
   const systemTmp = tmpSpaceReport(ROOT);
@@ -166,7 +166,7 @@ if (cmd === "status") {
       console.log(
         `  ⚠ working tree: ${stale.driftingFiles} source file(s) edited since index — graph queries may be stale.`,
       );
-      console.log("    Resync: npm run gitnexus:refresh (fast, incremental)");
+      console.log("    Resync: npm run bearing:refresh (fast, incremental)");
     }
     console.log(systemTmp);
     process.exit(0);
@@ -178,7 +178,7 @@ if (cmd === "status") {
       "  embeddings: missing — agent-refresh runs analyze --embeddings",
     );
   }
-  console.log("  Fix: npm run gitnexus:agent-refresh");
+  console.log("  Fix: npm run bearing:agent-refresh");
   console.log(systemTmp);
   process.exit(1);
 }
@@ -214,11 +214,11 @@ if (cmd === "refresh") {
     // Full --force + PDG: guarantees a complete control/data-dependence + taint
     // layer (pdg_query/explain/impact(mode:pdg)) on every autonomous refresh, same
     // as the pre-commit hook — no partial-incremental PDG risk.
-    run("npm", ["run", "gitnexus:full-pdg"], { stdio: "inherit" });
+    run("npm", ["run", "bearing:full-pdg"], { stdio: "inherit" });
     if (
-      fs.existsSync(path.join(ROOT, "scripts/sync-cursor-gitnexus-teaching.sh"))
+      fs.existsSync(path.join(ROOT, "scripts/sync-cursor-bearing-teaching.sh"))
     ) {
-      run("bash", ["scripts/sync-cursor-gitnexus-teaching.sh"], {
+      run("bash", ["scripts/sync-cursor-bearing-teaching.sh"], {
         stdio: "inherit",
       });
     }
@@ -313,7 +313,7 @@ if (cmd === "detect-api") {
 }
 
 if (cmd === "verify") {
-  const verifyPath = path.join(ROOT, "scripts/gitnexus-verify.mjs");
+  const verifyPath = path.join(ROOT, "scripts/bearing-verify.mjs");
   const fallback = path.join(ROOT, ".bearing/lib/verify-kit.mjs");
   const script = fs.existsSync(verifyPath) ? verifyPath : fallback;
   const r = spawnSync(
@@ -388,7 +388,7 @@ if (cmd === "branch-status") {
     );
   } else {
     lines.push(
-      "Fetch the base branch or pass an existing ref: npm run gitnexus:branch-status -- <base>",
+      "Fetch the base branch or pass an existing ref: npm run bearing:branch-status -- <base>",
     );
   }
   console.log(lines.join("\n"));
@@ -416,7 +416,7 @@ if (cmd === "review" || cmd === "pr-impact") {
   ];
   if (!base) {
     lines.push(
-      `Base ref "${baseArg}" not found — fetch it or pass an existing branch: npm run gitnexus:agent-review -- <base>`,
+      `Base ref "${baseArg}" not found — fetch it or pass an existing branch: npm run bearing:agent-review -- <base>`,
     );
     console.log(lines.join("\n"));
     process.exit(1);
@@ -661,7 +661,7 @@ if (cmd === "stats") {
   const fb = readFallbackReports(ROOT);
   if (fb.length) {
     console.log(
-      `\n  ⚠ GitNexus fallback reports: ${fb.length} — where the graph fell short. See: npm run gitnexus:fallback-log`,
+      `\n  ⚠ GitNexus fallback reports: ${fb.length} — where the graph fell short. See: npm run bearing:fallback-log`,
     );
   }
   process.exit(0);

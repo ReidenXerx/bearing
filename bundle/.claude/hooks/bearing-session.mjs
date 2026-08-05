@@ -47,9 +47,9 @@ const grant = fallbackGrant(root);
 const staleLine = !graphEnabled
   ? ""
   : grant
-  ? `⚠ CLASSICAL FALLBACK active (${grant.reason || "GitNexus distrusted"}) — classical Grep/Read/shell allowed for ~${Math.max(1, Math.round(grant.remainingMs / 60000))} min. RE-CONFIRM findings with the graph once GitNexus is reliable; end early with \`npm run gitnexus:fallback:off\`.`
+  ? `⚠ CLASSICAL FALLBACK active (${grant.reason || "GitNexus distrusted"}) — classical Grep/Read/shell allowed for ~${Math.max(1, Math.round(grant.remainingMs / 60000))} min. RE-CONFIRM findings with the graph once GitNexus is reliable; end early with \`npm run bearing:fallback:off\`.`
   : ctx.phase !== "fresh"
-    ? "Index is STALE — run `npm run gitnexus:agent-refresh` before graph calls (hooks block until refreshed)."
+    ? "Index is STALE — run `npm run bearing:agent-refresh` before graph calls (hooks block until refreshed)."
     : "Index is fresh — hooks redirect symbol Grep / large Read / blind edits to the graph.";
 
 // NORTH-STARS come FIRST on every session type (fresh, compact, resume). They're the project's

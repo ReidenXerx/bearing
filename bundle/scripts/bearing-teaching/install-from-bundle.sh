@@ -18,7 +18,7 @@ info "Target repo: $REPO_NAME"
 
 if grep -rq '__GITNEXUS_REPO__' .cursor/rules .cursor/hooks .bearing/skills/gitnexus-workspace .bearing/skills/gitnexus-enforcement 2>/dev/null; then
   warn "Bundle still references __GITNEXUS_REPO__ — set GITNEXUS_REPO_NAME and re-run substitution:"
-  warn "  GITNEXUS_REPO_NAME=$REPO_NAME bash scripts/gitnexus-teaching/install-from-bundle.sh"
+  warn "  GITNEXUS_REPO_NAME=$REPO_NAME bash scripts/bearing-teaching/install-from-bundle.sh"
   if [[ "${GITNEXUS_SKIP_RENAME:-}" != "1" ]]; then
     info "Replacing __GITNEXUS_REPO__ → $REPO_NAME in rules/hooks/skills"
     find .cursor/rules .cursor/hooks .bearing/skills/gitnexus-workspace .bearing/skills/gitnexus-enforcement \
@@ -31,10 +31,10 @@ if grep -rq '__GITNEXUS_REPO__' .cursor/rules .cursor/hooks .bearing/skills/gitn
   fi
 fi
 
-if [[ -f scripts/gitnexus-teaching/merge-package-scripts.mjs ]]; then
+if [[ -f scripts/bearing-teaching/merge-package-scripts.mjs ]]; then
   info "Injecting GitNexus npm scripts into package.json"
-  GITNEXUS_REPO_NAME="$REPO_NAME" node scripts/gitnexus-teaching/merge-package-scripts.mjs --write
-  ok "package.json updated (gitnexus:* + hooks:install)"
+  GITNEXUS_REPO_NAME="$REPO_NAME" node scripts/bearing-teaching/merge-package-scripts.mjs --write
+  ok "package.json updated (bearing:* + hooks:install)"
 elif [[ -f package.json.scripts.snippet.json ]]; then
   warn "merge-package-scripts.mjs missing — falling back to snippet merge"
   node <<'NODE'
@@ -49,7 +49,7 @@ NODE
 fi
 
 if [[ -f gitignore.snippet ]]; then
-  if ! grep -q 'gitnexus-teaching-bundle' .gitignore 2>/dev/null; then
+  if ! grep -q 'bearing-teaching-bundle' .gitignore 2>/dev/null; then
     echo "" >> .gitignore
     cat gitignore.snippet >> .gitignore
     ok "Appended gitignore.snippet"
@@ -57,6 +57,6 @@ if [[ -f gitignore.snippet ]]; then
 fi
 
 info "Running team setup"
-bash scripts/gitnexus-setup.sh ${GITNEXUS_SETUP_FLAGS:-}
+bash scripts/bearing-setup.sh ${GITNEXUS_SETUP_FLAGS:-}
 
 ok "Install complete — restart Cursor"

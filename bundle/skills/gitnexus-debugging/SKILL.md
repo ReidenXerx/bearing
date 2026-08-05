@@ -18,7 +18,7 @@ description: "Use when the user is debugging a bug, tracing an error, or asking 
 ```
 1. query({search_query: "<error or symptom>"})            → Find related execution flows
 2. context({name: "<suspect>"})                    → See callers/callees/processes
-3. READ gitnexus://repo/{name}/process/{name}                → Trace execution flow
+3. READ bearing://repo/{name}/process/{name}                → Trace execution flow
 4. trace({from, to})                                 → Shortest known A→B call path
 5. pdg_query({mode: "controls"|"flows"})            → Guards / data flow when PDG exists
 ```
@@ -96,7 +96,7 @@ RETURN [n IN nodes(path) | n.name] AS chain
 2. context({name: "validatePayment"})
    → Outgoing calls: verifyCard, fetchRates (external API!)
 
-3. READ gitnexus://repo/my-app/process/CheckoutFlow
+3. READ bearing://repo/my-app/process/CheckoutFlow
    → Step 3: validatePayment → calls fetchRates (external)
 
 4. Root cause: fetchRates calls external API without proper timeout

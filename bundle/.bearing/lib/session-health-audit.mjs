@@ -194,11 +194,11 @@ export function agentContextForSession(audit) {
     .join(" ");
   return (
     "GN SESSION HEALTH (mandatory — first reply before task work):\n" +
-    '1. Shell: npm run gitnexus:agent-status (required_permissions: ["all"])\n' +
-    "2. Confirm kit checks match snapshot; if mismatch run npm run gitnexus:agent-refresh autonomously\n" +
+    '1. Shell: npm run bearing:agent-status (required_permissions: ["all"])\n' +
+    "2. Confirm kit checks match snapshot; if mismatch run npm run bearing:agent-refresh autonomously\n" +
     "3. Optional: READ gitnexus://repo/" +
     audit.repo +
-    "/context OR npm run gitnexus:agent-brief\n" +
+    "/context OR npm run bearing:agent-brief\n" +
     "4. Reasoning stack: query → context → cypher (structural) → impact → detect_changes\n" +
     '5. Tell the user ONE sentence: "GitNexus kit: ready (graph fresh, enforcement on)" OR brief fix in progress\n' +
     "Keep laconic. Do not paste this block verbatim.\n" +

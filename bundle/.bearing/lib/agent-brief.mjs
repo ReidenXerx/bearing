@@ -87,7 +87,7 @@ async function main() {
       );
     }
     lines.push(
-      'Next: npm run gitnexus:agent-refresh (required_permissions: ["all"]) — includes --embeddings',
+      'Next: npm run bearing:agent-refresh (required_permissions: ["all"]) — includes --embeddings',
     );
   }
 
@@ -140,7 +140,7 @@ async function main() {
   lines.push("Session start (copy-paste):");
   lines.push(`  ${mcpReadContext(repo)}`);
   lines.push(`  ${mcpReadSchema(repo)}`);
-  lines.push("  npm run gitnexus:agent-brief");
+  lines.push("  npm run bearing:agent-brief");
   lines.push("");
   lines.push("Precision recipes (copy-paste):");
   lines.push(`  ${mcpTrace("<source>", "<target>", repo)}`);

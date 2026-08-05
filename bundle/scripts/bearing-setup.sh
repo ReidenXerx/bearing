@@ -8,7 +8,7 @@
 #   • Knowledge graph index
 #
 # Run once after cloning:
-#   npm run gitnexus:setup
+#   npm run bearing:setup
 #
 # Options:
 #   --quick           Hooks + teaching + MCP only; skip index build
@@ -31,12 +31,12 @@ usage() {
   sed -n '2,18p' "$0" | sed 's/^# \?//'
   echo ""
   echo "Examples:"
-  echo "  npm run gitnexus:setup              # full team onboarding (recommended)"
-  echo "  npm run gitnexus:setup -- --quick   # teaching + hooks/MCP, skip index"
-  echo "  npm run gitnexus:setup -- --full    # force full graph rebuild"
+  echo "  npm run bearing:setup              # full team onboarding (recommended)"
+  echo "  npm run bearing:setup -- --quick   # teaching + hooks/MCP, skip index"
+  echo "  npm run bearing:setup -- --full    # force full graph rebuild"
   echo ""
   echo "Re-sync teaching only (after pulling rule/skill updates):"
-  echo "  npm run gitnexus:pack             # tar.gz for other projects"
+  echo "  npm run bearing:pack             # tar.gz for other projects"
 }
 
 while [[ $# -gt 0 ]]; do
@@ -96,24 +96,24 @@ NODE_VERSION="$(node -p "process.versions.node")"
 semver_ge "$NODE_VERSION" "22.9.0" || fail "Node >= 22.9.0 required (found $NODE_VERSION)"
 ok "Node.js $NODE_VERSION"
 
-# ── 2. npm scripts (auto-inject / update gitnexus:* commands) ─────────────────
+# ── 2. npm scripts (auto-inject / update bearing:* commands) ─────────────────
 
 info "Ensuring GitNexus npm scripts in package.json"
-node scripts/gitnexus-teaching/merge-package-scripts.mjs --write
-ok "package.json gitnexus:* scripts injected"
+node scripts/bearing-teaching/merge-package-scripts.mjs --write
+ok "package.json bearing:* scripts injected"
 
 # ── 3. verify teaching sources (committed in repo) ───────────────────────────
 
 info "Verifying GitNexus teaching sources"
 
 CORE_SOURCES=(
-  "scripts/gitnexus-setup.sh"
-  "scripts/sync-cursor-gitnexus-teaching.sh"
+  "scripts/bearing-setup.sh"
+  "scripts/sync-cursor-bearing-teaching.sh"
   "scripts/install-git-hooks.sh"
-  "scripts/gitnexus-verify.mjs"
-  "scripts/gitnexus-agent.mjs"
-  "scripts/gitnexus-gate-hint.mjs"
-  "scripts/gitnexus-teaching/script-gates.mjs"
+  "scripts/bearing-verify.mjs"
+  "scripts/bearing-agent.mjs"
+  "scripts/bearing-gate-hint.mjs"
+  "scripts/bearing-teaching/script-gates.mjs"
   "scripts/lib/setup-ui.mjs"
   ".bearing/skills/gitnexus-workspace/SKILL.md"
   ".bearing/skills/gitnexus-enforcement/SKILL.md"
@@ -148,8 +148,8 @@ ok "Teaching sources OK (runtime: ${GITNEXUS_RUNTIME})"
 # ── 4. teaching bundle (skills symlinks + manifest) ─────────────────────────
 
 info "Sync skills + teaching manifest (runtime: ${GITNEXUS_RUNTIME})"
-chmod +x scripts/sync-cursor-gitnexus-teaching.sh scripts/gitnexus-setup.sh
-bash scripts/sync-cursor-gitnexus-teaching.sh
+chmod +x scripts/sync-cursor-bearing-teaching.sh scripts/bearing-setup.sh
+bash scripts/sync-cursor-bearing-teaching.sh
 
 # ── 4b. Cursor MCP (when runtime includes cursor) ───────────────────────────
 
@@ -189,35 +189,35 @@ bash scripts/install-git-hooks.sh
 # ── 7. knowledge graph index ─────────────────────────────────────────────────
 
 if [[ "$SKIP_INDEX" == true ]]; then
-  warn "Skipping index (--quick) — run npm run gitnexus:refresh before using graph tools"
+  warn "Skipping index (--quick) — run npm run bearing:refresh before using graph tools"
 else
   if [[ "$FULL_INDEX" == true ]]; then
     info "Full index rebuild (may take several minutes)"
-    npm run gitnexus:full
+    npm run bearing:full
   else
     info "Incremental index (embeddings + area skills)"
-    npm run gitnexus:refresh
+    npm run bearing:refresh
   fi
   ok "Knowledge graph indexed"
 
   info "Detecting HTTP router profile (Express vs custom)"
-  npm run gitnexus:detect-api 2>/dev/null && ok "API router profile written" || warn "API profile detection skipped"
+  npm run bearing:detect-api 2>/dev/null && ok "API router profile written" || warn "API profile detection skipped"
 
   info "Graph smoke test (Cypher / ACCESSES)"
-  npm run gitnexus:graph-smoke 2>/dev/null && ok "Graph smoke passed" || warn "Graph smoke failed — check index"
+  npm run bearing:graph-smoke 2>/dev/null && ok "Graph smoke passed" || warn "Graph smoke failed — check index"
 
   # Re-sync generated area skills produced by analyze --skills
   info "Re-syncing area skills after index"
-  bash scripts/sync-cursor-gitnexus-teaching.sh
+  bash scripts/sync-cursor-bearing-teaching.sh
 fi
 
 # ── 8. verify ─────────────────────────────────────────────────────────────────
 
 info "Full kit verification"
-if npm run gitnexus:verify 2>/dev/null; then
+if npm run bearing:verify 2>/dev/null; then
   ok "Kit verification passed"
 else
-  warn "Verification reported issues — run npm run gitnexus:verify after fixing"
+  warn "Verification reported issues — run npm run bearing:verify after fixing"
 fi
 
 # ── 9. onboarding ─────────────────────────────────────────────────────────────
@@ -231,7 +231,7 @@ cat <<'ONBOARD'
 
   GitNexus is now your Cursor agent's code brain — with enforcement.
 
-  ✓ Graph + embeddings indexed (or run gitnexus:agent-refresh after --quick)
+  ✓ Graph + embeddings indexed (or run bearing:agent-refresh after --quick)
   ✓ Hooks block grep-first habits when the graph is fresh
   ✓ Agent refreshes the index autonomously when stale
 
@@ -241,9 +241,9 @@ cat <<'ONBOARD'
   2. Open a new Agent chat and describe your task
   3. Share docs/GITNEXUS-CURSOR-GUIDE.md with your team
 
-  Quick check:  npm run gitnexus:health
-  Full audit:   npm run gitnexus:verify
-  Gate docs:    npm run gitnexus.__gate.1.session
+  Quick check:  npm run bearing:health
+  Full audit:   npm run bearing:verify
+  Gate docs:    npm run bearing.__gate.1.session
 
   When hooks redirect the agent (grep/read blocked), that is expected —
   GitNexus is enforcing graph-first reasoning.
@@ -254,15 +254,15 @@ cat <<'ONBOARD'
     query → context → cypher (structural) → impact → detect_changes
 
   Daily commands:
-    npm run gitnexus:health          human-friendly status
-    npm run gitnexus:agent-brief     session orientation (agents)
-    npm run gitnexus:agent-status    staleness (agents)
-    npm run gitnexus:agent-refresh   re-index when stale
-    npm run gitnexus:sync-teaching   after pulling kit updates
+    npm run bearing:health          human-friendly status
+    npm run bearing:agent-brief     session orientation (agents)
+    npm run bearing:agent-status    staleness (agents)
+    npm run bearing:agent-refresh   re-index when stale
+    npm run bearing:sync-teaching   after pulling kit updates
 
   Hooks DENY (when fresh): symbol Grep, SemanticSearch, broad Glob, large Read
   Hooks ALLOW: gitnexus npm scripts (agent refresh pre-approved)
-  MCP: gitnexus in .cursor/mcp.json · pre-commit → gitnexus:pdg
+  MCP: gitnexus in .cursor/mcp.json · pre-commit → bearing:pdg
 
 ONBOARD
 echo ""

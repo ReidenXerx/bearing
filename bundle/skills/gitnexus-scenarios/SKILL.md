@@ -5,7 +5,7 @@ description: "Scenario playbooks for GitNexus — pre-edit, pre-commit, PR revie
 
 # GitNexus Scenario Playbooks
 
-Match your task to a playbook. Always start with READ `gitnexus://repo/__GITNEXUS_REPO__/context`.
+Match your task to a playbook. Always start with READ `bearing://repo/__GITNEXUS_REPO__/context`.
 
 Cross-module flows / architecture questions → also read **`gitnexus-imaging`** skill.
 
@@ -28,7 +28,7 @@ Cross-module flows / architecture questions → also read **`gitnexus-imaging`**
 - [ ] Review changed_symbols + affected_processes
 - [ ] Unexpected cross-module hits? → split commit or narrow scope
 - [ ] Risk CRITICAL/HIGH → run broader test suite before commit
-- [ ] Commit (pre-commit hook refreshes index with PDG via `gitnexus:full-pdg` (full --force rebuild); agents use `gitnexus:agent-refresh` when stale mid-session)
+- [ ] Commit (pre-commit hook refreshes index with PDG via `bearing:full-pdg` (full --force rebuild); agents use `bearing:agent-refresh` when stale mid-session)
 ```
 
 ## 3. PR / branch review
@@ -46,7 +46,7 @@ Cross-module flows / architecture questions → also read **`gitnexus-imaging`**
 ```
 - [ ] gitnexus_query({search_query: "<error or symptom>", task_context: "debugging", goal: "find throw site"})
 - [ ] gitnexus_context on top suspect from returned processes
-- [ ] READ gitnexus://repo/__GITNEXUS_REPO__/processes — pick matching flow
+- [ ] READ bearing://repo/__GITNEXUS_REPO__/processes — pick matching flow
 - [ ] Optional cypher for call chains (see gitnexus-debugging skill)
 - [ ] Read source at flagged lines — confirm root cause
 - [ ] If regression: detect_changes on recent commits

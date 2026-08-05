@@ -14,7 +14,7 @@ description: "Use when reviewing a pull request, understanding what a PR changes
 ## Workflow
 
 ```
-1. `npm run gitnexus:branch-status -- <base>` to confirm current branch/base and suggested MCP calls
+1. `npm run bearing:branch-status -- <base>` to confirm current branch/base and suggested MCP calls
 2. gitnexus_detect_changes({ scope: "compare", base_ref: "main", repo: "__GITNEXUS_REPO__", branch: "<current-branch>" })
 3. Review summary.risk_level, changed_symbols, affected_processes
 4. For HIGH/CRITICAL or unexpected processes → impact on changed entry points with the same `branch`
@@ -25,7 +25,7 @@ description: "Use when reviewing a pull request, understanding what a PR changes
 ## Checklist
 
 ```
-- [ ] `npm run gitnexus:branch-status -- <base>` confirms branch/base refs
+- [ ] `npm run bearing:branch-status -- <base>` confirms branch/base refs
 - [ ] detect_changes compare against main (or PR base branch) with `branch` when multi-branch index is available
 - [ ] Risk level acceptable for change intent?
 - [ ] affected_processes match PR description?

@@ -94,4 +94,4 @@ Good vs useless:
 - Letting the file grow into a wall of prose — that recreates the problem it solves.
 - Editing it yourself because it "seems outdated". Propose; don't rewrite.
 
-Print them anytime: `npm run gitnexus:northstars` (`-- --full` for the whole document).
+Print them anytime: `npm run bearing:northstars` (`-- --full` for the whole document).

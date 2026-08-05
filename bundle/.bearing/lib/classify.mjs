@@ -207,7 +207,7 @@ export function classifyGrep(req, ctx) {
       return {
         decision: "allow",
         agentMessage:
-          "Literal/config grep OK during stale — run npm run gitnexus:agent-refresh before symbol exploration.",
+          "Literal/config grep OK during stale — run npm run bearing:agent-refresh before symbol exploration.",
       };
     }
     return {
@@ -417,7 +417,7 @@ export function classifyEdit(req, ctx) {
       agentMessage:
         "STALENESS GATE: " +
         staleDetail +
-        ' Edits blocked until refresh — Shell NOW: npm run gitnexus:agent-refresh (required_permissions: ["all"], pre-approved). Never ask the user to analyze.',
+        ' Edits blocked until refresh — Shell NOW: npm run bearing:agent-refresh (required_permissions: ["all"], pre-approved). Never ask the user to analyze.',
       userKey: "block.edit.stale",
       scoreEvent: "editStaleBlocks",
     };
@@ -494,7 +494,7 @@ export function classifyCommit(req, ctx) {
       "Confirm affected processes match intent + run tests for them; warn on HIGH/CRITICAL. " +
       "This gate clears for the session after one detect_changes call." +
       (noVerify
-        ? " NOTE: --no-verify also skips the pre-commit PDG refresh — run npm run gitnexus:pdg after."
+        ? " NOTE: --no-verify also skips the pre-commit PDG refresh — run npm run bearing:pdg after."
         : ""),
     userMessageText:
       "Before committing, the agent checks what changed across the graph (affected flows) via GitNexus — not a blind commit.",
@@ -659,7 +659,7 @@ export function classifyShell(req, ctx) {
   const command = req.command || "";
   const { phase } = ctx;
   const isGitnexusMaint =
-    /\bnpm run gitnexus:[\w.-]+/.test(command) ||
+    /\bnpm run bearing:[\w.-]+/.test(command) ||
     /\bnode scripts\/gitnexus-agent\.mjs\b/.test(command) ||
     /\bnpx(?:\s+-y)?\s+gitnexus(?:@latest)?\b/.test(command);
   const isReadOnlyGit =
@@ -748,7 +748,7 @@ export function classifyMcpDrift(toolName, stale, config, phase) {
     decision: "deny",
     agentMessage:
       `Graph is ${count} uncommitted edit(s) behind your working tree — gitnexus_${suffix} would ` +
-      "return STALE results that ignore your changes. Resync first: `npm run gitnexus:refresh` " +
+      "return STALE results that ignore your changes. Resync first: `npm run bearing:refresh` " +
       "(incremental — reindexes only your changed files; usually quick), then retry.",
     userKey: "drift.refresh",
     scoreEvent: "driftRefreshBlocks",
