@@ -44,3 +44,6 @@ AGENTS.md
 docs/ARCHITECTURE.gitnexus.md
 .claude/skills/
 # --- end bearing ---
+
+# npm pack artifacts
+*.tgz
