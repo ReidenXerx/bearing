@@ -2,6 +2,15 @@
 
 All notable changes to `bearing` are documented here.
 
+## 1.0.2 — proper diagrams
+
+### Changed
+
+- README diagrams are now generated **SVG** (`npm run gen:diagrams`) rather than ASCII: rendered
+  boxes, colour-coded outcomes, readable on light and dark. Served over absolute raw URLs so they
+  display on npm and GitHub alike, with no external renderer and no dependency on npm's
+  relative-link rewriting. 1.0.1 shipped the ASCII interim — this is the version worth looking at.
+
 ## 1.0.1 — npm presentation fixes
 
 ### Fixed
