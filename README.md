@@ -43,14 +43,14 @@ That failure has a name — **losing your bearings**. `bearing` gives an agent f
 
 ## What you get
 
-Four independent modules. Pick any combination; each works alone.
+Four independent modules. **Pick any combination — each works alone, none depends on another.**
 
 | Module | What it does |
 |---|---|
 | **North-stars** | Numbered, authoritative claims about what your project *is* — invariants, exact term meanings, settled decisions, ideas already rejected and why. **Outranks every other doc**, re-injected as the session runs. → *No more re-litigating decisions you made months ago.* |
 | **Task-core** | A dense save-state of the *current task*, written **before** compaction drops the detail and read back on recovery. → *A four-hour task doesn't forget its own goal at hour three.* |
 | **Microscope** | Milestone review through several independent lenses, adversarially verified, iterated in waves. → *Catches what a single confident pass always misses.* |
-| **GitNexus** *(optional)* | Hard gates that redirect symbol greps to a real code knowledge graph and demand impact analysis before edits. → *The agent stops guessing at your architecture.* Needs the GitNexus MCP server. |
+| **GitNexus** | Hard gates that redirect symbol greps to a real code knowledge graph and demand impact analysis before edits. → *The agent stops guessing at your architecture.* Requires the [GitNexus](https://github.com/abhigyanpatwari/GitNexus) MCP server. |
 
 ## Install
 
@@ -161,7 +161,7 @@ flowchart LR
 
 Findings that can't survive an attack never reach you.
 
-### 🕸 GitNexus — the agent stops guessing *(optional)*
+### 🕸 GitNexus — the agent stops guessing
 
 Grepping a symbol gives you 40 text matches and no structure. The graph knows what actually calls what.
 
@@ -177,7 +177,7 @@ flowchart LR
     style R fill:#4a3a15,stroke:#d69e2e,color:#fff
 ```
 
-The only module needing an external dependency — and the only one that can *block* a tool rather than advise.
+The only module that can **block** a tool outright rather than advise. Requires the GitNexus MCP server and an index — the one prerequisite in the set.
 
 ## Requirements
 
