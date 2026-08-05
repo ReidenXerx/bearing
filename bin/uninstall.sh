@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Uninstall gitnexus-agent-kit from a target repo.
+# Uninstall bearing from a target repo.
 # Usage: ./bin/uninstall.sh /path/to/repo [--remove-index]
 set -euo pipefail
 

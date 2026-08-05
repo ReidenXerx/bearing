@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Update gitnexus-agent-kit in a target repo. Reads the runtime from the manifest — pass
+# Update bearing in a target repo. Reads the runtime from the manifest — pass
 # --runtime only to CHANGE it (cursor|zed|claude|both|all, comma-list allowed).
 # Fresh clone? The manifest (.gitnexus/agent-kit-manifest.json) is gitignored, so it's absent and
 # update prints "Not installed. Run install first." — use ./bin/install.sh <repo> --runtime <rt> instead.

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Install gitnexus-agent-kit into a target git repo (interactive if no path given).
+# Install bearing into a target git repo (interactive if no path given).
 # Usage: ./bin/install.sh [/path/to/repo] [--runtime cursor|zed|claude|both|all] [--quick] [--no-setup]
 #   runtime: cursor · zed · claude · both (=cursor+zed, default) · all (=cursor+zed+claude) · comma-list e.g. cursor,claude
 set -euo pipefail
