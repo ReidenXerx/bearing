@@ -2,6 +2,58 @@
 
 All notable changes to `bearing` are documented here.
 
+## 1.0.3 — 20 defects fixed after an adversarial review
+
+Two independent reviewers audited the install/migration core and the runtime hooks, reproducing
+every finding end-to-end. **Anyone on 1.0.x should upgrade** — several of these made the tool
+unusable or destructive.
+
+### Fixed — critical
+
+- **`npx bearing` died immediately.** The interactive installer — the command the README leads with
+  — threw a `ReferenceError` on its first line.
+- **Any install without the `gitnexus` module crashed**, after writing the manifest, leaving a
+  half-installed repo.
+- **The feature filter applied to FILES only.** `settings.json` still registered every hook,
+  `package.json` still got every script, `.mcp.json` still wired GitNexus — so a filtered install
+  spawned a missing module on every tool call.
+- **`uninstall` deleted your north-stars** and `hooks.local.json` (untracked by the kit's own
+  gitignore, so unrecoverable). It now removes only what it installed and reports what it kept.
+
+### Fixed — the tool blocking legitimate work
+
+- Repos living under `~/src` or `~/go/src` had **every file** treated as source: every large Read
+  denied and every Edit gated, repo-wide. Classification is now repo-relative.
+- Piping into `rg`/`ag`/`ack` was denied — `npm run build 2>&1 | rg error` blocked, with a Cypher
+  query offered as the fix.
+- `TODO`/`FIXME` greps were denied as symbols, redirected to a lookup that cannot resolve.
+- A **failed refresh locked the session permanently** and re-locked it every session; the escape
+  hatch existed but was unreachable.
+- A repo with **no commits** denied `ls`, `cat`, Read, Grep and Edit.
+- **`bearing update` tripped its own drift gate**, blocking graph queries right after updating.
+- Deny messages now name the two ways out (`bearing:fallback`, `mode: guide`).
+
+### Fixed — protecting your files
+
+- Install **overwrote `.vscode/settings.json` and `.githooks/pre-commit`** without a backup, and
+  uninstall then deleted them. Pre-existing files are now saved to `<file>.bearing-backup`.
+- The pre-install backup was **re-taken from the already-modified file** on every update, so
+  uninstall "restored" kit artifacts.
+- Team-tuned `.bearing/hooks.json` was **reverted on every update** (e.g. `mode: guide` → blocking).
+- A `.gitignore` rule appended with `>>` was **absorbed into the managed block and deleted** on the
+  next update.
+- `update --features` was silently ignored; migration failures were rendered as successes.
+
+### Fixed — performance and precision
+
+- The read guard read entire files to compare one line count (398ms / 230MB on 54MB); now a bounded
+  scan (104ms → 2ms on 9.4MB).
+- Context-pressure tail cap 8MB → 32MB — past it the estimator reports "unknown", which reads as
+  "not full" exactly when the window is filling.
+- `git … commit` was a substring match, denying `git rev-parse HEAD^{commit}` and friends.
+
+75 tests, up from 69 — every fix has a test that fails when the fix is reverted.
+
 ## 1.0.2 — proper diagrams
 
 ### Changed
