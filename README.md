@@ -1,172 +1,94 @@
 <div align="center">
 
-# gitnexus-agent-kit
+# bearing
 
-**The enforcement layer for GitNexus — Cursor, Zed, Claude Code, and Ollama**
+**An intel layer for AI coding agents.**
 
-Hooks (Cursor) · Agent profiles (Zed) · MCP · Skills · Cypher · Autonomous refresh — graph-first reasoning on **every task**, not only when code is unfamiliar.
+Cognitive routines that keep an agent anchored to what your project actually is — across long sessions, context compaction, and months of accumulated documentation.
 
-**Stronger agent work at every model tier** — biggest lift on fast, budget, and local models; flagship models run leaner and more consistently too.
-
-The graph + hooks replace ad hoc grep-and-guess with enforced structure — so you pay less for weights *or* get more from the weights you already pay for.
-
-<br />
-
-[![CI](https://github.com/ReidenXerx/cursor-gitnexus-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/ReidenXerx/cursor-gitnexus-kit/actions/workflows/ci.yml)
 [![Node](https://img.shields.io/badge/node-%3E%3D22.9.0-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](LICENSE)
-[![GitNexus](https://img.shields.io/badge/GitNexus-MCP-6366f1)](https://github.com/abhigyanpatwari/GitNexus)
 
-[Quick start](#quick-start) · [Zed + Ollama](docs/ZED.md) · [Skills](docs/SKILLS.md) · [Architecture](docs/ARCHITECTURE.md) · [Full install guide](docs/QUICKSTART.md)
+Works with **Claude Code**, **Cursor**, and **Zed**.
 
 </div>
 
 ---
 
-GitNexus builds the knowledge graph. This kit wires it into **all agent reasoning** — explore, debug, edit, refactor, review, commit — with **hard enforcement** when the index is fresh: deny grep-first habits, inject MCP playbooks, auto-refresh stale graphs, verify the stack on every install.
+## The problem
 
-Battle-tested across real production repositories; examples below use neutral placeholder paths.
+Your tests catch code that breaks. Nothing catches an agent that has quietly drifted about what the code *means*.
 
+It reads a stale doc and adopts a premise you abandoned months ago. It re-proposes a feature you already measured and rejected — because the refutation lives in a changelog it didn't read. Two hundred thousand tokens in, it's optimising for a goal you never set. Every answer stays fluent, confident, and subtly wrong, and the only way to catch it is to read the wall of text yourself.
 
-```bash
-git clone https://github.com/ReidenXerx/gitnexus-agent-kit.git
-cd gitnexus-agent-kit
-./bin/install.sh                    # interactive — pick Cursor, Zed, Claude Code, or all
-./bin/install.sh /path/to/repo --runtime all    # Cursor + Zed + Claude Code
-./bin/install.sh /path/to/repo --runtime claude # Claude Code hooks + MCP + CLAUDE.md
-./bin/install.sh /path/to/repo --runtime zed    # Zed + Ollama profile
-# → restart your IDE → npm run gitnexus:health → new Agent chat
-```
-
-## Why this exists
-
-Most teams treat GitNexus as optional onboarding docs. Agents grep familiar files, skip `impact` on “small” edits, and only open the graph when lost. **Wrong model.** The graph should be the default substrate for every task.
-
-This kit closes that gap with **IDE-specific enforcement** — Cursor hooks, Zed agent profiles, shared symlinked skills, session health rituals, and a polished install that ends in `gitnexus:verify`.
-
-## IDE runtimes
-
-| Runtime | What gets installed | Enforcement style |
-| --- | --- | --- |
-| **Cursor** (`--runtime cursor`) | Hooks, rules, `.cursor/mcp.json`, skills | Hard — hooks deny grep/read when graph is fresh |
-| **Zed** (`--runtime zed`) | `.zed/settings.json`, **Zed + GitNexus** agent profile, `.agents/skills/`, `AGENTS.md` | Profile — grep disabled; Zed model + gitnexus MCP |
-| **Claude Code** (`--runtime claude`) | `.mcp.json`, `.claude/settings.json` hooks, `.claude/skills/`, `CLAUDE.md` | Hard — PreToolUse hooks deny symbol grep / large read / blind edits; commit gated on `detect_changes` |
-| **Both** (`--runtime both`, default) | Cursor + Zed | Cursor hard gates + Zed profile for the same repo |
-| **All** (`--runtime all`) | Cursor + Zed + Claude Code | Every adapter (also any comma list, e.g. `--runtime cursor,claude`) |
-
-Claude Code shares the **same enforcement core** as Cursor — the `classify.mjs` policy decides allow/deny, and a small `claude-emit` adapter maps the verdict to Claude Code's `PreToolUse` hook protocol. Same gates, same graph-first loop.
-
-Skills live once in `.gitnexus/agent-kit/skills/` and are **symlinked** into `.cursor/skills/` and/or `.agents/skills/` — one source of truth, both IDEs stay in sync on update.
-
-→ Deep dive with diagrams: **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**
-
-## Model tiers — who gains what
-
-Frontier models hide weak repo habits (grep-first, skip `impact`, full-file reads). **This kit fixes the workflow for every tier** — not only “dumb” models.
-
-| | Without kit | With kit + fresh graph |
-|---|-------------|------------------------|
-| **Budget / local / fast** | Often fails on large repos; grep loops, shallow refactors | Same enforced loop as everyone else — **graph carries what the model can't hold in context** |
-| **Flagship / expensive** | Still wastes tokens on blind reads and retries; inconsistent tool choice | **Less token burn**, fewer missed callers, same playbook every session — model spends capacity on *thinking*, not repo spelunking |
-
-**Honest positioning:**
-
-- **Unique wedge:** makes serious repo work viable on **lower-cost models** — structure lives in GitNexus, not in parameter count.
-- **Also true:** teams on **Opus / Sonnet / GPT-4 class** models still win — faster runs, fewer “smart but sloppy” edits, enforced `impact` / `cypher` / `detect_changes` even when the model *could* have guessed.
-- **Not either/or:** downgrade tier *or* keep flagship and ship with less waste. The kit is **model-agnostic enforcement**, not a budget-model patch.
-
-You pay for graph index + embeddings once; every agent turn — cheap or expensive — gets the same scaffold.
-
-→ Deep dive: **[docs/ARCHITECTURE.md#model-tiers-who-gains-what](docs/ARCHITECTURE.md#model-tiers-who-gains-what)**
+That failure has a name — **losing your bearings** — and it compounds silently. `bearing` gives an agent fixed points it can't drift away from.
 
 ## What you get
 
-| Outcome | Mechanism |
-|---------|-----------|
-| **Budget-model lift** | Enforced playbook — biggest relative gain on fast/local tiers |
-| **Flagship efficiency** | Same gates — less token waste, fewer grep retries, consistent impact checks |
-| Graph in every task loop | Hooks on explore, edit, commit — not a sidecar |
-| Fewer missed callers | Symbol grep blocked → `context` / `impact` |
-| Better fuzzy grounding | SemanticSearch blocked → `query` (BM25 + embeddings) |
-| Structural precision | Field data flow, N-hop chains → **`cypher`**, not field grep |
-| Safer edits | Pre-edit `impact`; `rename` MCP instead of blind StrReplace |
-| Fresh index | Agent runs `gitnexus:agent-refresh` when stale |
-| Proof it works | Session health + `gitnexus:verify` audit table |
+Four independent modules. Pick any combination; each works alone.
 
-## Quick start
+| Module | What it does |
+|---|---|
+| **North-stars** | A short, numbered, authoritative statement of what your project *is* — invariants, exact term meanings, settled decisions, ideas already rejected and why. It **outranks every other doc**, and is re-injected periodically so a long session can't drift off it. |
+| **Task-core** | A dense save-state of the *current task*. When the context window fills, the agent writes it **before** compaction drops the detail — and reads it back on recovery, instead of reconstructing from a summary. |
+| **Microscope** | A milestone review routine: several independent lenses, adversarially verified, iterated in waves. Opinionated, not just defect-hunting. |
+| **GitNexus** *(optional)* | Hard gates that redirect symbol greps and blind reads to a real code knowledge graph, keep the index fresh, and require impact analysis before edits. The deepest module — and the only one needing an external dependency. |
 
-**Prerequisites:** Node ≥ 22.9.0 · git · bash · **Cursor** (hooks) and/or **Zed** (agent profile) · GitNexus MCP
+## Install
 
 ```bash
-# Full install + index (recommended)
-./bin/install.sh /path/to/your-repo
-
-# Hooks/skills only — index later
-./bin/install.sh /path/to/your-repo --quick
-
-# Custom GitNexus registry name
-./bin/install.sh /path/to/your-repo --repo-name my-app
+npx bearing
 ```
 
-**After install (in the target repo):**
-
-1. Restart Cursor on that project  
-2. `npm run gitnexus:verify`  
-3. `npm run gitnexus:health`  
-4. New Agent chat  
-
-Details, flags, update/uninstall: **[docs/QUICKSTART.md](docs/QUICKSTART.md)**
-
-## Commands (target repo)
-
-| Command | Who | Purpose |
-|---------|-----|---------|
-| `npm run gitnexus:verify` | CI / leads | Full kit audit after install or update |
-| `npm run gitnexus:health` | Humans | Friendly status line |
-| `npm run gitnexus:agent-brief` | Agents | Session orientation |
-| `npm run gitnexus:agent-status` | Agents | Staleness check |
-| `npm run gitnexus:agent-refresh` | Agents | Re-index when stale |
-| `npm run gitnexus:branch-status` | PR review | Show current/base branch and branch-aware MCP calls |
-| `npm run gitnexus:pr-impact` | PR review | Branch-aware review playbook vs base |
-| `npm run gitnexus:pdg` | Git hook / humans | Re-index with PDG before commit |
-| `npm run gitnexus:graph-smoke` | CI | Cypher / ACCESSES sanity |
-| `npm run gitnexus:detect-api` | Setup | Express vs custom router profile |
-| `npm run gitnexus.__gate.*` | Docs | Gate explanations in `package.json` |
-
-Gate map: `scripts/gitnexus-teaching/script-gates.mjs` · `npm run gitnexus.__gate.1.session`
-
-## Repo layout
-
-```
-gitnexus-agent-kit/
-├── bin/              install · update · uninstall
-├── bundle/           teaching bundle → copied into target repos
-├── lib/              kit core + tests (migrate, skills, zed)
-├── docs/             architecture, quickstart, skills, ZED guide, release checklist
-└── .github/          CI, issue/PR templates
-```
-
-## North star (agent contract)
-
-> GitNexus is the **default reasoning layer for every task** — not a fallback when code is unfamiliar. Prefer **graph + embeddings + cypher** when the index is fresh. Refresh autonomously when stale. Fall back to grep/read only when GitNexus is stale, failing, or wrong — and say why.
-
-Enforced in `bundle/.cursor/rules/00-gitnexus-enforcement.mdc`.
-
-## For GitNexus upstream
-
-> GitNexus gives teams a code knowledge graph. **gitnexus-agent-kit** is the agent layer for Cursor, Zed, and Ollama: install once, wire the graph into every task, enforce graph-first reasoning (hooks on Cursor; profile + skills on Zed), autonomous refresh, human-readable status — **model-agnostic uplift; highest ROI on budget/local tiers; flagship models run leaner too.**  
-> **Proposed:** `gitnexus init --agent-kit`
-
-## Contributing
+The interactive installer explains each module and lets you choose. Or be explicit:
 
 ```bash
-npm test
+npx bearing install . --runtime claude --features northstars,taskcore
+npx bearing install /path/to/repo --runtime all --features all
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) · [SECURITY.md](SECURITY.md)
+`--runtime` — `claude` · `cursor` · `zed` · `all`
+`--features` — `northstars` · `taskcore` · `microscope` · `gitnexus` · `all`
 
-Maintainer bundle reference: [docs/TEAM-BUNDLE.md](docs/TEAM-BUNDLE.md). Release checklist: [docs/RELEASE.md](docs/RELEASE.md). Changelog: [CHANGELOG.md](CHANGELOG.md).
+Then restart your IDE and open a new agent chat.
+
+## How north-stars work
+
+Write down what your project *is*, as numbered claims that a conclusion could actually violate:
+
+```markdown
+- **NS-1** — The backtest stop model MUST match the live order's stop model.
+              If they differ the scoreboard is invalid.
+- **NS-4** — Win-rate is NEVER a ranker. Only net expectancy is a profitability claim.
+- **NS-9** — REJECTED: averaging into a losing position. Measured: adds fill only on the
+              weaker cases (adverse selection). Don't re-propose without new evidence.
+```
+
+Vague guidance is useless here — *"be careful with risk"* can't be violated, so it can't catch anything. A north-star has to be falsifiable.
+
+From then on the agent **cites them** (`per NS-4, ranking by win-rate is invalid here`), and when a doc contradicts one, **the north-star wins and the doc is stale**. If it can't cite one for a load-bearing claim, it says so — which is your signal that it may be drifting. It can propose changes, but never edit them silently: an anchor that drift can rewrite isn't an anchor.
+
+> Built for a real codebase where 81 documents had come to contradict each other on live production parameters — including a `CLAUDE.md` that routed every agent to a design doc marked superseded.
+
+## Requirements
+
+- Node.js ≥ 22.9.0
+- A git repository
+- macOS, Linux, Windows, or WSL
+- *(GitNexus module only)* the [GitNexus](https://github.com/abhigyanpatwari/GitNexus) MCP server
+
+## Commands
+
+```bash
+npx bearing install <repo> [--runtime ...] [--features ...]
+npx bearing-update <repo>       # pull in a newer bearing, keep your selection
+npx bearing-uninstall <repo>
+```
+
+## Documentation
+
+[Quickstart](docs/QUICKSTART.md) · [Skills](docs/SKILLS.md) · [Architecture](docs/ARCHITECTURE.md) · [Zed + local models](docs/ZED.md)
 
 ## License
 
-[ISC](LICENSE)
+ISC
