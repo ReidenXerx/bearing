@@ -392,6 +392,73 @@ export function bumpScore(root, key) {
 }
 
 /** @param {string} root */
+/**
+ * Is the enforcement layer earning its keep, or is it just getting in the way?
+ *
+ * The kit collects every number needed to answer that and never asked the question. A real session
+ * logged 60 graph calls against 49 grep redirects and 8 read redirects — the gates were the
+ * dominant interaction, not the graph — and nothing surfaced it. The operator only found out
+ * because an agent wrote a report by hand.
+ *
+ * Deliberately conservative: it stays silent below a traffic floor (early ratios are noise), and
+ * every finding names the concrete knob to turn. A diagnosis nobody can act on is just another
+ * unactionable message (NS-6).
+ *
+ * @param {Record<string, number>} counts scorecard counts
+ * @returns {{ level: 'warn'|'info', headline: string, advice: string }[]}
+ */
+export function diagnoseEnforcement(counts = {}) {
+  const n = (k) => Number(counts[k] ?? 0);
+  const redirects = n('grepRedirects') + n('readRedirects');
+  const graphCalls = n('graphCalls');
+  const findings = [];
+  if (redirects + graphCalls < 15) return findings; // too little traffic to mean anything
+
+  // Not `redirects > graphCalls`: a real reported session ran 57 redirects against 60 graph calls
+  // and read as "the gates are the dominant interaction" to the operator, yet a strict majority
+  // rule stays silent on it. What matters is that enforcement is a large SHARE of the session.
+  if (redirects >= graphCalls * 0.75) {
+    findings.push({
+      level: 'warn',
+      headline:
+        `Enforcement is ${Math.round((redirects / (redirects + graphCalls)) * 100)}% of graph interaction: ` +
+        `${redirects} redirects vs ${graphCalls} graph calls.`,
+      advice:
+        'The gates are the dominant interaction, which usually means they are firing on work the ' +
+        'graph cannot answer. Check `npm run bearing:fallback-log` for what agents distrusted, and ' +
+        'consider `"mode": "guide"` in .bearing/hooks.json to downgrade blocks to nudges.',
+    });
+  }
+  if (n('classicalFallbackGranted') >= 3) {
+    findings.push({
+      level: 'warn',
+      headline: `${n('classicalFallbackGranted')} classical-fallback grants — agents repeatedly distrusted the graph.`,
+      advice:
+        'Each grant is a logged failure report. Review with `npm run bearing:fallback-log --json` ' +
+        'and send it upstream; a recurring shape there is a real coverage gap, not agent error.',
+    });
+  }
+  if (n('impactVerdictsQuestioned') >= 2) {
+    findings.push({
+      level: 'warn',
+      headline: `${n('impactVerdictsQuestioned')} impact verdicts had no resolvable callers.`,
+      advice:
+        'The pre-edit gate is grading changes on a caller set it could not resolve (DI/factory ' +
+        'seams, module consts). Confirm blast radius classically before edits in those areas.',
+    });
+  }
+  if (n('driftRefreshBlocks') >= 5) {
+    findings.push({
+      level: 'info',
+      headline: `${n('driftRefreshBlocks')} drift-refresh blocks — the drift gate is firing often.`,
+      advice:
+        'Expected during a large refactor. If it is constant, raise `driftRefreshThreshold` in ' +
+        '.bearing/hooks.json (default 3 uncommitted source edits).',
+    });
+  }
+  return findings;
+}
+
 export function readScorecard(root) {
   try {
     return JSON.parse(fs.readFileSync(sessionPaths(root).scorecardFile, 'utf8'));

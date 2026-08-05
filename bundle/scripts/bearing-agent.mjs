@@ -622,6 +622,19 @@ if (cmd === "scorecard") {
   } else {
     for (const k of keys) console.log(`  ${labels[k]}: ${counts[k]}`);
   }
+  // The numbers alone never told anyone whether the gates were helping. Say it outright.
+  const { diagnoseEnforcement } = await import(
+    pathToFileURL(path.join(ROOT, ".bearing/lib/session-primer.mjs")).href
+  );
+  const findings = diagnoseEnforcement(counts);
+  if (findings.length) {
+    console.log("");
+    console.log("Diagnosis");
+    for (const f of findings) {
+      console.log(`  ${f.level === "warn" ? "!" : "\u00b7"} ${f.headline}`);
+      console.log(`    -> ${f.advice}`);
+    }
+  }
   process.exit(0);
 }
 

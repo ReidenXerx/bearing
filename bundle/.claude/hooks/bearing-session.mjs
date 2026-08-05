@@ -29,6 +29,10 @@ const {
   northStarsPath,
   northStarsExists,
   graphFeatureEnabled,
+  readTelemetry,
+  summarizeTelemetry,
+  readScorecard,
+  diagnoseEnforcement,
 } = await lib("session-primer.mjs");
 
 const source = input.source || "startup";
@@ -102,5 +106,22 @@ if (recovering) {
     staleLine,
   ];
 }
+// Is enforcement earning its keep? Every number needed has always been collected and nothing ever
+// asked the question. Read the ARCHIVE, not the live scorecard: clearSessionState() above flushes
+// the finishing session's tally to telemetry and wipes it, so on a fresh start the scorecard is
+// empty by definition and a diagnosis from it could never fire. The cross-session totals are also
+// the honest basis — one short session's ratio is noise.
+if (graphEnabled) {
+  let totals = {};
+  try {
+    totals = summarizeTelemetry(readTelemetry(root)).totals ?? {};
+  } catch {
+    totals = readScorecard(root).counts ?? {};
+  }
+  for (const f of diagnoseEnforcement(totals)) {
+    lines.push(`${f.level === "warn" ? "⚠" : "·"} ${f.headline} ${f.advice}`);
+  }
+}
+
 if (nsLine) lines.unshift(nsLine);
 emitContext(lines.filter(Boolean).join(" "), "SessionStart");
