@@ -5,6 +5,7 @@
  * Output parsing is intentionally lenient — the CLI table format may vary across versions.
  */
 import { spawnSync } from 'node:child_process';
+import { gitnexusSpawn } from './gitnexus-cmd.mjs';
 
 /**
  * @param {string} root repo root (cwd)

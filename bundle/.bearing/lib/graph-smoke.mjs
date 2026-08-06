@@ -8,6 +8,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { repoName } from './hook-helpers.mjs';
+import { gitnexusSpawn } from './gitnexus-cmd.mjs';
 
 const root = process.argv[2] ?? process.cwd();
 const repo = repoName(root);
