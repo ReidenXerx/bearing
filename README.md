@@ -225,9 +225,11 @@ One real project accumulated **93 reports across 47 indexed commits in three wee
 
 ```bash
 npx bearing install <repo> [--runtime ...] [--features ...]
-npx bearing-update <repo>       # pull in a newer bearing, keep your selection
-npx bearing-uninstall <repo>
+npx bearing update <repo>       # pull in a newer bearing, keep your module selection
+npx bearing uninstall <repo>
 ```
+
+The package also installs `bearing-update` and `bearing-uninstall` as commands, which work once it is a dependency. Through `npx` use the subcommand form above — `npx bearing-update` makes npx look for a *package* by that name and 404s.
 
 After install, the repo gets its own scripts — the ones worth knowing:
 
