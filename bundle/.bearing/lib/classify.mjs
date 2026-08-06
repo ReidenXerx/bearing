@@ -747,8 +747,33 @@ function parseShellSearch(command) {
  * outright whenever the command was sequenced.
  * @param {string} command
  */
+/**
+ * A blocked command is blocked WHOLE. When it has more than one step, say so \u2014
+ * otherwise a deny naming only the flagged step reads as "the earlier parts
+ * succeeded, only this was blocked", and the agent reports edits that never
+ * happened.
+ *
+ * NEWLINES COUNT. The incident this notice exists for was a heredoc followed by
+ * a grep on the next line:
+ *
+ *     python3 - <<'PY'   # rewrites 5 call sites
+ *     ...
+ *     PY
+ *     grep -c "exitContract" src/\u2026
+ *
+ * with no `&&`, `||` or `;` anywhere \u2014 so an operator-only test stayed silent on
+ * exactly the shape that cost five silent edits. A newline separates steps in
+ * bash just as `;` does.
+ *
+ * A backslash-escaped newline is a LINE CONTINUATION, not a separator, so it is
+ * excluded \u2014 `foo \<newline> --bar` is one step and gets no notice.
+ *
+ * Over-warning is the safe direction: this fires only on a DENY, where "nothing
+ * ran" is true by construction. A missing notice costs silently-lost work; a
+ * redundant one costs a line of text.
+ */
 function compoundNotice(command) {
-  return /(?:&&|\|\||;)/.test(String(command ?? ""))
+  return /(?:&&|\|\||;|(?<!\\)[\r\n])/.test(String(command ?? ""))
     ? "\n\u26a0 NOTHING IN THIS COMMAND RAN \u2014 the WHOLE line was blocked, not just the flagged part. Any earlier steps (edits, writes, installs) did NOT execute. Re-run them separately after the graph call."
     : "";
 }
