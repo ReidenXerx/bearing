@@ -108,12 +108,24 @@ export function gateCommentKey(g) {
 }
 
 /** Ordered scripts block for package.json (gate hints + commands). */
-export function buildGatedScripts() {
+/**
+ * How the generated scripts invoke gitnexus. `npx gitnexus@latest` needs no global install and is
+ * the right default, but a machine running a LOCAL build wants its own binary — otherwise
+ * `bearing:refresh` rebuilds the index with the PUBLISHED analyzer while everything else uses the
+ * local one. That is the "same version string, different code" hazard, and it is silent: the index
+ * is simply rebuilt by a different program than the one you are developing.
+ */
+export const DEFAULT_GITNEXUS_CMD = "npx gitnexus@latest";
+
+/** @param {{ gitnexusCmd?: string }} [opts] */
+export function buildGatedScripts({ gitnexusCmd = DEFAULT_GITNEXUS_CMD } = {}) {
+  const sub = (c) => c.split(DEFAULT_GITNEXUS_CMD).join(gitnexusCmd);
   /** @type {Record<string, string>} */
   const out = {};
   for (const g of GITNEXUS_SCRIPT_GATES) {
     out[gateCommentKey(g)] = `${GATE_HINT} ${g.gate}-${g.name}`;
-    for (const [key, cmd] of Object.entries(g.scripts)) {
+    for (const [key, rawCmd] of Object.entries(g.scripts)) {
+      const cmd = sub(rawCmd);
       out[key] = cmd;
       // LEGACY ALIAS. The kit was renamed gitnexus-agent-kit -> bearing, but these script names are
       // not just muscle memory: they are invoked BY NAME from user-owned git hooks (a pre-commit
@@ -148,9 +160,9 @@ export const GITNEXUS_NPM_SCRIPTS = flatGitnexusScripts();
 /**
  * @param {object} pkg
  */
-export function mergeGitnexusScripts(pkg) {
+export function mergeGitnexusScripts(pkg, opts = {}) {
   pkg.scripts ??= {};
-  const gated = buildGatedScripts();
+  const gated = buildGatedScripts(opts);
   let added = 0;
   let updated = 0;
   let unchanged = 0;
@@ -186,7 +198,7 @@ export function mergeIntoPackageJson(pkgPath, opts = {}) {
     throw new Error(`package.json not found: ${abs}`);
   }
 
-  const stats = mergeGitnexusScripts(pkg);
+  const stats = mergeGitnexusScripts(pkg, { gitnexusCmd: opts.gitnexusCmd });
 
   if (!pkg.engines?.node) {
     pkg.engines ??= {};
