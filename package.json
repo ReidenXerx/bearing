@@ -1,6 +1,6 @@
 {
   "name": "bearing",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "An intel layer for AI coding agents — cognitive routines that keep them anchored to what your project actually is: authoritative north-stars, task-core across compaction, domain-expert review. Claude Code, Cursor, Zed, Codex.",
   "type": "module",
   "private": false,

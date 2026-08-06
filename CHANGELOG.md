@@ -2,6 +2,49 @@
 
 All notable changes to `bearing` are documented here.
 
+## 1.0.6 — one MCP server for the whole machine, instead of one per client
+
+MCP stdio spawns one child process **per client**, by protocol design. Every editor window and
+every agent session therefore gets its own GitNexus server — seven were observed on one machine,
+all watching the same index, all auto-refreshing when HEAD moved, and all queueing behind a single
+index lock with a 600 s timeout. That contention blocked real work.
+
+GitNexus already ships the fix: `gitnexus mcp --http` (v1.6.9) is one long-running server that
+resolves repositories per request, so a single process serves every repo on the machine.
+
+### Added
+
+- **The installer asks how the MCP server should run**, rather than deciding for you. The http
+  option installs a background service on your machine, and that is not something to arrange
+  behind your back. Only asked when the GitNexus module is actually selected.
+- **The choice is recorded and re-applied on every update.** bearing still always writes the MCP
+  entry — that is what keeps it predictable — but it writes what you chose instead of a hardcoded
+  default. Non-interactive: `--mcp http|stdio|<port>|<url>`, or `BEARING_MCP`.
+- **Optional service setup**: a systemd user unit on Linux, a LaunchAgent on macOS, a scheduled
+  task on Windows. No root anywhere, loopback only, and the removal command is printed with it.
+
+### Fixed
+
+- **`bearing update` silently reverted a hand-configured MCP entry.** A repo deliberately pointed
+  at a shared server, or at a locally built gitnexus, had that overwritten with
+  `npx gitnexus@latest` at the next update — undoing a whole daemon setup without a word and
+  recreating the pile-up it was installed to fix.
+- **The README documented two commands that 404.** `npx bearing-update <repo>` makes npx resolve a
+  *package* by that name, which does not exist. The subcommand form (`npx bearing update <repo>`)
+  is the one that works through npx.
+
+### Known limitations
+
+- Only the **systemd** path has been executed. The launchd and Task Scheduler paths are written
+  from documented behaviour and are **untested** — the file says so, a successful install on those
+  platforms says so, and the manual `gitnexus mcp --http` command is printed either way. The rule
+  that broke the first systemd draft (these supervisors do not inherit your shell's PATH, so the
+  binary must be named absolutely) is applied and tested on all three.
+- Task Scheduler has no equivalent of `Restart=on-failure`, so on Windows the server stays down
+  until next logon if it dies mid-session.
+- A service definition bearing did not write is never touched, and a failed service install falls
+  back to stdio rather than leaving you with a config pointing at a dead port.
+
 ## 1.0.5 — the compound-command notice was silent on the shape it exists for
 
 1.0.4 added a notice telling the agent that a blocked shell command was blocked WHOLE, so
