@@ -2,6 +2,32 @@
 
 All notable changes to `bearing` are documented here.
 
+## 1.0.5 — the compound-command notice was silent on the shape it exists for
+
+1.0.4 added a notice telling the agent that a blocked shell command was blocked WHOLE, so
+`python3 edit.py && grep ...` could not be read as "the edit landed, only the grep was blocked".
+It fired on `&&`, `||` and `;`.
+
+**The incident it was written for has none of those.** It was a heredoc followed by a search on
+the next line — a `python3` heredoc that rewrote several call sites, then a `grep` beneath it.
+Bash rejects the whole line, so the rewrites never ran, and the notice stayed silent because a
+newline is not an operator. A newline separates steps exactly as `;` does. It now counts, so the
+notice covers the shape that actually costs silent edits.
+
+Backslash line-continuations are excluded — `foo \` then `--bar` is one step, and warning there
+would report lost work when none was. That exclusion also handles CRLF, where the byte before the
+newline is the carriage return rather than the backslash; without it the exclusion failed silently
+on Windows.
+
+Over-warning is the deliberate direction: the notice fires only on a **deny**, where "nothing ran"
+is true by construction. A missing notice costs silently-lost work; a redundant one costs a line.
+
+### Added
+
+- `lib/classify.test.mjs` — behavioural coverage for the shipped guard core, which previously had
+  none. Pins the compound-notice shapes and the scoped-grep allow *with its paired deny*, since an
+  allow with no paired deny widens silently into "greps are fine".
+
 ## 1.0.4 — dogfooding, a broken uninstall, two dead gates, and field feedback
 
 Installing `bearing` into its own repo for the first time, then auditing the paths dogfooding
