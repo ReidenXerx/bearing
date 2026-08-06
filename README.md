@@ -40,6 +40,8 @@ Four independent modules. **Pick any combination — each works alone, none depe
 | **Microscope** | Milestone review that first **adopts the expert role your project implies** (trading repo → quant trader), then spawns lenses per slice — correctness *and* judgment — adversarially verified in waves. → *Catches code that runs perfectly and is still the wrong thing.* |
 | **GitNexus** | Hard gates that redirect symbol greps to a real code knowledge graph and demand impact analysis before edits. → *The agent stops guessing at your architecture.* Requires the [GitNexus](https://github.com/abhigyanpatwari/GitNexus) MCP server. |
 
+And one thing that isn't a module: **the agent files bug reports against its own tooling.** When it doesn't believe an answer, it says why — captured with the graph state that produced it, exportable as JSON. The gates get measured the same way, and the kit will tell you when *they* are the problem. → [**The tool tells you when it's the problem**](#the-tool-tells-you-when-its-the-problem)
+
 ## Install
 
 ```bash
@@ -176,9 +178,41 @@ bearing:fallback -- "impact returned 0 callers for OrderService but grep finds 3
 
 …along with the two readings — gates misfiring on questions the graph can't answer, or gates correctly catching an agent that keeps reaching for grep — and which evidence tells them apart.
 
-*The tool keeps a record of its own failures instead of hiding them, and tells you when it's the problem.*
-
 The only module that can **block** a tool outright rather than advise. Requires the GitNexus MCP server and an index — the one prerequisite in the set.
+
+## The tool tells you when it's the problem
+
+Every enforcement tool believes its own rules are correct. This one assumes they might not be, and keeps the evidence.
+
+**The agent files the bug reports.** When an agent doesn't believe a graph answer, it doesn't silently work around it — it says why, and that becomes a record:
+
+```bash
+npm run bearing:fallback -- "impact returned 0 callers for OrderService but grep finds 3"
+```
+
+The reason is captured **with the graph state it distrusted** — tool version, node/edge/embedding counts, the indexed commit and when it was built. Not "the graph was wrong once", but *this query, on this index, at this commit*. It survives session clears, because a failure report is a record, not session state.
+
+```bash
+npm run bearing:fallback-log --json    # the whole corpus, ready to send upstream
+```
+
+One real project accumulated **93 reports across 47 indexed commits in three weeks**. Read together they stopped being complaints and became a diagnosis: 30 were empty results for things that demonstrably existed, ~24 were refresh failures. That corpus is what the graph-zero rules above are calibrated against — and it's exactly the artifact a graph maintainer can act on, because every entry carries the state that produced it.
+
+**The gates are measured too.** `bearing:scorecard` and the session brief report whether enforcement is earning its keep:
+
+> ⚠ Enforcement is 49% of graph interaction: 57 redirects vs 60 graph calls.
+
+…and refuse to draw the conclusion for you. That number reads two ways — gates misfiring on questions the graph can't answer, or gates correctly catching an agent that keeps reaching for grep first — so it names the evidence that tells them apart (a fallback log full of the same complaint means the first; an empty one means the second) and only recommends downgrading to `mode: guide` for the first.
+
+**Nothing here is opt-in.** The telemetry accrues while you work and nothing leaves the repo:
+
+| | |
+|---|---|
+| `bearing:fallback-log` | where the graph let an agent down — exportable JSON |
+| `bearing:scorecard` | this session's gates, redirects, refreshes, fallbacks — with a diagnosis |
+| `bearing:stats` | the same across sessions, so one bad afternoon isn't mistaken for a trend |
+
+*A tool that can block your work should be able to show you when it was wrong to.*
 
 ## Requirements
 
