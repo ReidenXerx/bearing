@@ -14,7 +14,8 @@ import { spawnSync } from 'node:child_process';
  * @returns {{ ok: boolean, stdout: string, stderr: string }}
  */
 export function runCypher(root, repo, query, env) {
-  const r = spawnSync('npx', ['-y', 'gitnexus@latest', 'cypher', '-r', repo, query], {
+  const gn = gitnexusSpawn(['cypher', '-r', repo, query], root);
+  const r = spawnSync(gn.command, gn.args, {
     cwd: root,
     encoding: 'utf8',
     timeout: 120000,

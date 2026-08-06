@@ -13,7 +13,8 @@ const root = process.argv[2] ?? process.cwd();
 const repo = repoName(root);
 
 function runCypher(query) {
-  const r = spawnSync('npx', ['gitnexus@latest', 'cypher', '-r', repo, query], {
+  const gn = gitnexusSpawn(['cypher', '-r', repo, query], root);
+  const r = spawnSync(gn.command, gn.args, {
     cwd: root,
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'pipe'],

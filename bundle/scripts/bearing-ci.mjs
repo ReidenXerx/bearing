@@ -16,6 +16,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execSync, spawnSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
+import { gitnexusSpawn } from '../.bearing/lib/gitnexus-cmd.mjs';
 
 const ROOT = process.cwd();
 const baseRef = process.argv[2] || process.env.GITHUB_BASE_REF || 'main';
@@ -64,7 +65,12 @@ async function main() {
   // Ensure an index exists.
   if (!process.env.GITNEXUS_CI_SKIP_BUILD && !fs.existsSync(path.join(ROOT, '.gitnexus/meta.json'))) {
     console.log('No index — running gitnexus analyze --embeddings …');
-    const r = spawnSync('npx', ['-y', 'gitnexus@latest', 'analyze', '--embeddings'], {
+    // Honour whatever this repo recorded. On a bare CI runner nothing is installed and the
+    // resolver falls back to npx, which is right there — but a repo that pinned a version
+    // (--gitnexus-cmd 'npx -y gitnexus@1.6.9') gets a reproducible CI build instead of whatever
+    // published most recently.
+    const gn = gitnexusSpawn(['analyze', '--embeddings'], ROOT);
+    const r = spawnSync(gn.command, gn.args, {
       cwd: ROOT,
       stdio: 'inherit',
     });

@@ -14,6 +14,9 @@ const ROOT = path.resolve(__dirname, "..");
 const { withProjectTmpEnv, tmpSpaceReport, enospcHelp } = await import(
   pathToFileURL(path.join(ROOT, "scripts/lib/project-tmp.mjs")).href
 );
+const { gitnexusSpawn } = await import(
+  pathToFileURL(path.join(ROOT, ".bearing/lib/gitnexus-cmd.mjs")).href
+);
 const { inspectPersistence, classifyPersistenceOutput } = await import(
   pathToFileURL(path.join(ROOT, ".bearing/lib/persistence-health.mjs"))
     .href
@@ -504,7 +507,11 @@ if (cmd === "doctor") {
   if (!mcpOk) problems++;
 
   // Live probe of the GitNexus CLI backend (proxy for MCP server health).
-  const probe = spawnSync("npx", ["-y", "gitnexus@latest", "--version"], {
+  // Probe the SAME binary everything else runs. Hardcoding npx here meant this reported the STOCK
+  // npm build's version while every real operation used the linked one — and both print the same
+  // version string, so the check stayed green even when the two had diverged completely.
+  const gnProbe = gitnexusSpawn(["--version"], ROOT);
+  const probe = spawnSync(gnProbe.command, gnProbe.args, {
     cwd: ROOT,
     encoding: "utf8",
     timeout: 60000,
@@ -528,8 +535,9 @@ if (cmd === "doctor") {
     `${stale.fresh ? "✓" : "!"} Index ${stale.fresh ? "fresh" : `stale — ${stale.reason}`}`,
   );
 
+  const gnList = gitnexusSpawn(["list"], ROOT);
   const listProbe = cliOk
-    ? spawnSync("npx", ["-y", "gitnexus@latest", "list"], {
+    ? spawnSync(gnList.command, gnList.args, {
         cwd: ROOT,
         encoding: "utf8",
         timeout: 60000,
