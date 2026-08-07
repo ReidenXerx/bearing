@@ -37,10 +37,27 @@ Four independent modules. **Pick any combination — each works alone, none depe
 |---|---|
 | **North-stars** | Numbered, authoritative claims about what your project *is* — invariants, exact term meanings, settled decisions, ideas already rejected and why. **Outranks every other doc**, re-injected as the session runs. → *No more re-litigating decisions you made months ago.* |
 | **Task-core** | A dense save-state of the *current task*, written **before** compaction drops the detail and read back on recovery. → *A four-hour task doesn't forget its own goal at hour three.* |
-| **Microscope** | Milestone review that first **adopts the expert role your project implies** (trading repo → quant trader), then spawns lenses per slice — correctness *and* judgment — adversarially verified in waves. → *Catches code that runs perfectly and is still the wrong thing.* |
+| **Microscope** | Milestone review that spawns a lens **per slice of your change** — correctness *and* judgment — then tries to **refute its own findings** and only reports what survives, iterating in waves. → *Catches code that runs perfectly and is still the wrong thing.* |
 | **GitNexus** | Hard gates that redirect symbol greps to a real code knowledge graph and demand impact analysis before edits. → *The agent stops guessing at your architecture.* Requires the [GitNexus](https://github.com/abhigyanpatwari/GitNexus) MCP server. |
 
-And one thing that isn't a module: **the agent files bug reports against its own tooling.** When it doesn't believe an answer, it says why — captured with the graph state that produced it, exportable as JSON. The gates get measured the same way, and the kit will tell you when *they* are the problem. → [**The tool tells you when it's the problem**](#the-tool-tells-you-when-its-the-problem)
+Plus a **domain persona**, resolved once at install and written into the always-on contract every
+runtime reads: a payments repo is reviewed by a ledger engineer, a trading repo by a quant trader.
+Not a review-time flag — the expertise is held for *every* task, because "this fee is computed on
+gross, should be net" is not a language error and a generic reviewer will never see it.
+
+### What actually makes this different
+
+Every agent tool tells you it will make your agent better. Here is the specific bet this one makes:
+
+**It assumes its own rules are wrong, and keeps the receipts.** The agent files bug reports against
+its own tooling. The gates measure whether they are earning their keep. The installer verifies its
+own claims and fails when they do not hold. Nothing else in this space is built to be *falsified by
+its own telemetry* — and that is the entire reason it can be trusted with a hard block.
+
+- **The agent files the bug reports.** When it doesn't believe a graph answer, it says why — captured with the graph state that produced it, exportable as JSON. → [details](#the-tool-tells-you-when-its-the-problem)
+- **The installer checks its own claims.** Eight post-conditions run on every install and update, outside `--skip-verify`. They exist because nine defects once shipped while the installer printed success — a service reported "listening" while crash-looping, a CLI exited 0 having installed nothing. *Presence is not correctness.*
+- **The CI report refuses to block.** The graph cannot distinguish "no callers" from "could not resolve callers", so a gate built on it would fail honest PRs. It reports and lets you judge. → [details](#-ci-a-review-report-not-a-gate)
+- **A zero is never a finding.** The contract tells the agent, in as many words, that an empty graph result is *unknown*, not *none* — and the kit warns the moment an `impact` verdict grades LOW off callers it never resolved.
 
 ## Install
 
@@ -126,9 +143,13 @@ It stores what a summary reliably loses: `GOAL · CONSTRAINTS · DECISIONS(+why)
 
 ### 🔬 Microscope — reviewed by an expert in *your* domain, not a linter
 
-Most review asks *"is this code correct?"* — a question a linter can ask. Microscope first **adopts the expert role your project implies**, then asks the question that actually costs you money: *is this the right thing to have built?*
+Most review asks *"is this code correct?"* — a question a linter can ask. Microscope asks the one that actually costs you money: *is this the right thing to have built?*
 
-In a trading repo it reviews as a **senior quant trader**. In a payments repo, as a **ledger engineer**. It infers the role from your README, `CLAUDE.md` and the code's own structure — or you pin it in `.bearing/domain.json`.
+**It is not a checklist.** It maps your change into slices — flows, layers, seams — and spawns **one lens per slice**, tagged by kind. Important slices get both kinds. Then every finding has to survive a deliberate attempt to **refute** it before you ever see it, and the whole pass repeats in numbered **waves** until clean.
+
+The reviewer is a **domain expert**, resolved at install and pinned in `.bearing/domain.json`: a trading repo gets a senior quant trader, a payments repo a ledger engineer. Inference reads what your repo says about *itself* and weights `package.json` above prose — and when the signals are weak it stays a plain senior engineer and tells you what it suspected, because a confidently wrong specialism skews every judgment downstream. It's yours to edit; bearing never overwrites it.
+
+**It does not need the graph.** With GitNexus installed the map comes from clusters, flows and `impact`. Without it, the same routine runs on a classically-built map — changed files as layers, imports as seams, entry points as flows — and says which path it took, because the map's completeness bounds what the pass can claim to have covered.
 
 <img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/microscope.svg" alt="Adopt the domain expert role, map the target, spawn Kind A correctness lenses and Kind B judgment lenses, verify against real logic, keep survivors." width="100%">
 
@@ -180,6 +201,18 @@ bearing:fallback -- "impact returned 0 callers for OrderService but grep finds 3
 
 The only module that can **block** a tool outright rather than advise. Requires the GitNexus MCP server and an index — the one prerequisite in the set.
 
+#### One server for the machine, not one per window
+
+MCP stdio spawns a server **per client** by protocol design, so every editor window and agent session gets its own — seven were observed on one machine, all watching the same index, all auto-refreshing when HEAD moved, and all queueing behind a single index lock. The installer can point every runtime at one shared HTTP server instead, and optionally supervise it (systemd user unit · LaunchAgent · scheduled task — no root anywhere, loopback only).
+
+It confirms the port actually answers before writing that config, because a repo aimed at a dead port fails *every* graph call — worse than the contention it replaces.
+
+### 🤖 CI: a review report, not a gate
+
+A pull-request comment — updated in place, not piled up — with blast radius per changed symbol, the execution flows your change touches, security-sensitive paths, and structural regressions like new import cycles. It also lands in the job summary and as inline annotations.
+
+**It never fails your build,** and that is deliberate rather than timid. The graph cannot distinguish *"nothing calls this"* from *"I could not resolve the callers"*, so a hard gate on that signal blocks honest PRs until people learn to route around it. A report a human reads beats a gate they disable. If you want teeth, `GITNEXUS_CI_MODE=block` is one line away.
+
 ## The tool tells you when it's the problem
 
 Every enforcement tool believes its own rules are correct. This one assumes they might not be, and keeps the evidence.
@@ -213,6 +246,24 @@ One real project accumulated **93 reports across 47 indexed commits in three wee
 | `bearing:stats` | the same across sessions, so one bad afternoon isn't mistaken for a trend |
 
 *A tool that can block your work should be able to show you when it was wrong to.*
+
+**And the installer holds itself to it too.** Eight post-conditions run at the end of every install
+and update — deliberately *not* behind `--skip-verify`, because every automated path passes that
+flag and that is exactly how things slip through. They check that the recorded gitnexus binary is
+what the generated scripts actually call, that every MCP entry matches the transport you chose,
+that a shared server really answers, that machine-local state (your in-flight task-core, install
+backups) can't be committed, that a declined module left no trace, and that nothing an installed
+file tells you to run is missing.
+
+A failure changes the headline and the exit code. It will not print "Install complete" over a
+warning — the whole point is that presence is not correctness:
+
+```
+! 1 post-install check FAILED — this install is not what it claims:
+!   ✗ shared MCP server answers: nothing answering at http://127.0.0.1:39100/mcp
+!       fix: start it with `gitnexus mcp --http --port 39100`, or re-run with --mcp stdio
+  Install finished with 1 FAILED check
+```
 
 ## Requirements
 

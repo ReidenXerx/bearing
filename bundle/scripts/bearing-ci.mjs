@@ -1,16 +1,26 @@
 #!/usr/bin/env node
 /**
- * GitNexus CI impact gate — merge-time enforcement for target repos.
+ * bearing CI — a graph-backed review report on every pull request.
  *
- * Fails a PR when a changed symbol has a large upstream blast radius but the PR
- * touches no tests. Graph-stale repos are flagged too. Pure CLI (no MCP).
+ * INFORMATIONAL BY DEFAULT. This does not fail your build. It was a gate that failed PRs when a
+ * high-blast-radius symbol changed without tests, and that is the wrong shape for this signal: the
+ * graph's own contract says a ZERO is not a finding (it returns no callers for code wired through
+ * factories and DI all the time), so a hard block built on it fails honest PRs and teaches people
+ * to add `[skip ci]`. A report a human reads and judges is worth more than a gate they route
+ * around. Set GITNEXUS_CI_MODE=block only if you have decided you want teeth.
+ *
+ * Output goes where people actually look:
+ *   - a STICKY pull-request comment, edited in place on each push rather than piling up
+ *   - the job summary (GITHUB_STEP_SUMMARY), so it is on the checks tab without opening logs
+ *   - ::notice annotations on the risky files
+ *   - stdout, for anyone reading the raw log
  *
  * Usage:  node scripts/bearing-ci.mjs [baseRef]
  * Env:
- *   GITNEXUS_CI_MODE=block|warn   (default: block — non-zero exit on violation)
- *   GITNEXUS_CI_HIGH=<n>          (caller threshold for HIGH risk, default 8)
- *   GITNEXUS_CI_SKIP_BUILD=1      (don't run analyze; assume index present)
- *   GITHUB_BASE_REF              (used as base when no arg given)
+ *   GITNEXUS_CI_MODE=report|block   default report — `block` restores non-zero exits
+ *   GITNEXUS_CI_HIGH=<n>            callers before a symbol is called HIGH (default 8)
+ *   GITNEXUS_CI_SKIP_BUILD=1        don't run analyze; assume the index is present
+ *   GITHUB_TOKEN                    needed for the PR comment (pull-requests: write)
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -20,11 +30,13 @@ import { gitnexusSpawn } from '../.bearing/lib/gitnexus-cmd.mjs';
 
 const ROOT = process.cwd();
 const baseRef = process.argv[2] || process.env.GITHUB_BASE_REF || 'main';
-const mode = (process.env.GITNEXUS_CI_MODE || 'block').toLowerCase();
+const mode = (process.env.GITNEXUS_CI_MODE || 'report').toLowerCase();
 const highThreshold = Number(process.env.GITNEXUS_CI_HIGH || 8);
+const MARKER = '<!-- bearing-ci-report -->';
 
 const CODE_RE = /\.(js|mjs|cjs|jsx|ts|tsx|py|rb|go|rs|java|kt|swift|php|cs|cpp|c|scala)$/i;
 const TEST_RE = /(^|\/)(tests?|spec|__tests__)\/|\.(test|spec)\./i;
+const SENSITIVE_RE = /(auth|login|session|token|password|secret|crypto|payment|billing|permission|admin)/i;
 
 function git(args) {
   try {
@@ -34,90 +46,263 @@ function git(args) {
   }
 }
 
-function repoName() {
-  return process.env.GITNEXUS_REPO || path.basename(ROOT);
+function gn(args, timeoutMs = 120000) {
+  const { command, args: a } = gitnexusSpawn(args, ROOT);
+  const r = spawnSync(command, a, { cwd: ROOT, encoding: 'utf8', timeout: timeoutMs });
+  return { ok: r.status === 0, out: `${r.stdout || ''}${r.stderr || ''}` };
 }
 
-function fail(msg) {
-  console.error(`\n✗ ${msg}`);
-  process.exit(mode === 'warn' ? 0 : 1);
+function repoName() {
+  return path.basename(ROOT);
+}
+
+/** Changed production code, and whether tests moved with it. */
+function collectDiff() {
+  let base = baseRef;
+  if (!git(`rev-parse --verify ${base}`)) base = `origin/${baseRef}`;
+  const files = git(`diff --name-only ${base}...HEAD`).split('\n').filter(Boolean);
+  return {
+    base,
+    all: files,
+    code: files.filter((f) => CODE_RE.test(f) && !TEST_RE.test(f)),
+    tests: files.filter((f) => TEST_RE.test(f)),
+    sensitive: files.filter((f) => CODE_RE.test(f) && SENSITIVE_RE.test(f) && !TEST_RE.test(f)),
+  };
+}
+
+/** `detect-changes` maps the diff onto indexed symbols and execution flows. */
+function detectChanges(repo, base) {
+  const r = gn(['detect-changes', '--scope', 'compare', '--base-ref', base, '-r', repo]);
+  if (!r.ok) return null;
+  const num = (re) => Number((r.out.match(re) ?? [])[1] ?? 0);
+  return {
+    files: num(/Changes:\s*(\d+)\s*files/i),
+    symbols: num(/,\s*(\d+)\s*symbols/i),
+    processes: num(/Affected processes:\s*(\d+)/i),
+    risk: (r.out.match(/Risk level:\s*(\w+)/i) ?? [])[1] ?? 'unknown',
+    changed: [...r.out.matchAll(/^\s*Symbol\s+(.+?)\s+→\s+(.+)$/gm)].map((m) => ({
+      sym: m[1].trim(),
+      file: m[2].trim(),
+    })),
+  };
+}
+
+/** Upstream caller count per changed symbol — the blast-radius signal. */
+function blastRadius(repo, symbols) {
+  const out = [];
+  for (const sym of symbols.slice(0, 25)) {
+    const q = `MATCH (caller)-[:CodeRelation {type: 'CALLS'}]->(f {name: '${sym.replace(/'/g, "\\'")}'}) RETURN count(caller)`;
+    const r = gn(['cypher', '-r', repo, q], 60000);
+    const n = r.ok ? Number((r.out.match(/(\d+)/) ?? [])[1] ?? 0) : null;
+    out.push({ sym, callers: n });
+  }
+  return out.sort((a, b) => (b.callers ?? -1) - (a.callers ?? -1));
+}
+
+/** Structural regressions: import cycles introduced anywhere in the graph. */
+function structural(repo) {
+  const r = gn(['check', '--cycles', '--json', '-r', repo], 90000);
+  if (!r.ok && !r.out.includes('{')) return null;
+  try {
+    const j = JSON.parse(r.out.slice(r.out.indexOf('{')));
+    return { cycles: j.cycleCount ?? 0, sample: (j.cycles ?? []).slice(0, 3) };
+  } catch {
+    return null;
+  }
+}
+
+function riskTag(callers) {
+  if (callers === null) return 'unknown';
+  if (callers >= highThreshold) return 'high';
+  if (callers >= Math.ceil(highThreshold / 2)) return 'medium';
+  return 'low';
+}
+
+function render({ diff, detected, radius, struct, indexed }) {
+  const L = [];
+  L.push(MARKER);
+  L.push('## 🧭 bearing — graph impact report');
+  L.push('');
+  L.push('_Informational. This check never fails your build — it is here to tell you where to look._');
+  L.push('');
+
+  if (!indexed) {
+    L.push('> ⚠️ No GitNexus index could be built for this run, so there is nothing graph-backed to report.');
+    L.push('> Everything below falls back to the diff alone.');
+    L.push('');
+  }
+
+  L.push(
+    `**${diff.code.length}** production file(s) changed · **${diff.tests.length}** test file(s) touched` +
+      (detected ? ` · graph risk: **${detected.risk}**` : ''),
+  );
+  L.push('');
+
+  if (radius.length) {
+    L.push('### Blast radius — who calls what you changed');
+    L.push('');
+    L.push('| symbol | upstream callers | |');
+    L.push('|---|---:|---|');
+    for (const f of radius.slice(0, 15)) {
+      const tag = riskTag(f.callers);
+      const icon = { high: '🔴 high', medium: '🟠 medium', low: '🟢 low', unknown: '⚪ unknown' }[tag];
+      L.push(`| \`${f.sym}\` | ${f.callers ?? '—'} | ${icon} |`);
+    }
+    if (radius.length > 15) L.push(`\n_…and ${radius.length - 15} more._`);
+    L.push('');
+  }
+
+  if (detected?.processes) {
+    L.push(`### Execution flows touched: ${detected.processes}`);
+    L.push('');
+    L.push('Changed symbols participate in indexed end-to-end flows — a change here reaches further than the file suggests.');
+    L.push('');
+  }
+
+  if (diff.sensitive.length) {
+    L.push('### Security-sensitive paths in this diff');
+    L.push('');
+    for (const f of diff.sensitive.slice(0, 10)) L.push(`- \`${f}\``);
+    L.push('');
+    L.push('_Matched on path naming (auth/token/payment/permission/…), not on behaviour — worth a human look, not an accusation._');
+    L.push('');
+  }
+
+  if (struct) {
+    L.push('### Structural');
+    L.push('');
+    if (struct.cycles > 0) {
+      L.push(`🔁 **${struct.cycles} import cycle(s)** in the graph. Sample:`);
+      for (const c of struct.sample) L.push(`- ${(c.files ?? []).map((x) => `\`${x}\``).join(' → ')}`);
+      L.push('');
+      L.push('_Repo-wide, not necessarily introduced by this PR._');
+    } else {
+      L.push('✅ No import cycles.');
+    }
+    L.push('');
+  }
+
+  const high = radius.filter((f) => riskTag(f.callers) === 'high');
+  if (high.length && !diff.tests.length) {
+    L.push(`> 💡 ${high.length} widely-called symbol(s) changed and no test file moved. Worth a second look — not a rule.`);
+    L.push('');
+  }
+
+  L.push('<details><summary>How to read this</summary>');
+  L.push('');
+  L.push('**A positive result is strong evidence; a zero is not a finding.** The graph resolves calls through');
+  L.push('factories, DI containers and dynamic dispatch imperfectly, so `0 callers` can mean "none" or');
+  L.push('"could not resolve". Never read an empty result as "dead code" or "safe to delete" — confirm it');
+  L.push('classically first. That asymmetry is why this report does not block anything.');
+  L.push('');
+  L.push('</details>');
+  return L.join('\n');
+}
+
+/** Post once, then edit in place. A new comment per push buries the PR. */
+async function postSticky(body) {
+  const token = process.env.GITHUB_TOKEN;
+  const repo = process.env.GITHUB_REPOSITORY;
+  if (!token || !repo) return 'skipped (no GITHUB_TOKEN / GITHUB_REPOSITORY)';
+  let pr = null;
+  try {
+    const ev = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'));
+    pr = ev.pull_request?.number ?? ev.number ?? null;
+  } catch {
+    /* not a PR event */
+  }
+  if (!pr) return 'skipped (not a pull_request event)';
+
+  const api = `https://api.github.com/repos/${repo}`;
+  const headers = {
+    authorization: `Bearer ${token}`,
+    accept: 'application/vnd.github+json',
+    'content-type': 'application/json',
+  };
+  try {
+    const list = await fetch(`${api}/issues/${pr}/comments?per_page=100`, { headers }).then((r) => r.json());
+    const mine = Array.isArray(list) ? list.find((c) => (c.body ?? '').includes(MARKER)) : null;
+    const res = mine
+      ? await fetch(`${api}/issues/comments/${mine.id}`, { method: 'PATCH', headers, body: JSON.stringify({ body }) })
+      : await fetch(`${api}/issues/${pr}/comments`, { method: 'POST', headers, body: JSON.stringify({ body }) });
+    return res.ok ? (mine ? 'updated existing comment' : 'created comment') : `failed (HTTP ${res.status})`;
+  } catch (e) {
+    // Never let a reporting failure look like a code problem.
+    return `failed (${e.message})`;
+  }
 }
 
 async function main() {
-  const { runCypher, parseCount } = await import(
-    pathToFileURL(path.join(ROOT, '.bearing/lib/cypher-cli.mjs')).href
-  );
   const repo = repoName();
+  const diff = collectDiff();
 
-  console.log(`GitNexus CI impact gate — base=${baseRef} mode=${mode} highThreshold=${highThreshold}`);
-
-  if (!git(`rev-parse --verify ${baseRef}`)) {
-    // Common in shallow CI checkouts — try origin/<base>.
-    if (git(`rev-parse --verify origin/${baseRef}`)) {
-      console.log(`(using origin/${baseRef})`);
-    } else {
-      fail(`base ref "${baseRef}" not found (fetch it with fetch-depth: 0).`);
-      return;
-    }
-  }
-  const base = git(`rev-parse --verify ${baseRef}`) ? baseRef : `origin/${baseRef}`;
-
-  // Ensure an index exists.
-  if (!process.env.GITNEXUS_CI_SKIP_BUILD && !fs.existsSync(path.join(ROOT, '.gitnexus/meta.json'))) {
-    console.log('No index — running gitnexus analyze --embeddings …');
-    // Honour whatever this repo recorded. On a bare CI runner nothing is installed and the
-    // resolver falls back to npx, which is right there — but a repo that pinned a version
-    // (--gitnexus-cmd 'npx -y gitnexus@1.6.9') gets a reproducible CI build instead of whatever
-    // published most recently.
-    const gn = gitnexusSpawn(['analyze', '--embeddings'], ROOT);
-    const r = spawnSync(gn.command, gn.args, {
-      cwd: ROOT,
-      stdio: 'inherit',
-    });
-    if (r.status !== 0) fail('gitnexus analyze failed — cannot run impact gate.');
-  }
-
-  const changed = git(`diff --name-only ${base}...HEAD`).split('\n').filter(Boolean);
-  const codeFiles = changed.filter((f) => CODE_RE.test(f) && !TEST_RE.test(f));
-  const testChanged = changed.some((f) => TEST_RE.test(f));
-
-  if (!codeFiles.length) {
-    console.log('No changed production code files — gate passes.');
+  if (!diff.code.length) {
+    console.log('bearing CI: no production code changed — nothing to report.');
     process.exit(0);
   }
 
-  const symbols = [...new Set(codeFiles.map((f) => path.basename(f, path.extname(f))).filter(Boolean))];
-  const findings = [];
-  for (const sym of symbols) {
-    const q = `MATCH (caller)-[:CodeRelation {type: 'CALLS'}]->(f {name: '${sym.replace(/'/g, "\\'")}'}) RETURN count(caller)`;
-    const r = runCypher(ROOT, repo, q);
-    const callers = r.ok ? parseCount(r.stdout) ?? 0 : 0;
-    findings.push({ sym, callers });
-  }
-  findings.sort((a, b) => b.callers - a.callers);
-
-  console.log('\nUpstream callers per changed symbol:');
-  for (const f of findings.slice(0, 20)) {
-    const tag = f.callers >= highThreshold ? 'HIGH' : f.callers >= Math.ceil(highThreshold / 2) ? 'MED ' : 'low ';
-    console.log(`  [${tag}] ${f.sym}: ${f.callers}`);
+  let indexed = fs.existsSync(path.join(ROOT, '.gitnexus/meta.json'));
+  if (!indexed && process.env.GITNEXUS_CI_SKIP_BUILD !== '1') {
+    console.log('bearing CI: building index…');
+    indexed = gn(['analyze', '--embeddings', '0'], 900000).ok;
   }
 
-  const high = findings.filter((f) => f.callers >= highThreshold);
-  console.log(`\nTests changed in PR: ${testChanged ? 'yes' : 'NO'}`);
+  const detected = indexed ? detectChanges(repo, diff.base) : null;
+  // Only CODE symbols. detect-changes indexes markdown headings as symbols too, so a PR touching
+  // CLAUDE.md filled the blast-radius table with rows like "Always Do" and "npm gates" — every one
+  // of them 0 callers, burying the two rows that meant something.
+  const codeSymbols = (detected?.changed ?? []).filter((c) => CODE_RE.test(c.file));
+  const symbols = codeSymbols.length
+    ? [...new Set(codeSymbols.map((c) => c.sym))]
+    : [...new Set(diff.code.map((f) => path.basename(f, path.extname(f))))];
+  const radius = indexed ? blastRadius(repo, symbols) : [];
+  const struct = indexed ? structural(repo) : null;
 
-  if (high.length && !testChanged) {
-    fail(
-      `${high.length} high-impact symbol(s) changed with NO test changes: ${high.map((h) => `${h.sym}(${h.callers})`).join(', ')}. ` +
-        'Add/adjust tests or set GITNEXUS_CI_MODE=warn to allow.'
-    );
-    return;
+  const body = render({ diff, detected, radius, struct, indexed });
+  console.log(`\n${body}\n`);
+
+  if (process.env.GITHUB_STEP_SUMMARY) {
+    try {
+      fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${body}\n`);
+    } catch {
+      /* summary is a nicety */
+    }
   }
+  // Annotations surface on the Files tab without opening the summary.
+  for (const f of radius.filter((x) => riskTag(x.callers) === 'high').slice(0, 10)) {
+    const file = detected?.changed.find((c) => c.sym === f.sym)?.file;
+    console.log(`::notice ${file ? `file=${file},` : ''}title=bearing::${f.sym} has ${f.callers} upstream callers`);
+  }
+  console.log(`bearing CI: PR comment ${await postSticky(body)}`);
 
-  console.log('\n✓ Impact gate passed.');
+  // Default is report-only ON PURPOSE — see the header. `block` is opt-in.
+  if (mode === 'block') {
+    const high = radius.filter((x) => riskTag(x.callers) === 'high');
+    if (high.length && !diff.tests.length) {
+      console.error(`bearing CI (block mode): ${high.length} high-impact symbol(s) changed with no test changes.`);
+      process.exit(1);
+    }
+  }
   process.exit(0);
 }
 
-main().catch((e) => {
-  console.error(e);
-  process.exit(mode === 'warn' ? 0 : 1);
-});
+const isMain =
+  process.argv[1] &&
+  (() => {
+    const real = (p) => {
+      try {
+        return fs.realpathSync(p);
+      } catch {
+        return path.resolve(p);
+      }
+    };
+    return real(new URL(import.meta.url).pathname) === real(process.argv[1]);
+  })();
+
+if (isMain) {
+  main().catch((e) => {
+    // A reporting crash must never read as a code failure.
+    console.error(`bearing CI: report failed — ${e?.message || e}`);
+    process.exit(mode === 'block' ? 1 : 0);
+  });
+}

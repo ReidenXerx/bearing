@@ -1,14 +1,34 @@
-# GitNexus merge-time impact gate.
-# Fails PRs that change high-blast-radius symbols without touching tests, and surfaces a risk report.
-# Copy this file into your repo's .github/workflows/ (the kit installs it for you).
-name: GitNexus impact gate
+# bearing — graph-backed impact report on every pull request.
+#
+# INFORMATIONAL. This workflow does not fail your build. It posts a report and gets out of the way.
+# The reason is the graph's own contract: it resolves calls through factories and DI imperfectly, so
+# `0 callers` can mean "none" or "could not resolve". A hard gate built on a signal that cannot tell
+# those apart fails honest PRs, and people learn to route around it. A report a human reads is worth
+# more than a gate they disable.
+#
+# Want teeth anyway? Set GITNEXUS_CI_MODE=block below — then a widely-called symbol changing with no
+# test changes fails the check.
+#
+# The kit installs this for you; it is also fine to copy into another repo's .github/workflows/.
+name: bearing impact report
 
 on:
   pull_request:
     branches: [main, master]
 
+# Least privilege: read the code, write the one sticky comment. Nothing else.
+permissions:
+  contents: read
+  pull-requests: write
+
+# A second push should replace the in-flight run, not queue behind it — the report is only ever
+# about the current head.
+concurrency:
+  group: bearing-impact-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
-  impact-gate:
+  impact-report:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,11 +39,17 @@ jobs:
         with:
           node-version: 22
 
-      - name: GitNexus impact gate
+      # Indexing dominates the runtime and the graph only changes when the code does.
+      - name: Cache GitNexus index
+        uses: actions/cache@v4
+        with:
+          path: .gitnexus
+          key: gitnexus-${{ runner.os }}-${{ github.event.pull_request.base.sha }}
+          restore-keys: gitnexus-${{ runner.os }}-
+
+      - name: bearing impact report
         env:
-          GITNEXUS_CI_MODE: block # set to "warn" to report without failing
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITNEXUS_CI_MODE: report # `block` to fail on high-impact changes without tests
           GITNEXUS_CI_HIGH: "8"
-        # The kit ships this as scripts/bearing-ci.mjs. It read `gitnexus-ci.mjs` for one release
-        # after the rename, so the gate failed with "Cannot find module" on every PR — a CI check
-        # that never actually ran while looking like it was configured.
         run: node scripts/bearing-ci.mjs "${{ github.base_ref }}"
