@@ -2,7 +2,7 @@
 
 All notable changes to `bearing` are documented here.
 
-## Unreleased — the rename reaches the identifiers it had skipped
+## 1.0.7 — a domain expert on every review, and an installer that checks its own claims
 
 The kit was renamed `gitnexus-agent-kit` → `bearing`, but three identifiers kept the old name
 because renaming them touches files in *your* repository. Two were merely stale. One was a bug.
@@ -151,6 +151,54 @@ later. The Task Scheduler path remains unverified.
   emptied `.gitnexus/` (rmdir only, so a real index is never touched).
 - **The `gitnexus:*` npm script aliases are unchanged** (NS-15), and so is the Zed `zed-gitnexus`
   profile — that one names the actual GitNexus MCP server, not the kit's old name.
+
+### Added — a domain persona, resolved once and used everywhere
+
+The headline claim — a trading repo reviewed by a quant trader, a payments repo by a ledger
+engineer — was implemented in exactly ONE skill. `.bearing/domain.json` appeared in the README and
+in `bearing-microscope` and nowhere else: nothing created it, nothing seeded it, and no other skill,
+contract or session brief read it. Every review skill except microscope worked as a generic
+engineer, and microscope re-inferred the domain on each wave, so wave 2 could adopt a different
+persona than wave 1 while folding in wave 1's findings.
+
+- **Resolved once at install**, written to `.bearing/domain.json`, and substituted into the
+  always-on contract every runtime reads. Inference reads only what the repo says about ITSELF —
+  package metadata, README, `CLAUDE.md` — and weights `package.json` above prose.
+- **A near-miss is recorded as `suggestedDomain` rather than adopted.** A wrong specialism biases
+  every downstream judgement; "senior engineer" biases nothing. Equal weighting classified bearing
+  itself as a *trading* repo, purely because its README explains a feature using a trading example.
+- **The file is yours.** Edit it and the contract follows; update never overwrites it.
+
+### Changed — CI reports instead of gating
+
+The merge gate failed PRs when a high-blast-radius symbol changed without tests, and that is the
+wrong shape for this signal: the graph cannot distinguish "nothing calls this" from "I could not
+resolve the callers", so a hard block on it fails honest PRs until people learn `[skip ci]`. It now
+posts a sticky PR comment, a job summary and inline annotations — blast radius per changed symbol,
+affected flows, security-sensitive paths, import cycles — and **never fails the build**.
+`GITNEXUS_CI_MODE=block` is opt-in.
+
+### Fixed — the placeholder check missed the placeholder it was written for
+
+`checkPersonaResolved` looked only for `__BEARING_PERSONA__`. The bug it shipped alongside was
+`__GITNEXUS_REPO__` reaching the Cursor rule verbatim, so the regression guard could not have caught
+the regression — it covered the right FILES and the wrong TOKEN. Both are now read from the exported
+constants, so substitution and verification share one source, and the failure names which token in
+which file.
+
+### Changed — the README and diagrams
+
+- **3374 words to 1335.** The old page explained the product to someone already convinced. Hook,
+  four modules and install now sit above the fold, one section per module led by its diagram, and
+  the deep material stays in `docs/`.
+- **The diagrams draw one claim each.** The microscope one had twelve boxes at 11px, which reads as
+  "this is complicated" — and it *understated* the feature by drawing two lenses, when the skill
+  spawns one lens agent per slice, in parallel where the runtime allows, each carrying the same
+  pinned persona.
+- Rasterising caught three defects invisible in the source: arrows missing a `y2` rendered
+  `undefined`, sub-labels overlapped the card beneath them, and a backward connector routed straight
+  through the boxes it was meant to pass under. The generator now **fails** on text that would
+  overflow the canvas, since SVG clips silently.
 
 ## 1.0.6 — one MCP server for the whole machine, instead of one per client
 
