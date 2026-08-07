@@ -52,4 +52,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITNEXUS_CI_MODE: report # `block` to fail on high-impact changes without tests
           GITNEXUS_CI_HIGH: "8"
+          # Indexing a few-thousand-file repo on a 2-core runner can exceed 15m. If the cache is
+          # cold and this still times out, the report says so and falls back to the diff.
+          GITNEXUS_CI_INDEX_TIMEOUT_MS: "1500000"
         run: node scripts/bearing-ci.mjs "${{ github.base_ref }}"

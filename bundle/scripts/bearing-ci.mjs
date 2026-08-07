@@ -49,7 +49,17 @@ function git(args) {
 function gn(args, timeoutMs = 120000) {
   const { command, args: a } = gitnexusSpawn(args, ROOT);
   const r = spawnSync(command, a, { cwd: ROOT, encoding: 'utf8', timeout: timeoutMs });
-  return { ok: r.status === 0, out: `${r.stdout || ''}${r.stderr || ''}` };
+  // Distinguish the failure modes. spawnSync reports a timeout as status:null + SIGTERM, which
+  // collapsed into the same `ok:false` as a real error — so a 15-minute index timeout was reported
+  // to users as the unexplained "no index could be built". A failure without its reason is the same
+  // defect as a success that was never verified.
+  return {
+    ok: r.status === 0,
+    out: `${r.stdout || ''}${r.stderr || ''}`,
+    timedOut: r.status === null && (r.signal === 'SIGTERM' || r.error?.code === 'ETIMEDOUT'),
+    missing: r.error?.code === 'ENOENT',
+    cmd: [command, ...a].join(' '),
+  };
 }
 
 function repoName() {
@@ -118,7 +128,7 @@ function riskTag(callers) {
   return 'low';
 }
 
-function render({ diff, detected, radius, struct, indexed }) {
+function render({ diff, detected, radius, struct, indexed, indexNote }) {
   const L = [];
   L.push(MARKER);
   L.push('## 🧭 bearing — graph impact report');
@@ -127,9 +137,10 @@ function render({ diff, detected, radius, struct, indexed }) {
   L.push('');
 
   if (!indexed) {
-    L.push('> ⚠️ No GitNexus index could be built for this run, so there is nothing graph-backed to report.');
-    L.push('> Everything below falls back to the diff alone.');
-    L.push('');
+    L.push(`> ⚠️ **No graph for this run** — ${indexNote ?? "no index was available"}`);
+    L.push(">");
+    L.push("> Everything below comes from the diff alone: no blast radius, no affected flows, no cycle check.");
+    L.push("");
   }
 
   L.push(
@@ -242,9 +253,24 @@ async function main() {
   }
 
   let indexed = fs.existsSync(path.join(ROOT, '.gitnexus/meta.json'));
+  let indexNote = null;
   if (!indexed && process.env.GITNEXUS_CI_SKIP_BUILD !== '1') {
-    console.log('bearing CI: building index…');
-    indexed = gn(['analyze', '--embeddings', '0'], 900000).ok;
+    // Default 25min, configurable. The old hardcoded 15 was under the real cost of a 3,000-file
+    // monorepo on a 2-core runner, so the step burned a full quarter-hour and produced nothing.
+    const budgetMs = Number(process.env.GITNEXUS_CI_INDEX_TIMEOUT_MS || 1500000);
+    const started = Date.now();
+    console.log(`bearing CI: building index (budget ${Math.round(budgetMs / 60000)}m)…`);
+    const r = gn(['analyze', '--embeddings', '0'], budgetMs);
+    indexed = r.ok && fs.existsSync(path.join(ROOT, '.gitnexus/meta.json'));
+    if (!indexed) {
+      const mins = Math.round((Date.now() - started) / 60000);
+      indexNote = r.timedOut
+        ? `indexing did not finish within ${mins}m. Raise \`GITNEXUS_CI_INDEX_TIMEOUT_MS\`, or warm the \`.gitnexus\` cache once on your default branch so PR runs restore it instead of rebuilding.`
+        : r.missing
+          ? `the \`gitnexus\` binary was not found on this runner (\`${r.cmd.split(' ')[0]}\`). Add an install step, or let it fall back to \`npx gitnexus@latest\`.`
+          : `\`gitnexus analyze\` exited non-zero after ${mins}m: ${(r.out.trim().split('\n').pop() || 'no output').slice(0, 200)}`;
+      console.log(`bearing CI: ${indexNote}`);
+    }
   }
 
   const detected = indexed ? detectChanges(repo, diff.base) : null;
@@ -258,7 +284,7 @@ async function main() {
   const radius = indexed ? blastRadius(repo, symbols) : [];
   const struct = indexed ? structural(repo) : null;
 
-  const body = render({ diff, detected, radius, struct, indexed });
+  const body = render({ diff, detected, radius, struct, indexed, indexNote });
   console.log(`\n${body}\n`);
 
   if (process.env.GITHUB_STEP_SUMMARY) {
