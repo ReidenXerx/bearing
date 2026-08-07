@@ -76,7 +76,7 @@ Your runner must print **one JSON line**:
 A real runner should, per invocation:
 
 1. Reset a fixture repo to a known state.
-2. If `GITNEXUS_KIT=on`, install/enable the kit (`gn-kit install`); if `off`, disable hooks.
+2. If `GITNEXUS_KIT=on`, install/enable the kit (`npx bearing install .`); if `off`, disable hooks.
 3. Drive an agent on `GITNEXUS_TASK_PROMPT` (e.g. via `@cursor/sdk` or the `cursor-agent` CLI).
 4. Run the task's success check (see each task's `rubric`).
 5. Print `{"pass": <bool>, "tokens": <int>}`.

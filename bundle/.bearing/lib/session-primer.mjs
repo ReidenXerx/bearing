@@ -19,7 +19,9 @@ import { playbookForHint, mcpReadContext, repoName, clearDenyCache } from './hoo
  *   or a pre-1.0.3 manifest with no `features` field) — callers must then fall back, never assume.
  */
 export function installedFeatures(root) {
-  for (const rel of ['.gitnexus/agent-kit-manifest.json', '.bearing/manifest.json']) {
+  // Newest first: during an interrupted upgrade both can exist, and the legacy copy is the stale
+  // one — reading it would report a module selection the user already changed.
+  for (const rel of ['.bearing/manifest.json', '.gitnexus/agent-kit-manifest.json']) {
     try {
       const m = JSON.parse(fs.readFileSync(path.join(root, rel), 'utf8'));
       if (Array.isArray(m.features)) return new Set(m.features);

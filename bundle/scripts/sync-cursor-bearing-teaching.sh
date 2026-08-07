@@ -218,7 +218,7 @@ ok "${#HOOK_SCRIPTS[@]} hook scripts + ${#HOOK_LIBS[@]} lib(s) ready"
 info "  [3/5] Link skills (symlinks from canonical store)"
 STORE=".bearing/skills"
 if [[ ! -d "$STORE" ]]; then
-  fail "Missing $STORE — run gn-agent-kit install or update first"
+  fail "Missing $STORE — run 'npx bearing install .' or 'npx bearing update .' first"
 fi
 
 link_skills() {

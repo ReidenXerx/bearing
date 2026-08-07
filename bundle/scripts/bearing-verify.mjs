@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Unified gitnexus-agent-kit verification (runtime-aware).
+ * Unified bearing verification (runtime-aware).
  * Usage: node scripts/bearing-verify.mjs [repoRoot] [--json]
  */
 import fs from 'node:fs';
@@ -14,8 +14,16 @@ const ZED_PROFILE_KEY = 'zed-gitnexus';
 const ZED_PROFILE_NAME = 'Zed + GitNexus';
 const SKILLS_STORE = '.bearing/skills';
 
+// Newest first. The older paths stay readable because this script ships INTO the repo and can be
+// run against an install that predates the move.
+const MANIFESTS = [
+  '.bearing/manifest.json',
+  '.gitnexus/agent-kit-manifest.json',
+  '.cursor/gn-kit-manifest.json',
+];
+
 function readRuntime() {
-  for (const rel of ['.gitnexus/agent-kit-manifest.json', '.cursor/gn-kit-manifest.json']) {
+  for (const rel of MANIFESTS) {
     const p = path.join(root, rel);
     if (!fs.existsSync(p)) continue;
     try {
@@ -41,14 +49,12 @@ function checkFile(rel) {
 }
 
 function checkManifest() {
-  const ok =
-    fs.existsSync(path.join(root, '.gitnexus/agent-kit-manifest.json')) ||
-    fs.existsSync(path.join(root, '.cursor/gn-kit-manifest.json'));
+  const found = MANIFESTS.find((rel) => fs.existsSync(path.join(root, rel)));
   return {
     id: 'manifest',
-    ok,
+    ok: Boolean(found),
     label: 'Kit manifest',
-    detail: ok ? 'agent-kit-manifest.json' : 'missing — run kit install/update',
+    detail: found ?? 'missing — run kit install/update',
   };
 }
 
@@ -239,7 +245,7 @@ export async function verifyInstall(repoRoot) {
 
 async function printHuman(report) {
   const ui = await import(pathToFileURL(path.join(root, 'scripts/lib/setup-ui.mjs')).href);
-  ui.banner(`gitnexus-agent-kit verification (${report.runtime})`, path.basename(report.root));
+  ui.banner(`bearing verification (${report.runtime})`, path.basename(report.root));
 
   const rows = report.checks.map((c) => ({
     label: c.label,

@@ -16,8 +16,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 
-/** Manifest locations, newest first. */
-const MANIFESTS = ['.gitnexus/agent-kit-manifest.json', '.bearing/manifest.json'];
+/** Manifest locations, newest first — order matters, the first readable one wins. */
+const MANIFESTS = ['.bearing/manifest.json', '.gitnexus/agent-kit-manifest.json'];
 
 /** @param {string} root @returns {string|null} the recorded command, if any */
 function recordedCmd(root) {
@@ -60,4 +60,40 @@ export function gitnexusCmd(root = process.cwd()) {
 export function gitnexusSpawn(args = [], root = process.cwd()) {
   const parts = gitnexusCmd(root).split(/\s+/).filter(Boolean);
   return { command: parts[0], args: [...parts.slice(1), ...args] };
+}
+
+/**
+ * The MCP entry for this repo, matching what lib/mcp-config.mjs writes at install time.
+ *
+ * Shell callers need this: bearing-setup.sh writes .cursor/mcp.json AFTER the installer has
+ * already written it, so hardcoding an entry there silently reverted both the transport and the
+ * binary choice on every install.
+ * @param {string} [root]
+ */
+export function mcpEntryFor(root = process.cwd()) {
+  let transport = null;
+  for (const rel of MANIFESTS) {
+    try {
+      transport = JSON.parse(fs.readFileSync(path.join(root, rel), 'utf8')).mcpTransport;
+      if (transport) break;
+    } catch {
+      /* try the next */
+    }
+  }
+  if (transport?.mode === 'http' && transport.url) {
+    return { type: 'http', url: transport.url };
+  }
+  const parts = gitnexusCmd(root).split(/\s+/).filter(Boolean);
+  return { command: parts[0], args: [...parts.slice(1), 'mcp'] };
+}
+
+// `node .bearing/lib/gitnexus-cmd.mjs [--mcp-entry]` — so shell scripts can ask the same question
+// the JS callers do instead of hardcoding an answer that goes stale.
+if (process.argv[1] && fs.realpathSync(process.argv[1]) === fs.realpathSync(new URL(import.meta.url).pathname)) {
+  const root = process.cwd();
+  process.stdout.write(
+    (process.argv.includes('--mcp-entry')
+      ? JSON.stringify(mcpEntryFor(root))
+      : gitnexusCmd(root)) + '\n',
+  );
 }

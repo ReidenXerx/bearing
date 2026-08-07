@@ -2,6 +2,156 @@
 
 All notable changes to `bearing` are documented here.
 
+## Unreleased — the rename reaches the identifiers it had skipped
+
+The kit was renamed `gitnexus-agent-kit` → `bearing`, but three identifiers kept the old name
+because renaming them touches files in *your* repository. Two were merely stale. One was a bug.
+
+### Fixed
+
+- **An intel-only install no longer creates `.gitnexus/`.** The install manifest lived at
+  `.gitnexus/agent-kit-manifest.json`, and writing it created the graph tool's index directory in
+  repos that had explicitly declined the GitNexus module — an index directory for an indexer that
+  was never installed. NS-13 names four channels through which enforcement must not leak; this was
+  a fifth. The manifest now lives at `.bearing/manifest.json`, and the four `gitnexus` entries in
+  the managed `.gitignore` block are gated on the module too. `.bearing/.gitnexus-*` stays
+  ungated: the **core** session-primer writes it, and `.gitnexus-northstar-counter.json` belongs
+  to the north-stars module rather than the graph.
+- **The managed `AGENTS.md` / `CLAUDE.md` block is `<!-- bearing:BEGIN -->`.** Matching only a new
+  marker would have left the old block in place in every installed repo and appended a second one
+  beside it — the exact failure `GITIGNORE_MARKERS_LEGACY` already documents. Both adapters now
+  match the current marker or any legacy one, replace the first in place, and drop any duplicate.
+- **The gitignore migration pointed at a command that does not exist.** It rewrote
+  `(safe to remove via gn-kit uninstall)` into `(safe to remove via gn-agent-kit uninstall)` —
+  one dead binary name for another. Both now collapse to `bearing-uninstall` (NS-6).
+- Renamed the remaining user-visible strings: the `bearing verification` banner, the
+  `bearing installed` health detail, and a sync script that told the user to run `gn-agent-kit`.
+
+### Fixed — uninstall now leaves the repo as it found it
+
+Six leaks, all pre-dating this release. After `install; update; uninstall` a repo was left holding
+`.bearing/hooks.json`, an empty `.claude/` with a `{}` settings file, empty `.claude/skills/` and
+`.agents/skills/` directories, and a `.gitignore` it never had. It now comes back byte-identical.
+
+- **An update disowned the file the install created.** `.bearing/hooks.json` is seeded only when
+  absent, because it is team-shared config the user edits — but skipping the copy also dropped it
+  from the manifest's file list, so uninstall no longer knew the kit had put it there. It is now
+  re-claimed on update, and *only* when a previous manifest says the kit wrote it: a hooks.json
+  that existed before the first install was never ours and is still never touched.
+- **`.claude/settings.json` was left as `{}`** once our hooks were stripped out. It now follows
+  the rule `.mcp.json` in the same adapter already used — remove the file when what remains is
+  empty, keep it when the user has anything else in it.
+- **The skill link directories were never removed**, only their contents, and **`.claude/` was
+  missing from uninstall's prune list** entirely. Both are rmdir-only, so a directory holding
+  anything of the user's survives.
+- **A `.gitignore` the kit created was left behind empty.** Whether the repo had one is now
+  recorded in the manifest at install time, because by the second run the file exists *because we
+  made it* — indistinguishable, after the fact, from the user's own (NS-1).
+- **Uninstall stripped the final newline** from a `.gitignore` it was otherwise leaving alone,
+  which was enough to show the file as modified in the user's diff.
+
+### Added — the installer now checks its own claims
+
+Every defect below was found by an agent inspecting a real install by hand. A person running
+`npx bearing` would have been told about **none** of them — and three would have printed success
+while broken. The existing verifier could not have caught a single one: it asks *does this file
+exist*, and every failure had the right files in the right places with the wrong content.
+
+`lib/postcheck.mjs` asserts post-conditions against the disk at the end of every install and
+update. Each check exists because a real defect shipped through the gap it covers:
+
+| check | the defect it would have caught |
+| --- | --- |
+| `scripts_binary` | all 16 npm scripts reverted to `npx gitnexus@latest` after step 7 |
+| `mcp_entries` | setup overwrote `.cursor/mcp.json`; the Zed adapter hardcoded npx |
+| `mcp_http_live` | the repo pointed at a port where the LaunchAgent had died on exit 127 |
+| `local_state_ignored` | task-core, session flags and install backups became committable |
+| `agent_docs` | a marker rename appended a second contract block |
+| `no_legacy` | two manifests left side by side, free to disagree |
+| `declined_clean` | `.gitnexus/` created in a repo that declined the graph module |
+| `files_present` | a recorded file missing from disk |
+
+Three deliberate properties:
+
+- **Not behind `--skip-verify`.** That flag exists to skip the slow index build, and every
+  automated path in this repo passes it — which is precisely how these reached a real machine.
+  The checks read the disk we just wrote and cost milliseconds.
+- **In `lib/`, not the bundle.** `scripts/bearing-verify.mjs` is owned by the gitnexus feature and
+  so is its fallback, so an intel-only install had no verification at all. The configuration least
+  exercised by the author was also the least checked.
+- **A failure changes the headline and the exit code.** The summary reads "finished with N FAILED
+  checks" rather than "complete", and the process exits non-zero. Environmental problems (a server
+  that is not running) print a fix instead of asking for a bug report.
+
+Recorded as NS-20 and NS-21. The negative-case test immediately earned its keep: the first draft
+of `scripts_binary` compared with `String.includes`, and `"npx gitnexus@latest".includes("gitnexus")`
+is true — a check that could never fail, which is the exact trap NS-9 describes.
+
+### Fixed — `npx gitnexus@latest` came back after every install
+
+1.0.6 added a recorded `gitnexusCmd` so a repo could pin the binary it runs. The manifest recorded
+it correctly and `kit.mjs` wrote it correctly — and then **step 7 undid all of it**, because three
+shipped components rebuilt their commands from the bare default. Found by installing into a real
+repo and reading what actually landed: manifest said `gitnexus`, all 16 npm scripts said `@latest`.
+
+- **`scripts/bearing-teaching/merge-package-scripts.mjs`** is run by `bearing-setup.sh` *after* the
+  installer has written the scripts, and rebuilt every one of them from `npx gitnexus@latest`. The
+  existing regression test passed `--no-setup`, so the fixture skipped exactly the step that broke
+  it (NS-9). It now asks `.bearing/lib/gitnexus-cmd.mjs`, and so does `--snippet`.
+- **`bearing-setup.sh` overwrote `.cursor/mcp.json`** with a hardcoded `npx -y gitnexus@latest mcp`
+  stdio entry, reverting *both* recorded choices — a repo pointed at a shared http server went
+  back to spawning one server per client, recreating the pile-up http exists to prevent. It now
+  builds the entry from the new `mcpEntryFor()` resolver. Its own `GITNEXUS_CLI` was pinned the
+  same way and now resolves too.
+- **The Zed adapter never honoured either choice** — alone among the three, it hardcoded the npx
+  entry. Because Zed project settings *win over user settings*, that committed entry superseded a
+  correctly configured global one: observed on a real machine as Zed running `analyze` from
+  `~/Library/Application Support/Zed/node/cache/_npx` against the same index a bearing refresh was
+  writing. Zed now writes the resolved binary. It stays on stdio deliberately even for an http
+  repo — Zed's remote-context-server shape is unverified, and guessing a schema in someone's real
+  editor config risks a server that will not start at all, which is worse than one that works
+  locally. The installer now says so in its next steps instead of leaving it to be discovered.
+- **`.bearing/lib/detect-api-router.mjs`** spawned `npx gitnexus@latest cypher` directly, with
+  `gitnexusSpawn` sitting unused beside it — so it queried the published analyzer's graph while
+  everything else used the installed one.
+
+### Fixed — the CLI silently did nothing through a symlink
+
+`lib/kit.mjs` decided whether it was the entry point by comparing `import.meta.url` against
+`process.argv[1]` unresolved. Any symlink on the way in made those differ, so the CLI fell through
+and **exited 0 having done nothing**. On macOS this is the ordinary case, not an exotic one: `/tmp`
+is a link to `/private/tmp`, so `node /tmp/checkout/lib/kit.mjs install …` looked like a
+successful install that installed nothing. Both sides are now resolved with `realpath`.
+
+### Fixed — the macOS shared MCP server never actually started
+
+The launchd path shipped in 1.0.6 marked UNVERIFIED. Running it on a Mac showed the warning was
+right, and in the predicted place.
+
+- **The LaunchAgent exited 127 in a restart loop.** An absolute `ProgramArguments` path is not
+  enough: gitnexus is an "env node" shebang script, and launchd starts with a minimal PATH that has
+  no version-manager bin dir, so `env` could not find `node`. `servicePathEnv()` now puts the
+  binary's own directory first — where nvm, volta, fnm and nodenv all keep the matching `node` —
+  and the systemd unit had the identical latent bug.
+- **`installService` reported `ok: true, "listening on 127.0.0.1:39100"` for that dead agent**,
+  because it only checked that `launchctl bootstrap` had *loaded* the definition. Loading a
+  service and running a server are different events. The caller's fallback-to-stdio path was
+  therefore unreachable — it would have written an http entry pointing at nothing, which fails
+  every graph call. It now confirms the port answers before claiming success.
+
+Verified on macOS 27: agent runs, survives `kill -9` via KeepAlive, and is listening again ~1s
+later. The Task Scheduler path remains unverified.
+
+### Compatibility
+
+- **Every manifest reader consults the old paths.** The manifest *is* an install's identity —
+  `update`, `uninstall` and `update-all` discovery all key off it, so a reader that knew only the
+  new path would report an installed repo as never installed and `update-all` would silently stop
+  seeing every repo installed before this release. Install and update move the file and prune the
+  emptied `.gitnexus/` (rmdir only, so a real index is never touched).
+- **The `gitnexus:*` npm script aliases are unchanged** (NS-15), and so is the Zed `zed-gitnexus`
+  profile — that one names the actual GitNexus MCP server, not the kit's old name.
+
 ## 1.0.6 — one MCP server for the whole machine, instead of one per client
 
 MCP stdio spawns one child process **per client**, by protocol design. Every editor window and

@@ -131,6 +131,7 @@ cat > "$BUNDLE_ROOT/gitignore.snippet" <<'SNIP'
 .cursor/bearing-teaching-bundle.json
 .cursor/gn-kit-manifest.json
 .gitnexus/agent-kit-manifest.json
+.bearing/manifest.json
 .bearing/.bearing-session-edits.flag
 .bearing/.bearing-session-primed.flag
 .bearing/.gitnexus-prompt-hint.json

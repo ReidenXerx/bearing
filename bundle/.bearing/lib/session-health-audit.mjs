@@ -130,16 +130,17 @@ export function auditKitHealth(root) {
             : "Unavailable until graph is fresh",
   });
 
-  const kitOk =
-    fs.existsSync(path.join(root, ".gitnexus/agent-kit-manifest.json")) ||
-    fs.existsSync(path.join(root, ".cursor/gn-kit-manifest.json"));
+  // Newest first; the older paths keep an install that predates the move reporting as healthy.
+  const kitOk = [
+    ".bearing/manifest.json",
+    ".gitnexus/agent-kit-manifest.json",
+    ".cursor/gn-kit-manifest.json",
+  ].some((rel) => fs.existsSync(path.join(root, rel)));
   checks.push({
     id: "kit_manifest",
     ok: kitOk,
     label: "Kit manifest",
-    detail: kitOk
-      ? "gitnexus-agent-kit installed"
-      : "No agent-kit manifest (manual install?)",
+    detail: kitOk ? "bearing installed" : "No bearing manifest (manual install?)",
   });
 
   const persistence = inspectPersistence(root);

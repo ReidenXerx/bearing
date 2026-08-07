@@ -7,6 +7,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { repoName } from './hook-helpers.mjs';
+import { gitnexusSpawn } from './gitnexus-cmd.mjs';
 
 export const API_PROFILE_FILE = '.bearing/gitnexus-api-profile.json';
 
@@ -84,11 +85,14 @@ function scanSourceHeuristics(root) {
 function cypherRouteCount(root, repo) {
   const q =
     "MATCH (r:Route) RETURN count(r) AS routes LIMIT 1";
-  const r = spawnSync(
-    'npx',
-    ['gitnexus@latest', 'cypher', '-r', repo, q],
-    { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }
-  );
+  // Use the repo's resolved gitnexus, not a hardcoded npx: npx never consults PATH, so this
+  // queried the PUBLISHED analyzer's graph while everything else used the installed one.
+  const { command, args } = gitnexusSpawn(['cypher', '-r', repo, q], root);
+  const r = spawnSync(command, args, {
+    cwd: root,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
   if (r.status !== 0) return null;
   const m = r.stdout.match(/(\d+)/);
   return m ? Number(m[1]) : null;

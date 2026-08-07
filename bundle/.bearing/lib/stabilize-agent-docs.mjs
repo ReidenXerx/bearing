@@ -8,7 +8,7 @@
  * files churn on every refresh — perpetual "modified" noise for every teammate who pulls.
  *
  * This strips that volatile block wherever it lands, preserving the user's own content
- * and the kit's stable `gitnexus-agent-kit` contract block. Run after every analyze
+ * and the kit's stable `bearing` contract block. Run after every analyze
  * (sync-teaching + pre-commit) so the block never persists in a committed file.
  */
 import fs from "node:fs";

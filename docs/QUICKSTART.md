@@ -91,7 +91,7 @@ Skills live once in `.bearing/skills/` and are **symlinked** — not copied — 
 
 `update` reads the runtime from the manifest, so you only pass `--runtime` to **change** it. Default: `--quick` (skips full re-index). **Migration runs on every update** — old rsync'd `.cursor/skills/*`, `.claude/skills/*`, legacy manifest, and Zed profile key `gitnexus` are cleaned automatically.
 
-> **Fresh clone of an already-installed repo?** The manifest (`.gitnexus/agent-kit-manifest.json`) is **gitignored**, so it isn't in a new clone — `update` will stop with *"Not installed. Run install first."* That's expected: run **`./bin/install.sh /path/to/repo --runtime all --no-setup`** instead. Install is idempotent — it re-materializes the current bundle and rewrites the manifest without touching your code.
+> **Fresh clone of an already-installed repo?** The manifest (`.bearing/manifest.json`) is **gitignored**, so it isn't in a new clone — `update` will stop with *"Not installed. Run install first."* That's expected: run **`./bin/install.sh /path/to/repo --runtime all --no-setup`** instead. Install is idempotent — it re-materializes the current bundle and rewrites the manifest without touching your code.
 
 Bulk update every installed repo under a workspace root:
 

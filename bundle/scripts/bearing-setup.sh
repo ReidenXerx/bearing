@@ -21,7 +21,15 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-GITNEXUS_CLI=(npx -y gitnexus@latest)
+# WHICH gitnexus this repo runs. Pinning it to `npx -y gitnexus@latest` here meant setup used the
+# published analyzer even on a machine with a local build or a global install — a different program
+# from the one every other bearing command uses, reporting the same version string. Ask the repo's
+# own resolver (recorded choice → installed binary → npx), falling back only if it is missing.
+if [[ -f .bearing/lib/gitnexus-cmd.mjs ]]; then
+  read -r -a GITNEXUS_CLI <<<"$(node .bearing/lib/gitnexus-cmd.mjs 2>/dev/null || echo 'npx -y gitnexus@latest')"
+else
+  GITNEXUS_CLI=(npx -y gitnexus@latest)
+fi
 SKIP_INDEX=false
 FULL_INDEX=false
 SKIP_GLOBAL_MCP=false
@@ -158,14 +166,25 @@ info "Ensuring GitNexus MCP in .cursor/mcp.json"
 
 node <<'NODE'
 import fs from 'node:fs';
+import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 const p = '.cursor/mcp.json';
-const entry = { command: 'npx', args: ['-y', 'gitnexus@latest', 'mcp'] };
+// Ask the resolver rather than hardcoding. This step runs AFTER the installer has already written
+// the entry, so a literal `npx gitnexus@latest` stdio entry here silently undid BOTH the recorded
+// transport (a shared http server reverted to spawning per-client) and the recorded binary.
+let entry = { command: 'npx', args: ['-y', 'gitnexus@latest', 'mcp'] };
+try {
+  const mod = await import(pathToFileURL(path.resolve('.bearing/lib/gitnexus-cmd.mjs')).href);
+  entry = mod.mcpEntryFor(process.cwd());
+} catch {
+  /* resolver absent → keep the zero-config default, which always works */
+}
 let c = { mcpServers: {} };
 if (fs.existsSync(p)) c = JSON.parse(fs.readFileSync(p, 'utf8'));
 c.mcpServers ??= {};
 c.mcpServers.gitnexus = entry;
 fs.writeFileSync(p, JSON.stringify(c, null, 2) + '\n');
-console.log('    ✓ gitnexus MCP entry in .cursor/mcp.json');
+console.log(`    ✓ gitnexus MCP entry in .cursor/mcp.json (${entry.url ?? entry.command})`);
 NODE
 fi
 
