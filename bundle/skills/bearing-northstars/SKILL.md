@@ -94,4 +94,8 @@ Good vs useless:
 - Letting the file grow into a wall of prose — that recreates the problem it solves.
 - Editing it yourself because it "seems outdated". Propose; don't rewrite.
 
-Print them anytime: `npm run bearing:northstars` (`-- --full` for the whole document).
+Read them anytime from `.bearing/northstars.md` — that file is the source of truth and is always
+present wherever this skill is. (Repos that also installed the GitNexus module get a
+`bearing:northstars` npm script that pretty-prints it; `-- --full` for the whole document. The
+script is a convenience, never the only way in — north-stars are a core module and must not depend
+on the graph module being installed.)

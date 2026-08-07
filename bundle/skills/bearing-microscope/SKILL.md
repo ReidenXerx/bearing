@@ -5,13 +5,13 @@ description: "Deep multi-lens audit ('microscope waves') for MILESTONE moments �
 
 # Microscope waves — deep, opinionated, verified audit
 
-This is **not** a cascade code review or a linter pass. A microscope wave scrutinizes a target from many independent angles, **has real opinions** (is this even needed? is this the right approach? is it over-engineered?), verifies every finding **against real logic — not "does it run"**, and iterates in numbered **waves** until clean. It's the power-composition of the whole GitNexus toolset.
+This is **not** a cascade code review or a linter pass. A microscope wave scrutinizes a target from many independent angles, **has real opinions** (is this even needed? is this the right approach? is it over-engineered?), verifies every finding **against real logic — not "does it run"**, and iterates in numbered **waves** until clean. With the GitNexus module installed it is the power-composition of that whole toolset; without it the same routine runs on a classically-built map.
 
 ## When to run (trigger) — and when NOT (scope gate)
 
 Fire at **milestone boundaries**: a feature is "done" / pre-PR / pre-ship · a checkpoint in a large multi-step task · after a refactor touching shared/hub code · the user asks to "audit / review deeply / find real bugs / is this solid?".
 
-**Scope gate (avoid harm):** run the full waves only when the work is *substantial* — multi-file, OR touches a hub (check with `impact` blast-radius), OR high-risk path. A small localized change → **skip**, or run one quick lens. Don't fan out six agents on a one-file fix. This is a **capability you invoke**, not a mandatory gate — use judgment.
+**Scope gate (avoid harm):** run the full waves only when the work is *substantial* — multi-file, OR touches a hub (`impact` blast-radius with the graph; `git diff --stat` plus who-imports-this without it), OR high-risk path. A small localized change → **skip**, or run one quick lens. Don't fan out six agents on a one-file fix. This is a **capability you invoke**, not a mandatory gate — use judgment.
 
 ## Two KINDS of lenses (not a fixed list)
 
@@ -26,12 +26,24 @@ Kind B is what separates this from cascade review — a linter never asks *"why 
 
 ## The routine (one wave)
 
+> **With or without the graph.** Microscope does not require GitNexus. Steps 0 and 2 have a graph
+> path and a classical path; every other step is identical. Use the classical path whenever the
+> graph module is not installed, the index is stale and cannot be refreshed, or a graph call
+> returns nothing — and **say which path you used**, because the map's completeness bounds how much
+> the wave can claim to have covered.
+
 ```
-0. SCOPE-GATE: substantial? (impact blast-radius). If not → skip or one lens.
-1. PERSONA:  adopt "senior <this project's domain> engineer" (see Domain persona).
-2. MAP:      GitNexus enumerates the lenses for you —
-             READ clusters (layers/areas) + processes (flows) + impact/detect_changes (changed surface)
-             → the list of slices/seams to scrutinize.
+0. SCOPE-GATE: substantial? If not → skip or one lens.
+             graph:     impact blast-radius on the changed symbols.
+             classical: `git diff --stat <base>...HEAD` — multi-file? shared/hub dir? risky path?
+1. PERSONA:  use .bearing/domain.json (written at install). See Domain persona.
+2. MAP:      enumerate the slices/seams to scrutinize.
+             graph:     READ clusters (layers/areas) + processes (flows)
+                        + impact/detect_changes (changed surface).
+             classical: changed files grouped by directory = the layers;
+                        their imports/exports = the seams;
+                        entry points (routes, CLI, jobs, exported API) = the flows.
+                        Read the files — this is a slower map, not a missing one.
 3. SPAWN:    one lens per meaningful slice, tagged KIND A or B (both on core slices);
              + cross-cutting lenses (security, performance) where relevant.
              Parallel agents IF the runtime has multi-agent orchestration; else run sequentially.
@@ -44,14 +56,30 @@ Kind B is what separates this from cascade review — a linter never asks *"why 
              repeat until clean. Record each pass to memory as a handoff.
 ```
 
-> Stale index → `npm run bearing:agent-refresh` first (the map depends on a fresh graph + PDG).
+> **Graph module installed and the index is stale?** Refresh it first with the
+> `bearing:agent-refresh` script — the graph map is only as good as the index. If that script is
+> not in this repo's `package.json`, the graph module is not installed: take the classical path
+> above rather than going looking for it.
 
-## Domain persona (generalize, don't hardcode)
+## Domain persona
 
-The judgment lenses need a domain expert, not a generic reviewer. **Adopt "a senior engineer expert in *this project's* domain."**
+The judgment lenses need a domain expert, not a generic reviewer.
 
-- **Pinned?** If `.bearing/domain.json` exists (e.g. `{ "domain": "payments", "persona": "staff payments/ledger engineer" }`), use it.
-- **Else infer** the domain from `README`, `package.json` description, `CLAUDE.md`, and the GitNexus `clusters`/`processes` names — then state the persona you adopted in one line before reviewing.
+**Read `.bearing/domain.json`.** bearing writes it at install and injects the same persona into the
+always-on contract, so you are almost certainly already holding it — the file is the authority when
+they disagree. State it in one line before reviewing.
+
+```json
+{ "domain": "payments", "persona": "staff payments and ledger engineer" }
+```
+
+- `persona` is the user's to edit; treat it as pinned, never re-derive over the top of it.
+- `domain: null` with a neutral persona means inference was **not confident** — check
+  `suggestedDomain`, and if the project clearly has a specialism the file missed, say so and
+  propose the correction rather than silently adopting your own guess. A persona that changes
+  between waves makes wave N+1's findings incomparable with wave N's.
+- File missing entirely (pre-1.0.7 install)? Infer from `README`, `package.json` description and
+  `CLAUDE.md`, state what you adopted, and suggest pinning it.
 
 An expert in the domain catches *semantic* wrongness ("this fee is computed on gross, should be net") and *taste* issues ("this whole abstraction is unnecessary") that a language-only reviewer never sees.
 
