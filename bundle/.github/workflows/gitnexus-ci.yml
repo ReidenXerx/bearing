@@ -23,4 +23,7 @@ jobs:
         env:
           GITNEXUS_CI_MODE: block # set to "warn" to report without failing
           GITNEXUS_CI_HIGH: "8"
-        run: node scripts/gitnexus-ci.mjs "${{ github.base_ref }}"
+        # The kit ships this as scripts/bearing-ci.mjs. It read `gitnexus-ci.mjs` for one release
+        # after the rename, so the gate failed with "Cannot find module" on every PR — a CI check
+        # that never actually ran while looking like it was configured.
+        run: node scripts/bearing-ci.mjs "${{ github.base_ref }}"

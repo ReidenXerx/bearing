@@ -15,4 +15,7 @@ done
 git config core.hooksPath .githooks
 
 echo "Git hooks installed: core.hooksPath=.githooks"
-echo "Pre-commit will run: npm run bearing:pdg (embeddings + skills + PDG)"
+# Name what the hook ACTUALLY runs. It said `bearing:pdg` while .githooks/pre-commit ran
+# `bearing:full-pdg` (a --force rebuild) plus `bearing:graph-smoke` — so anyone debugging a slow
+# commit was looking for the wrong command.
+echo "Pre-commit will run: npm run bearing:full-pdg + bearing:graph-smoke (force rebuild + PDG, then smoke test)"

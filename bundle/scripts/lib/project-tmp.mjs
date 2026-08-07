@@ -65,19 +65,25 @@ export function parseUsePct(usePct) {
  */
 export function tmpSpaceReport(root = process.cwd()) {
   const projectTmp = getProjectTmpDir(root);
+  // Measure the temp dir this machine ACTUALLY uses. This computed systemTmp from TMPDIR and then
+  // ignored it, always stat'ing /tmp — so on macOS, where TMPDIR is a per-user
+  // /var/folders/... path, the report described a filesystem nothing was writing to and the
+  // "nearly full" warning watched the wrong mount.
   const systemTmp = process.env.TMPDIR ?? '/tmp';
   const projectDf = dfMount(projectTmp);
-  const systemDf = dfMount('/tmp');
+  const systemDf = dfMount(systemTmp);
 
   const lines = [`Project temp: ${projectTmp}`];
   if (projectDf) {
     lines.push(`  ${projectDf.mount}: ${projectDf.used}/${projectDf.size} (${projectDf.usePct}), avail ${projectDf.avail}`);
   }
   if (systemDf && systemDf.mount !== projectDf?.mount) {
-    lines.push(`System /tmp: ${systemDf.used}/${systemDf.size} (${systemDf.usePct}), avail ${systemDf.avail}`);
+    // Name the directory we measured, not a literal "/tmp" — saying /tmp while reporting numbers
+    // for $TMPDIR sends anyone chasing a full disk to the wrong filesystem.
+    lines.push(`System temp (${systemTmp}): ${systemDf.used}/${systemDf.size} (${systemDf.usePct}), avail ${systemDf.avail}`);
     if (parseUsePct(systemDf.usePct) >= 95) {
       lines.push(
-        '  WARNING: /tmp (tmpfs) nearly full — gitnexus/npm use project .tmp-agent/ instead; clear /tmp/cursor-sandbox-cache if needed.'
+        `  WARNING: ${systemTmp} nearly full — gitnexus/npm use project .tmp-agent/ instead; clear /tmp/cursor-sandbox-cache if needed.`
       );
     }
   }
