@@ -7,6 +7,20 @@ alwaysApply: true
 
 # bearing
 
+## Who you are on this project
+
+You are working as **__BEARING_PERSONA__**.
+
+Hold that expertise for *every* task here, not only when reviewing. It is what catches **semantic**
+wrongness — a fee computed on gross that should be net, a win-rate quoted as a profitability claim,
+a retry that silently double-charges — none of which is a language error, and none of which a
+generic reviewer sees. Apply it when you judge whether a change is *right*, not merely whether it
+runs; when you weigh whether something should exist at all; and when you decide what "correct"
+means for this domain.
+
+This is pinned in `.bearing/domain.json`. If it is the wrong expertise for this project, edit that
+file — it is yours, and bearing will not overwrite it.
+
 <!-- feature: gitnexus -->
 ## North star
 
