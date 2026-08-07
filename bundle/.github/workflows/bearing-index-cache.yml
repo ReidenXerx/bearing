@@ -1,0 +1,67 @@
+# bearing — build the GitNexus index once per push to the default branch and cache it.
+#
+# This is the other half of the impact report. The PR job restores what this produces and never
+# builds anything itself, so PR feedback stays in seconds no matter how large the repo gets.
+#
+# The rule that makes the cache trustworthy: SAVE ONLY A COMPLETE INDEX. The earlier design let a
+# timed-out PR job store a partial .gitnexus/ under the primary key, which then could never be
+# replaced — every later run restored a useless index and rebuilt from scratch. Here the save step
+# runs only after `meta.json` exists, which is the analyzer's own completion marker.
+name: bearing index cache
+
+on:
+  push:
+    branches: [main, master]
+  # Available by hand, for the first warm-up or after a cache purge.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bearing-index-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-index:
+    runs-on: ubuntu-latest
+    # Generous: this is a background job on the default branch, not anyone's PR wait.
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Warm start: an existing index makes analyze incremental rather than a full rebuild.
+      - name: Restore previous index
+        uses: actions/cache/restore@v4
+        with:
+          path: .gitnexus
+          key: bearing-index-${{ runner.os }}-
+          restore-keys: bearing-index-${{ runner.os }}-
+
+      - name: Build index
+        id: build
+        run: |
+          npx -y gitnexus@latest analyze --embeddings 0
+          # meta.json is written last, so its presence means the analyzer finished.
+          if [ -f .gitnexus/meta.json ]; then
+            echo "complete=true" >> "$GITHUB_OUTPUT"
+            echo "Indexed $(node -e "const m=require('./.gitnexus/meta.json');console.log((m.stats?.nodes ?? '?')+' nodes')")"
+          else
+            echo "complete=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::analyze produced no meta.json — not caching an incomplete index"
+          fi
+
+      # The key is unique per commit so it can actually be written; restore-keys give PR jobs the
+      # most recent one by prefix. Saving under a fixed key would hit "already exists" forever.
+      - name: Save index
+        if: steps.build.outputs.complete == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: .gitnexus
+          key: bearing-index-${{ runner.os }}-${{ github.sha }}

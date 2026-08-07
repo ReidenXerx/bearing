@@ -1,28 +1,30 @@
 # bearing — graph-backed impact report on every pull request.
 #
-# INFORMATIONAL. This workflow does not fail your build. It posts a report and gets out of the way.
-# The reason is the graph's own contract: it resolves calls through factories and DI imperfectly, so
-# `0 callers` can mean "none" or "could not resolve". A hard gate built on a signal that cannot tell
-# those apart fails honest PRs, and people learn to route around it. A report a human reads is worth
-# more than a gate they disable.
+# INFORMATIONAL. This workflow does not fail your build, and it does not build the index either.
+# It restores a warm one and reports in seconds.
 #
-# Want teeth anyway? Set GITNEXUS_CI_MODE=block below — then a widely-called symbol changing with no
-# test changes fails the check.
+# Why it never indexes: a first attempt built the graph inside this job, and on a 3,000-file repo
+# that exceeded 25 minutes on a 2-core runner — every push, producing nothing. Worse, the killed
+# run left a PARTIAL .gitnexus/ that actions/cache stored under the primary key, so every later run
+# restored a useless index, rebuilt from scratch, timed out, and could not replace the entry it
+# had poisoned. Indexing belongs on the default branch (see bearing-index-cache.yml), once per
+# push, where a slow job is nobody's PR feedback loop.
 #
-# The kit installs this for you; it is also fine to copy into another repo's .github/workflows/.
+# With no warm cache this still reports — from the diff alone — and says what is missing and why.
+#
+# Want teeth? Set GITNEXUS_CI_MODE=block: a widely-called symbol changing with no test changes then
+# fails the check. Off by default, because the graph cannot distinguish "no callers" from "could
+# not resolve callers", and a gate on that fails honest PRs until people route around it.
 name: bearing impact report
 
 on:
   pull_request:
     branches: [main, master]
 
-# Least privilege: read the code, write the one sticky comment. Nothing else.
 permissions:
   contents: read
   pull-requests: write
 
-# A second push should replace the in-flight run, not queue behind it — the report is only ever
-# about the current head.
 concurrency:
   group: bearing-impact-${{ github.event.pull_request.number }}
   cancel-in-progress: true
@@ -30,6 +32,8 @@ concurrency:
 jobs:
   impact-report:
     runs-on: ubuntu-latest
+    # A report that cannot finish in a couple of minutes is not a report anyone waits for.
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
@@ -39,20 +43,19 @@ jobs:
         with:
           node-version: 22
 
-      # Indexing dominates the runtime and the graph only changes when the code does.
-      - name: Cache GitNexus index
-        uses: actions/cache@v4
+      # RESTORE ONLY — never save from a PR job. A cancelled or timed-out PR run must not be able
+      # to overwrite the good index with a half-written one.
+      - name: Restore GitNexus index
+        uses: actions/cache/restore@v4
         with:
           path: .gitnexus
-          key: gitnexus-${{ runner.os }}-${{ github.event.pull_request.base.sha }}
-          restore-keys: gitnexus-${{ runner.os }}-
+          key: bearing-index-${{ runner.os }}-
+          restore-keys: bearing-index-${{ runner.os }}-
 
       - name: bearing impact report
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITNEXUS_CI_MODE: report # `block` to fail on high-impact changes without tests
           GITNEXUS_CI_HIGH: "8"
-          # Indexing a few-thousand-file repo on a 2-core runner can exceed 15m. If the cache is
-          # cold and this still times out, the report says so and falls back to the diff.
-          GITNEXUS_CI_INDEX_TIMEOUT_MS: "1500000"
+          GITNEXUS_CI_SKIP_BUILD: "1" # indexing happens on the default branch, not here
         run: node scripts/bearing-ci.mjs "${{ github.base_ref }}"
