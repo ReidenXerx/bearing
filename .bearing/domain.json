@@ -1,0 +1,11 @@
+{
+  "_comment": "Domain persona adopted by bearing's review skills and injected into the always-on contract. Edit `persona` to anything you like — bearing never overwrites this file once it exists.",
+  "domain": "developer-tooling",
+  "persona": "senior developer-tooling engineer",
+  "confidence": "high",
+  "inferredFrom": [
+    "package.json: \"agentic-ai\"",
+    "README.md: \"mcp\"",
+    "CLAUDE.md: \"agent\""
+  ]
+}
