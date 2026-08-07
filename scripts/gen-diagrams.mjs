@@ -15,7 +15,7 @@
  */
 import { writeFileSync, mkdirSync } from "node:fs";
 import {
-  C, svg, card, pill, arrow, elbow, elbowV, eyebrow, headline, caption, MONO,
+  C, svg, card, deck, pill, arrow, elbow, elbowV, eyebrow, headline, caption, MONO,
 } from "./diagram-kit.mjs";
 
 const out = {};
@@ -92,35 +92,41 @@ out["taskcore"] = svg(
 
 // ── 4. microscope — the claim is KIND B + adversarial filtering ──────────────
 out["microscope"] = svg(
-  900, 326,
+  900, 342,
   [
-    eyebrow(28, 34, "milestone review · persona pinned from your repo"),
-    headline(28, 60, "Two questions. Only survivors reach you."),
+    eyebrow(28, 34, "milestone review · one agent per slice"),
+    headline(28, 60, "A panel of specialists, not a checklist."),
 
-    card(28, 108, 196, 76, { title: "Your change", sub: "reviewed as a ledger engineer", accent: C.faint }),
+    card(28, 112, 196, 58, { title: "Your change", sub: "mapped into slices", accent: C.faint }),
+    // The persona is PINNED from .bearing/domain.json and every lens carries it — the same expert
+    // reviews every slice, and wave 2 cannot quietly become a different one.
+    card(28, 186, 196, 58, { title: "Pinned persona", sub: "staff ledger engineer", accent: C.accent }),
 
-    // Sub-text lives INSIDE the card. As separate captions it overlapped the box below — caught by
-    // rasterising, not by reading the source (NS-10).
-    card(252, 92, 286, 58, { title: "KIND A — is it right?", sub: "logic · edges · races", titleFill: C.dim }),
-    card(252, 166, 286, 58, { title: "KIND B — the RIGHT thing?", sub: "why does this exist at all?", accent: C.accent }),
+    // Decks, not single cards: one lens is spawned per meaningful slice, so drawing exactly two
+    // would understate it as a fixed pair.
+    deck(272, 108, 268, 52, { title: "KIND A — is it right?", sub: "logic · edges · races", titleFill: C.dim }),
+    deck(272, 196, 268, 52, { title: "KIND B — the RIGHT thing?", sub: "necessity · proportionality", accent: C.accent }),
 
-    elbow(224, 146, 252, 121, C.rule),
-    elbow(224, 146, 252, 195, C.accent),
-    elbow(538, 121, 574, 152, C.rule),
-    elbow(538, 195, 574, 152, C.accent),
+    elbow(224, 141, 272, 134, C.rule),
+    elbow(224, 215, 272, 222, C.accent),
+    elbow(224, 141, 272, 222, C.rule),
 
-    card(574, 122, 298, 62, { title: "Try to REFUTE it", sub: "trace the value, read the branch", accent: C.bad }),
+    caption(272, 178, "spawned in parallel where the runtime allows", C.faint),
 
-    // Vertical-first: routed BENEATH the lens cards instead of straight through them.
-    elbowV(723, 184, 388, 244, 238, C.good),
-    arrow(723, 184, 723, 244),
+    elbow(540, 134, 592, 172, C.rule),
+    elbow(540, 222, 592, 172, C.accent),
 
-    pill(252, 250, "✓  survives → reported with file:line", C.good),
-    pill(616, 250, "✕  refuted → you never see it", C.bad),
+    card(592, 142, 280, 60, { title: "Try to REFUTE it", sub: "trace the value, read the branch", accent: C.bad }),
 
-    caption(28, 308, "Kind B is the part a linter can never do — code that runs perfectly and is still the wrong thing.", C.dim),
+    elbowV(732, 202, 400, 260, 254, C.good),
+    arrow(732, 202, 732, 260),
+
+    pill(264, 266, "✓  survives → reported with file:line", C.good),
+    pill(628, 266, "✕  refuted → you never see it", C.bad),
+
+    caption(28, 324, "Kind B is the part a linter can never do — code that runs perfectly and is still the wrong thing.", C.dim),
   ].join("\n"),
-  "A change is reviewed by a pinned domain persona through correctness and judgment lenses; every finding must survive an adversarial refutation attempt before it is reported.",
+  "A change is split into slices and one lens agent is spawned per slice, all carrying the same pinned domain persona, asking correctness and judgment questions in parallel; every finding must then survive an adversarial refutation attempt before it reaches you.",
 );
 
 // ── 5. gitnexus — the claim is TEXT vs STRUCTURE ─────────────────────────────

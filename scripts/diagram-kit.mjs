@@ -84,6 +84,21 @@ export function card(x, y, w, h, { title, sub, accent, titleFill, mono } = {}) {
   return parts.join("\n");
 }
 
+/**
+ * A card drawn as a small DECK — two offset ghosts behind it.
+ *
+ * Says "there are N of these, running at once" without spending N boxes on it. The microscope
+ * spawns one lens per meaningful slice, so a diagram showing exactly two understates it as a fixed
+ * pair; drawing the multiplicity is the honest shape and costs no extra reading.
+ */
+export function deck(x, y, w, h, opts = {}) {
+  return [
+    `<rect x="${x + 10}" y="${y - 8}" width="${w}" height="${h}" rx="10" fill="${C.panel}" stroke="${C.panelEdge}" opacity="0.4"/>`,
+    `<rect x="${x + 5}" y="${y - 4}" width="${w}" height="${h}" rx="10" fill="${C.panel}" stroke="${C.panelEdge}" opacity="0.7"/>`,
+    card(x, y, w, h, opts),
+  ].join("\n");
+}
+
 /** Pill for short state words — reads as a badge, not another box in the flow. */
 export function pill(x, y, text, fill, textFill = "#ffffff") {
   const w = 13 + String(text).length * 7.4;
