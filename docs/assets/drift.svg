@@ -1,16 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 250" width="880" height="250" role="img">
-<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#94a3b8"/></marker></defs>
-<rect x="10" y="95" width="150" height="60" rx="8" fill="#334155"/><text x="85" y="120.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="13" font-weight="600" fill="#fff" text-anchor="middle">Agent reads</text><text x="85" y="137.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="13" font-weight="400" fill="#fff" text-anchor="middle">a stale doc</text>
-<path d="M160 125 H185 V50 H210" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#a)"/><text x="185" y="42" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="11" fill="#64748b" text-anchor="middle">without</text>
-<path d="M160 125 H185 V200 H210" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#a)"/><text x="185" y="192" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="11" fill="#64748b" text-anchor="middle">with</text>
-<rect x="210" y="20" width="170" height="60" rx="8" fill="#64748b"/><text x="295" y="45.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="13" font-weight="600" fill="#fff" text-anchor="middle">adopts a</text><text x="295" y="62.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="13" font-weight="400" fill="#fff" text-anchor="middle">dead premise</text>
-<path d="M380 50 L420 50" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#a)"/>
-<rect x="420" y="20" width="190" height="60" rx="8" fill="#64748b"/><text x="515" y="45.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="13" font-weight="600" fill="#fff" text-anchor="middle">every conclusion</text><text x="515" y="62.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="13" font-weight="400" fill="#fff" text-anchor="middle">after it inherits it</text>
-<path d="M610 50 L650 50" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#a)"/>
-<rect x="650" y="20" width="220" height="60" rx="8" fill="#991b1b"/><text x="760" y="45.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="13" font-weight="600" fill="#fff" text-anchor="middle">✕  found out</text><text x="760" y="62.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="13" font-weight="400" fill="#fff" text-anchor="middle">three days later</text>
-<rect x="210" y="170" width="170" height="60" rx="8" fill="#1d4ed8"/><text x="295" y="195.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="13" font-weight="600" fill="#fff" text-anchor="middle">it contradicts</text><text x="295" y="212.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="13" font-weight="400" fill="#fff" text-anchor="middle">NS-4</text>
-<path d="M380 200 L420 200" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#a)"/>
-<rect x="420" y="170" width="190" height="60" rx="8" fill="#1d4ed8"/><text x="515" y="195.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="13" font-weight="600" fill="#fff" text-anchor="middle">north-star wins,</text><text x="515" y="212.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="13" font-weight="400" fill="#fff" text-anchor="middle">doc flagged stale</text>
-<path d="M610 200 L650 200" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#a)"/>
-<rect x="650" y="170" width="220" height="60" rx="8" fill="#15803d"/><text x="760" y="195.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="13" font-weight="600" fill="#fff" text-anchor="middle">✓  caught in</text><text x="760" y="212.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="13" font-weight="400" fill="#fff" text-anchor="middle">one line</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 268" width="900" height="268" role="img" aria-label="Without bearing a stale premise is found three days later; with it the north-star outranks the doc and it is caught in one line.">
+<defs>
+  <marker id="ar" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse">
+    <path d="M0 0 L10 5 L0 10 z" fill="#3a465c"/>
+  </marker>
+</defs>
+<rect width="900" height="268" rx="14" fill="#11161f" stroke="#232c3b"/>
+<text x="28" y="34" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="11.5" font-weight="600" letter-spacing="1.6" fill="#61708a">AN AGENT READS A DOC YOU ABANDONED IN MARCH</text>
+<text x="28" y="60" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="19" font-weight="650" fill="#e8edf5">The premise is dead. Nothing fails.</text>
+<rect x="28" y="92" width="196" height="62" rx="10" fill="#1a2130" stroke="#2c3648"/>
+<path d="M29 103 a10 10 0 0 1 10 -10 h2 v60 h-2 a10 10 0 0 1 -10 -10 z" fill="#61708a"/>
+<text x="48" y="119" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="14.5" font-weight="600" fill="#e8edf5">Stale doc</text>
+<text x="48" y="138" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" fill="#9aa8bd">confident. fluent.</text>
+<path d="M224 123 H262 V116 H300" fill="none" stroke="#d95926" stroke-width="1.75" marker-end="url(#ar)"/>
+<path d="M224 123 H262 V218 H300" fill="none" stroke="#3987e5" stroke-width="1.75" marker-end="url(#ar)"/>
+<text x="300" y="100" text-anchor="start" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" fill="#d95926">WITHOUT</text>
+<rect x="300" y="108" width="258" height="54" rx="10" fill="#1a2130" stroke="#2c3648"/>
+<path d="M301 119 a10 10 0 0 1 10 -10 h2 v52 h-2 a10 10 0 0 1 -10 -10 z" fill="#d95926"/>
+<text x="320" y="131" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="14.5" font-weight="600" fill="#e8edf5">Every later conclusion</text>
+<text x="320" y="150" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" fill="#9aa8bd">inherits it, silently</text>
+<line x1="558" y1="135" x2="606" y2="135" stroke="#3a465c" stroke-width="1.75" marker-end="url(#ar)"/>
+<rect x="606" y="108" width="266" height="54" rx="10" fill="#1a2130" stroke="#2c3648"/>
+<path d="M607 119 a10 10 0 0 1 10 -10 h2 v52 h-2 a10 10 0 0 1 -10 -10 z" fill="#d95926"/>
+<text x="626" y="131" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="14.5" font-weight="600" fill="#f2a58a">Found out 3 days later</text>
+<text x="626" y="150" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" fill="#9aa8bd">after you shipped on it</text>
+<text x="300" y="202" text-anchor="start" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" fill="#3987e5">WITH BEARING</text>
+<rect x="300" y="210" width="258" height="54" rx="10" fill="#1a2130" stroke="#2c3648"/>
+<path d="M301 221 a10 10 0 0 1 10 -10 h2 v52 h-2 a10 10 0 0 1 -10 -10 z" fill="#3987e5"/>
+<text x="320" y="233" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="14.5" font-weight="600" fill="#e8edf5">Contradicts NS-4</text>
+<text x="320" y="252" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" fill="#9aa8bd">the north-star outranks it</text>
+<line x1="558" y1="237" x2="606" y2="237" stroke="#3a465c" stroke-width="1.75" marker-end="url(#ar)"/>
+<rect x="606" y="210" width="266" height="54" rx="10" fill="#1a2130" stroke="#2c3648"/>
+<path d="M607 221 a10 10 0 0 1 10 -10 h2 v52 h-2 a10 10 0 0 1 -10 -10 z" fill="#199e70"/>
+<text x="626" y="233" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="14.5" font-weight="600" fill="#7fd9b4">Caught in one line</text>
+<text x="626" y="252" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" fill="#9aa8bd">before the premise spreads</text>
 </svg>

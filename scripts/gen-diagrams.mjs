@@ -1,181 +1,174 @@
 #!/usr/bin/env node
 /**
- * Generate the README diagrams as SVG.
+ * Generate the README diagrams as SVG. `npm run gen:diagrams`, commit the output.
  *
  * Why SVG and not mermaid: npm does not execute mermaid, so those blocks rendered as raw source on
- * npmjs.com. Why generated and not hand-drawn: five hand-written SVGs drift in style the moment one
- * is edited; a spec keeps the visual language in one place.
+ * npmjs.com (NS-17). Why generated and not hand-drawn: five hand-written SVGs drift in style the
+ * moment one is edited, and the shared primitives keep the type scale and palette identical.
  *
- * No emoji in the SVG text: emoji rendering depends on the viewer's font stack, so they can arrive
- * as tofu boxes. Dingbats (U+2713/2717/25B6/2605) exist in every text font.
+ * ONE IDEA PER DIAGRAM. The previous set drew the whole process — the microscope one had twelve
+ * boxes and twenty-four drawing calls at 11px type — which reads as "this product is complicated"
+ * to someone deciding in two seconds whether to keep scrolling. Process detail belongs in prose,
+ * where it can be skipped; a diagram's job is to land one claim at a glance.
  *
- * Colours are chosen to read on BOTH light and dark backgrounds — saturated fills with white text,
- * mid-grey connectors — because GitHub has a dark theme and npm does not, and <picture> media
- * queries are not honoured on npm.
- *
- *   node scripts/gen-diagrams.mjs
+ * Each carries an aria-label stating that claim, so the image is never load-bearing on its own.
  */
 import { writeFileSync, mkdirSync } from "node:fs";
-
-const C = {
-  step: "#334155", accent: "#1d4ed8", role: "#6d28d9",
-  warn: "#b45309", danger: "#991b1b", good: "#15803d", mute: "#64748b",
-};
-const LINE = "#94a3b8", LABEL = "#64748b";
-const F = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif";
-
-const esc = (t) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
-/** rounded node with wrapped white text */
-function node(x, y, w, h, lines, fill) {
-  const fs = 13, lh = 17;
-  const startY = y + h / 2 - ((lines.length - 1) * lh) / 2 + 4;
-  const text = lines
-    .map((l, i) => `<text x="${x + w / 2}" y="${startY + i * lh}" font-family="${F}" font-size="${fs}" font-weight="${i === 0 ? 600 : 400}" fill="#fff" text-anchor="middle">${esc(l)}</text>`)
-    .join("");
-  return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8" fill="${fill}"/>${text}`;
-}
-function arrow(x1, y1, x2, y2, label) {
-  const mx = (x1 + x2) / 2;
-  const lbl = label
-    ? `<text x="${mx}" y="${(y1 + y2) / 2 - 7}" font-family="${F}" font-size="11" fill="${LABEL}" text-anchor="middle">${esc(label)}</text>`
-    : "";
-  return `<path d="M${x1} ${y1} L${x2} ${y2}" stroke="${LINE}" stroke-width="2" fill="none" marker-end="url(#a)"/>${lbl}`;
-}
-function elbow(x1, y1, x2, y2, label) {
-  const mx = x1 + (x2 - x1) / 2;
-  const lbl = label
-    ? `<text x="${mx}" y="${y2 - 8}" font-family="${F}" font-size="11" fill="${LABEL}" text-anchor="middle">${esc(label)}</text>`
-    : "";
-  return `<path d="M${x1} ${y1} H${mx} V${y2} H${x2}" stroke="${LINE}" stroke-width="2" fill="none" marker-end="url(#a)"/>${lbl}`;
-}
-/** Small node for fan-out items, where a full-size box would not fit the count. */
-function chip(x, y, w, h, lines, fill) {
-  const startY = y + h / 2 - ((lines.length - 1) * 15) / 2 + 4;
-  const text = lines
-    .map((l, i) => `<text x="${x + w / 2}" y="${startY + i * 15}" font-family="${F}" font-size="${i === 0 ? 11.5 : 11}" font-weight="${i === 0 ? 600 : 400}" fill="#fff" text-anchor="middle">${esc(l)}</text>`)
-    .join("");
-  return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="7" fill="${fill}"/>${text}`;
-}
-/** Standalone caption, for naming a band of the diagram rather than a box. */
-function label(x, y, t) {
-  return `<text x="${x}" y="${y}" font-family="${F}" font-size="11.5" fill="${LABEL}" text-anchor="middle" font-style="italic">${esc(t)}</text>`;
-}
-/** Feedback arrow that leaves a box, loops out to the left, and returns above it. */
-function loop(x, y, dx, up, t) {
-  const lx = x - dx;
-  return (
-    `<path d="M${x} ${y} H${lx} V${y - up} H${x}" stroke="${LINE}" stroke-width="2" stroke-dasharray="5 4" fill="none" marker-end="url(#a)"/>` +
-    `<text x="${lx + 8}" y="${y - up - 8}" font-family="${F}" font-size="11.5" fill="${LABEL}" font-style="italic">${esc(t)}</text>`
-  );
-}
-const svg = (w, h, body) =>
-  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img">
-<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="${LINE}"/></marker></defs>
-${body}
-</svg>\n`;
+import {
+  C, svg, card, pill, arrow, elbow, elbowV, eyebrow, headline, caption, MONO,
+} from "./diagram-kit.mjs";
 
 const out = {};
 
-// 1 — drift: one input, two outcomes
-out["drift"] = svg(880, 250, [
-  node(10, 95, 150, 60, ["Agent reads", "a stale doc"], C.step),
-  elbow(160, 125, 210, 50, "without"),
-  elbow(160, 125, 210, 200, "with"),
-  node(210, 20, 170, 60, ["adopts a", "dead premise"], C.mute),
-  arrow(380, 50, 420, 50),
-  node(420, 20, 190, 60, ["every conclusion", "after it inherits it"], C.mute),
-  arrow(610, 50, 650, 50),
-  node(650, 20, 220, 60, ["✕  found out", "three days later"], C.danger),
-  node(210, 170, 170, 60, ["it contradicts", "NS-4"], C.accent),
-  arrow(380, 200, 420, 200),
-  node(420, 170, 190, 60, ["north-star wins,", "doc flagged stale"], C.accent),
-  arrow(610, 200, 650, 200),
-  node(650, 170, 220, 60, ["✓  caught in", "one line"], C.good),
-].join("\n"));
+// ── 1. drift — the failure the product exists for ────────────────────────────
+// Two lanes, same input, opposite endings. Nothing else earns a place.
+out["drift"] = svg(
+  900, 268,
+  [
+    eyebrow(28, 34, "an agent reads a doc you abandoned in march"),
+    headline(28, 60, "The premise is dead. Nothing fails."),
 
-// 2 — north-stars: fan-in to an authority
-out["northstars"] = svg(880, 250, [
-  node(10, 15, 150, 42, ["docs/"], C.mute),
-  node(10, 65, 150, 42, ["README"], C.mute),
-  node(10, 115, 150, 42, ["code comments"], C.mute),
-  node(10, 165, 150, 42, ["the agent's guess"], C.mute),
-  ...[36, 86, 136, 186].map((y) => elbow(160, y, 230, 111)),
-  node(230, 86, 150, 50, ["conflict?"], C.step),
-  arrow(380, 111, 430, 111),
-  node(430, 76, 210, 70, ["★  NORTH-STAR WINS", "the other source", "is declared STALE"], C.accent),
-  arrow(640, 111, 690, 111),
-  node(690, 81, 180, 60, ["agent cites NS-4,", "names the stale doc"], C.good),
-].join("\n"));
+    card(28, 92, 196, 62, { title: "Stale doc", sub: "confident. fluent.", accent: C.faint }),
 
-// 3 — task-core: a timeline through compaction
-out["taskcore"] = svg(920, 190, [
-  node(10, 60, 130, 60, ["session", "starts"], C.step),
-  arrow(140, 90, 180, 90),
-  node(180, 60, 140, 60, ["work…", "context fills"], C.step),
-  arrow(320, 90, 360, 90),
-  node(360, 55, 170, 70, ["▲  ~90% full", "writes task-core", "BEFORE the summary"], C.warn),
-  arrow(530, 90, 570, 90),
-  node(570, 60, 150, 60, ["✕  COMPACTION", "transcript gone"], C.danger),
-  arrow(720, 90, 760, 90),
-  node(760, 55, 150, 70, ["✓  reads it back", "goal + decisions", "+ next step intact"], C.good),
-].join("\n"));
+    elbow(224, 123, 300, 116, C.bad),
+    elbow(224, 123, 300, 218, C.accent),
 
-// 4 — microscope: the whole routine. The old version showed two lens boxes and implied a fixed
-// checklist, which undersells the thing that makes it different — lenses are spawned PER SLICE,
-// every finding must survive an attempt to refute it, and it iterates in numbered waves.
-// Left gutter (x < 44) is reserved for the wave-loop return path — keep boxes out of it.
-out["microscope"] = svg(1000, 500, [
-  // Row 1 — scope gate, the pinned persona, and a map that works with or without the graph.
-  node(44, 26, 158, 68, ["SCOPE GATE", "one-file fix?", "→ skip, don't fan out"], C.mute),
-  arrow(202, 60, 238, 60),
-  node(238, 20, 226, 80, ["PERSONA — pinned", ".bearing/domain.json", "payments → ledger engineer"], C.role),
-  arrow(464, 60, 500, 60),
-  node(500, 20, 256, 80, ["MAP THE TARGET", "graph: clusters · flows · impact", "no graph: dirs · imports · entry pts"], C.step),
-  label(628, 118, "one lens per meaningful slice — not a fixed checklist"),
+    caption(300, 100, "WITHOUT", C.bad),
+    card(300, 108, 258, 54, { title: "Every later conclusion", sub: "inherits it, silently", accent: C.bad }),
+    arrow(558, 135, 606),
+    card(606, 108, 266, 54, { title: "Found out 3 days later", sub: "after you shipped on it", accent: C.bad, titleFill: "#f2a58a" }),
 
-  // Row 2 — the fan-out. Five chips stand in for "as many as the target has slices".
-  ...[[44, "A", "auth flow", "logic · edges"], [230, "B", "auth flow", "necessity"],
-      [416, "A", "ledger write", "races · taint"], [602, "B", "ledger write", "proportionality"],
-      [788, "A", "api surface", "contracts"]]
-    .map(([x, kind, slice, sub]) =>
-      chip(x, 142, 160, 58, [`KIND ${kind} — ${slice}`, sub], kind === "A" ? C.step : C.accent)),
-  ...[124, 310, 496, 682, 868].map((x) => elbow(628, 100, x, 142)),
-  // One caption, centred: the chips already carry their own KIND, so two band labels were both
-  // redundant and — at this width — overlapping the wave-loop text.
-  label(500, 226, "KIND A — is it RIGHT?    ·    KIND B — is it the RIGHT THING?"),
+    caption(300, 202, "WITH BEARING", C.accent),
+    card(300, 210, 258, 54, { title: "Contradicts NS-4", sub: "the north-star outranks it", accent: C.accent }),
+    arrow(558, 237, 606),
+    card(606, 210, 266, 54, { title: "Caught in one line", sub: "before the premise spreads", accent: C.good, titleFill: "#7fd9b4" }),
+  ].join("\n"),
+  "Without bearing a stale premise is found three days later; with it the north-star outranks the doc and it is caught in one line.",
+);
 
-  // Row 3 — the part a linter cannot do: try to kill your own finding.
-  ...[124, 310, 496, 682, 868].map((x) => elbow(x, 200, 500, 250)),
-  node(256, 250, 488, 62, ["ADVERSARIAL VERIFY — try to REFUTE every finding", "trace the value, read the branch — not plausibility"], C.warn),
+// ── 2. north-stars — the claim is PRECEDENCE ─────────────────────────────────
+out["northstars"] = svg(
+  900, 256,
+  [
+    eyebrow(28, 34, "four sources, one answer"),
+    headline(28, 60, "Something has to outrank the rest."),
 
-  // Row 4 — survivors only.
-  elbow(380, 312, 268, 362),
-  elbow(620, 312, 732, 362),
-  node(114, 362, 308, 58, ["✓  survives → reported", "with file:line + the WHY"], C.good),
-  node(578, 362, 308, 58, ["✕  refuted → dropped", "never reaches you"], C.danger),
+    ...["A doc from March", "The README", "A code comment", "The agent's own guess"].map((t, i) =>
+      card(28, 88 + i * 38, 232, 32, { title: t, titleFill: C.dim }),
+    ),
+    ...[0, 1, 2, 3].map((i) => elbow(260, 104 + i * 38, 372, 158, C.rule)),
 
-  // The wave: survivors feed the next numbered pass, which re-maps the target. Routed down and
-  // around the left gutter so it crosses nothing.
-  `<path d="M268 420 V462 H20 V60 H44" stroke="${LINE}" stroke-width="2" stroke-dasharray="5 4" fill="none" marker-end="url(#a)"/>`,
-  `<text x="290" y="466" font-family="${F}" font-size="11.5" fill="${LABEL}" font-style="italic">WAVE N+1 — fix criticals, fold in the rest, re-run until clean</text>`,
-].join("\n"));
+    card(372, 132, 214, 52, { title: "CONFLICT", sub: "which one is true?", accent: C.bad, mono: true }),
+    arrow(586, 158, 630),
+    card(630, 120, 242, 76, { title: "NS-4 wins", sub: "the others are stale", accent: C.accent }),
 
-// 5 — gitnexus: two gates
-out["gitnexus"] = svg(900, 230, [
-  node(10, 85, 170, 60, ["grep", "'handleOrder'"], C.step),
-  arrow(180, 115, 225, 115),
-  node(225, 15, 200, 55, ["index STALE?", "→ refresh first"], C.warn),
-  node(225, 85, 200, 55, ["tree DRIFTED?", "→ re-index first"], C.warn),
-  node(225, 155, 200, 55, ["fresh → pass"], C.step),
-  ...[42, 112, 182].map((y) => elbow(425, y, 480, 112)),
-  node(480, 85, 160, 55, ["graph query"], C.accent),
-  arrow(640, 112, 685, 112),
-  node(685, 77, 205, 70, ["✓  callers, callees,", "execution flows", "— not 40 text matches"], C.good),
-].join("\n"));
+    // Bottom-left and full width: at x=630 this ran off the 900px canvas and was clipped mid-word.
+    caption(28, 232, "The agent must CITE it for any load-bearing claim — and may never edit it silently.", C.faint),
+  ].join("\n"),
+  "Docs, README, comments and the agent's own guess conflict; the numbered north-star wins and the others are declared stale.",
+);
 
-mkdirSync(new URL("../docs/assets/", import.meta.url), { recursive: true });
+// ── 3. task-core — the claim is ORDER: written BEFORE the summary lands ──────
+out["taskcore"] = svg(
+  900, 238,
+  [
+    eyebrow(28, 34, "long session · context filling"),
+    headline(28, 60, "The detail is written down before it's lost."),
+
+    `<line x1="28" y1="150" x2="872" y2="150" stroke="${C.rule}" stroke-width="1.5" stroke-dasharray="3 4"/>`,
+
+    card(28, 118, 176, 62, { title: "~90% full", sub: "pressure detected", accent: C.faint }),
+    card(232, 108, 226, 82, { title: "TASK-CORE written", sub: "goal · decisions · gotchas", accent: C.accent }),
+    caption(232, 206, "before the summary, not after", C.accent),
+    card(486, 118, 168, 62, { title: "COMPACTION", sub: "transcript dropped", accent: C.bad, mono: true }),
+    card(682, 108, 190, 82, { title: "Read back", sub: "goal intact", accent: C.good }),
+
+    arrow(204, 150, 232),
+    arrow(458, 150, 486),
+    arrow(654, 150, 682),
+  ].join("\n"),
+  "At about 90% context the task-core is written before compaction drops the transcript, then read back with the goal intact.",
+);
+
+// ── 4. microscope — the claim is KIND B + adversarial filtering ──────────────
+out["microscope"] = svg(
+  900, 326,
+  [
+    eyebrow(28, 34, "milestone review · persona pinned from your repo"),
+    headline(28, 60, "Two questions. Only survivors reach you."),
+
+    card(28, 108, 196, 76, { title: "Your change", sub: "reviewed as a ledger engineer", accent: C.faint }),
+
+    // Sub-text lives INSIDE the card. As separate captions it overlapped the box below — caught by
+    // rasterising, not by reading the source (NS-10).
+    card(252, 92, 286, 58, { title: "KIND A — is it right?", sub: "logic · edges · races", titleFill: C.dim }),
+    card(252, 166, 286, 58, { title: "KIND B — the RIGHT thing?", sub: "why does this exist at all?", accent: C.accent }),
+
+    elbow(224, 146, 252, 121, C.rule),
+    elbow(224, 146, 252, 195, C.accent),
+    elbow(538, 121, 574, 152, C.rule),
+    elbow(538, 195, 574, 152, C.accent),
+
+    card(574, 122, 298, 62, { title: "Try to REFUTE it", sub: "trace the value, read the branch", accent: C.bad }),
+
+    // Vertical-first: routed BENEATH the lens cards instead of straight through them.
+    elbowV(723, 184, 388, 244, 238, C.good),
+    arrow(723, 184, 723, 244),
+
+    pill(252, 250, "✓  survives → reported with file:line", C.good),
+    pill(616, 250, "✕  refuted → you never see it", C.bad),
+
+    caption(28, 308, "Kind B is the part a linter can never do — code that runs perfectly and is still the wrong thing.", C.dim),
+  ].join("\n"),
+  "A change is reviewed by a pinned domain persona through correctness and judgment lenses; every finding must survive an adversarial refutation attempt before it is reported.",
+);
+
+// ── 5. gitnexus — the claim is TEXT vs STRUCTURE ─────────────────────────────
+out["gitnexus"] = svg(
+  900, 244,
+  [
+    eyebrow(28, 34, "you ask: who uses orderservice?"),
+    headline(28, 60, "40 text matches, or the actual callers."),
+
+    caption(28, 96, "GREP", C.bad),
+    card(28, 104, 380, 60, { title: "40 matches. No structure.", sub: "strings, comments, its own definition", accent: C.bad }),
+
+    caption(492, 96, "GRAPH", C.accent),
+    card(492, 104, 380, 60, { title: "3 callers, 2 flows, 1 route", sub: "what actually calls what", accent: C.accent }),
+
+    `<text x="450" y="141" text-anchor="middle" font-family="${MONO}" font-size="15" font-weight="700" fill="${C.faint}">vs</text>`,
+
+    caption(28, 200, "A zero is not a finding: the graph is authoritative about what it FINDS, never about what it misses.", C.dim),
+    caption(28, 222, "Unresolvable callers are flagged, distrust is logged as a bug report you can send upstream.", C.faint),
+  ].join("\n"),
+  "A grep returns 40 unstructured text matches; the graph returns the actual callers and flows — and a zero result is treated as unknown, not as absence.",
+);
+
+/**
+ * Text that runs off the canvas is CLIPPED, silently — SVG neither wraps nor complains, and the
+ * source looks correct. Two captions shipped past the right edge during this rewrite and only a
+ * rasteriser revealed it. This is the cheap half of that check so a regeneration cannot
+ * reintroduce one; rasterising and LOOKING is still required for collisions (NS-10).
+ */
+function assertNoOverflow(name, body) {
+  const w = Number(body.match(/viewBox="0 0 (\d+)/)[1]);
+  const bad = [];
+  for (const m of body.matchAll(/<text x="([\d.]+)"([^>]*)>([^<]*)</g)) {
+    const attrs = m[2];
+    const size = Number((attrs.match(/font-size="([\d.]+)"/) || [, 13])[1]);
+    const width = m[3].length * size * 0.55; // conservative for the sans stack used here
+    const end = /text-anchor="middle"/.test(attrs) ? Number(m[1]) + width / 2 : Number(m[1]) + width;
+    if (end > w - 8) bad.push(`${JSON.stringify(m[3].slice(0, 44))} ends ~${Math.round(end)} > ${w}`);
+  }
+  if (bad.length) {
+    console.error(`✗ ${name}.svg: text overflows the canvas\n   ${bad.join("\n   ")}`);
+    process.exitCode = 1;
+  }
+}
+
+mkdirSync("docs/assets", { recursive: true });
 for (const [name, body] of Object.entries(out)) {
-  writeFileSync(new URL(`../docs/assets/${name}.svg`, import.meta.url), body);
-  console.log(`  docs/assets/${name}.svg  ${body.length} bytes`);
+  assertNoOverflow(name, body);
+  writeFileSync(`docs/assets/${name}.svg`, body);
+  console.log(`  wrote docs/assets/${name}.svg`);
 }

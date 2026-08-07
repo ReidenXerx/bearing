@@ -1,32 +1,34 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 500" width="1000" height="500" role="img">
-<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#94a3b8"/></marker></defs>
-<rect x="44" y="26" width="158" height="68" rx="8" fill="#64748b"/><text x="123" y="47" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="13" font-weight="600" fill="#fff" text-anchor="middle">SCOPE GATE</text><text x="123" y="64" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="13" font-weight="400" fill="#fff" text-anchor="middle">one-file fix?</text><text x="123" y="81" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="13" font-weight="400" fill="#fff" text-anchor="middle">→ skip, don't fan out</text>
-<path d="M202 60 L238 60" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#a)"/>
-<rect x="238" y="20" width="226" height="80" rx="8" fill="#6d28d9"/><text x="351" y="47" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="13" font-weight="600" fill="#fff" text-anchor="middle">PERSONA — pinned</text><text x="351" y="64" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="13" font-weight="400" fill="#fff" text-anchor="middle">.bearing/domain.json</text><text x="351" y="81" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="13" font-weight="400" fill="#fff" text-anchor="middle">payments → ledger engineer</text>
-<path d="M464 60 L500 60" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#a)"/>
-<rect x="500" y="20" width="256" height="80" rx="8" fill="#334155"/><text x="628" y="47" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="13" font-weight="600" fill="#fff" text-anchor="middle">MAP THE TARGET</text><text x="628" y="64" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="13" font-weight="400" fill="#fff" text-anchor="middle">graph: clusters · flows · impact</text><text x="628" y="81" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="13" font-weight="400" fill="#fff" text-anchor="middle">no graph: dirs · imports · entry pts</text>
-<text x="628" y="118" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="11.5" fill="#64748b" text-anchor="middle" font-style="italic">one lens per meaningful slice — not a fixed checklist</text>
-<rect x="44" y="142" width="160" height="58" rx="7" fill="#334155"/><text x="124" y="167.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="11.5" font-weight="600" fill="#fff" text-anchor="middle">KIND A — auth flow</text><text x="124" y="182.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="11" font-weight="400" fill="#fff" text-anchor="middle">logic · edges</text>
-<rect x="230" y="142" width="160" height="58" rx="7" fill="#1d4ed8"/><text x="310" y="167.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="11.5" font-weight="600" fill="#fff" text-anchor="middle">KIND B — auth flow</text><text x="310" y="182.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="11" font-weight="400" fill="#fff" text-anchor="middle">necessity</text>
-<rect x="416" y="142" width="160" height="58" rx="7" fill="#334155"/><text x="496" y="167.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="11.5" font-weight="600" fill="#fff" text-anchor="middle">KIND A — ledger write</text><text x="496" y="182.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="11" font-weight="400" fill="#fff" text-anchor="middle">races · taint</text>
-<rect x="602" y="142" width="160" height="58" rx="7" fill="#1d4ed8"/><text x="682" y="167.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="11.5" font-weight="600" fill="#fff" text-anchor="middle">KIND B — ledger write</text><text x="682" y="182.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="11" font-weight="400" fill="#fff" text-anchor="middle">proportionality</text>
-<rect x="788" y="142" width="160" height="58" rx="7" fill="#334155"/><text x="868" y="167.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="11.5" font-weight="600" fill="#fff" text-anchor="middle">KIND A — api surface</text><text x="868" y="182.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="11" font-weight="400" fill="#fff" text-anchor="middle">contracts</text>
-<path d="M628 100 H376 V142 H124" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#a)"/>
-<path d="M628 100 H469 V142 H310" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#a)"/>
-<path d="M628 100 H562 V142 H496" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#a)"/>
-<path d="M628 100 H655 V142 H682" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#a)"/>
-<path d="M628 100 H748 V142 H868" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#a)"/>
-<text x="500" y="226" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="11.5" fill="#64748b" text-anchor="middle" font-style="italic">KIND A — is it RIGHT?    ·    KIND B — is it the RIGHT THING?</text>
-<path d="M124 200 H312 V250 H500" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#a)"/>
-<path d="M310 200 H405 V250 H500" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#a)"/>
-<path d="M496 200 H498 V250 H500" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#a)"/>
-<path d="M682 200 H591 V250 H500" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#a)"/>
-<path d="M868 200 H684 V250 H500" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#a)"/>
-<rect x="256" y="250" width="488" height="62" rx="8" fill="#b45309"/><text x="500" y="276.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="13" font-weight="600" fill="#fff" text-anchor="middle">ADVERSARIAL VERIFY — try to REFUTE every finding</text><text x="500" y="293.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="13" font-weight="400" fill="#fff" text-anchor="middle">trace the value, read the branch — not plausibility</text>
-<path d="M380 312 H324 V362 H268" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#a)"/>
-<path d="M620 312 H676 V362 H732" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#a)"/>
-<rect x="114" y="362" width="308" height="58" rx="8" fill="#15803d"/><text x="268" y="386.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="13" font-weight="600" fill="#fff" text-anchor="middle">✓  survives → reported</text><text x="268" y="403.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="13" font-weight="400" fill="#fff" text-anchor="middle">with file:line + the WHY</text>
-<rect x="578" y="362" width="308" height="58" rx="8" fill="#991b1b"/><text x="732" y="386.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="13" font-weight="600" fill="#fff" text-anchor="middle">✕  refuted → dropped</text><text x="732" y="403.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="13" font-weight="400" fill="#fff" text-anchor="middle">never reaches you</text>
-<path d="M268 420 V462 H20 V60 H44" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5 4" fill="none" marker-end="url(#a)"/>
-<text x="290" y="466" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="11.5" fill="#64748b" font-style="italic">WAVE N+1 — fix criticals, fold in the rest, re-run until clean</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 326" width="900" height="326" role="img" aria-label="A change is reviewed by a pinned domain persona through correctness and judgment lenses; every finding must survive an adversarial refutation attempt before it is reported.">
+<defs>
+  <marker id="ar" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse">
+    <path d="M0 0 L10 5 L0 10 z" fill="#3a465c"/>
+  </marker>
+</defs>
+<rect width="900" height="326" rx="14" fill="#11161f" stroke="#232c3b"/>
+<text x="28" y="34" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="11.5" font-weight="600" letter-spacing="1.6" fill="#61708a">MILESTONE REVIEW · PERSONA PINNED FROM YOUR REPO</text>
+<text x="28" y="60" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="19" font-weight="650" fill="#e8edf5">Two questions. Only survivors reach you.</text>
+<rect x="28" y="108" width="196" height="76" rx="10" fill="#1a2130" stroke="#2c3648"/>
+<path d="M29 119 a10 10 0 0 1 10 -10 h2 v74 h-2 a10 10 0 0 1 -10 -10 z" fill="#61708a"/>
+<text x="48" y="142" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="14.5" font-weight="600" fill="#e8edf5">Your change</text>
+<text x="48" y="161" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" fill="#9aa8bd">reviewed as a ledger engineer</text>
+<rect x="252" y="92" width="286" height="58" rx="10" fill="#1a2130" stroke="#2c3648"/>
+<text x="268" y="117" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="14.5" font-weight="600" fill="#9aa8bd">KIND A — is it right?</text>
+<text x="268" y="136" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" fill="#9aa8bd">logic · edges · races</text>
+<rect x="252" y="166" width="286" height="58" rx="10" fill="#1a2130" stroke="#2c3648"/>
+<path d="M253 177 a10 10 0 0 1 10 -10 h2 v56 h-2 a10 10 0 0 1 -10 -10 z" fill="#3987e5"/>
+<text x="272" y="191" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="14.5" font-weight="600" fill="#e8edf5">KIND B — the RIGHT thing?</text>
+<text x="272" y="210" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" fill="#9aa8bd">why does this exist at all?</text>
+<path d="M224 146 H238 V121 H252" fill="none" stroke="#3a465c" stroke-width="1.75" marker-end="url(#ar)"/>
+<path d="M224 146 H238 V195 H252" fill="none" stroke="#3987e5" stroke-width="1.75" marker-end="url(#ar)"/>
+<path d="M538 121 H556 V152 H574" fill="none" stroke="#3a465c" stroke-width="1.75" marker-end="url(#ar)"/>
+<path d="M538 195 H556 V152 H574" fill="none" stroke="#3987e5" stroke-width="1.75" marker-end="url(#ar)"/>
+<rect x="574" y="122" width="298" height="62" rx="10" fill="#1a2130" stroke="#2c3648"/>
+<path d="M575 133 a10 10 0 0 1 10 -10 h2 v60 h-2 a10 10 0 0 1 -10 -10 z" fill="#d95926"/>
+<text x="594" y="149" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="14.5" font-weight="600" fill="#e8edf5">Try to REFUTE it</text>
+<text x="594" y="168" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" fill="#9aa8bd">trace the value, read the branch</text>
+<path d="M723 184 V238 H388 V244" fill="none" stroke="#199e70" stroke-width="1.75" marker-end="url(#ar)"/>
+<line x1="723" y1="184" x2="723" y2="244" stroke="#3a465c" stroke-width="1.75" marker-end="url(#ar)"/>
+<g><rect x="252" y="250" width="286.8" height="26" rx="13" fill="#199e70"/><text x="395.4" y="267.5" text-anchor="middle" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" font-weight="600" fill="#ffffff">✓  survives → reported with file:line</text></g>
+<g><rect x="616" y="250" width="227.60000000000002" height="26" rx="13" fill="#d95926"/><text x="729.8" y="267.5" text-anchor="middle" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" font-weight="600" fill="#ffffff">✕  refuted → you never see it</text></g>
+<text x="28" y="308" text-anchor="start" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" fill="#9aa8bd">Kind B is the part a linter can never do — code that runs perfectly and is still the wrong thing.</text>
 </svg>
