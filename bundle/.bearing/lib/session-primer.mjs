@@ -765,6 +765,13 @@ export function clearSessionState(root) {
     impactUsedFlag,
     detectUsedFlag,
     refreshFailedFlag,
+    // refreshFailedFlag is deliberately NOT here. Everything else in this list is per-session —
+    // gates satisfied, nudges shown, counters — and resetting it for a new session is right.
+    // "The index could not be built" is not a fact about the session: an index does not repair
+    // itself because the user opened a new chat. Clearing it meant the pre-commit hook's warning
+    // survived only until the next session, after which the agent went back to trusting a graph
+    // that had failed to build. It is cleared where it is actually disproven — bearing-agent
+    // passes `clear` on a successful refresh and `set-failed` on a failed one.
     stalenessCacheFile,
     scorecardFile,
     fallbackFlag,
@@ -780,7 +787,6 @@ export function clearSessionState(root) {
     mcpUsedFlag,
     impactUsedFlag,
     detectUsedFlag,
-    refreshFailedFlag,
     stalenessCacheFile,
     scorecardFile,
     fallbackFlag,
