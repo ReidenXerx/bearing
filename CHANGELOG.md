@@ -2,58 +2,7 @@
 
 All notable changes to `bearing` are documented here.
 
-## Unreleased
-
-### Added — `bearing update` tells you what changed
-
-Nobody visits a changelog; everybody reads the terminal they just typed into. An update is the one
-moment you are asking "what did this just do to my repo?", and bearing already records the version
-you were on, so it can answer:
-
-```
-  What's new since 1.0.4
-    1.0.5 — the compound-command notice was silent on the shape it exists for
-    1.0.6 — one MCP server for the whole machine, instead of one per client
-    1.0.7 — a domain expert on every review, and an installer that checks its own claims
-    Full notes: https://github.com/ReidenXerx/bearing/releases
-```
-
-Titles only — 1.0.7's section alone is 13k characters, and burying the next steps under it would
-make the useful part unreadable. It stays silent rather than guess: a fresh install, an unknown
-previous version, no packaged changelog, or nothing new all print nothing, and an update never
-fails because release notes could not be read.
-
-`CHANGELOG.md` now ships in the npm package, so this works from an install as well as a checkout.
-
-### Added — every release is on GitHub
-
-The repo had zero tags and zero releases, so the changelog was visible only to someone who thought
-to open the file. All eight — `v1.0.0` through `v1.0.7` — are now published, each tagged at the
-commit that actually shipped it, with its changelog section as the body. `npm run release:notes --
---list` shows what is releasable; it refuses `Unreleased` and the pre-rename `1.2.0`.
-
-The README's changelog link is now absolute, since npm does not reliably rewrite relative paths
-(NS-17), and points at the releases page too.
-
-### Fixed — the contract promised commands the install did not have
-
-Found by dogfooding: bearing's own repo runs an intel-only install, and `npm run bearing:northstars`
-— the command its own `CLAUDE.md` advertises — does not exist there.
-
-Every npm script is owned by the GitNexus module, so an intel-only install has none of them. The
-north-stars section was advertising a command you only get by installing a *different* module, in
-the one file every agent reads as authoritative (NS-13, NS-20). The contract now points at the
-skill and the file path, both of which are always installed.
-
-- The generated-file note shipped into user repos said "edit there, run `npm run gen:contract`" — a
-  path and a command that exist only in bearing's own repo. It now tells the user what they actually
-  need to know: edits to that block are replaced on the next update.
-- The post-install check that catches dangling commands scanned only executable files, on the
-  reasoning that docs mention commands illustratively. True in general, but the contract is an
-  *instruction*, so those three files are now held to what is installed — including when
-  `package.json` has no scripts at all, which the original scan skipped as uninteresting and was in
-  fact the broken case.
-- README lists those commands under "With the GitNexus module".
+## 1.0.8 — an uninstall that actually leaves, and a task-core per chat
 
 ### Fixed — uninstall did not leave the repo as it found it
 
@@ -109,6 +58,57 @@ precisely the drift a task-core exists to prevent, manufactured by the task-core
 - `.bearing/task-cores/` is gitignored and covered by the post-install check — the previous rule
   matched a file, not a folder, so every chat's save-state would have been committed. Uninstall
   removes the empty directory but keeps any core still in it, the same way it keeps north-stars.
+
+### Fixed — the contract promised commands the install did not have
+
+Found by dogfooding: bearing's own repo runs an intel-only install, and `npm run bearing:northstars`
+— the command its own `CLAUDE.md` advertises — does not exist there.
+
+Every npm script is owned by the GitNexus module, so an intel-only install has none of them. The
+north-stars section was advertising a command you only get by installing a *different* module, in
+the one file every agent reads as authoritative (NS-13, NS-20). The contract now points at the
+skill and the file path, both of which are always installed.
+
+- The generated-file note shipped into user repos said "edit there, run `npm run gen:contract`" — a
+  path and a command that exist only in bearing's own repo. It now tells the user what they actually
+  need to know: edits to that block are replaced on the next update.
+- The post-install check that catches dangling commands scanned only executable files, on the
+  reasoning that docs mention commands illustratively. True in general, but the contract is an
+  *instruction*, so those three files are now held to what is installed — including when
+  `package.json` has no scripts at all, which the original scan skipped as uninteresting and was in
+  fact the broken case.
+- README lists those commands under "With the GitNexus module".
+
+### Added — `bearing update` tells you what changed
+
+Nobody visits a changelog; everybody reads the terminal they just typed into. An update is the one
+moment you are asking "what did this just do to my repo?", and bearing already records the version
+you were on, so it can answer:
+
+```
+  What's new since 1.0.4
+    1.0.5 — the compound-command notice was silent on the shape it exists for
+    1.0.6 — one MCP server for the whole machine, instead of one per client
+    1.0.7 — a domain expert on every review, and an installer that checks its own claims
+    Full notes: https://github.com/ReidenXerx/bearing/releases
+```
+
+Titles only — 1.0.7's section alone is 13k characters, and burying the next steps under it would
+make the useful part unreadable. It stays silent rather than guess: a fresh install, an unknown
+previous version, no packaged changelog, or nothing new all print nothing, and an update never
+fails because release notes could not be read.
+
+`CHANGELOG.md` now ships in the npm package, so this works from an install as well as a checkout.
+
+### Added — every release is on GitHub
+
+The repo had zero tags and zero releases, so the changelog was visible only to someone who thought
+to open the file. All eight — `v1.0.0` through `v1.0.7` — are now published, each tagged at the
+commit that actually shipped it, with its changelog section as the body. `npm run release:notes --
+--list` shows what is releasable; it refuses `Unreleased` and the pre-rename `1.2.0`.
+
+The README's changelog link is now absolute, since npm does not reliably rewrite relative paths
+(NS-17), and points at the releases page too.
 
 ## 1.0.7 — a domain expert on every review, and an installer that checks its own claims
 
