@@ -2,6 +2,26 @@
 
 All notable changes to `bearing` are documented here.
 
+## Unreleased
+
+### Fixed — the pre-commit hook blocked commits when the INDEX was broken
+
+Reported from a real repo: `bearing:full-pdg` ran unguarded under `set -e`, so any indexer failure
+blocked every commit. Theirs ended *"graph write collapsed — 200,722 relationships produced, 64,983
+readable"*, reproducibly, and the team committed with `--no-verify` for days.
+
+Blocking a commit because an *index* could not be built fails the developer for something that is
+not their fault and that they cannot fix from there (NS-5) — and `--no-verify` teaches people to
+skip the hook permanently, which costs far more than one stale index. bearing's CI has always been
+report-not-gate for exactly this reason; the commit hook, where a block is more disruptive, was the
+opposite.
+
+The two halves are now split (NS-8): **fail open for the developer** — the commit proceeds — and
+**fail closed for the graph** — the index is marked failed, so the session brief tells the agent
+`Index is STALE` instead of letting it answer from a broken one. The warning names how to fix it
+(`bearing:agent-refresh`), how to report it (`bearing:fallback`), and how to get the old behaviour
+(`BEARING_PRECOMMIT=block`, mirroring `GITNEXUS_CI_MODE=block`).
+
 ## 1.0.8 — an uninstall that actually leaves, and a task-core per chat
 
 ### Fixed — uninstall did not leave the repo as it found it

@@ -2,15 +2,72 @@
 # Full GitNexus re-index (force) with PDG before each commit; smoke-test graph integrity.
 # Full --force rebuild keeps control/data-dependence + taint flows accurate at commit
 # boundaries (vs. the lighter incremental bearing:pdg used mid-session).
-set -euo pipefail
+#
+# THIS HOOK REPORTS. IT DOES NOT GATE.
+#
+# It used to run under `set -e` with both commands unguarded, so any indexer failure — a bug, an
+# OOM, a half-written database — blocked every commit in the repository. That happened: an analyze
+# ending "graph write collapsed, 200,722 relationships produced, 64,983 readable" left a team
+# committing with `--no-verify` for days. Blocking a commit because an INDEX could not be built
+# fails the developer for something that is not their fault and that they cannot fix from here
+# (NS-5), and `--no-verify` teaches people to skip the hook permanently, which costs more than the
+# stale index ever would.
+#
+# So the two halves are split (NS-8): fail OPEN for the developer — the commit proceeds — and fail
+# CLOSED for the graph — the index is marked refresh-failed, so the session primer and the guards
+# know not to trust it rather than silently answering from a broken one.
+#
+# Want teeth? BEARING_PRECOMMIT=block makes a failure block the commit, mirroring
+# GITNEXUS_CI_MODE=block in the CI workflow.
+set -uo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-npm run bearing:full-pdg
+STRICT="${BEARING_PRECOMMIT:-report}"
+FAILED=""
+
+# Mark the graph untrustworthy. Best-effort: this runs BECAUSE something already went wrong, and a
+# failure to record that must not become the thing that blocks the commit.
+mark_failed() {
+  if [[ -f ".bearing/lib/set-refresh-pending.mjs" ]]; then
+    node .bearing/lib/set-refresh-pending.mjs . set-failed "$1" >/dev/null 2>&1 || true
+  fi
+}
+
+if ! npm run bearing:full-pdg; then
+  FAILED="index"
+  mark_failed "pre-commit: bearing:full-pdg failed"
+fi
+
 # Keep AGENTS.md/CLAUDE.md free of the volatile GitNexus stats block that
 # full-pdg's analyze re-injects, so commits don't carry machine-specific churn.
 if [[ -f ".bearing/lib/stabilize-agent-docs.mjs" ]]; then
   node .bearing/lib/stabilize-agent-docs.mjs . || true
 fi
-npm run bearing:graph-smoke
+
+# Only worth running if there is an index to smoke-test; after a failed build it would just report
+# the same failure a second time in a more confusing way.
+if [[ -z "$FAILED" ]] && ! npm run bearing:graph-smoke; then
+  FAILED="smoke"
+  mark_failed "pre-commit: bearing:graph-smoke failed"
+fi
+
+if [[ -n "$FAILED" ]]; then
+  echo ""
+  echo "  ⚠ bearing pre-commit: the graph could not be rebuilt ($FAILED)."
+  echo "    Your commit is NOT blocked — this is an indexing problem, not a problem with your change."
+  echo "    The index is now marked FAILED, so the agent will be told not to trust it."
+  echo ""
+  echo "    Fix it later with:  npm run bearing:agent-refresh"
+  echo "    If the graph is wrong rather than absent, file it:"
+  echo "      npm run bearing:fallback -- \"what the graph claimed vs what is true\""
+  echo "    To make this block commits instead:  BEARING_PRECOMMIT=block"
+  echo ""
+  if [[ "$STRICT" == "block" ]]; then
+    echo "  ✗ BEARING_PRECOMMIT=block is set — blocking. Bypass once with: git commit --no-verify"
+    exit 1
+  fi
+fi
+
+exit 0
