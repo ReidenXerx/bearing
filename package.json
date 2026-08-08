@@ -30,7 +30,8 @@
     "test": "node --test lib/kit.test.mjs lib/classify.test.mjs",
     "sync:meta": "node scripts/sync-repo-meta.mjs",
     "gen:diagrams": "node scripts/gen-diagrams.mjs",
-    "dogfood": "node lib/kit.mjs install . --runtime claude --features northstars,taskcore,microscope --no-setup --skip-verify"
+    "dogfood": "node lib/kit.mjs install . --runtime claude --features northstars,taskcore,microscope --no-setup --skip-verify",
+    "release:notes": "node scripts/release-notes.mjs"
   },
   "keywords": [
     "ai",
