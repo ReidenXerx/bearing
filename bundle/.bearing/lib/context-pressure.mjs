@@ -102,11 +102,41 @@ function lastUsageTokens(text) {
  * @param {{ contextWindowTokens?: number, contextPressureThreshold?: number }} config
  * @returns {{ tokens: number, window: number, threshold: number, ratio: number, over: boolean }}
  */
+/**
+ * Context windows sold today, smallest first. Used only to round an OBSERVED size up to the
+ * nearest real one — never to guess which model is running.
+ */
+const KNOWN_WINDOWS = [200_000, 1_000_000];
+
+/**
+ * The window the session ACTUALLY has.
+ *
+ * The transcript does not record it and the model id cannot settle it — `claude-opus-5` is the
+ * same string on a 200k and a 1M session. So the assumption is corrected by EVIDENCE: a session
+ * that has already carried more tokens than the assumed window is proof the assumption is too
+ * small, since a real 200k session cannot hold 300k. Round that observation up to the nearest
+ * real window rather than trusting it exactly, because usage is measured at the last assistant
+ * turn and the true ceiling is higher than whatever we happened to see.
+ *
+ * Only ever revises UPWARD. Guessing a window too small is the failure being fixed here — it had
+ * every 1M session reading 150% full, so the agent wrote task-cores and hedged about running out
+ * from the first hour on, permanently. Guessing too large merely delays a warning.
+ *
+ * An explicit `contextWindowTokens` is the user's own statement of fact and always wins.
+ * @param {number} tokens observed @param {number|undefined} configured
+ */
+export function resolveWindow(tokens, configured) {
+  if (Number(configured) > 0) return Number(configured);
+  const base = KNOWN_WINDOWS[0];
+  if (!(tokens > base)) return base;
+  return KNOWN_WINDOWS.find((w) => w >= tokens) ?? tokens;
+}
+
 export function contextPressure(transcriptPath, config = {}) {
-  const window = Number(config.contextWindowTokens) > 0 ? Number(config.contextWindowTokens) : 200000;
   const threshold =
     Number(config.contextPressureThreshold) > 0 ? Number(config.contextPressureThreshold) : 0.9;
   const tokens = estimateContextTokens(transcriptPath);
+  const window = resolveWindow(tokens, config.contextWindowTokens);
   const ratio = window > 0 ? tokens / window : 0;
   return { tokens, window, threshold, ratio, over: ratio >= threshold };
 }

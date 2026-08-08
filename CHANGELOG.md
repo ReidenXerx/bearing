@@ -4,6 +4,22 @@ All notable changes to `bearing` are documented here.
 
 ## Unreleased
 
+### Fixed — the agent thought every session was a 200k one
+
+A 1M session carrying 300k tokens read as **152% full**, so the agent hedged about running out and
+wrote task-cores from the first hour — permanently, since it never got less full. The window was a
+hardcoded 200,000.
+
+It cannot simply be looked up: the transcript records no window, and `claude-opus-5` is the same
+model id on a 200k and a 1M session. So it is corrected by evidence instead — a session cannot have
+carried more tokens than it can hold, so usage above the assumed window disproves the assumption.
+The observation is rounded up to a real window rather than trusted exactly, since usage is sampled
+at the last assistant turn and the true ceiling is higher than whatever was seen.
+
+Revises **upward only**: too small is the failure being fixed, too large merely delays a warning.
+An explicit `contextWindowTokens` in `.bearing/hooks.local.json` is your own statement of fact and
+still wins.
+
 ### Fixed — the pre-commit hook blocked commits when the INDEX was broken
 
 Reported from a real repo: `bearing:full-pdg` ran unguarded under `set -e`, so any indexer failure
