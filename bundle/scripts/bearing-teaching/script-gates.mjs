@@ -200,13 +200,18 @@ export function mergeIntoPackageJson(pkgPath, opts = {}) {
 
   const stats = mergeGitnexusScripts(pkg, { gitnexusCmd: opts.gitnexusCmd });
 
-  if (!pkg.engines?.node) {
+  // Our scripts need Node 22.9, so declaring it is right — but this is the USER's manifest, and an
+  // engines floor is enforced by npm under `engine-strict`, by Yarn always, and by CI. Left behind
+  // after uninstall it fails their build on Node 20 for a tool they removed. Report whether WE added
+  // it so uninstall can take back exactly what it gave, and never touch a floor they set themselves.
+  const addedEngines = !pkg.engines?.node;
+  if (addedEngines) {
     pkg.engines ??= {};
     pkg.engines.node = ">=22.9.0";
   }
 
   fs.writeFileSync(abs, JSON.stringify(pkg, null, 2) + "\n");
-  return stats;
+  return { ...stats, addedEngines };
 }
 
 /** @param {string} gateId e.g. "1-session" */

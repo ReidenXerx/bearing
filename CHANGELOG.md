@@ -4,6 +4,40 @@ All notable changes to `bearing` are documented here.
 
 ## Unreleased
 
+### Fixed — uninstall did not leave the repo as it found it
+
+A shakedown of install / update / uninstall across every runtime and module combination. The
+install and update paths held up — idempotent over repeated runs, recorded choices preserved,
+feature downgrade removing what it should. Uninstall was the weak one, and every defect below needs
+a SECOND install to appear, which is why a suite that installs once never saw them.
+
+- **The Node floor stayed in the user's `package.json` forever.** Install adds
+  `engines.node >= 22.9.0` because bearing's own scripts need it; uninstall never took it back. Left
+  behind it is enforced by npm under `engine-strict`, by Yarn always, and by CI — so a project on
+  Node 20 fails to install because of a tool it removed. Now recorded at install and removed at
+  uninstall, and a floor the user set themselves is never touched in either direction.
+- **Uninstall restored bearing's own Cursor config.** A backup answers "was there a file of the
+  user's here before bearing?", and only a first install can observe that — by the second run
+  `.cursor/hooks.json` exists because we wrote it. So update backed up our own file and uninstall
+  faithfully restored it, leaving Cursor registering hooks whose scripts the same uninstall had just
+  deleted: a failed spawn on every session start, prompt and tool call, in a repo the user believes
+  is clean. The earlier install's answer now wins, per adapter so a runtime added later still backs
+  up a genuinely user-owned file. Uninstall also strips a leftover registration written by an older
+  version, and only when the entry is the one we write — a user's own `gitnexus` MCP server survives.
+- **Empty `.zed/` and `.cursor/` shells were left behind.** Install creates these in repos that
+  never had them; uninstall wrote back `{"context_servers":{},"agent":{"profiles":{}}}` and stopped.
+  Both are now removed once nothing of the user's is left in them — and a settings file holding
+  their theme, keymap or own servers is left exactly as it is.
+- **An intel-only contract pointed at a section that isn't there.** The north-stars text
+  distinguished itself from "the graph-first North star above", which in a repo without the GitNexus
+  module is a pointer to a section the filter had just removed (NS-13). Contract tags now apply to a
+  paragraph as well as a section.
+- **A bad target printed a stack trace.** "Not a git repository" is a fact the user needs, not a
+  crash to read; the stack is one `BEARING_DEBUG=1` away.
+
+Known and accepted: installing rewrites `package.json` as 2-space JSON, so a repo that minified or
+tab-indented it sees a whitespace-only diff that uninstall cannot undo.
+
 ### Fixed — the task-core was one file per REPO, not per chat
 
 `.bearing/.task-core.md` was a single path. The moment two agent sessions ran in the same

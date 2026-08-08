@@ -186,6 +186,7 @@ At a **milestone** — feature done / big-task checkpoint / shared-code refactor
 <!-- feature: northstars -->
 ## Project north-stars — the semantic anchor (highest authority)
 
+<!-- feature: gitnexus -->
 *(Distinct from the graph-first "North star" above: those are the kit's reasoning rules; these are **this project's** fixed points.)*
 
 If **`.bearing/northstars.md`** exists, it is the project's **authoritative** statement of what this project IS: numbered, falsifiable propositions (`NS-1`, `NS-2`, …) covering **INVARIANTS** (must always hold), **SEMANTICS** (exact meaning of load-bearing terms), **EVIDENCE** (what counts as proof here), **SETTLED** decisions, and a **GRAVEYARD** of tried-and-rejected / validated ideas.
