@@ -20,6 +20,7 @@ silently — propose the change.
 - **NS-6** — **Every block must have a discoverable exit.** `bearing:fallback` and `mode: guide` are named in deny messages for this reason. Enforcement that cannot be escaped is a trap.
 - **NS-7** — **Hooks run on every tool call.** Nothing on that path may read a whole file, spawn unnecessarily, or block without a bound. Prefer a bounded scan that stops early over a correct-but-linear one.
 - **NS-8** — **Fail open on the hot path, fail closed on the graph.** An unreadable file, malformed JSON or missing stdin must never block the developer; a stale or missing index must never be reported as fresh.
+- **NS-22** — **Only a FIRST install can observe what the user owned.** Every "was this here before us?" question — is the `.gitignore` ours, did we add `engines.node`, was there a `.cursor/hooks.json` — must be answered once and RECORDED in the manifest. Re-deriving it later reads our own artifact as the user's, because by the second run the file exists *precisely because we wrote it*. Three fields have hit this: `createdGitignore`, `addedEngines`, and `backups` — the last made uninstall restore bearing's own Cursor hooks, registering scripts the same uninstall had just deleted. An earlier install's answer is the authoritative one. Record it **per adapter**, since a runtime added later (claude first, then cursor) meets a genuinely user-owned file for the first time.
 
 ## Evidence — what counts as proof here
 
