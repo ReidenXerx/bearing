@@ -54,6 +54,7 @@
     "lib",
     "bundle",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE",
     "!lib/*.test.mjs"
   ]

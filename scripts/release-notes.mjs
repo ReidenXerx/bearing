@@ -17,49 +17,10 @@ import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { releasableVersions, parseChangelog } from "../lib/changelog.mjs";
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const CHANGELOG = path.join(ROOT, "CHANGELOG.md");
-
-/** `## 1.0.7 — title` or `## Unreleased`. The em-dash separator is the file's own convention. */
-const HEADING = /^## +(\S+)(?: +[—-] +(.*))?$/;
-
-/**
- * @param {string} md
- * @returns {{version: string, title: string, body: string, preRename: boolean}[]}
- *   In file order, i.e. newest first.
- */
-export function parseChangelog(md) {
-  const lines = md.split("\n");
-  const marks = [];
-  lines.forEach((line, i) => {
-    const m = line.match(HEADING);
-    if (m) marks.push({ version: m[1], title: (m[2] ?? "").trim(), line: i });
-  });
-
-  // Everything BELOW `1.0.0 — first public release (as bearing)` predates the rename and carries
-  // the old package's version numbers — which is why a `1.2.0` sits under a `1.0.0`. Releasing
-  // those as `v1.2.0` would put a tag newer than every real one at the bottom of the history.
-  // Position in the file decides it, not the number: this file is strictly newest-first.
-  const firstPublic = marks.findIndex((m) => m.version === "1.0.0");
-
-  return marks.map((m, idx) => ({
-    version: m.version,
-    title: m.title,
-    body: lines
-      .slice(m.line + 1, marks[idx + 1]?.line ?? lines.length)
-      .join("\n")
-      .trim(),
-    preRename: firstPublic >= 0 && idx > firstPublic,
-  }));
-}
-
-/** Every version worth publishing as a GitHub release. */
-export function releasableVersions(md) {
-  return parseChangelog(md).filter(
-    (e) => e.version !== "Unreleased" && !e.preRename && /^\d+\.\d+\.\d+$/.test(e.version),
-  );
-}
 
 /**
  * The commit where package.json first declared this version — the honest tag target. Matching on

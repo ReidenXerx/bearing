@@ -4,6 +4,37 @@ All notable changes to `bearing` are documented here.
 
 ## Unreleased
 
+### Added — `bearing update` tells you what changed
+
+Nobody visits a changelog; everybody reads the terminal they just typed into. An update is the one
+moment you are asking "what did this just do to my repo?", and bearing already records the version
+you were on, so it can answer:
+
+```
+  What's new since 1.0.4
+    1.0.5 — the compound-command notice was silent on the shape it exists for
+    1.0.6 — one MCP server for the whole machine, instead of one per client
+    1.0.7 — a domain expert on every review, and an installer that checks its own claims
+    Full notes: https://github.com/ReidenXerx/bearing/releases
+```
+
+Titles only — 1.0.7's section alone is 13k characters, and burying the next steps under it would
+make the useful part unreadable. It stays silent rather than guess: a fresh install, an unknown
+previous version, no packaged changelog, or nothing new all print nothing, and an update never
+fails because release notes could not be read.
+
+`CHANGELOG.md` now ships in the npm package, so this works from an install as well as a checkout.
+
+### Added — every release is on GitHub
+
+The repo had zero tags and zero releases, so the changelog was visible only to someone who thought
+to open the file. All eight — `v1.0.0` through `v1.0.7` — are now published, each tagged at the
+commit that actually shipped it, with its changelog section as the body. `npm run release:notes --
+--list` shows what is releasable; it refuses `Unreleased` and the pre-rename `1.2.0`.
+
+The README's changelog link is now absolute, since npm does not reliably rewrite relative paths
+(NS-17), and points at the releases page too.
+
 ### Fixed — the contract promised commands the install did not have
 
 Found by dogfooding: bearing's own repo runs an intel-only install, and `npm run bearing:northstars`
