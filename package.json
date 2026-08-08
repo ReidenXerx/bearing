@@ -1,6 +1,6 @@
 {
   "name": "bearing",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "An intel layer for AI coding agents that assumes its own rules might be wrong — and keeps the evidence. Authoritative north-stars the agent must cite, a task-core written before compaction eats it, review by an expert in YOUR domain, and an installer that verifies its own claims instead of printing success. Claude Code, Cursor, Zed, Codex.",
   "type": "module",
   "private": false,

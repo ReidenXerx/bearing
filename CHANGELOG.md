@@ -2,7 +2,7 @@
 
 All notable changes to `bearing` are documented here.
 
-## Unreleased
+## 1.0.9 — the agent stops fearing a window it isn't in, and a broken index stops blocking commits
 
 ### Fixed — the agent thought every session was a 200k one
 
