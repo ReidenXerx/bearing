@@ -4,6 +4,26 @@ All notable changes to `bearing` are documented here.
 
 ## Unreleased
 
+### Fixed — the contract promised commands the install did not have
+
+Found by dogfooding: bearing's own repo runs an intel-only install, and `npm run bearing:northstars`
+— the command its own `CLAUDE.md` advertises — does not exist there.
+
+Every npm script is owned by the GitNexus module, so an intel-only install has none of them. The
+north-stars section was advertising a command you only get by installing a *different* module, in
+the one file every agent reads as authoritative (NS-13, NS-20). The contract now points at the
+skill and the file path, both of which are always installed.
+
+- The generated-file note shipped into user repos said "edit there, run `npm run gen:contract`" — a
+  path and a command that exist only in bearing's own repo. It now tells the user what they actually
+  need to know: edits to that block are replaced on the next update.
+- The post-install check that catches dangling commands scanned only executable files, on the
+  reasoning that docs mention commands illustratively. True in general, but the contract is an
+  *instruction*, so those three files are now held to what is installed — including when
+  `package.json` has no scripts at all, which the original scan skipped as uninteresting and was in
+  fact the broken case.
+- README lists those commands under "With the GitNexus module".
+
 ### Fixed — uninstall did not leave the repo as it found it
 
 A shakedown of install / update / uninstall across every runtime and module combination. The

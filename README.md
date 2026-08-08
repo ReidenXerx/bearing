@@ -146,7 +146,7 @@ npx bearing update <repo>       # keeps your module + transport choices
 npx bearing uninstall <repo>    # restores what it overwrote
 ```
 
-After install: `bearing:northstars` · `bearing:health` · `bearing:refresh` · `bearing:fallback-log` · `bearing:scorecard` · `bearing:verify`
+With the GitNexus module: `bearing:northstars` · `bearing:health` · `bearing:refresh` · `bearing:fallback-log` · `bearing:scorecard` · `bearing:verify`
 
 **Requirements:** Node ≥ 22.9.0 · a git repo · macOS, Linux, Windows or WSL · *(GitNexus module only)* the GitNexus MCP server.
 
