@@ -25,7 +25,11 @@ const {
   memoryPath,
   fallbackGrant,
   taskCorePath,
+  taskCoreReadPath,
   taskCoreExists,
+  pruneTaskCores,
+  ensureTaskCoreDir,
+  sessionKey,
   northStarsPath,
   northStarsExists,
   graphFeatureEnabled,
@@ -35,10 +39,18 @@ const {
   diagnoseEnforcement,
 } = await lib("session-primer.mjs");
 
+// The brief names a path the agent is expected to write; make sure it can.
+ensureTaskCoreDir(root);
+
 const source = input.source || "startup";
 // compact | resume = the SAME task continuing → preserve gates + memory; don't re-arm.
 const recovering = !shouldClearOnSource(source);
-if (!recovering) clearSessionState(root);
+if (!recovering) {
+  clearSessionState(root);
+  // Only on a real start: cores accumulate one per chat, so old ones are swept while never
+  // touching this chat's own.
+  pruneTaskCores(root, sessionKey(input.transcript_path));
+}
 
 // FEATURE PROBE: read the install MANIFEST — the only authoritative record of what the user chose.
 // (The previous probe tested for check-staleness.mjs on the theory that a feature-owned file's
@@ -69,13 +81,16 @@ const nsLine = northStarsExists(root)
 let lines;
 if (recovering) {
   const hasMem = existsSync(memoryPath(root));
-  const hasCore = taskCoreExists(root);
-  const tcp = taskCorePath(root);
+  // Per CHAT, not per repo: several sessions run in one repository and a single file meant they
+  // overwrote each other, so a recovery could reconstruct from a DIFFERENT chat's task.
+  const key = sessionKey(input.transcript_path);
+  const hasCore = taskCoreExists(root, key);
+  const tcp = hasCore ? taskCoreReadPath(root, key) : taskCorePath(root, key);
   lines = [
     `Context was ${source === "compact" ? "COMPACTED" : "resumed"} — the task CONTINUES${graphEnabled ? "; enforcement and this session's satisfied gates are PRESERVED" : ""}.`,
     hasCore
       ? `READ your TASK-CORE FIRST — \`${tcp}\`: a dense save-state of THIS task (goal/constraints/decisions/state/anchors/gotchas/next). Reconstruct from it, verify against reality, then continue — do not re-derive what it already settles.`
-      : `No TASK-CORE saved — reconstruct THIS task (goal/decisions/state/next) from your memory + the code before acting, and write \`.bearing/.task-core.md\` next time so compaction can't drift you.`,
+      : `No TASK-CORE saved — reconstruct THIS task (goal/decisions/state/next) from your memory + the code before acting, and write \`${tcp}\` next time so compaction can't drift you. That path is THIS chat's own; other sessions in this repo have their own.`,
     // Graph-first discipline MUST be re-stated here, not only on fresh start: post-compaction is
     // exactly where agents drift back to grep/blind-read. "Gates preserved" ≠ "stop using the graph".
     // Graph-first discipline MUST be re-stated here, not only on fresh start: post-compaction is
@@ -103,6 +118,11 @@ if (recovering) {
       ? "Orient with gitnexus_query; drill with gitnexus_context; cypher for structure; impact before edits; detect_changes before commit."
       : "",
     `Keep your project memory current as you work (${mp}) — it survives compaction + sessions; the transcript does not.`,
+    // The path is per CHAT and therefore NOT guessable — before this it was one documented file the
+    // agent could name from memory. Say it on a fresh start too, or the agent cannot write a
+    // task-core proactively at a milestone and only learns where it lives once compaction hits,
+    // which is exactly too late.
+    `Your TASK-CORE for this chat is \`${taskCorePath(root, sessionKey(input.transcript_path))}\` — one file per chat, so parallel sessions here cannot overwrite each other. Write it at a milestone or when context fills.`,
     staleLine,
   ];
 }

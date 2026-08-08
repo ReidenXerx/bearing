@@ -9,7 +9,9 @@ When a long task runs, Claude Code **compacts**: it summarizes the conversation 
 
 The fix: **you** decide what survives. Keep a **task-core** — a dense, machine-facing save-state of the CURRENT TASK — and read it back on recovery. It's the one artifact guaranteed to survive with full fidelity.
 
-**File:** `.bearing/.task-core.md` (gitignored; survives compaction *and* new sessions — a task can span both; overwrite it when the task changes).
+**File:** `.bearing/task-cores/<chat-id>.md` — **one per CHAT**, not one per repo. The SessionStart brief names your exact path; use that one. Gitignored; survives compaction *and* new sessions — a task can span both; overwrite it when the task changes.
+
+> Several agent sessions run in the same repository routinely (a second editor window is enough). A single shared file meant they overwrote each other, and on recovery a session would reconstruct from **another chat's task** with full confidence — the exact drift a task-core exists to prevent. If the brief gives you no path, fall back to `.bearing/task-cores/shared.md`.
 
 ## When to write / refresh it
 

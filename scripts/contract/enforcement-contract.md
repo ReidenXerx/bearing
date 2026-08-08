@@ -204,7 +204,7 @@ Maintain your **Claude Code project memory** — `~/.claude/projects/<this-proje
 <!-- feature: taskcore -->
 ## Task-core (survive compaction without drift)
 
-Long tasks get **compacted** — the transcript is summarized and dropped, and detail drifts. Keep a **task-core**: a dense, **AI-facing** save-state of the CURRENT TASK at **`.bearing/.task-core.md`**. When a PostToolUse nudge says context is filling (~90%), or at a milestone / before a risky pivot, **write or refresh it** — terse, for *you* not humans, no prose tax:
+Long tasks get **compacted** — the transcript is summarized and dropped, and detail drifts. Keep a **task-core**: a dense, **AI-facing** save-state of the CURRENT TASK at **`.bearing/task-cores/<this chat's id>.md`** — the SessionStart brief names the exact path, and it is one file per CHAT so parallel sessions in this repo cannot overwrite each other's save-state. When a PostToolUse nudge says context is filling (~90%), or at a milestone / before a risky pivot, **write or refresh it** — terse, for *you* not humans, no prose tax:
 
 ```
 GOAL <what "done" is> · CONSTRAINTS <must/never> · DECISIONS <choice→why (settled)>

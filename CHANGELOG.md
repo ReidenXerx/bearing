@@ -2,6 +2,29 @@
 
 All notable changes to `bearing` are documented here.
 
+## Unreleased
+
+### Fixed — the task-core was one file per REPO, not per chat
+
+`.bearing/.task-core.md` was a single path. The moment two agent sessions ran in the same
+repository — a second editor window is enough, and three is routine — they overwrote each other's
+save-state. The failure is worse than losing the file: on recovery a session reads whatever the
+last writer left, so it reconstructs from **another chat's task** with full confidence. That is
+precisely the drift a task-core exists to prevent, manufactured by the task-core itself.
+
+- **One file per chat**, at `.bearing/task-cores/<chat-id>.md`. The key comes from the transcript
+  path every hook already receives; its basename is the session id and it stays stable across
+  compaction, which is exactly when the core must be found again.
+- **The path is now unguessable, so the session brief states it** — on a fresh start as well as on
+  recovery. Before, the agent could name the one documented file from memory; without this it
+  could not write a core proactively at a milestone and would only learn its path once compaction
+  hit, which is too late.
+- **A pre-existing single-file core is still read**, so upgrading mid-task loses nothing.
+- Old chats' cores are pruned after 30 days, never the current chat's however old it looks.
+- `.bearing/task-cores/` is gitignored and covered by the post-install check — the previous rule
+  matched a file, not a folder, so every chat's save-state would have been committed. Uninstall
+  removes the empty directory but keeps any core still in it, the same way it keeps north-stars.
+
 ## 1.0.7 — a domain expert on every review, and an installer that checks its own claims
 
 The kit was renamed `gitnexus-agent-kit` → `bearing`, but three identifiers kept the old name

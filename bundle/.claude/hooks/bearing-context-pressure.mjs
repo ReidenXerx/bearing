@@ -23,7 +23,7 @@ const lib = (rel) => import(pathToFileURL(path.join(root, ".bearing/lib", rel)).
 const { loadHookConfig } = await lib("hook-helpers.mjs");
 const { contextPressure } = await lib("context-pressure.mjs");
 const { emitContext } = await lib("claude-emit.mjs");
-const { taskCoreExists, isPressureNudged, setPressureNudged, bumpScore } =
+const { taskCoreExists, taskCorePath, sessionKey, isPressureNudged, setPressureNudged, bumpScore } =
   await lib("session-primer.mjs");
 
 const config = loadHookConfig(root);
@@ -34,7 +34,8 @@ const p = contextPressure(transcript, config);
 if (p.over) {
   // Nudge once per pressure zone (flag) — but keep nudging while there's still NO task-core,
   // since compacting with no core is straight data loss. Once a core exists, go quiet.
-  if (!isPressureNudged(root) || !taskCoreExists(root)) {
+  const coreKey = sessionKey(input.transcript_path);
+if (!isPressureNudged(root) || !taskCoreExists(root, coreKey)) {
     const pct = Math.round(p.ratio * 100);
     const kt = Math.round(p.tokens / 1000);
     emitContext(

@@ -70,27 +70,118 @@ export function sessionPaths(root) {
 // survives the summary without drift. Lives under .bearing/ (gitignored, survives compaction
 // AND new sessions since a task can span both; the agent overwrites it when the task changes).
 
-/** @param {string} root */
-export function taskCorePath(root) {
+// ONE FILE PER CHAT, not per repo. A single `.bearing/.task-core.md` was wrong the moment two
+// agent sessions ran in the same repository — which is the normal case, not the edge one: three
+// editor windows, or a second chat opened to look at something, and they overwrite each other's
+// save-state. The failure is worse than losing it: on recovery a session reads whatever the last
+// writer left, so it reconstructs from ANOTHER CHAT'S TASK with full confidence. That is precisely
+// the drift the task-core exists to prevent, produced by the task-core itself.
+
+/** The legacy single-file path. Still read so an in-flight task is not lost on upgrade. */
+function legacyTaskCorePath(root) {
   return path.join(root, '.bearing', '.task-core.md');
 }
 
-/** @param {string} root @returns {boolean} does a task-core exist + have content? */
-export function taskCoreExists(root) {
-  try {
-    return fs.statSync(taskCorePath(root)).size > 0;
-  } catch {
-    return false;
-  }
+/** @param {string} root */
+export function taskCoreDir(root) {
+  return path.join(root, '.bearing', 'task-cores');
 }
 
-/** Age of the task-core in ms (Infinity if none) — the pressure hook nudges harder when stale. */
-export function taskCoreAgeMs(root) {
+/**
+ * Stable per-chat key, derived from the transcript path Claude Code passes every hook. Its basename
+ * IS the session id, and it stays the same across compaction — the same session continues — which
+ * is exactly when the core has to be found again.
+ * @param {string} [transcriptPath]
+ */
+export function sessionKey(transcriptPath) {
+  const base = path.basename(String(transcriptPath || ''), '.jsonl').trim();
+  // Filesystem-safe and bounded. No transcript (a runtime that does not pass one) falls back to a
+  // shared key, which reproduces the old single-file behaviour rather than dropping the core.
+  const safe = base.replace(/[^\w.-]/g, '').slice(0, 64);
+  return safe || 'shared';
+}
+
+/**
+ * Make sure the directory exists before anyone is told to write into it.
+ *
+ * Moving from one file to a directory introduced a failure the single file never had: writing
+ * `.bearing/task-cores/<id>.md` into a directory that does not exist is ENOENT, so the agent is
+ * handed a path it cannot write. Cheap and idempotent; called at install and on session start.
+ * @param {string} root
+ */
+export function ensureTaskCoreDir(root) {
   try {
-    return Date.now() - fs.statSync(taskCorePath(root)).mtimeMs;
+    fs.mkdirSync(taskCoreDir(root), { recursive: true });
+  } catch {
+    /* best effort — a missing dir surfaces when the agent writes, not by failing the session */
+  }
+  return taskCoreDir(root);
+}
+
+/** @param {string} root @param {string} [key] */
+export function taskCorePath(root, key) {
+  return path.join(taskCoreDir(root), `${sessionKey(key)}.md`);
+}
+
+/** Non-empty file for this chat, else the legacy single file (one-way, for upgrades). */
+function resolveTaskCore(root, key) {
+  for (const p of [taskCorePath(root, key), legacyTaskCorePath(root)]) {
+    try {
+      if (fs.statSync(p).size > 0) return p;
+    } catch {
+      /* try the next */
+    }
+  }
+  return null;
+}
+
+/** @param {string} root @param {string} [key] @returns {boolean} */
+export function taskCoreExists(root, key) {
+  return resolveTaskCore(root, key) !== null;
+}
+
+/** Path the agent should actually READ on recovery — keyed if present, else the legacy file. */
+export function taskCoreReadPath(root, key) {
+  return resolveTaskCore(root, key) ?? taskCorePath(root, key);
+}
+
+/** Age of this chat's task-core in ms (Infinity if none) — the pressure hook nudges harder when stale. */
+export function taskCoreAgeMs(root, key) {
+  const p = resolveTaskCore(root, key);
+  if (!p) return Infinity;
+  try {
+    return Date.now() - fs.statSync(p).mtimeMs;
   } catch {
     return Infinity;
   }
+}
+
+/**
+ * Drop cores from chats that ended long ago. Without this the directory grows one file per chat
+ * forever. Never removes the CURRENT chat's core regardless of age — a long-running session that
+ * has not needed to rewrite its core must not have it deleted underneath it.
+ * @param {string} root @param {string} [keepKey] @param {number} [maxAgeMs] default 30 days
+ */
+export function pruneTaskCores(root, keepKey, maxAgeMs = 30 * 24 * 60 * 60 * 1000) {
+  const keep = `${sessionKey(keepKey)}.md`;
+  let removed = 0;
+  try {
+    for (const name of fs.readdirSync(taskCoreDir(root))) {
+      if (name === keep || !name.endsWith('.md')) continue;
+      const p = path.join(taskCoreDir(root), name);
+      try {
+        if (Date.now() - fs.statSync(p).mtimeMs > maxAgeMs) {
+          fs.unlinkSync(p);
+          removed++;
+        }
+      } catch {
+        /* best effort — a core we cannot stat or remove is not worth failing a session over */
+      }
+    }
+  } catch {
+    /* no directory yet */
+  }
+  return removed;
 }
 
 // ── NORTH-STARS (user-owned semantic anchor) ─────────────────────────────────

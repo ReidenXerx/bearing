@@ -41,6 +41,7 @@ AGENTS.md
 .bearing/.gitnexus-*
 .bearing/.bearing-*
 .bearing/.task-core.md
+.bearing/task-cores/
 *.bearing-backup
 .bearing/manifest.json
 .bearing/hooks.local.json
