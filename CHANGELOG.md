@@ -64,6 +64,10 @@ round-trip is paid once rather than three times.
 
 ### Added — Minions, a fifth module: fan out to gather
 
+The README carries a generated diagram for it like every other module — the fan-out is only half
+the picture, so it shows what comes BACK (citations, not opinions) and where the conclusion is
+drawn.
+
 Your agent can already spawn subagents. What it does not know is **when it should** — so it grinds
 through forty files serially, or samples five and generalises. That judgment is the module; the
 fan-out is plumbing.

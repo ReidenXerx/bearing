@@ -129,7 +129,54 @@ out["microscope"] = svg(
   "A change is split into slices and one lens agent is spawned per slice, all carrying the same pinned domain persona, asking correctness and judgment questions in parallel; every finding must then survive an adversarial refutation attempt before it reaches you.",
 );
 
-// ── 5. gitnexus — the claim is TEXT vs STRUCTURE ─────────────────────────────
+// ── 5. minions — the claim is GRIND vs ANCHORED FAN-OUT ──────────────────────
+// The trigger is the product (NS-23), so the diagram leads with the CHOICE — forty serial reads
+// or forty gatherers — not with the machinery. The lower band is the part nobody else does: what
+// comes back is citations, and the conclusion stays with the main agent (NS-24).
+out["minions"] = svg(
+  900, 346,
+  [
+    eyebrow(28, 34, "forty files, one rule to check"),
+    headline(28, 60, "Grind through them, or send forty gatherers."),
+
+    caption(28, 96, "SERIAL", C.bad),
+    card(28, 104, 372, 58, {
+      title: "40 reads, one after another",
+      sub: "your window, your tokens, your afternoon",
+      accent: C.bad,
+    }),
+
+    `<text x="450" y="139" text-anchor="middle" font-family="${MONO}" font-size="15" font-weight="700" fill="${C.faint}">vs</text>`,
+
+    caption(500, 96, "FAN-OUT", C.accent),
+    // A deck, not one card: the count is the point, and drawing a single box would read as
+    // "spawn a helper" rather than "one per unit".
+    deck(500, 104, 372, 58, {
+      title: "40 minions, middle tier",
+      sub: "each carries your north-stars + persona",
+      accent: C.accent,
+    }),
+
+    arrow(686, 162, 686, 190),
+
+    caption(28, 188, "THEY RETURN EVIDENCE — NEVER A VERDICT", C.faint),
+    pill(28, 198, "FOUND  src/fees.ts:88 — fee = gross * RATE", C.good),
+    pill(368, 198, "CHECKED  rg \"* RATE\" src/", C.faint),
+    pill(576, 198, "MISSED  dynamic dispatch", C.bad),
+
+    arrow(450, 224, 450, 252),
+    card(180, 254, 540, 58, {
+      title: "YOU conclude",
+      sub: "from citations you can open and check yourself",
+      accent: C.accent,
+    }),
+
+    caption(28, 334, "Minions do minimal or zero reasoning: a subagent that CONCLUDES puts a lossy summary between the evidence and your decision.", C.dim),
+  ].join("\n"),
+  "Forty files checked serially by one agent, versus forty cheap subagents each carrying the project's north-stars and persona; they return citations — FOUND file:line, CHECKED, MISSED — and the main agent draws the conclusion itself.",
+);
+
+// ── 6. gitnexus — the claim is TEXT vs STRUCTURE ─────────────────────────────
 out["gitnexus"] = svg(
   900, 244,
   [
