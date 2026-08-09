@@ -106,7 +106,7 @@ Then every finding has to survive an adversarial pass that tries to **refute** i
 
 **Your agent can already spawn subagents. It doesn't know when it should.**
 
-So it grinds through forty files serially — or samples five and generalises. Minions is that missing judgment: fan out when the work is **bounded, verifiable, independent and wide** (~5+ units), and *don't* when the judgment itself is the work.
+So it grinds through forty files serially — or samples five and generalises. Minions is that missing judgment: fan out when the work is **bounded, verifiable, independent and wide** (3+ units), and *don't* when the judgment itself is the work.
 
 Each subagent carries the same north-stars and pinned persona, and returns evidence in a fixed shape:
 

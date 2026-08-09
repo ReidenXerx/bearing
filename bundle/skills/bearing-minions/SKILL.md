@@ -1,6 +1,6 @@
 ---
 name: bearing-minions
-description: "Fan work out to a swarm of cheap, anchored subagents that GATHER — for wide mechanical work you would otherwise grind through serially: finding every call site, auditing N files against one rule, discovering migration sites, cross-referencing a list against the codebase, 'where is this used and how does it flow'. Use when the work is bounded, verifiable, independent and wide (~5+ units). NOT when the judgment IS the work, when the answer only survives verbatim, or when the unit needs conversation context the minion was never in. Examples: \"find every place we do X\", \"which files still use the old API\", \"trace all callers of these 12 symbols\", \"audit every route for auth\"."
+description: "Fan work out to a swarm of cheap, anchored subagents that GATHER — for wide mechanical work you would otherwise grind through serially: finding every call site, auditing N files against one rule, discovering migration sites, cross-referencing a list against the codebase, 'where is this used and how does it flow'. Use when the work is bounded, verifiable, independent and wide (3+ units). NOT when the judgment IS the work, when the answer only survives verbatim, or when the unit needs conversation context the minion was never in. Examples: \"find every place we do X\", \"which files still use the old API\", \"trace all callers of these 12 symbols\", \"audit every route for auth\"."
 ---
 
 # Minions — fan out to gather, keep the thinking
@@ -19,7 +19,7 @@ All four must hold:
 | **Bounded** | Each unit has a definite end. "Find every caller of `X`" ends. "Improve the architecture" does not. |
 | **Verifiable** | You can check the answer against the repo — a path, a line, a command's output. If you cannot check it, you are trusting testimony. |
 | **Independent** | Unit N does not need unit N−1's answer. Sequential work becomes a queue of agents waiting on each other, which is slower than doing it yourself. |
-| **Wide** | Roughly 5+ units. Below that, spawning and reporting cost more than the work saved. |
+| **Wide** | **3 or more units.** Below that, spawning and reporting cost more than doing it yourself. At three they already run concurrently, so the round-trip is paid once rather than three times. |
 
 **Do NOT fan out when:**
 
@@ -28,6 +28,7 @@ All four must hold:
 - **The answer must survive verbatim.** Anything that only survives as a summary is corrupted by the
   round-trip. Have the minion return raw text, or read it yourself.
 - **The unit needs context the minion was not in.** It will answer confidently and wrongly.
+- **Two units.** That is not a fan-out — do it yourself.
 - **You are about to delegate the conclusion.** That is the failure mode this whole skill is shaped
   around — see §4.
 
@@ -42,12 +43,38 @@ work is not bounded and you should not be here.
 
 ## 3. What every minion gets
 
-1. **The relevant north-stars** — the subset this task could violate, not all of them. A minion
-   tracing imports does not need the evidence-standard ones, and the token cost is paid N times.
-2. **The persona** from `.bearing/domain.json`, so a minion reads a trading repo as a trader.
-3. **Its unit, its bounds, and what NOT to decide** — stated explicitly.
+<!-- BEGIN GENERATED: anchored-spawn — bearing regenerates this block; edits here are replaced on update -->
+### Anchored spawn — how to send work out
 
-Tell each one, verbatim:
+A subagent starts with **none of your context**. That is what makes it cheap and what makes it
+drift, so everything below exists to give it back exactly enough and no more.
+
+**1. Persona.** Read `.bearing/domain.json` and give every subagent the SAME pinned persona bearing
+resolved at install. Same in wave 2 as in wave 1, same in every unit of a fan-out — an expert that
+changes between agents produces findings you cannot compare.
+
+**2. Anchor.** Include the north-stars this task could actually violate — the relevant subset, not
+the whole file. A subagent that never sees them will confidently contradict a settled decision, and
+one that sees all of them pays that token cost once per agent.
+
+**3. Bounds.** State the unit, what to return, and **what NOT to decide**. Whatever you leave
+unstated, a subagent will decide anyway, using context it does not have.
+
+**4. Parallel where the runtime allows it**, sequential where it does not. Claude Code can run them
+concurrently; treat that as an optimisation, never as a requirement — the routine must produce the
+same answer either way.
+
+**5. Coverage is a claim, so keep it honest.** A subagent that died, timed out, or came back
+empty-but-confused has REDUCED YOUR COVERAGE, and silence reads as "I checked everything". Re-run
+it, or say plainly what went unchecked. Never let the count of agents you spawned stand in for the
+count that actually reported.
+
+**6. Spot-check before you trust.** Open at least one cited `file:line` per subagent and confirm it
+says what the report claims. A fabricated citation is the one failure the return shape cannot catch
+on its own.
+<!-- END GENERATED: anchored-spawn -->
+
+Plus, verbatim:
 
 > Return what you SAW, not what you concluded. Do not judge, rank, recommend, or summarise. If you
 > find yourself writing "this looks like", stop and return the line instead.

@@ -4,13 +4,27 @@ All notable changes to `bearing` are documented here.
 
 ## Unreleased
 
+### Changed — one spawn harness, shared by microscope and minions
+
+Both modules send work to anchored subagents, and the mechanics are identical: the same pinned
+persona from `.bearing/domain.json`, the same north-star subset, parallel where the runtime allows
+it, and the duty to say what went unchecked. That is now authored once and rendered into both
+skills, with a test that fails if a copy goes stale.
+
+The **return contract stays separate, deliberately** — the two are opposite on the axis that
+matters. A microscope lens *must* reason; opinions are the entire point of it. A minion must not
+(NS-24). Unifying those would either silence the lenses or let the minions editorialise.
+
+The fan-out threshold is now **3 units, not 5** — at three they already run concurrently, so the
+round-trip is paid once rather than three times.
+
 ### Added — Minions, a fifth module: fan out to gather
 
 Your agent can already spawn subagents. What it does not know is **when it should** — so it grinds
 through forty files serially, or samples five and generalises. That judgment is the module; the
 fan-out is plumbing.
 
-Fan out when the work is **bounded, verifiable, independent and wide** (~5+ units): every call site
+Fan out when the work is **bounded, verifiable, independent and wide** (3+ units): every call site
 of a symbol, every file still on the old API, every migration site, every route to audit against one
 rule. Don't when the judgment *is* the work, when the answer only survives verbatim, or when the
 unit needs context the subagent was never in.

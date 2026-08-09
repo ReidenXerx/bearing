@@ -1,6 +1,7 @@
 # Minion harness — design
 
-**Status:** proposed. Nothing implemented.
+**Status:** implemented. Module `minions` (Claude Code only); skill `bearing-minions`; trigger in the
+always-on contract. This doc is the reasoning behind it, not a plan.
 
 ## What it is
 
@@ -32,8 +33,8 @@ Reach for minions when **all** of these hold:
   If the main agent cannot check it, it is trusting testimony.
 - **Independent** — unit N does not need unit N−1's answer. Sequential work fans out into a queue
   of agents waiting on each other, which is slower than doing it alone.
-- **Wide** — roughly 5+ units. Below that, spawn overhead and the reporting round-trip cost more
-  than the work saved.
+- **Wide** — 3 or more units. Below that, spawn overhead and the reporting round-trip cost more
+  than doing it yourself. At three they already run concurrently, so the round-trip is paid once.
 
 Canonical shapes: migration site discovery, "where is this used and how does it flow", auditing N
 files against one rule, cross-referencing a list against the codebase, reading many files to answer
@@ -47,7 +48,7 @@ one question.
   the round-trip. Have the minion return the raw text, or read it yourself.
 - **The context is the point.** A unit that only makes sense given a conversation the minion was
   not in will be answered confidently and wrongly.
-- **Small N.** Two files is not a fan-out.
+- **Small N.** Two units is not a fan-out.
 
 ### The rule that prevents the failure mode
 
@@ -93,7 +94,10 @@ Each minion receives, in order:
   Encode the task shape; let the model be a setting.
 - **Runtime reach.** Only Claude Code can spawn subagents with a model choice. Under NS-14 this is a
   Claude-only module and the README must say so plainly rather than implying parity.
-- **Relationship to microscope.** Microscope already spawns anchored lenses. This harness should be
-  EXTRACTED from it and microscope made its first consumer — two spawn implementations will diverge.
+- ~~**Relationship to microscope.**~~ **Settled.** The spawn MECHANICS are extracted to
+  `scripts/skill-fragments/anchored-spawn.md` and rendered into both skills by `npm run gen:skills`,
+  with a test that fails if a copy goes stale. The RETURN CONTRACT is deliberately NOT shared: a
+  microscope lens must reason — opinions are the point — and a minion must not (NS-24). Unifying
+  those would either silence the lenses or let the minions editorialise.
 - **Failure of a minion.** A subagent that dies or times out must not silently reduce coverage. What
   was not checked has to reach the user, the same way a silent cap would.
