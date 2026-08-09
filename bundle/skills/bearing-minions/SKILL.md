@@ -106,6 +106,15 @@ Take that part back.
 Same rule when a unit keeps returning `MISSED`: **do that unit yourself.** Do not re-run it on a
 bigger model. If it needs reasoning to answer, it was never a minion's by NS-24.
 
+### Enumerate the SHAPES, not just the rule
+
+Whatever reference shapes your units contain, list them. A rule that says "check every `.mjs` path"
+meets a `.cjs` path and the minion has no instruction for it — the honest ones return `MISSED`, the
+literal ones return nothing, and you cannot tell those apart from a clean result.
+
+**If two minions handle the same evidence differently, your bounds were ambiguous, not their work.**
+That divergence is a bug report about your prompt; re-run the unit with the shape named.
+
 ## 4. The return contract
 
 Every minion returns exactly this shape:
@@ -151,3 +160,8 @@ a cheaper model's summary.
 If a minion died, timed out, or came back empty-but-confused, **say so in your answer**. Silent
 under-coverage reads as "I checked everything" when you did not — the same failure as a silent cap.
 Re-run it, or state plainly what went unchecked.
+
+**Read every `MISSED` as being about YOUR split, first.** The first real use of this skill handed a
+minion a file that did not exist; it returned `MISSED — no such file` instead of a confident
+all-clear, and that is how the bad unit was discovered. A `MISSED` is usually the delegator's
+mistake, not the minion's.
