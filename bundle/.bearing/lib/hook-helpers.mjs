@@ -111,6 +111,9 @@ export function loadHookConfig(root) {
     // .bearing/hooks.local.json if your account has different models. Wanting a SMARTER minion is a
     // design smell, not a config problem: it means judgment was delegated.
     minionModel: "sonnet",
+    // MINIONS nudge: after this many DISTINCT gather targets in a row with no delegation, suggest
+    // fanning out. Once per session, advisory only. 0 disables.
+    minionFanoutThreshold: 8,
     northStarAnchorEvery: 25,
     // Cap on how many NS-# propositions the re-anchor repeats. Each is clipped to its opening
     // claim, so the whole set normally fits; raise this only for an unusually large north-stars doc.
@@ -155,6 +158,8 @@ function applyHookConfigFile(cfg, cfgPath) {
     // a spawn as a model name.
     if (typeof file.minionModel === "string" && file.minionModel.trim())
       cfg.minionModel = file.minionModel.trim();
+    if (typeof file.minionFanoutThreshold === "number")
+      cfg.minionFanoutThreshold = file.minionFanoutThreshold;
     if (typeof file.northStarAnchorEvery === "number")
       cfg.northStarAnchorEvery = file.northStarAnchorEvery;
     if (typeof file.northStarAnchorMaxLines === "number")

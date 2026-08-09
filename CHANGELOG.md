@@ -4,6 +4,29 @@ All notable changes to `bearing` are documented here.
 
 ## Unreleased
 
+### Added — the fan-out trigger is now enforced, and citations are checkable
+
+Four follow-ups that turn minions from instructions into something with feedback.
+
+- **A nudge when you are grinding.** The trigger lived only in the always-on contract, which means
+  it fired when the agent happened to recall it. A PostToolUse hook now notices 8 *distinct* gather
+  targets in a row with no delegation and suggests fanning out — once per session, advisory, never a
+  block (NS-5). Distinct targets, not calls: re-reading one file while editing it is not grinding,
+  and a nudge that fires during every edit loop gets ignored forever. `minionFanoutThreshold: 0`
+  disables it.
+- **`node .bearing/lib/verify-citations.mjs src/a.ts:88`** prints what is actually on each cited
+  line and exits non-zero if any do not resolve. "Spot-check one per minion" was advice; a
+  fabricated `file:line` is the one failure the return shape cannot catch by itself. Deliberately
+  not an npm script — those are all owned by the GitNexus module, so a minions-only install could
+  not run it.
+- **Fan-outs and grind-nudges are counted** in the scorecard, so the module can be measured rather
+  than assumed — the same reason the gates keep a tally instead of asserting they help.
+- **Subagents inherit graph-first.** A minion grepping for call sites in a repo with a graph is
+  doing the exact thing the gates exist to redirect, one level down where no gate can see it.
+
+Also fixed: the context-pressure nudge still named the old shared `.bearing/.task-core.md`, so it
+sent the agent to write a core its own recovery would not read.
+
 ### Added — minions run on a middle tier, and wanting a smarter one is a smell
 
 `sonnet` by default, overridable per machine via `minionModel` in `.bearing/hooks.local.json`. If

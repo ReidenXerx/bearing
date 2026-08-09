@@ -40,7 +40,9 @@ if (!isPressureNudged(root) || !taskCoreExists(root, coreKey)) {
     const kt = Math.round(p.tokens / 1000);
     emitContext(
       `⚠ CONTEXT ~${pct}% full (~${kt}k tok) — auto-compaction is NEAR. Refresh your TASK-CORE ` +
-        "**now**, before the summary drops load-bearing detail: write `.bearing/.task-core.md` " +
+        // The path is PER CHAT and therefore not guessable — naming the old shared file here sent
+        // the agent to write a core that its own recovery would not read.
+        `**now**, before the summary drops load-bearing detail: write \`${taskCorePath(root, coreKey)}\` ` +
         "as a DENSE, AI-facing save-state of THIS TASK — GOAL · CONSTRAINTS · DECISIONS(+why) · " +
         "STATE(done/now/NEXT/todo) · ANCHORS(file:line) · GOTCHAS(failed approaches, traps) · " +
         "OPEN-Qs · this-task USER-PREFS. Terse, no prose — it's for you, not humans. It is the ONE " +
