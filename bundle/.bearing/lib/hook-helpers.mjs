@@ -151,6 +151,10 @@ function applyHookConfigFile(cfg, cfgPath) {
       cfg.contextWindowTokens = file.contextWindowTokens;
     if (typeof file.contextPressureThreshold === "number")
       cfg.contextPressureThreshold = file.contextPressureThreshold;
+    // A non-empty string only: `"minionModel": ""` or a stray number would otherwise be handed to
+    // a spawn as a model name.
+    if (typeof file.minionModel === "string" && file.minionModel.trim())
+      cfg.minionModel = file.minionModel.trim();
     if (typeof file.northStarAnchorEvery === "number")
       cfg.northStarAnchorEvery = file.northStarAnchorEvery;
     if (typeof file.northStarAnchorMaxLines === "number")
