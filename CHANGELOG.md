@@ -4,6 +4,16 @@ All notable changes to `bearing` are documented here.
 
 ## Unreleased
 
+### Fixed — "would be committed" sent you to a .gitignore that was already correct
+
+Found updating a real repo installed back at 1.0.6. The machine-local check reported
+`.bearing/.bearing-session-primed.flag` as committable, but the ignore rule was present and
+correct — the file had been COMMITTED before that rule existed, and git never ignores a tracked
+file however good the rule is.
+
+The check now separates the two causes and names the exit for the one you cannot fix by editing a
+file: `already COMMITTED, so the ignore rule cannot help — run git rm --cached <path>` (NS-6).
+
 ### Added — the fan-out trigger is now enforced, and citations are checkable
 
 Four follow-ups that turn minions from instructions into something with feedback.
