@@ -187,6 +187,13 @@ Enforcement is **polyglot** — JS/TS, Python, Rust, Go, Java, and more count as
 
 At a **milestone** — feature done / big-task checkpoint / shared-code refactor / pre-ship, or "audit / find real bugs / is this solid?" — **and** only when the work is *substantial* (multi-file or high `impact` blast-radius): run a **microscope-waves** pass → load the `bearing-microscope` skill. Multi-lens, opinionated (not just defects), adversarially verified, iterated in waves. Skip it for small localized changes.
 
+<!-- feature: minions -->
+## Wide mechanical work — fan it out (intel layer)
+
+Before grinding through a long list of files or symbols **serially** — every call site of X, every file still on the old API, every route to audit against one rule, every migration site — stop and check the four: is each unit **bounded**, **verifiable**, **independent**, and are there **~5 or more**? If so, fan out → load the `bearing-minions` skill. One anchored subagent per unit, each carrying the north-stars and persona.
+
+**Minions gather; you conclude — they do minimal or zero reasoning.** They return `FOUND file:line` (verbatim), `CHECKED` (the exact query) and `MISSED` — never a verdict. A subagent that concludes puts a lossy summary between the evidence and your decision. Do not fan out when the judgment IS the work, when the answer only survives verbatim, or when the unit needs context the subagent was never in.
+
 <!-- feature: northstars -->
 ## Project north-stars — the semantic anchor (highest authority)
 

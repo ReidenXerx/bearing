@@ -2,6 +2,36 @@
 
 All notable changes to `bearing` are documented here.
 
+## Unreleased
+
+### Added — Minions, a fifth module: fan out to gather
+
+Your agent can already spawn subagents. What it does not know is **when it should** — so it grinds
+through forty files serially, or samples five and generalises. That judgment is the module; the
+fan-out is plumbing.
+
+Fan out when the work is **bounded, verifiable, independent and wide** (~5+ units): every call site
+of a symbol, every file still on the old API, every migration site, every route to audit against one
+rule. Don't when the judgment *is* the work, when the answer only survives verbatim, or when the
+unit needs context the subagent was never in.
+
+Each subagent carries the project's north-stars and pinned persona, and returns a fixed shape:
+
+```
+FOUND    src/fees.ts:88 — const fee = gross * RATE
+CHECKED  rg "\* RATE" src/ --type ts
+MISSED   dynamic dispatch in src/plugins/ — could not resolve
+```
+
+**Minions gather; your agent concludes — they do minimal or zero reasoning.** A subagent returning a
+*verdict* puts a cheaper model's summary between the evidence and your decision, which is the drift
+this product exists to prevent. And the `CHECKED`/`FOUND` split is load-bearing: `CHECKED` filled
+with `FOUND` empty means *it looked and there was nothing*; both empty means *it never understood the
+task*. In prose those are the same sentence — the same error as reading a graph zero as absence.
+
+Claude Code only, since it is the only runtime that can spawn subagents with a model choice — the
+README says so rather than implying parity.
+
 ## 1.0.9 — the agent stops fearing a window it isn't in, and a broken index stops blocking commits
 
 ### Fixed — the agent thought every session was a 200k one

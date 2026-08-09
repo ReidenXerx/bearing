@@ -26,13 +26,14 @@ That failure has a name — **losing your bearings**.
 
 ## What you get
 
-**Four independent modules. Pick any combination — each works alone, none depends on another.**
+**Five independent modules. Pick any combination — each works alone, none depends on another.**
 
 | | |
 |---|---|
 | ⚑ **North-stars** | Numbered, authoritative claims about what your project *is*. **Outranks every other doc**, re-injected as the session runs. |
 | 💾 **Task-core** | A dense save-state of the current task, written **before** compaction drops the detail. |
 | 🔬 **Microscope** | A panel of lens agents that reviews as an expert in *your* domain — and must survive its own refutation pass. |
+| 🐜 **Minions** | Wide mechanical work split across cheap anchored subagents that return **citations, not opinions**. They gather; your agent concludes. |
 | 🕸 **GitNexus** | Hard gates that redirect symbol greps to a real code graph. Requires the [GitNexus](https://github.com/abhigyanpatwari/GitNexus) MCP server. |
 
 **And one thing that isn't a module:** the agent files bug reports against its own tooling, and the kit will tell you when *its own gates* are the problem. → [the receipts](#it-tells-you-when-its-the-problem)
@@ -44,7 +45,7 @@ npx bearing                                    # interactive — explains each m
 npx bearing install . --runtime claude --features northstars,taskcore
 ```
 
-`--runtime` `claude` · `cursor` · `zed` · `codex` · `all`  ·  `--features` `northstars` · `taskcore` · `microscope` · `gitnexus` · `all`
+`--runtime` `claude` · `cursor` · `zed` · `codex` · `all`  ·  `--features` `northstars` · `taskcore` · `microscope` · `minions` · `gitnexus` · `all`
 
 Then restart your IDE. Enforcement needs tool-interception hooks, and only some runtimes expose them:
 
@@ -54,6 +55,7 @@ Then restart your IDE. Enforcement needs tool-interception hooks, and only some 
 | North-stars — re-anchored mid-session | ✅ | — | — | — |
 | Task-core — survives compaction | ✅ | — | — | — |
 | Microscope — domain-expert review | ✅ | ✅ | ✅ | — |
+| Minions — anchored fan-out | ✅ | — | — | — |
 | GitNexus — hard gates | ✅ | ✅ | — | — |
 
 ---
@@ -99,6 +101,24 @@ It maps your change into slices and spawns **one lens agent per slice** — in p
 **Kind B is the part a linter can never do.** It asks *why does this exist?*, *is this the wrong abstraction?* — and catches semantic wrongness: *"this fee is computed on gross, should be net."* Code that runs perfectly and is still wrong.
 
 Then every finding has to survive an adversarial pass that tries to **refute** it. What can't be defended never reaches you.
+
+## 🐜 Minions
+
+**Your agent can already spawn subagents. It doesn't know when it should.**
+
+So it grinds through forty files serially — or samples five and generalises. Minions is that missing judgment: fan out when the work is **bounded, verifiable, independent and wide** (~5+ units), and *don't* when the judgment itself is the work.
+
+Each subagent carries the same north-stars and pinned persona, and returns evidence in a fixed shape:
+
+```
+FOUND    src/fees.ts:88 — const fee = gross * RATE
+CHECKED  rg "\* RATE" src/ --type ts
+MISSED   dynamic dispatch in src/plugins/ — could not resolve
+```
+
+**Minions gather. Your agent concludes — they do minimal or zero reasoning.** A subagent that returns a *verdict* puts a cheaper model's summary between the evidence and your decision, which is the drift this whole tool exists to prevent.
+
+That `CHECKED`/`FOUND` split is load-bearing: `CHECKED` filled and `FOUND` empty means *it looked and there was nothing*. Both empty means *it never understood the task*. In prose those are the same sentence.
 
 ## 🕸 GitNexus
 
