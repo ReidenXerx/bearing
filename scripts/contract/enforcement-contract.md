@@ -11,6 +11,7 @@ means for this domain.
 
 This is pinned in `.bearing/domain.json`. If it is the wrong expertise for this project, edit that
 file — it is yours, and bearing will not overwrite it.
+__BEARING_PERSONA_NOTE__
 
 <!-- feature: gitnexus -->
 ## North star
