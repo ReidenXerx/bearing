@@ -106,6 +106,11 @@ export function loadHookConfig(root) {
     // NORTH-STARS re-anchor: re-inject the numbered NS-# propositions verbatim every N tool calls
     // (and always right after the agent writes a doc/conclusion). Loading them once at session
     // start loses to 100k+ tokens of drift, so the anchor has to RECUR. 0 disables.
+    // MINIONS: the tier a fanned-out subagent runs on. A middle tier is correct BECAUSE minions do
+    // no reasoning (NS-24) — gathering citations does not need a flagship. Override per machine in
+    // .bearing/hooks.local.json if your account has different models. Wanting a SMARTER minion is a
+    // design smell, not a config problem: it means judgment was delegated.
+    minionModel: "sonnet",
     northStarAnchorEvery: 25,
     // Cap on how many NS-# propositions the re-anchor repeats. Each is clipped to its opening
     // claim, so the whole set normally fits; raise this only for an unusually large north-stars doc.

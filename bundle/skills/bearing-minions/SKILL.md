@@ -79,6 +79,23 @@ Plus, verbatim:
 > Return what you SAW, not what you concluded. Do not judge, rank, recommend, or summarise. If you
 > find yourself writing "this looks like", stop and return the line instead.
 
+## 3b. Which model
+
+**Spawn minions on a MIDDLE tier — `sonnet` by default.** Not merely to save money: it is correct
+*because* minions do no reasoning. Gathering citations does not need a flagship, and a whole fan-out
+on the top tier costs more than doing the work yourself would have.
+
+Override per machine in `.bearing/hooks.local.json` (`"minionModel": "..."`) if your account has
+different models available. If the tier you ask for is unavailable, **run anyway on whatever you
+get** — a costlier minion is a nuisance; a skipped unit is a hole in the answer.
+
+**The diagnostic that matters:** if you find yourself wanting a *smarter* minion, stop. That is the
+signal that you delegated judgment rather than gathering, and the fix is the split, not the model.
+Take that part back.
+
+Same rule when a unit keeps returning `MISSED`: **do that unit yourself.** Do not re-run it on a
+bigger model. If it needs reasoning to answer, it was never a minion's by NS-24.
+
 ## 4. The return contract
 
 Every minion returns exactly this shape:

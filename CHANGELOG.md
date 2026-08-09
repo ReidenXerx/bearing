@@ -4,6 +4,17 @@ All notable changes to `bearing` are documented here.
 
 ## Unreleased
 
+### Added — minions run on a middle tier, and wanting a smarter one is a smell
+
+`sonnet` by default, overridable per machine via `minionModel` in `.bearing/hooks.local.json`. If
+the tier is unavailable the fan-out runs anyway — a costlier minion is a nuisance, a skipped unit is
+a hole in the answer.
+
+The tier is not a cost setting, it is a consequence: a middle model is *sufficient* precisely
+because minions do no reasoning (NS-24). Which makes it a diagnostic. **If you want a smarter
+minion, you delegated judgment** — the fix is the split, not the model. Same when a unit keeps
+returning `MISSED`: do that unit yourself rather than re-running it on a bigger model.
+
 ### Changed — one spawn harness, shared by microscope and minions
 
 Both modules send work to anchored subagents, and the mechanics are identical: the same pinned
