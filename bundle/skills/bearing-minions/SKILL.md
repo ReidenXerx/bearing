@@ -69,7 +69,12 @@ empty-but-confused has REDUCED YOUR COVERAGE, and silence reads as "I checked ev
 it, or say plainly what went unchecked. Never let the count of agents you spawned stand in for the
 count that actually reported.
 
-**6. Spot-check before you trust.** Open at least one cited `file:line` per subagent and confirm it
+**6. Tier follows the return contract.** A subagent that must REASON needs a capable model; one
+that only GATHERS does not. Decide the tier from what you are asking it to return, never from
+what the task feels like — and if a gatherer seems to need a smarter model, you have asked it to
+reason and should take that part back.
+
+**7. Spot-check before you trust.** Open at least one cited `file:line` per subagent and confirm it
 says what the report claims. A fabricated citation is the one failure the return shape cannot catch
 on its own.
 <!-- END GENERATED: anchored-spawn -->

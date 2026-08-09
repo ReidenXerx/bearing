@@ -87,10 +87,25 @@ empty-but-confused has REDUCED YOUR COVERAGE, and silence reads as "I checked ev
 it, or say plainly what went unchecked. Never let the count of agents you spawned stand in for the
 count that actually reported.
 
-**6. Spot-check before you trust.** Open at least one cited `file:line` per subagent and confirm it
+**6. Tier follows the return contract.** A subagent that must REASON needs a capable model; one
+that only GATHERS does not. Decide the tier from what you are asking it to return, never from
+what the task feels like — and if a gatherer seems to need a smarter model, you have asked it to
+reason and should take that part back.
+
+**7. Spot-check before you trust.** Open at least one cited `file:line` per subagent and confirm it
 says what the report claims. A fabricated citation is the one failure the return shape cannot catch
 on its own.
 <!-- END GENERATED: anchored-spawn -->
+
+## Lens model tier
+
+**Lenses run on your MAIN model — do not downgrade them.** A lens's job is judgment: is this the
+wrong abstraction, is this needed at all, is this fee on gross when it should be net. That is
+reasoning, and reasoning is what a cheaper tier gives up first.
+
+This is the opposite of a minion, deliberately. Minions run on a middle tier *because* they do no
+reasoning (NS-24); a lens is the case where the reasoning IS the deliverable. Same harness, opposite
+answer, and the return contract is what decides it.
 
 ## Domain persona
 
