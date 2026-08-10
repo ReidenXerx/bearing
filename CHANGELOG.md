@@ -2,17 +2,39 @@
 
 All notable changes to `bearing` are documented here.
 
-## Unreleased
+## 1.0.10 — minions: fan out to gather, and keep the thinking
 
-### Fixed — "would be committed" sent you to a .gitignore that was already correct
+### Added — Minions, a fifth module: fan out to gather
 
-Found updating a real repo installed back at 1.0.6. The machine-local check reported
-`.bearing/.bearing-session-primed.flag` as committable, but the ignore rule was present and
-correct — the file had been COMMITTED before that rule existed, and git never ignores a tracked
-file however good the rule is.
+The README carries a generated diagram for it like every other module — the fan-out is only half
+the picture, so it shows what comes BACK (citations, not opinions) and where the conclusion is
+drawn.
 
-The check now separates the two causes and names the exit for the one you cannot fix by editing a
-file: `already COMMITTED, so the ignore rule cannot help — run git rm --cached <path>` (NS-6).
+Your agent can already spawn subagents. What it does not know is **when it should** — so it grinds
+through forty files serially, or samples five and generalises. That judgment is the module; the
+fan-out is plumbing.
+
+Fan out when the work is **bounded, verifiable, independent and wide** (3+ units): every call site
+of a symbol, every file still on the old API, every migration site, every route to audit against one
+rule. Don't when the judgment *is* the work, when the answer only survives verbatim, or when the
+unit needs context the subagent was never in.
+
+Each subagent carries the project's north-stars and pinned persona, and returns a fixed shape:
+
+```
+FOUND    src/fees.ts:88 — const fee = gross * RATE
+CHECKED  rg "\* RATE" src/ --type ts
+MISSED   dynamic dispatch in src/plugins/ — could not resolve
+```
+
+**Minions gather; your agent concludes — they do minimal or zero reasoning.** A subagent returning a
+*verdict* puts a cheaper model's summary between the evidence and your decision, which is the drift
+this product exists to prevent. And the `CHECKED`/`FOUND` split is load-bearing: `CHECKED` filled
+with `FOUND` empty means *it looked and there was nothing*; both empty means *it never understood the
+task*. In prose those are the same sentence — the same error as reading a graph zero as absence.
+
+Claude Code only, since it is the only runtime that can spawn subagents with a model choice — the
+README says so rather than implying parity.
 
 ### Added — the fan-out trigger is now enforced, and citations are checkable
 
@@ -62,37 +84,36 @@ matters. A microscope lens *must* reason; opinions are the entire point of it. A
 The fan-out threshold is now **3 units, not 5** — at three they already run concurrently, so the
 round-trip is paid once rather than three times.
 
-### Added — Minions, a fifth module: fan out to gather
+### Fixed — domain inference read the wrong things, and a missing persona stayed quiet
 
-The README carries a generated diagram for it like every other module — the fan-out is only half
-the picture, so it shows what comes BACK (citations, not opinions) and where the conclusion is
-drawn.
+Found by pinning personas on real repos, and all three failures pointed the same way: a
+screen-capture app and a patient-facing health platform were both branded *developer-tooling*.
 
-Your agent can already spawn subagents. What it does not know is **when it should** — so it grinds
-through forty files serially, or samples five and generalises. That judgment is the module; the
-fan-out is plumbing.
+- **Dependencies are not identity.** `package.json`'s dependency list counted as the repo
+  describing itself, so a `jwt` dependency scored as a strong *identity* signal — overriding the
+  package's own description. Almost every web app depends on an auth library; almost none are
+  identity products. Name, description and keywords only.
+- **`\bhealth\b` does not match "Healthcare".** The word boundary fails on the trailing *care*, so
+  a package naming its own domain scored zero for it. A repo naming its domain should be the
+  strongest signal there is.
+- **The analyzer's block is not the repo's voice.** bearing's own contract was stripped before
+  inference, but the stats block `analyze` writes into `CLAUDE.md` — "indexed by GitNexus… use the
+  MCP tools" — was not, and that alone suggested developer-tooling for a claims platform.
 
-Fan out when the work is **bounded, verifiable, independent and wide** (3+ units): every call site
-of a symbol, every file still on the old API, every migration site, every route to audit against one
-rule. Don't when the judgment *is* the work, when the answer only survives verbatim, or when the
-unit needs context the subagent was never in.
+And an unresolved domain is now raised where it will be seen: the installer prints the
+*consequence* ("reviews here will be generic") rather than one warn line, and the always-on
+contract carries the ask so the agent meets it every session — phrased as a job it can usually
+answer from the code, asked once, taking no for an answer.
 
-Each subagent carries the project's north-stars and pinned persona, and returns a fixed shape:
+### Fixed — "would be committed" sent you to a .gitignore that was already correct
 
-```
-FOUND    src/fees.ts:88 — const fee = gross * RATE
-CHECKED  rg "\* RATE" src/ --type ts
-MISSED   dynamic dispatch in src/plugins/ — could not resolve
-```
+Found updating a real repo installed back at 1.0.6. The machine-local check reported
+`.bearing/.bearing-session-primed.flag` as committable, but the ignore rule was present and
+correct — the file had been COMMITTED before that rule existed, and git never ignores a tracked
+file however good the rule is.
 
-**Minions gather; your agent concludes — they do minimal or zero reasoning.** A subagent returning a
-*verdict* puts a cheaper model's summary between the evidence and your decision, which is the drift
-this product exists to prevent. And the `CHECKED`/`FOUND` split is load-bearing: `CHECKED` filled
-with `FOUND` empty means *it looked and there was nothing*; both empty means *it never understood the
-task*. In prose those are the same sentence — the same error as reading a graph zero as absence.
-
-Claude Code only, since it is the only runtime that can spawn subagents with a model choice — the
-README says so rather than implying parity.
+The check now separates the two causes and names the exit for the one you cannot fix by editing a
+file: `already COMMITTED, so the ignore rule cannot help — run git rm --cached <path>` (NS-6).
 
 ## 1.0.9 — the agent stops fearing a window it isn't in, and a broken index stops blocking commits
 
