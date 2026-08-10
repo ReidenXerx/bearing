@@ -1,0 +1,123 @@
+<!doctype html>
+<!--
+  Social card as HTML — open it in a browser, tweak, refresh, screenshot.
+
+  The SVG generator next door is precise but every position is arithmetic I do by hand, which is
+  how "expertise" ended up orphaned on its own line. CSS lays out for you: text wraps, boxes size
+  to content, and the whole thing is editable by anyone without reading a coordinate.
+
+  Screenshot the .card element at 2x for a crisp 1200×1200. In Chrome/Firefox devtools: inspect
+  the node → right-click → "Capture node screenshot" (set DPR to 2 first), or just crop a
+  full-page shot — the page is exactly the card plus a margin.
+-->
+<meta charset="utf-8" />
+<title>bearing — social card</title>
+<style>
+  :root {
+    --surface: #11161f;
+    --edge: #232c3b;
+    --panel: #1a2130;
+    --panel-edge: #2c3648;
+    --ink: #e8edf5;
+    --dim: #9aa8bd;
+    --faint: #61708a;
+    --accent: #3987e5;
+    --bad: #d95926;
+    --good: #199e70;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    background: #0a0d13;
+    display: grid;
+    place-items: center;
+    min-height: 100vh;
+    padding: 40px;
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", Inter, Roboto, sans-serif;
+  }
+
+  /* 1200×1200 — LinkedIn's square feed slot. Change to 1200×627 for the landscape crop. */
+  .card {
+    width: 1200px;
+    height: 1200px;
+    padding: 88px 100px;
+    display: flex;
+    flex-direction: column;
+    background:
+      radial-gradient(120% 80% at 100% 0%, #17202e 0%, transparent 60%),
+      var(--surface);
+    border: 2px solid var(--edge);
+    border-radius: 28px;
+    color: var(--ink);
+  }
+
+  .eyebrow {
+    font-size: 26px; font-weight: 700; letter-spacing: 3px;
+    color: var(--faint); text-transform: uppercase;
+  }
+  h1 { font-size: 60px; font-weight: 700; letter-spacing: -1px; margin-top: 10px; }
+
+  .label {
+    font-size: 24px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+  }
+  .label.was { color: var(--bad); }
+  .label.now { color: var(--accent); }
+
+  /* The accent edge is a border, not a hand-drawn path — and it stretches with the content. */
+  .slab {
+    margin-top: 16px;
+    padding: 30px 34px;
+    background: var(--panel);
+    border: 2px solid var(--panel-edge);
+    border-left: 10px solid var(--edge-color, var(--panel-edge));
+    border-radius: 20px;
+    box-shadow: 0 18px 40px -24px #000;
+  }
+  .slab.was { --edge-color: var(--bad); }
+  .slab.now { --edge-color: var(--accent); }
+  .slab strong { display: block; font-size: 52px; font-weight: 700; letter-spacing: -0.5px; }
+  .slab .why { margin-top: 10px; font-size: 26px; color: var(--dim); }
+  .slab .good { margin-top: 8px; font-size: 36px; font-weight: 600; color: var(--good); }
+
+  .arrow { margin: 26px auto; width: 3px; height: 56px; background: var(--faint); position: relative; }
+  .arrow::after {
+    content: ""; position: absolute; bottom: -2px; left: 50%; transform: translateX(-50%);
+    border: 11px solid transparent; border-top-color: var(--faint);
+  }
+
+  .punch { margin-top: auto; font-size: 42px; font-weight: 600; line-height: 1.28; }
+  .punch span { color: var(--dim); }
+
+  footer { margin-top: 40px; display: flex; justify-content: space-between; align-items: baseline; }
+  footer b { font-size: 40px; font-weight: 800; color: var(--accent); }
+  footer code { font-size: 30px; color: var(--faint); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+</style>
+
+<div class="card">
+  <p class="eyebrow">A healthcare claims platform</p>
+  <h1>Who is reviewing your code?</h1>
+
+  <div style="margin-top:56px">
+    <p class="label was">Was reviewed by</p>
+    <div class="slab was">
+      <strong>a developer-tooling engineer</strong>
+      <p class="why">inference read the tool's own boilerplate as evidence</p>
+    </div>
+  </div>
+
+  <div class="arrow"></div>
+
+  <div>
+    <p class="label now">Now reviewed by</p>
+    <div class="slab now">
+      <strong>a clinical systems engineer</strong>
+      <p class="good">with HIPAA and patient-safety expertise</p>
+    </div>
+  </div>
+
+  <p class="punch">
+    The agent was confident. It was wrong.<br />
+    <span>Nothing would have told you.</span>
+  </p>
+
+  <footer><b>bearing</b><code>npx bearing</code></footer>
+</div>
