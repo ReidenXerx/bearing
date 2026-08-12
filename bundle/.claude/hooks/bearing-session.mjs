@@ -144,4 +144,21 @@ if (graphEnabled) {
 }
 
 if (nsLine) lines.unshift(nsLine);
-emitContext(lines.filter(Boolean).join(" "), "SessionStart");
+
+// STEALTH INSTALL: the always-on contract cannot live in CLAUDE.md, because CLAUDE.md is tracked
+// and editing it is the leak the mode exists to avoid. It sits in .bearing/contract.md (excluded
+// via .git/info/exclude) and is injected here instead — same text, delivered per session rather
+// than committed. Prepended, because it is the frame everything after it is read through.
+let contractPrefix = "";
+try {
+  const p = path.join(root, ".bearing", "contract.md");
+  if (existsSync(p)) {
+    const { readFileSync } = await import("node:fs");
+    const body = readFileSync(p, "utf8").trim();
+    if (body) contractPrefix = `${body}\n\n---\n\n`;
+  }
+} catch {
+  // A missing or unreadable contract must not cost the session its brief.
+}
+
+emitContext(contractPrefix + lines.filter(Boolean).join(" "), "SessionStart");

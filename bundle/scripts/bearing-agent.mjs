@@ -8,6 +8,25 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
+/**
+ * How to invoke a bearing command IN THIS REPO.
+ *
+ * A stealth install adds no npm scripts — package.json is tracked, and editing it is the leak the
+ * mode exists to avoid — so an npm-script invocation in help text was advice the reader could not
+ * follow (NS-5). Resolve against what actually exists instead of assuming the shared layout.
+ * @param {string} name e.g. "bearing:fallback"
+ */
+function howToRun(name) {
+  try {
+    const pkg = JSON.parse(fs.readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+    if (pkg.scripts?.[name]) return `npm run ${name}`;
+  } catch {
+    /* no package.json, or unreadable → fall through to the direct form */
+  }
+  return `node scripts/bearing-agent.mjs ${name.replace(/^bearing:/, "")}`;
+}
+
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
 
@@ -87,8 +106,8 @@ if (cmd === "fallback") {
   const reason = process.argv.slice(3).join(" ").trim();
   if (!reason) {
     console.error(
-      'Usage: npm run bearing:fallback -- "<why GitNexus can\'t be trusted here>"\n' +
-        '   or: node scripts/bearing-agent.mjs fallback "<why>"',
+      `Usage: ${howToRun("bearing:fallback")} -- "<why GitNexus can't be trusted here>"\n` +
+        `   or: node scripts/bearing-agent.mjs fallback "<why>"`,
     );
     process.exit(2);
   }
@@ -101,8 +120,8 @@ if (cmd === "fallback") {
   console.log(
     "  Classical Grep/Read/shell are now allowed. Re-confirm findings with the graph once GitNexus is reliable.",
   );
-  console.log("  Logged for review → npm run bearing:fallback-log (report these to the GitNexus devs).");
-  console.log("  End early: npm run bearing:fallback:off");
+  console.log(`  Logged for review → ${howToRun('bearing:fallback-log')} (report these to the GitNexus devs).`);
+  console.log(`  End early: ${howToRun('bearing:fallback:off')}`);
   process.exit(0);
 }
 
@@ -127,7 +146,7 @@ if (cmd === "fallback-log") {
     console.log(`    ${r.reason}`);
   }
   if (reports.length > 30) console.log(`\n(showing last 30 of ${reports.length}; --json for all)`);
-  console.log("\nExport for the GitNexus developers: npm run bearing:fallback-log -- --json");
+  console.log(`\nExport for the GitNexus developers: ${howToRun('bearing:fallback-log')} -- --json`);
   process.exit(0);
 }
 
@@ -151,7 +170,7 @@ if (cmd === "northstars") {
   }
   console.log(`Project north-stars — ${lines.length} proposition(s) · ${nsp}\n`);
   for (const l of lines) console.log(`  ${l}`);
-  console.log("\nFull document: npm run bearing:northstars -- --full");
+  console.log(`\nFull document: ${howToRun('bearing:northstars')} -- --full`);
   process.exit(0);
 }
 
@@ -168,7 +187,7 @@ if (cmd === "status") {
     console.log(
       `⚠ CLASSICAL FALLBACK active (${grant.reason || "GitNexus distrusted"}) — classical tools allowed for ~${mins} min more.`,
     );
-    console.log("  End early: npm run bearing:fallback:off\n");
+    console.log(`  End early: ${howToRun('bearing:fallback:off')}\n`);
   }
   const stale = loadStaleness();
   const systemTmp = tmpSpaceReport(ROOT);
@@ -184,7 +203,7 @@ if (cmd === "status") {
       console.log(
         `  ⚠ working tree: ${stale.driftingFiles} source file(s) edited since index — graph queries may be stale.`,
       );
-      console.log("    Resync: npm run bearing:refresh (fast, incremental)");
+      console.log(`    Resync: ${howToRun('bearing:refresh')} (fast, incremental)`);
     }
     console.log(systemTmp);
     process.exit(0);
@@ -196,7 +215,7 @@ if (cmd === "status") {
       "  embeddings: missing — agent-refresh runs analyze --embeddings",
     );
   }
-  console.log("  Fix: npm run bearing:agent-refresh");
+  console.log(`  Fix: ${howToRun('bearing:agent-refresh')}`);
   console.log(systemTmp);
   process.exit(1);
 }
@@ -237,8 +256,8 @@ if (cmd === "refresh") {
       markRefreshOutcome(false, `analyze exited ${rc} — index could not be refreshed`);
       console.error(
         "\n==> Refresh FAILED. Classical Grep/Read are now permitted so you are not stuck.\n" +
-          "    Fix the cause (network, disk, gitnexus install) and re-run: npm run bearing:agent-refresh\n" +
-          "    If GitNexus itself is the problem: npm run bearing:fallback -- \"<what went wrong>\"",
+          `    Fix the cause (network, disk, gitnexus install) and re-run: ${howToRun('bearing:agent-refresh')}\n` +
+          `    If GitNexus itself is the problem: ${howToRun('bearing:fallback')} -- \"<what went wrong>\"`,
       );
       process.exit(rc);
     }
@@ -415,7 +434,7 @@ if (cmd === "branch-status") {
     );
   } else {
     lines.push(
-      "Fetch the base branch or pass an existing ref: npm run bearing:branch-status -- <base>",
+      `Fetch the base branch or pass an existing ref: ${howToRun('bearing:branch-status')} -- <base>`,
     );
   }
   console.log(lines.join("\n"));
@@ -443,7 +462,7 @@ if (cmd === "review" || cmd === "pr-impact") {
   ];
   if (!base) {
     lines.push(
-      `Base ref "${baseArg}" not found — fetch it or pass an existing branch: npm run bearing:agent-review -- <base>`,
+      `Base ref "${baseArg}" not found — fetch it or pass an existing branch: ${howToRun('bearing:agent-review')} -- <base>`,
     );
     console.log(lines.join("\n"));
     process.exit(1);
@@ -706,7 +725,7 @@ if (cmd === "stats") {
   const fb = readFallbackReports(ROOT);
   if (fb.length) {
     console.log(
-      `\n  ⚠ GitNexus fallback reports: ${fb.length} — where the graph fell short. See: npm run bearing:fallback-log`,
+      `\n  ⚠ GitNexus fallback reports: ${fb.length} — where the graph fell short. See: ${howToRun('bearing:fallback-log')}`,
     );
   }
   process.exit(0);
