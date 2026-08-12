@@ -32,6 +32,21 @@ export function stabilizeAgentDocs(root) {
       .replace(/\n{3,}/g, "\n\n")
       .replace(/^\n+/, "");
     if (next !== orig) {
+      // A file whose ONLY content was the volatile block is analyzer litter, not a user doc.
+      // `analyze` creates AGENTS.md from nothing in repos that never had one, so stripping the
+      // block left a 0-byte file behind — invisible in a normal install because it is ignored,
+      // but in a STEALTH install a stray untracked AGENTS.md is exactly the leak the mode
+      // promises not to create. Nothing of the user's is lost: the strip preserves their content,
+      // so empty means there was none.
+      if (!next.trim()) {
+        try {
+          fs.unlinkSync(p);
+          changed.push(`${rel} (removed — held only the stats block)`);
+          continue;
+        } catch {
+          /* fall through to writing the empty file rather than failing */
+        }
+      }
       fs.writeFileSync(p, next);
       changed.push(rel);
     }

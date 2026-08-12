@@ -145,6 +145,22 @@ if (graphEnabled) {
 
 if (nsLine) lines.unshift(nsLine);
 
+// STEALTH INSTALL: `gitnexus analyze` writes its own stats block into CLAUDE.md and AGENTS.md,
+// which in a stealth repo means a MODIFIED tracked file and a stray untracked one — the exact leak
+// the mode promises not to create. Normally the pre-commit hook or a refresh script strips it, but
+// stealth installs neither (package.json and .githooks are off-limits), so nothing was cleaning up
+// and a real install went dirty the moment its index was built. SessionStart is the one thing that
+// always runs, so it does the tidying here.
+try {
+  const contractFile = path.join(root, ".bearing", "contract.md");
+  if (existsSync(contractFile)) {
+    const { stabilizeAgentDocs } = await lib("stabilize-agent-docs.mjs");
+    stabilizeAgentDocs(root);
+  }
+} catch {
+  // Never let tidying cost the session its brief.
+}
+
 // STEALTH INSTALL: the always-on contract cannot live in CLAUDE.md, because CLAUDE.md is tracked
 // and editing it is the leak the mode exists to avoid. It sits in .bearing/contract.md (excluded
 // via .git/info/exclude) and is injected here instead — same text, delivered per session rather
