@@ -60,7 +60,43 @@ export function sessionPaths(root) {
     fallbackFlag: path.join(stateDir, '.gitnexus-fallback.json'),
     pressureNudgedFlag: path.join(stateDir, '.gitnexus-pressure-nudged.flag'),
     northStarCounter: path.join(stateDir, '.gitnexus-northstar-counter.json'),
+    checkpointFile: path.join(stateDir, '.gitnexus-checkpoint-band.json'),
   };
+}
+
+/**
+ * The highest context BAND this session has already been checkpointed at.
+ *
+ * Keyed by session, unlike the older pressure flag which is one file per repo: two chats open on the
+ * same repo would otherwise silence each other's checkpoints, and a task-core is per chat.
+ * @param {string} root @param {string} key session key
+ * @returns {number}
+ */
+export function lastCheckpointBand(root, key) {
+  try {
+    const all = JSON.parse(fs.readFileSync(sessionPaths(root).checkpointFile, 'utf8'));
+    return Number(all[key]) || 0;
+  } catch {
+    return 0;
+  }
+}
+
+/** @param {string} root @param {string} key @param {number} band */
+export function setCheckpointBand(root, key, band) {
+  const { stateDir, checkpointFile } = sessionPaths(root);
+  try {
+    let all = {};
+    try {
+      all = JSON.parse(fs.readFileSync(checkpointFile, 'utf8'));
+    } catch {
+      /* first checkpoint in this repo */
+    }
+    all[key] = band;
+    fs.mkdirSync(stateDir, { recursive: true });
+    fs.writeFileSync(checkpointFile, JSON.stringify(all));
+  } catch {
+    /* best effort — a lost band means one extra nudge, not a wrong one */
+  }
 }
 
 // ── TASK-CORE (compaction-migration save-state) ──────────────────────────────

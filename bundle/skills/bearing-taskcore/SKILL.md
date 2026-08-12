@@ -15,7 +15,8 @@ The fix: **you** decide what survives. Keep a **task-core** — a dense, machine
 
 ## When to write / refresh it
 
-- **Context-pressure nudge** — a PostToolUse hook estimates the window and, at ~90% (`contextPressureThreshold` × `contextWindowTokens`, tunable in `.bearing/hooks.json`), tells you compaction is near. **Refresh the core immediately** — this is the last reliable window before the summary lands.
+- **Periodic checkpoints** — a PostToolUse hook nudges every 10% of the window (`contextCheckpointEvery`), each band once. These are *skippable*: refresh the core if the task has actually moved, otherwise ignore them. Waiting for the 90% warning is not a plan — on a 1M window that is 900k tokens, which most sessions never reach.
+- **Context-pressure nudge** — at ~90% (`contextPressureThreshold` × the window) it says compaction is near. **Refresh the core immediately** — this is the last reliable window before the summary lands. The window is inferred from evidence, not assumed; if bearing says it is assuming, set `contextWindowTokens` in `.bearing/hooks.local.json`.
 - **Milestones** — a sub-goal done, a decision settled, a pivot. Cheap insurance so a *sudden* auto-compact never catches you with a stale core.
 - **Task start / task shift** — seed a fresh core when a new task begins (don't carry the old one).
 

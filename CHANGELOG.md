@@ -36,6 +36,28 @@ Two consequences worth knowing. The exclusions live in the clone, so a **re-clon
 the stealth install** — run it again. And uninstall empties only the block it wrote, leaving
 anything you put in `.git/info/exclude` yourself.
 
+### Added — the task-core is checkpointed through the session, not only at the top
+
+Fixing the window exposed the trigger behind it. The nudge to save state fires at 90% of the window,
+and 90% of a correctly-resolved 1M window is **900,000 tokens** — which 6 of 404 real sessions on
+one machine ever reached. The one prompt that protects against losing detail was firing in 1.5% of
+sessions, and the reason it had seemed to work was the false alarm: a wrong window made it fire
+early. Correcting the window removed the accident that was doing the job.
+
+Context fullness was the wrong signal anyway. What should prompt a checkpoint is how much work would
+be lost, and that accumulates steadily rather than arriving at a threshold.
+
+So the task-core is now checkpointed every 10% of the window — every 100k on a 1M session, every 20k
+on a 200k one, scaling with whatever the window turns out to be. Each band nudges at most once and
+only upward, so a compaction that drops the ratio does not replay every band on the way back up, and
+skipping bands does not queue them. The 90% warning keeps its urgency and its wording; the earlier
+ones are explicitly skippable — *"skip it if nothing meaningful changed"* — because a nudge the agent
+is allowed to decline is the only kind that can fire nine times without becoming noise.
+
+Tuning lives in `contextCheckpointEvery` (0 disables the periodic checkpoints and leaves only the
+warning). The band is tracked per CHAT, not per repo like the older pressure flag: two sessions in
+one repo would otherwise silence each other's checkpoints, and a task-core is per chat.
+
 ### Fixed — the 1.0.9 context-window fix had never once run
 
 Reported from a live 1M session: at **197,084 tokens the agent announced "context is near

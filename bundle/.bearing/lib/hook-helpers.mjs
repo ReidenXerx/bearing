@@ -110,6 +110,11 @@ export function loadHookConfig(root) {
     // Set it to state a fact: gitignored .bearing/hooks.local.json (repo-scoped, per-machine) or
     // GITNEXUS_CONTEXT_WINDOW. Precedence: unset < hooks.json < .local.json < env.
     contextPressureThreshold: 0.9,
+    // Checkpoint the task-core every N of the window (0.1 = every 10%), not just once near the top.
+    // 90% of a correctly-resolved 1M window is 900,000 tokens, which 6 of 404 real sessions reached
+    // — so the single high-water trigger almost never fired. 0 disables the periodic checkpoints and
+    // leaves only the pressure warning.
+    contextCheckpointEvery: 0.1,
     // NORTH-STARS re-anchor: re-inject the numbered NS-# propositions verbatim every N tool calls
     // (and always right after the agent writes a doc/conclusion). Loading them once at session
     // start loses to 100k+ tokens of drift, so the anchor has to RECUR. 0 disables.
@@ -161,6 +166,8 @@ function applyHookConfigFile(cfg, cfgPath) {
       cfg.contextWindowTokens = file.contextWindowTokens;
     if (typeof file.contextPressureThreshold === "number")
       cfg.contextPressureThreshold = file.contextPressureThreshold;
+    if (typeof file.contextCheckpointEvery === "number")
+      cfg.contextCheckpointEvery = file.contextCheckpointEvery;
     // A non-empty string only: `"minionModel": ""` or a stray number would otherwise be handed to
     // a spawn as a model name.
     if (typeof file.minionModel === "string" && file.minionModel.trim())
