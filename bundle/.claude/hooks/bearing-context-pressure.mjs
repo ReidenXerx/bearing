@@ -54,8 +54,17 @@ const coreKeyEarly = sessionKey(input.transcript_path);
 // The epsilon is load-bearing: 0.7 / 0.1 is 6.999999999999999 in IEEE754, so a session sitting
 // exactly on a boundary binned one band LOW and then nudged a second time a few tokens later.
 const band = Math.floor(p.ratio / every + 1e-9);
-if (!p.over && band >= 1 && band > lastCheckpointBand(root, coreKeyEarly)) {
-  setCheckpointBand(root, coreKeyEarly, band);
+const prev = lastCheckpointBand(root, coreKeyEarly);
+
+// A band spent against a SMALLER window is not a band spent against this one. When evidence arrives
+// mid-session and the window is revised upward, "band 9 is done" was a statement about a window that
+// turned out not to exist — leaving the rest of the session, which is most of it, with no
+// checkpoints at all. Re-anchor to where we now are and carry on upward from there, without firing
+// on the revision itself.
+if (prev.window && p.window > prev.window) {
+  setCheckpointBand(root, coreKeyEarly, band, p.window);
+} else if (!p.over && band >= 1 && band > prev.band) {
+  setCheckpointBand(root, coreKeyEarly, band, p.window);
   const pct = Math.round(p.ratio * 100);
   const has = taskCoreExists(root, coreKeyEarly);
   emitContext(

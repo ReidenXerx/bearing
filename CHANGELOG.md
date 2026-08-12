@@ -54,6 +54,15 @@ skipping bands does not queue them. The 90% warning keeps its urgency and its wo
 ones are explicitly skippable — *"skip it if nothing meaningful changed"* — because a nudge the agent
 is allowed to decline is the only kind that can fire nine times without becoming noise.
 
+The bands divide the *window*, so they inherit whatever it is — which made the window matter more,
+not less. Two consequences had to be handled. The evidence lookup now runs from the **first** band
+rather than from the 90% warning: waiting meant a 1M session spent all nine checkpoints inside its
+first 195k tokens, announcing them as 13%, 30%, 53%, 80%, 98%, and then went silent for the
+remaining 800k — front-loaded and then absent is worse than the single trigger it replaced. And when
+the window is revised upward mid-session, the spent bands are re-anchored to the corrected one:
+*"band 9 is done"* was a statement about a window that turned out not to exist, and honouring it
+would leave the rest of the session — most of it — with no checkpoints at all.
+
 Tuning lives in `contextCheckpointEvery` (0 disables the periodic checkpoints and leaves only the
 warning). The band is tracked per CHAT, not per repo like the older pressure flag: two sessions in
 one repo would otherwise silence each other's checkpoints, and a task-core is per chat.

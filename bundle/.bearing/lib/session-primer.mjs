@@ -75,14 +75,16 @@ export function sessionPaths(root) {
 export function lastCheckpointBand(root, key) {
   try {
     const all = JSON.parse(fs.readFileSync(sessionPaths(root).checkpointFile, 'utf8'));
-    return Number(all[key]) || 0;
+    const hit = all[key];
+    if (typeof hit === 'number') return { band: hit, window: 0 }; // written before windows were tracked
+    return { band: Number(hit?.band) || 0, window: Number(hit?.window) || 0 };
   } catch {
-    return 0;
+    return { band: 0, window: 0 };
   }
 }
 
-/** @param {string} root @param {string} key @param {number} band */
-export function setCheckpointBand(root, key, band) {
+/** @param {string} root @param {string} key @param {number} band @param {number} window */
+export function setCheckpointBand(root, key, band, window = 0) {
   const { stateDir, checkpointFile } = sessionPaths(root);
   try {
     let all = {};
@@ -91,7 +93,7 @@ export function setCheckpointBand(root, key, band) {
     } catch {
       /* first checkpoint in this repo */
     }
-    all[key] = band;
+    all[key] = { band, window };
     fs.mkdirSync(stateDir, { recursive: true });
     fs.writeFileSync(checkpointFile, JSON.stringify(all));
   } catch {

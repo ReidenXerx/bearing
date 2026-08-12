@@ -284,7 +284,14 @@ export function contextPressure(transcriptPath, config = {}) {
   // Only pay for evidence when it could change what we SAY. Below the threshold the answer is
   // "quiet" either way, and reading transcripts on every PostToolUse to confirm silence would be
   // pure cost. So the lookup happens exactly once conditions are wrong enough to cry wolf.
-  if (source === "assumed" && window > 0 && tokens / window >= threshold) {
+  // Investigate as soon as the answer could change ANY message, not just the loud one. The periodic
+  // checkpoints divide the window into bands, so they need it resolved from the first band onward —
+  // waiting for the 90% warning meant a 1M session spent all nine checkpoints inside its first 195k
+  // tokens (reported as 13%, 30%, 53%, 80%, 98%) and then went silent for the remaining 800k. The
+  // per-session cache keeps this to one lookup.
+  const every = Number(config.contextCheckpointEvery) > 0 ? Number(config.contextCheckpointEvery) : 0;
+  const investigateAt = every > 0 ? Math.min(threshold, every) : threshold;
+  if (source === "assumed" && window > 0 && tokens / window >= investigateAt) {
     const hit = readWindowCache(transcriptPath);
     if (hit) {
       window = hit.window;
