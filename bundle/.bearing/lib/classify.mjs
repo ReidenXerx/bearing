@@ -870,6 +870,31 @@ export function mcpToolSuffix(name) {
  * @param {string} [phase] staleness phase — drift only applies on `fresh`
  * @returns {Verdict}
  */
+/**
+ * The `graph_behind` gate: HEAD moved, but by fewer source files than the drift threshold.
+ *
+ * Same shape as the drift gate and for the same reason — a graph that is a few files out of date
+ * answers confidently from code that has changed. The difference from `must_refresh` is what stays
+ * open: classical tools, because the index is out of date rather than invalid, and taking away grep
+ * over a two-file gap is how a proportionate signal turns into a stopped session.
+ * @param {string} toolName @param {{ behindFiles?: number }} stale
+ * @returns {Verdict}
+ */
+export function classifyGraphBehind(toolName, stale) {
+  const suffix = mcpToolSuffix(toolName);
+  if (!DRIFT_GATED_TOOLS.has(suffix)) return { decision: "allow" };
+  const n = Number(stale?.behindFiles) || 0;
+  return {
+    decision: "deny",
+    agentMessage:
+      `Graph is ${n} source file(s) behind HEAD — gitnexus_${suffix} would answer from the older ` +
+      "code. Resync: `npm run bearing:refresh` (incremental — usually quick), then retry. Read/Grep " +
+      "are OPEN meanwhile: this is a small measured gap, not a broken index.",
+    userKey: "stale.graph_behind",
+    scoreEvent: "graphBehindBlocks",
+  };
+}
+
 export function classifyMcpDrift(toolName, stale, config, phase) {
   // Drift applies ONLY on a commit-FRESH index. Never in classical_fallback (a failed refresh
   // OR a user-granted fallback) — forcing a refresh there would loop or override the escape

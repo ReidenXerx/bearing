@@ -50,6 +50,20 @@ export function evaluateStalePolicy(stale, root) {
     };
   }
 
+  // A SMALL, measured gap: fewer source files behind HEAD than the drift threshold. The graph is
+  // wrong about a handful of files, not structurally invalid, so the proportionate response is the
+  // one the drift path already makes — distrust the graph, not the rest of the toolbox. Placed after
+  // the refresh-failed check so a failed refresh still yields the full fallback.
+  if (stale?.softBehind) {
+    return {
+      phase: 'graph_behind',
+      forceRefresh: false,
+      allowClassical: true,
+      allowGraphTools: false,
+      behindFiles: stale.behindFiles,
+    };
+  }
+
   return {
     phase: 'must_refresh',
     forceRefresh: true,

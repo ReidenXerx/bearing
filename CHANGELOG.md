@@ -36,6 +36,33 @@ Two consequences worth knowing. The exclusions live in the clone, so a **re-clon
 the stealth install** — run it again. And uninstall empties only the block it wrote, leaving
 anything you put in `.git/info/exclude` yourself.
 
+### Changed — a stale index now blocks in proportion to what actually changed
+
+Two paths reach the same condition — *the graph no longer describes the repo* — and only one of them
+measured anything. The working-tree path counted **source files** and gated the ten graph query
+tools, leaving Read and Grep open. The commit path counted **commits**, applied no file filter at
+all, and denied everything until a reindex.
+
+So a commit touching one file stopped the whole session. A commit touching only `README.md` stopped
+it too, while the graph was accurate for every line of code in the repo. The hard-stop path was the
+one with no measurement behind it.
+
+The commit path now counts source files across `indexedCommit..HEAD`, using the same filters as the
+drift path — extension, and bearing's own files excluded, since `bearing update` rewrites those
+without re-indexing:
+
+- **No source changed** → not stale. A docs, lockfile or CI-config commit leaves every indexed
+  symbol accurate, and there is nothing to reindex before trusting it.
+- **Fewer files than `driftRefreshThreshold`** → a new `graph_behind` phase. The graph tools are
+  gated, Read and Grep stay open, and the message says how many files behind it is. The index is out
+  of date, not invalid, and taking away grep over a two-file gap is how a proportionate signal turns
+  into a stopped session.
+- **At or above the threshold, or a diverged history** → the hard block, unchanged.
+
+A gap git cannot measure counts as material rather than small: guessing "small" on an unknown delta
+buys a confident answer from a graph that no longer describes the repo, which is the failure the
+gate exists to prevent.
+
 ### Added — the task-core is checkpointed through the session, not only at the top
 
 Fixing the window exposed the trigger behind it. The nudge to save state fires at 90% of the window,

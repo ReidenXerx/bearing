@@ -17,7 +17,7 @@ const lib = (rel) =>
 
 const { gnContext, emitVerdict } = await lib("claude-emit.mjs");
 const { setMcpToolUsed, bumpScore } = await lib("session-primer.mjs");
-const { classifyMcpDrift } = await lib("classify.mjs");
+const { classifyMcpDrift, classifyGraphBehind } = await lib("classify.mjs");
 
 const ctx = gnContext(root);
 const tool = input.tool_name ?? "";
@@ -32,10 +32,14 @@ if (ctx.phase === "must_refresh") {
     { root, mode: ctx.config.mode },
   );
 } else {
-  // Drift gate (classifyMcpDrift enforces phase === "fresh" itself): on a commit-fresh index a
-  // graph QUERY tool would return stale results that ignore the agent's uncommitted edits →
-  // require a fast incremental refresh.
-  const drift = classifyMcpDrift(tool, ctx.stale, ctx.config, ctx.phase);
+  // Two gates, one shape. `graph_behind` is HEAD moved by fewer source files than the threshold;
+  // drift is the working tree moved by fewer. Both mean the graph would answer from code that is no
+  // longer there, and neither is a reason to take away Read/Grep. (classifyMcpDrift enforces
+  // phase === "fresh" itself, so it stays inert on the other phases.)
+  const drift =
+    ctx.phase === "graph_behind"
+      ? classifyGraphBehind(tool, ctx.stale)
+      : classifyMcpDrift(tool, ctx.stale, ctx.config, ctx.phase);
   if (drift.decision === "deny") {
     emitVerdict(drift, { root, mode: ctx.config.mode });
   } else {

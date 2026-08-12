@@ -22,6 +22,47 @@ function git(cmd) {
  * @param {string|null} at meta.indexedAt (ISO)
  * @param {RegExp} sourceExtRe the kit's canonical source-file matcher (loadHookConfig)
  */
+/**
+ * SOURCE files changed between the indexed commit and HEAD.
+ *
+ * Same filters as countDrift — extension, and bearing's own files excluded, since `bearing update`
+ * rewrites those without re-indexing and they are not the user's code.
+ *
+ * Returns -1 when git cannot answer. The caller treats that as material: an unknown gap must not
+ * quietly downgrade a block, because the failure mode of guessing "small" is a confident answer from
+ * a graph that no longer describes the repo.
+ * @param {string} from indexed commit @param {string} to HEAD @param {RegExp} sourceExtRe
+ * @returns {number} count, or -1 if unknown
+ */
+function countBehindSource(from, to, sourceExtRe) {
+  let names = '';
+  try {
+    names = execSync(`git -c core.quotePath=false diff --name-only ${from}..${to}`, {
+      cwd: root,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    });
+  } catch {
+    return -1;
+  }
+  let n = 0;
+  for (let f of names.split('\n')) {
+    f = f.trim();
+    if (!f) continue;
+    if (f.startsWith('"') && f.endsWith('"')) f = f.slice(1, -1);
+    if (!sourceExtRe.test(f)) continue;
+    if (
+      /^\.bearing\//.test(f) ||
+      /^scripts\/bearing-/.test(f) ||
+      /^\.claude\/hooks\/bearing-/.test(f) ||
+      /^\.cursor\/hooks\/bearing-/.test(f)
+    )
+      continue;
+    n++;
+  }
+  return n;
+}
+
 function countDrift(at, sourceExtRe) {
   const atMs = at ? Date.parse(at) : NaN;
   if (!Number.isFinite(atMs)) return 0;
@@ -183,8 +224,34 @@ try {
   out.commitsBehind =
     parseInt(git(`git rev-list --count ${out.indexedCommit}..${out.headCommit}`), 10) || 0;
   if (out.commitsBehind > 0) {
-    out.fresh = false;
-    out.reason = 'behind';
+    // COUNT WHAT MOVED, not merely that something moved.
+    //
+    // This branch used to read `commitsBehind > 0 → stale → block everything`. A commit touching a
+    // single file stopped the whole session, and a commit touching only README.md stopped it too —
+    // even though the graph remained accurate for every line of code in the repo. Meanwhile the
+    // drift path, which is the same underlying condition arrived at through the working tree,
+    // measured SOURCE files and gated only the graph query tools. One rule was proportionate and
+    // the other was not, and the one that was not had no measurement behind it at all.
+    const cfg = loadHookConfig(root);
+    const threshold = Number(cfg.driftRefreshThreshold) > 0 ? Number(cfg.driftRefreshThreshold) : 0;
+    out.behindFiles = countBehindSource(out.indexedCommit, out.headCommit, cfg.sourceExtRe);
+    if (out.behindFiles === 0) {
+      // Docs, lockfiles, CI config. Nothing the graph indexes changed, so the graph is not stale.
+      out.fresh = true;
+      out.reason = 'behind_non_source';
+      out.detail =
+        `Index is ${out.commitsBehind} commit(s) behind HEAD, but none of them touched source — ` +
+        'every indexed symbol is still accurate.';
+    } else if (threshold > 0 && out.behindFiles > 0 && out.behindFiles < threshold) {
+      // A small gap: the graph is wrong about a few files, not structurally invalid. Gate the graph
+      // and leave the rest of the toolbox open, exactly as drift does.
+      out.fresh = false;
+      out.reason = 'behind_small';
+      out.softBehind = true;
+    } else {
+      out.fresh = false;
+      out.reason = 'behind';
+    }
   }
 } catch {
   out.fresh = false;
