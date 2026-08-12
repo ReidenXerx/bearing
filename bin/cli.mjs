@@ -30,10 +30,16 @@ const implied = VERB_SUFFIX.find(([suffix]) => invokedAs.endsWith(suffix))?.[1];
 
 // `bearing <path>` means install; keep that, but only when the first argument is clearly not
 // already a verb (otherwise `bearing install …` would become `install install …`).
+//
+// A LEADING FLAG means install too. `bearing --stealth` is the whole reason the mode exists — you
+// are standing in someone else's repo and want bearing only for yourself — and it used to print
+// "Missing target repo path", because a `-` prefix suppressed the implied verb. Only the flags that
+// are genuinely verb-less stay exempt; everything else is options to an install.
 const VERBS = new Set(["install", "update", "update-all", "uninstall"]);
+const VERBLESS_FLAGS = new Set(["--help", "-h", "--version", "-v"]);
 const first = argv[0];
 const needsImpliedInstall =
-  !implied && (!first || (!VERBS.has(first) && !first.startsWith("-") ? true : false));
+  !implied && (!first || (!VERBS.has(first) && !VERBLESS_FLAGS.has(first)));
 
 const effective = implied
   ? [implied, ...argv]

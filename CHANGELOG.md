@@ -53,6 +53,12 @@ Every natural way to ask for a stealth install failed:
 - The wizard had no notion of stealth to begin with, so the mode was unreachable from `npx bearing`
   — the entry point most people use. It now asks, right after the target, and skips the question
   when bearing is already committed there and the answer could only be refused.
+- `npx bearing --stealth` — the exact line these notes and the README print — answered *"Missing
+  target repo path"*. A leading `-` suppressed the implied `install` verb, so the release's flagship
+  invocation was one the docs promised and the binary rejected. A leading flag means install now;
+  only genuinely verb-less flags (`--help`, `--version`) stay exempt.
+- `bearing --version` answered *"Missing target repo path"* too — the one reply that cannot be
+  right, since it isn't a question about a repo. It prints the version.
 
 ### Fixed — stealth hid what it avoided, not what it created
 
