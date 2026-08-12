@@ -58,6 +58,27 @@ Then restart your IDE. Enforcement needs tool-interception hooks, and only some 
 | Minions — anchored fan-out | ✅ | — | — | — |
 | GitNexus — hard gates | ✅ | ✅ | — | — |
 
+### 🥷 Stealth — for repos that aren't yours to change
+
+```bash
+npx bearing install . --stealth
+```
+
+A normal install is a team decision: it commits hooks, skills, a contract and npm scripts, and
+everyone who pulls gets them. That's right for a repo you own and wrong for one you contribute to.
+
+Stealth makes one promise, and it's testable: **`git status` is exactly as clean after the install
+as it was before.** No tracked file is modified — not `.gitignore`, not `package.json`, not
+`CLAUDE.md`. Ignores go in `.git/info/exclude`, which is per-clone and itself untracked, so the
+rules can't travel. The contract is delivered by the session hook instead of a file.
+
+Where a runtime has no per-user channel, bearing says so instead of writing the file anyway. It also
+**refuses** to convert a repo where bearing is already committed — un-tracking it for your whole team
+is a deliberate, visible act, not something an install flag should do behind your back.
+
+Two things to know: the exclusions live in the clone, so a re-clone doesn't carry the install — run
+it again. And uninstall empties only the block it wrote.
+
 ---
 
 ## ⚑ North-stars
@@ -163,7 +184,7 @@ Nothing leaves your repo. There is no telemetry endpoint.
 ## Commands
 
 ```bash
-npx bearing install <repo> [--runtime ...] [--features ...] [--mcp http|stdio|<port>]
+npx bearing install <repo> [--runtime ...] [--features ...] [--mcp http|stdio|<port>] [--stealth]
 npx bearing update <repo>       # keeps your module + transport choices
 npx bearing uninstall <repo>    # restores what it overwrote
 ```

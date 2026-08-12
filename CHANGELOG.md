@@ -2,6 +2,86 @@
 
 All notable changes to `bearing` are documented here.
 
+## 1.0.11 — a stealth install, and the two ways it leaked on the first real repo
+
+### Added — stealth install: bearing for you, invisible to the repo and your teammates
+
+`npx bearing --stealth`. The normal install is a team decision — it commits hooks, skills, a
+contract and npm scripts, and everyone who pulls gets them. That is right for a repo you own and
+wrong for one you contribute to, or where nobody has agreed to it yet. The only options were
+"commit bearing into someone else's repo" or "don't use it".
+
+The promise is narrow and testable: **after a stealth install `git status` is exactly as clean as
+it was before, and nothing bearing wrote can be committed by accident.** Two rules get there.
+
+- **No tracked file is modified.** Not `.gitignore`, not `package.json`, not `CLAUDE.md`. Each has
+  a per-user substitute: `.git/info/exclude` for ignores, no npm scripts at all, and the contract
+  delivered by the SessionStart hook from `.bearing/contract.md` instead of a file.
+- **Every new path is excluded.** `.git/info/exclude` is per-clone and is itself untracked, so the
+  rules never travel. It is the one ignore mechanism that cannot leak, which is exactly why it is
+  the right one and `.gitignore` is not.
+
+Where a runtime has no per-user channel we say so instead of writing the file anyway: Codex reads
+`AGENTS.md` and nothing else, so if that file is tracked its contract cannot be hidden and the
+runtime is skipped by name. Zed's MCP entry lives in a tracked `.zed/settings.json`, so skills
+still install and the context server is left for your Zed user settings.
+
+Not a conversion tool. If bearing is already committed here, `--stealth` refuses — un-tracking ~80
+paths and removing them from teammates' checkouts is a deliberate, visible act and must not hide
+behind an install flag (NS-1). That check reads git's index rather than the manifest, because the
+manifest is gitignored: a fresh clone of a repo with bearing committed has no manifest at all, and
+that is precisely the case that must be caught.
+
+Two consequences worth knowing. The exclusions live in the clone, so a **re-clone does not carry
+the stealth install** — run it again. And uninstall empties only the block it wrote, leaving
+anything you put in `.git/info/exclude` yourself.
+
+### Fixed — the flag this release exists for could not be typed
+
+Caught by installing the release candidate the way a user would, rather than the way the tests do.
+Every natural way to ask for a stealth install failed:
+
+- `bearing install --stealth` died with `Not a git repository: /cwd/--stealth`. The second argument
+  was taken as the target path whatever it looked like, so the flag became a directory name — the
+  error named a path the user never typed. A flag is never a target now.
+- The same bug quietly ate values: `install --runtime claude` consumed `--runtime` as the target,
+  after which it no longer appeared in the list the parser searches, so the runtime silently fell
+  back to the default. No error, just the wrong install.
+- `npx bearing --stealth` with no path routes to the interactive wizard, which was spawned with **no
+  argv at all** — the flag was dropped on the floor and the user got a normal, committed install
+  into the very repo they had chosen because they must not commit to it. Flags are forwarded now.
+- The wizard had no notion of stealth to begin with, so the mode was unreachable from `npx bearing`
+  — the entry point most people use. It now asks, right after the target, and skips the question
+  when bearing is already committed there and the answer could only be refused.
+
+### Fixed — stealth hid what it avoided, not what it created
+
+Found on the first real stealth install, not in the tests. `.mcp.json` was on the list of tracked
+files a stealth install must never touch, and absent from the list of paths it must exclude — so
+in a repo that *had* no `.mcp.json`, bearing created one and it sat there in `git status`.
+
+The test fixture happened to have a **tracked** `.mcp.json`, which sends the adapter down the
+skip-it branch, so the create-path was never once exercised. A fixture chosen to be convenient
+tested the case that could not fail (NS-21).
+
+### Fixed — stealth went dirty the moment its index was built
+
+The same install, one step later. `gitnexus analyze` writes its own `<!-- gitnexus:start -->` stats
+block into `CLAUDE.md` and creates `AGENTS.md` from nothing — so a repo that was verifiably
+invisible after install had a MODIFIED tracked file and a stray untracked one as soon as the graph
+was built. One `git add -A` from committing into a third party's repo.
+
+Stealth had accounted for what bearing writes and not for what it **causes another tool to write**.
+In a normal install the pre-commit hook strips that block, but stealth installs no hooks and no npm
+scripts by design, so nothing was cleaning up.
+
+- SessionStart now stabilizes the agent docs in a stealth repo. It is the one thing guaranteed to
+  run, so the churn heals at the next session rather than waiting for a hook that does not exist.
+- Stabilizing now **removes** a doc whose only content was that block. `analyze` creates
+  `AGENTS.md` in repos that never had one, so stripping left a 0-byte file — ignored and harmless
+  in a shared install, a leak in a stealth one. Nothing of yours is lost: the strip preserves your
+  content, so empty means there was none.
+
 ## 1.0.10 — minions: fan out to gather, and keep the thinking
 
 ### Added — Minions, a fifth module: fan out to gather
