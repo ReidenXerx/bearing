@@ -13,6 +13,8 @@
  * exact prompt size the model saw), with a byte-size fallback.
  */
 import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 
 // Widen the tail read until a usage record appears. A single huge tool-result line (a big file
 // read / grep / command dump can be MBs) sits at the very end at PostToolUse time and pushes the
@@ -132,11 +134,121 @@ export function resolveWindow(tokens, configured) {
   return KNOWN_WINDOWS.find((w) => w >= tokens) ?? tokens;
 }
 
+/**
+ * The window PROVEN by an auto-compaction, read from the transcript.
+ *
+ * Claude Code writes a `compact_boundary` record when it compacts, carrying
+ * `compactMetadata: { trigger: "auto", preTokens }`. `preTokens` is the size the session had
+ * reached when the CLIENT decided it was full — which is the window itself, measured rather than
+ * assumed. `trigger: "manual"` proves nothing: a person can /compact at any size.
+ *
+ * Rounds DOWN, where the usage signal rounds up, because the two prove opposite bounds. Usage of N
+ * proves the window is at LEAST N — the session held it. An auto-compaction at N proves it is at
+ * MOST N, and slightly less: the check runs after a turn completes, so it overshoots. Real values
+ * seen on one machine were 1000070, 1000459 and 1001889 — all of them a 1M window.
+ * @param {string} text a chunk of JSONL
+ * @returns {number} proven window, or 0
+ */
+export function windowFromCompaction(text) {
+  let best = 0;
+  const re = /"trigger":"auto","preTokens":(\d+)/g;
+  for (const m of text.matchAll(re)) best = Math.max(best, Number(m[1]) || 0);
+  if (!best) return 0;
+  const atOrBelow = KNOWN_WINDOWS.filter((w) => w <= best);
+  return atOrBelow.length ? atOrBelow[atOrBelow.length - 1] : best;
+}
+
+/**
+ * What the machine's own history says the window is.
+ *
+ * The estimator's blind spot is structural, not a tuning problem: it corrects the assumed window by
+ * noticing usage ABOVE it, but the warning fires at 90% — BELOW it. So on a 1M session the false
+ * "you are nearly full" is guaranteed to land in the 180k–200k band every single time, and the
+ * evidence that would have prevented it only arrives afterwards. Observed: 197,084 tokens read as
+ * 98.5% full when it was 19.7%.
+ *
+ * Recent transcripts settle it. An auto-compaction anywhere on this machine is a measurement of the
+ * window that was actually in force, and the setting is sticky across sessions — far better than a
+ * hardcoded floor. Newest-first and capped, because this is only consulted at the moment we would
+ * otherwise cry wolf, and a wrong-but-cheap answer beats a slow one.
+ * @param {number} limit how many recent transcripts to consult
+ * @returns {number} learned window, or 0
+ */
+export function learnWindowFromHistory(limit = 24) {
+  try {
+    const home = process.env.HOME || os.homedir();
+    const base = path.join(home, ".claude", "projects");
+    /** @type {{p: string, m: number}[]} */
+    const files = [];
+    for (const dir of fs.readdirSync(base)) {
+      const d = path.join(base, dir);
+      let entries;
+      try {
+        entries = fs.readdirSync(d);
+      } catch {
+        continue;
+      }
+      for (const f of entries) {
+        if (!f.endsWith(".jsonl")) continue;
+        const p = path.join(d, f);
+        try {
+          files.push({ p, m: fs.statSync(p).mtimeMs });
+        } catch {
+          /* vanished mid-scan */
+        }
+      }
+    }
+    files.sort((a, b) => b.m - a.m);
+    let best = 0;
+    for (const { p } of files.slice(0, limit)) {
+      try {
+        best = Math.max(best, windowFromCompaction(fs.readFileSync(p, "utf8")));
+      } catch {
+        /* unreadable — skip */
+      }
+      if (best >= KNOWN_WINDOWS[KNOWN_WINDOWS.length - 1]) break; // cannot do better
+    }
+    return best;
+  } catch {
+    return 0;
+  }
+}
+
 export function contextPressure(transcriptPath, config = {}) {
   const threshold =
     Number(config.contextPressureThreshold) > 0 ? Number(config.contextPressureThreshold) : 0.9;
   const tokens = estimateContextTokens(transcriptPath);
-  const window = resolveWindow(tokens, config.contextWindowTokens);
+  let window = resolveWindow(tokens, config.contextWindowTokens);
+  /** @type {'configured'|'usage'|'compaction'|'history'|'assumed'} */
+  let source =
+    Number(config.contextWindowTokens) > 0
+      ? "configured"
+      : tokens > KNOWN_WINDOWS[0]
+        ? "usage"
+        : "assumed";
+
+  // Only pay for evidence when it could change what we SAY. Below the threshold the answer is
+  // "quiet" either way, and reading transcripts on every PostToolUse to confirm silence would be
+  // pure cost. So the lookup happens exactly once conditions are wrong enough to cry wolf.
+  if (source === "assumed" && window > 0 && tokens / window >= threshold) {
+    let proven = 0;
+    try {
+      proven = windowFromCompaction(fs.readFileSync(transcriptPath, "utf8"));
+    } catch {
+      /* unreadable — fall through to history */
+    }
+    if (proven > window) {
+      window = proven;
+      source = "compaction";
+    } else {
+      const learned = learnWindowFromHistory();
+      if (learned > window) {
+        window = learned;
+        source = "history";
+      }
+    }
+  }
+
   const ratio = window > 0 ? tokens / window : 0;
-  return { tokens, window, threshold, ratio, over: ratio >= threshold };
+  return { tokens, window, threshold, ratio, over: ratio >= threshold, source };
 }

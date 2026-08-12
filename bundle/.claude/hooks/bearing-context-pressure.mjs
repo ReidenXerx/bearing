@@ -38,8 +38,18 @@ if (p.over) {
 if (!isPressureNudged(root) || !taskCoreExists(root, coreKey)) {
     const pct = Math.round(p.ratio * 100);
     const kt = Math.round(p.tokens / 1000);
+    // Say only what we KNOW. The window is recorded nowhere, so when nothing has proven it we are
+    // assuming the smaller one — and asserting "auto-compaction is NEAR" on an assumption is how a
+    // 1M session at 20% full got told it was 98% full and started hedging about running out. A
+    // guess stated as a fact is worse than a guess stated as a guess (NS-20).
+    const certainty =
+      p.source === "assumed"
+        ? `— IF this is a 200k session auto-compaction is near, but bearing cannot read the window ` +
+          `and assumes the smaller one; set \`contextWindowTokens\` in \`.bearing/hooks.local.json\` ` +
+          `to settle it. The save-state is cheap either way.`
+        : `— auto-compaction is NEAR.`;
     emitContext(
-      `⚠ CONTEXT ~${pct}% full (~${kt}k tok) — auto-compaction is NEAR. Refresh your TASK-CORE ` +
+      `⚠ CONTEXT ~${pct}% full (~${kt}k tok) ${certainty} Refresh your TASK-CORE ` +
         // The path is PER CHAT and therefore not guessable — naming the old shared file here sent
         // the agent to write a core that its own recovery would not read.
         `**now**, before the summary drops load-bearing detail: write \`${taskCorePath(root, coreKey)}\` ` +

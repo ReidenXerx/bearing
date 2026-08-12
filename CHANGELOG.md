@@ -36,6 +36,42 @@ Two consequences worth knowing. The exclusions live in the clone, so a **re-clon
 the stealth install** — run it again. And uninstall empties only the block it wrote, leaving
 anything you put in `.git/info/exclude` yourself.
 
+### Fixed — the 1.0.9 context-window fix had never once run
+
+Reported from a live 1M session: at **197,084 tokens the agent announced "context is near
+auto-compaction"** and started saving state. It was 19.7% full. 1.0.9 shipped a fix for exactly this
+and the fix was dead on arrival.
+
+Two independent faults, either of which alone was enough.
+
+**The default was indistinguishable from the user's answer.** `loadHookConfig` defaulted
+`contextWindowTokens` to `200000`, and the estimator treats a set window as the user's own statement
+of fact — so it returned 200000 and stopped, every time. The evidence path added in 1.0.9 could
+never execute in a real install. Its test passed by calling `resolveWindow(300_000, undefined)`, and
+`undefined` is a value the shipped pipeline never produced: the unit was green, the seam was broken.
+The default is now absent. Unset means *"nobody has said"*, which is the truth and leaves the
+estimator free to work; setting it in `.bearing/hooks.local.json` or `GITNEXUS_CONTEXT_WINDOW` still
+wins outright.
+
+**The correction could not reach the band it was needed in.** It revises the window upward on seeing
+usage *above* the assumed 200k — but the warning fires at 90% of it, *below*. So the false alarm was
+not an edge case, it was guaranteed on every 1M session: you cross 180k first, and the evidence that
+would have prevented the alarm only arrives afterwards. Two signals now settle it before then:
+
+- **An auto-compaction is a measurement.** Claude Code records `compactMetadata: {trigger: "auto",
+  preTokens}` at the boundary, and `preTokens` is the size at which the client decided it was full.
+  Rounded *down* to a real window, where usage rounds up — the two prove opposite bounds.
+  `trigger: "manual"` proves nothing, since a person can `/compact` at any size.
+- **The machine's own recent transcripts**, when this session has nothing to say yet. The setting is
+  sticky across sessions, so a recent auto-compaction elsewhere is far better evidence than a
+  hardcoded floor. Consulted only at the moment we would otherwise cry wolf, so the common path
+  costs nothing.
+
+And when nothing has proven the window, the nudge no longer *asserts* one. It says it is assuming
+the smaller window and names the one-line way to settle it, rather than announcing an imminent
+compaction that may be 800k tokens away. A guess stated as a fact is worse than a guess stated as a
+guess (NS-20).
+
 ### Fixed — the flag this release exists for could not be typed
 
 Caught by installing the release candidate the way a user would, rather than the way the tests do.

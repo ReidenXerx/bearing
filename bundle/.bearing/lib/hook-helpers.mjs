@@ -97,11 +97,18 @@ export function loadHookConfig(root) {
     // graph query tools require a fast incremental refresh. 0 disables the drift gate.
     driftRefreshThreshold: 3,
     // TASK-CORE compaction migration: nudge the agent to refresh its task-core once context
-    // reaches contextPressureThreshold of contextWindowTokens. The window is model-specific, so
-    // scope 1000000 per-machine — a gitignored .bearing/hooks.local.json (repo-scoped) or the
-    // GITNEXUS_CONTEXT_WINDOW env — instead of committing it to a repo where teammates run a 200k
-    // model. Precedence: this default < gitnexus-hooks.json < .local.json < env. 0 threshold disables.
-    contextWindowTokens: 200000,
+    // reaches contextPressureThreshold of the window.
+    //
+    // contextWindowTokens is DELIBERATELY ABSENT. It used to default to 200000, and that one line
+    // made every correction below it unreachable: contextPressure treats a set window as the user's
+    // own statement of fact and stops, so the evidence paths — usage above the assumed window, an
+    // auto-compaction, the machine's history — could never run in a real install. The 1.0.9 fix for
+    // "the agent thought every session was a 200k one" passed its test by calling resolveWindow with
+    // `undefined`, a value this pipeline never produced, and shipped dead. Left unset, the estimator
+    // applies its own floor AND stays free to revise it.
+    //
+    // Set it to state a fact: gitignored .bearing/hooks.local.json (repo-scoped, per-machine) or
+    // GITNEXUS_CONTEXT_WINDOW. Precedence: unset < hooks.json < .local.json < env.
     contextPressureThreshold: 0.9,
     // NORTH-STARS re-anchor: re-inject the numbered NS-# propositions verbatim every N tool calls
     // (and always right after the agent writes a doc/conclusion). Loading them once at session
