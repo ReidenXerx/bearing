@@ -214,6 +214,60 @@ export function learnWindowFromHistory(limit = 24) {
   }
 }
 
+/**
+ * Remember what the evidence said, per session.
+ *
+ * Without this the lookup is not paid once, it is paid on EVERY PostToolUse for as long as the
+ * session sits in the ambiguous band — and the worst case is the machine that has no evidence at
+ * all, which reads two dozen transcripts in full and concludes nothing, over and over.
+ *
+ * Kept beside the transcripts it summarizes, NOT in the repo: the finding is about this machine, and
+ * a stealth install cannot afford a new path inside someone else's project. Colocating also scopes
+ * the cache to the same HOME the evidence was read from — a cache keyed only by session would
+ * outlive the world it described.
+ *
+ * A negative expires; a positive does not. "No evidence yet" is a statement about a moment — the
+ * session may compact five minutes later and settle it — while a window that has been PROVEN cannot
+ * become unproven.
+ */
+const CACHE_FILE = () =>
+  path.join(process.env.HOME || os.homedir(), ".claude", ".bearing-context-window.json");
+const NEGATIVE_TTL_MS = 15 * 60 * 1000;
+
+function readWindowCache(key) {
+  try {
+    const all = JSON.parse(fs.readFileSync(CACHE_FILE(), "utf8"));
+    const hit = all[key];
+    if (!hit || !(hit.window > 0)) return null;
+    if (hit.source === "assumed" && Date.now() - hit.at > NEGATIVE_TTL_MS) return null;
+    return hit;
+  } catch {
+    return null;
+  }
+}
+
+function writeWindowCache(key, window, source) {
+  try {
+    let all = {};
+    try {
+      all = JSON.parse(fs.readFileSync(CACHE_FILE(), "utf8"));
+    } catch {
+      /* first write */
+    }
+    all[key] = { window, source, at: Date.now() };
+    fs.mkdirSync(path.dirname(CACHE_FILE()), { recursive: true });
+    // Bound it — one entry per session transcript, and sessions are endless over a machine's life.
+    const keys = Object.keys(all);
+    if (keys.length > 200) {
+      for (const k of keys.sort((a, b) => (all[a].at || 0) - (all[b].at || 0)).slice(0, 100))
+        delete all[k];
+    }
+    fs.writeFileSync(CACHE_FILE(), JSON.stringify(all));
+  } catch {
+    /* a cache that cannot be written is a slow correct answer, not a wrong one */
+  }
+}
+
 export function contextPressure(transcriptPath, config = {}) {
   const threshold =
     Number(config.contextPressureThreshold) > 0 ? Number(config.contextPressureThreshold) : 0.9;
@@ -231,21 +285,28 @@ export function contextPressure(transcriptPath, config = {}) {
   // "quiet" either way, and reading transcripts on every PostToolUse to confirm silence would be
   // pure cost. So the lookup happens exactly once conditions are wrong enough to cry wolf.
   if (source === "assumed" && window > 0 && tokens / window >= threshold) {
-    let proven = 0;
-    try {
-      proven = windowFromCompaction(fs.readFileSync(transcriptPath, "utf8"));
-    } catch {
-      /* unreadable — fall through to history */
-    }
-    if (proven > window) {
-      window = proven;
-      source = "compaction";
+    const hit = readWindowCache(transcriptPath);
+    if (hit) {
+      window = hit.window;
+      source = hit.source;
     } else {
-      const learned = learnWindowFromHistory();
-      if (learned > window) {
-        window = learned;
-        source = "history";
+      let proven = 0;
+      try {
+        proven = windowFromCompaction(fs.readFileSync(transcriptPath, "utf8"));
+      } catch {
+        /* unreadable — fall through to history */
       }
+      if (proven > window) {
+        window = proven;
+        source = "compaction";
+      } else {
+        const learned = learnWindowFromHistory();
+        if (learned > window) {
+          window = learned;
+          source = "history";
+        }
+      }
+      writeWindowCache(transcriptPath, window, source);
     }
   }
 
