@@ -36,6 +36,45 @@ Two consequences worth knowing. The exclusions live in the clone, so a **re-clon
 the stealth install** — run it again. And uninstall empties only the block it wrote, leaving
 anything you put in `.git/info/exclude` yourself.
 
+### Added — gold practices: the half of the anchor that isn't yours
+
+North-stars are per-project and user-owned. `.bearing/gold-practices.md` is the complement — 21
+numbered `GP-#` rules for how the work is done *anywhere*, shipped with bearing, cited the same way.
+It rides with the north-stars module: same form, same discipline, one place to look. **`NS-#` wins on
+conflict**, because a project's own invariant is more specific than a general rule.
+
+The framing is deliberate, and it is the reason this is a feature rather than a doc. A file of
+universal best practice — write tests, small commits, clear names — is exactly the capability every
+model already has, and shipping it changes nothing (NS-23). These are the failures that keep
+happening *anyway*, each paired with the check that catches it, and most name the scar that bought
+them:
+
+- **GP-1** — executed, or unverified. *A grep said uninstall left nothing; running it found six leaks.*
+- **GP-2** — a test that has never failed has never been tested. *Revert the fix and watch it fail.*
+- **GP-3** — test at the seam the bug lives at. *A window fix tested with a value the shipped config
+  never produced was green and dead for two releases.*
+- **GP-4** — a fixture chosen for convenience tests the case that cannot fail. *A tracked file in the
+  fixture sent every test down the skip branch; the create branch, the one that leaked, never ran.*
+
+Ownership runs opposite to the north-stars and both directions matter: `bearing update` **refreshes**
+the gold practices, so a fix to a rule reaches every repo, and it still never touches
+`.bearing/northstars.md`. Declining the north-stars module declines both.
+
+### Added — `bearing-pr`: writing a PR someone can actually review
+
+A PR skill for the authoring end, distinct from `bearing-pr-review` at the other. It ships with the
+microscope module, since both fire at the same moment — work being handed to someone else — and it
+degrades to `git diff` plus grep in a repo with no graph.
+
+It looks for the house style **first**: a `PULL_REQUEST_TEMPLATE`, then the three most recently
+merged PRs, and only falls back to its own structure when there is nothing to follow. A repo with a
+convention keeps it.
+
+What it adds over any template is the paragraph a template cannot generate — the real blast radius
+from `detect_changes`, *reconciled against reality*: which callers are listed, which are genuinely
+affected, and where the tool overstates it because a symbol changed but its behaviour did not. That
+is the reviewer's most expensive work, done once by the person who still remembers why.
+
 ### Changed — a stale index now blocks in proportion to what actually changed
 
 Two paths reach the same condition — *the graph no longer describes the repo* — and only one of them

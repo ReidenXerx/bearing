@@ -210,6 +210,8 @@ If **`.bearing/northstars.md`** exists, it is the project's **authoritative** st
 - **The GRAVEYARD is settled**: do not re-propose a rejected idea without new evidence that addresses *why* it was rejected, and do not discard a VALIDATED one without evidence that overturns it.
 - Format + maintenance routine: the **`bearing-northstars`** skill.
 
+**`.bearing/gold-practices.md` is the other half**: `GP-#` rules for how the work is done *anywhere*, shipped with bearing, where the north-stars say what *this project* is. Cite them the same way. **On conflict the `NS-#` wins** — a project's own invariant is more specific than a general rule — and you say which one and why. The ones that bite most often: a claim from reading rather than running is unverified (`GP-1`); a test that has never failed has never been tested (`GP-2`); a fixture chosen for convenience tests the case that cannot fail (`GP-4`); every line you print is a claim (`GP-7`).
+
 ## Durable memory (survives compaction + sessions)
 
 Maintain your **Claude Code project memory** — `~/.claude/projects/<this-project>/memory/MEMORY.md` (Claude Code's native memory; **all agents share this one file** — Claude refers to its own, other agents mirror it). Record task, key decisions, findings, open items, important `file:line`. Update it at milestones and whenever you conclude something that must outlive the current transcript. Context compaction and new sessions drop the conversation; this file does not. On recovery (post-compaction/resume) READ it first and reconcile it with reality — **nothing important may be lost.**

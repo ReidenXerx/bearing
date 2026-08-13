@@ -5,6 +5,15 @@ description: Read, cite, and maintain the project's north-stars — the authorit
 
 # North-stars — the project's semantic anchor
 
+## Two files, one discipline
+
+- **`.bearing/northstars.md`** — what **this project** is. Yours; bearing never overwrites it.
+- **`.bearing/gold-practices.md`** — how the work is done **anywhere** (`GP-#`). Bearing's; it
+  refreshes on every update, so do not edit it — a project rule belongs in the north-stars.
+
+Cite both the same way. **On conflict the `NS-#` wins**, because a project's own invariant is more
+specific than a general rule — say which one and why rather than averaging them.
+
 ## The problem this solves
 
 Code drift is caught by tests. **Semantic drift is not.** You read a stale doc, quietly redefine a
