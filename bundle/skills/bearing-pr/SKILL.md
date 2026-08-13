@@ -85,7 +85,7 @@ a config, something that cannot be undone by revert. Omit the section rather tha
   already in the diff.
 - **Verification steps must be ones you actually performed.** An unrun step is a guess with a
   checkbox (GP-1). If you could not run something, say so and say why.
-- **Explain rejected alternatives** (GP-16) — "why not just change all six call sites" is the
+- **Explain rejected alternatives** — "why not just change all six call sites" is the
   question, and answering it pre-empts a review round trip.
 - **Do not restate the diff.** If a line adds nothing a reviewer could not read faster in the diff
   itself, cut it.
@@ -97,5 +97,5 @@ a config, something that cannot be undone by revert. Omit the section rather tha
 
 - Does the title match the repo's convention?
 - Would someone who has never seen this code know what to click to check it?
-- Is every claim in the body one you verified (GP-1, GP-7)?
+- Is every claim in the body one you verified (GP-1, GP-8)?
 - Is the branch actually up to date with the base?

@@ -107,15 +107,18 @@ North-stars say what *your project* is. `.bearing/gold-practices.md` ships with 
 the work is done **anywhere** — numbered `GP-#`, cited the same way, and **outranked by your `NS-#`**
 whenever they disagree.
 
-Most of them were paid for, and each names its scar:
+**Every rule has a scar, and a rule without one is not in the file.** Nothing about writing tests or
+naming things — you already do that. These are the mistakes that got made *anyway*, by a careful
+agent, on this codebase:
 
 > **GP-3 — Test at the seam the bug lives at.** A unit test that passes an argument the real pipeline
 > never produces is green and dead. *Scar: a context-window fix tested as `resolve(300_000, undefined)`
 > while the shipped config always passed a number — so the fix could not run, and did not, for two
 > releases.*
 
-Not "write tests, name things well" — the model already does that. These are the failures that keep
-happening anyway, each with the check that catches it.
+Thirteen of them, and two computed guards keep the list honest: every rule must carry a scar, and
+every `GP-#` cited anywhere must still exist. The second caught a dangling citation within minutes of
+being written.
 
 ---
 

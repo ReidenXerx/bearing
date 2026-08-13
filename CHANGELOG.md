@@ -38,16 +38,17 @@ anything you put in `.git/info/exclude` yourself.
 
 ### Added — gold practices: the half of the anchor that isn't yours
 
-North-stars are per-project and user-owned. `.bearing/gold-practices.md` is the complement — 21
+North-stars are per-project and user-owned. `.bearing/gold-practices.md` is the complement — 13
 numbered `GP-#` rules for how the work is done *anywhere*, shipped with bearing, cited the same way.
 It rides with the north-stars module: same form, same discipline, one place to look. **`NS-#` wins on
 conflict**, because a project's own invariant is more specific than a general rule.
 
-The framing is deliberate, and it is the reason this is a feature rather than a doc. A file of
-universal best practice — write tests, small commits, clear names — is exactly the capability every
-model already has, and shipping it changes nothing (NS-23). These are the failures that keep
-happening *anyway*, each paired with the check that catches it, and most name the scar that bought
-them:
+**Every rule has a scar, and a rule without one is not in the file.** The first draft had 21 and
+included things like *prefer deleting* and *record the alternative you rejected* — which is an agent
+lecturing itself about what it already does, and exactly the capability-not-trigger failure NS-23
+exists to reject. What survived is 13: the mistakes that got made *anyway*, by a careful agent, on
+this codebase, each paired with the check that catches it. They share a shape — every one is a moment
+where **something looked verified and was not**:
 
 - **GP-1** — executed, or unverified. *A grep said uninstall left nothing; running it found six leaks.*
 - **GP-2** — a test that has never failed has never been tested. *Revert the fix and watch it fail.*
@@ -55,6 +56,18 @@ them:
   never produced was green and dead for two releases.*
 - **GP-4** — a fixture chosen for convenience tests the case that cannot fail. *A tracked file in the
   fixture sent every test down the skip branch; the create branch, the one that leaked, never ran.*
+- **GP-5** — an assertion that cannot fail is not an assertion. *Three of them: a substring check
+  against text that always contained it, a revert check written `return "" || (…)`, and a fixture
+  whose search term matched under both branches. All passed. None tested anything.*
+- **GP-9** — a default indistinguishable from an explicit choice disables everything downstream that
+  would correct it. *The 200000 window default, read as the user's own statement of fact.*
+- **GP-13** — your blast radius includes what you cause OTHER tools to write. *Stealth was verified
+  clean at install, then the indexer it triggered dirtied the repo.*
+
+Two guards keep it honest, both computed rather than trusted: every rule must carry a `*Scar:*`, and
+every `GP-#` cited in the contract, the skills or the README must exist. The second one earned itself
+immediately — trimming the list left a citation pointing at a deleted rule, and another that still
+resolved while meaning something entirely different.
 
 Ownership runs opposite to the north-stars and both directions matter: `bearing update` **refreshes**
 the gold practices, so a fix to a rule reaches every repo, and it still never touches
