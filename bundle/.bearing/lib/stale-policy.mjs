@@ -85,7 +85,7 @@ export function staleRefreshAgentMessage(stale, policy) {
     const pending = policy.refreshPending ? ' Session auto-refresh did not complete.' : '';
     return (
       `STALE INDEX (${detail}) — mandatory refresh BEFORE Grep/Read/MCP/shell.${pending} ` +
-      'Shell NOW: npm run bearing:agent-refresh with required_permissions: ["all"]. ' +
+      `Shell NOW: ${howToRun('bearing:agent-refresh')} with required_permissions: ["all"]. ` +
       'Run yourself — never ask the user to run npx gitnexus analyze.'
     );
   }
@@ -97,7 +97,7 @@ export function staleRefreshAgentMessage(stale, policy) {
       return (
         `CLASSICAL FALLBACK active (${why}) — classical Grep/Read/shell OK for ~${mins} min. ` +
         'Re-confirm with the graph once GitNexus is reliable; ' +
-        'end early with npm run bearing:fallback:off.'
+        `end early with ${howToRun('bearing:fallback:off')}.`
       );
     }
     return (

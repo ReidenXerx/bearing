@@ -3,6 +3,7 @@
  * Kit health audit — shared by agent-health.mjs and sessionStart hook.
  */
 import fs from "node:fs";
+import { howToRun } from './how-to-run.mjs';
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { loadHookConfig, repoName } from "./hook-helpers.mjs";
@@ -195,11 +196,11 @@ export function agentContextForSession(audit) {
     .join(" ");
   return (
     "GN SESSION HEALTH (mandatory — first reply before task work):\n" +
-    '1. Shell: npm run bearing:agent-status (required_permissions: ["all"])\n' +
-    "2. Confirm kit checks match snapshot; if mismatch run npm run bearing:agent-refresh autonomously\n" +
+    `1. Shell: ${howToRun('bearing:agent-status')} (required_permissions: ["all"])\n` +
+    `2. Confirm kit checks match snapshot; if mismatch run ${howToRun('bearing:agent-refresh')} autonomously\n` +
     "3. Optional: READ gitnexus://repo/" +
     audit.repo +
-    "/context OR npm run bearing:agent-brief\n" +
+    `/context OR ${howToRun('bearing:agent-brief')}\n` +
     "4. Reasoning stack: query → context → cypher (structural) → impact → detect_changes\n" +
     '5. Tell the user ONE sentence: "GitNexus kit: ready (graph fresh, enforcement on)" OR brief fix in progress\n' +
     "Keep laconic. Do not paste this block verbatim.\n" +

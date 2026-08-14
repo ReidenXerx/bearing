@@ -228,7 +228,7 @@ export function classifyGrep(req, ctx) {
       return {
         decision: "allow",
         agentMessage:
-          "Literal/config grep OK during stale — run npm run bearing:agent-refresh before symbol exploration.",
+          "Literal/config grep OK during stale — run " + howToRun("bearing:agent-refresh") + " before symbol exploration.",
       };
     }
     return {
@@ -301,7 +301,7 @@ export function classifyGrep(req, ctx) {
           `indexes class fields, and plain-object properties (option bags, config objects, ` +
           `destructured params) often produce no rows. Then re-run this grep scoped to a file or ` +
           `directory — that is allowed — and report the gap: ` +
-          `npm run bearing:fallback -- "ACCESSES returned [] for <field> but grep finds N".\n` +
+          `${howToRun("bearing:fallback")} -- "ACCESSES returned [] for <field> but grep finds N".\n` +
           `${helpers.cypherMidSessionNudge()}`,
         userKey: "block.grep.field",
         userVars: { symbol: seg },
@@ -487,7 +487,7 @@ export function classifyEdit(req, ctx) {
       agentMessage:
         "STALENESS GATE: " +
         staleDetail +
-        ' Edits blocked until refresh — Shell NOW: npm run bearing:agent-refresh (required_permissions: ["all"], pre-approved). Never ask the user to analyze.',
+        ` Edits blocked until refresh — Shell NOW: ${howToRun("bearing:agent-refresh")} (required_permissions: ["all"], pre-approved). Never ask the user to analyze.`,
       userKey: "block.edit.stale",
       scoreEvent: "editStaleBlocks",
     };
@@ -569,7 +569,7 @@ export function classifyCommit(req, ctx) {
       "Confirm affected processes match intent + run tests for them; warn on HIGH/CRITICAL. " +
       "This gate clears for the session after one detect_changes call." +
       (noVerify
-        ? " NOTE: --no-verify also skips the pre-commit PDG refresh — run npm run bearing:pdg after."
+        ? " NOTE: --no-verify also skips the pre-commit refresh — run " + howToRun("bearing:pdg") + " after."
         : "") +
       // `git add -A && git commit -m x` is the most common shape this gate ever sees, and the
       // whole line is blocked — the staging did NOT happen either.

@@ -3,6 +3,7 @@
  * Session-first-tool nudge + flag management for GitNexus hooks.
  */
 import fs from 'node:fs';
+import { howToRun } from './how-to-run.mjs';
 import os from 'node:os';
 import path from 'node:path';
 import { playbookForHint, mcpReadContext, repoName, clearDenyCache } from './hook-helpers.mjs';
@@ -557,7 +558,7 @@ export function diagnoseEnforcement(counts = {}) {
       advice:
         'This reads two ways and the log tells you which: the gates may be firing on work the graph ' +
         'cannot answer (a real misfit), OR they may be doing exactly their job on an agent that ' +
-        'keeps reaching for grep first (working as intended). Check `npm run bearing:fallback-log` ' +
+        `keeps reaching for grep first (working as intended). Check \`${howToRun('bearing:fallback-log')}\` ` +
         '— recurring distrust of the same tool is the first case and is worth reporting upstream; ' +
         'an empty log points at the second. Only downgrade to `"mode": "guide"` for the first.',
     });
@@ -567,7 +568,7 @@ export function diagnoseEnforcement(counts = {}) {
       level: 'warn',
       headline: `${n('classicalFallbackGranted')} classical-fallback grants — agents repeatedly distrusted the graph.`,
       advice:
-        'Each grant is a logged failure report. Review with `npm run bearing:fallback-log --json` ' +
+        `Each grant is a logged failure report. Review with \`${howToRun('bearing:fallback-log')} --json\` ` +
         'and send it upstream; a recurring shape there is a real coverage gap, not agent error.',
     });
   }
@@ -885,10 +886,10 @@ export function firstToolNudge(root, stale) {
         ? 'MISSING EMBEDDINGS: semantic query unavailable — '
         : 'STALE INDEX: ';
     parts.push(
-      `${reason}next Shell MUST be npm run bearing:agent-refresh (required_permissions: ["all"]). Includes --embeddings. Run yourself — never ask user to analyze.`
+      `${reason}next Shell MUST be ${howToRun('bearing:agent-refresh')} (required_permissions: ["all"]). Includes --embeddings. Run yourself — never ask user to analyze.`
     );
   } else {
-    parts.push(`SESSION: ${mcpReadContext(repo)} OR npm run bearing:agent-brief`);
+    parts.push(`SESSION: ${mcpReadContext(repo)} OR ${howToRun('bearing:agent-brief')}`);
   }
 
   const playbook = playbookForHint(hint, repo);

@@ -4,6 +4,7 @@
  * Usage: node .bearing/lib/agent-health.mjs [repoRoot]
  */
 import fs from "node:fs";
+import { howToRun } from './how-to-run.mjs';
 import path from "node:path";
 import { auditKitHealth } from "./session-health-audit.mjs";
 
@@ -64,9 +65,9 @@ async function main() {
   );
   lines.push("");
   lines.push("Commands:");
-  lines.push("  npm run bearing:health        this summary");
-  lines.push("  npm run bearing:agent-brief   session orientation (agents)");
-  lines.push("  npm run bearing:agent-status  staleness check (agents)");
+  lines.push(`  ${howToRun('bearing:health')}        this summary`);
+  lines.push(`  ${howToRun('bearing:agent-brief')}   session orientation (agents)`);
+  lines.push(`  ${howToRun('bearing:agent-status')}  staleness check (agents)`);
   lines.push("");
   lines.push("Team guide: docs/GITNEXUS-CURSOR-GUIDE.md");
 

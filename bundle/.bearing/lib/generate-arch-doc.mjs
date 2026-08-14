@@ -5,6 +5,7 @@
  * Writes docs/ARCHITECTURE.gitnexus.md. Best-effort: degrades to stats-only if cypher unavailable.
  */
 import fs from "node:fs";
+import { howToRun } from './how-to-run.mjs';
 import path from "node:path";
 import { repoName } from "./hook-helpers.mjs";
 import { runCypher, parseRows } from "./cypher-cli.mjs";
@@ -55,7 +56,7 @@ export function generateArchDoc(root, repoArg, env) {
   lines.push(`# Architecture — ${repo}`);
   lines.push("");
   lines.push(
-    "> Auto-generated from the GitNexus knowledge graph. Do not edit by hand — regenerate with `npm run bearing:map`.",
+    "> Auto-generated from the GitNexus knowledge graph. Do not edit by hand — regenerate with `${howToRun('bearing:map')}`.",
   );
   lines.push(
     `> Generated ${new Date().toISOString()}${lastCommit ? ` @ ${lastCommit.slice(0, 7)}` : ""}.`,

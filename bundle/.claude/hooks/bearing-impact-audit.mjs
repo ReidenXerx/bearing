@@ -69,6 +69,7 @@ if (risk && !["LOW", "NONE", "MINIMAL"].includes(risk)) process.exit(0);
 
 const { emitContext } = await lib("claude-emit.mjs");
 const { bumpScore } = await lib("session-primer.mjs");
+const { howToRun } = await lib("how-to-run.mjs");
 
 const symptom = emptyCallers
   ? "resolved NO callers"
@@ -86,7 +87,7 @@ emitContext(
     "  • check route/registration/DI wiring — where is the factory's result destructured?\n" +
     "  • if the symbol is exported, search for its import sites\n\n" +
     "If a classical check finds callers the graph missed, that is a defect worth reporting:\n" +
-    '  npm run bearing:fallback -- "impact returned 0 callers for <symbol> but grep finds N at <file:line>"',
+    `  ${howToRun('bearing:fallback')} -- "impact returned 0 callers for <symbol> but grep finds N at <file:line>"`,
   "PostToolUse",
 );
 

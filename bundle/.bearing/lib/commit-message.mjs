@@ -4,6 +4,7 @@
  * Lists affected execution flows + functional areas for the changed symbols.
  */
 import { execSync } from 'node:child_process';
+import { howToRun } from './how-to-run.mjs';
 import path from 'node:path';
 import { repoName } from './hook-helpers.mjs';
 import { runCypher, firstColumn, parseRows } from './cypher-cli.mjs';
@@ -78,7 +79,7 @@ export function draftCommitMessage(root, repoArg, env) {
   }
   if (!grounded && symbols.length) {
     lines.push('');
-    lines.push('# (Graph unavailable — flows/modules omitted. Run npm run bearing:agent-refresh, then retry.)');
+    lines.push(`# (Graph unavailable — flows/modules omitted. Run ${howToRun('bearing:agent-refresh')}, then retry.)`);
   }
 
   return { message: lines.join('\n'), grounded };

@@ -4,6 +4,7 @@
  * Usage: node .bearing/lib/agent-brief.mjs [repoRoot]
  */
 import { execSync } from "node:child_process";
+import { howToRun } from './how-to-run.mjs';
 import fs from "node:fs";
 import path from "node:path";
 import {
@@ -87,7 +88,7 @@ async function main() {
       );
     }
     lines.push(
-      'Next: npm run bearing:agent-refresh (required_permissions: ["all"]) — includes --embeddings',
+      `Next: ${howToRun('bearing:agent-refresh')} (required_permissions: ["all"]) — includes --embeddings`,
     );
   }
 
@@ -140,7 +141,7 @@ async function main() {
   lines.push("Session start (copy-paste):");
   lines.push(`  ${mcpReadContext(repo)}`);
   lines.push(`  ${mcpReadSchema(repo)}`);
-  lines.push("  npm run bearing:agent-brief");
+  lines.push(`  ${howToRun('bearing:agent-brief')}`);
   lines.push("");
   lines.push("Precision recipes (copy-paste):");
   lines.push(`  ${mcpTrace("<source>", "<target>", repo)}`);
