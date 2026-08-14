@@ -93,15 +93,34 @@ better does not prevent.
   calls it.** Rank every source by distance from where the behaviour is decided: the producer's own
   implementation, then its published spec, then anything downstream. A call site tells you what one
   developer *believed* the contract was — which is a claim about them, not about the contract, and
-  it carries their bugs forward as evidence. When the only thing you can reach is downstream, say
-  that is what you have. *Scar: the meaning of two query parameters was settled by reading a
-  frontend mapping helper, which was itself inverted. The real contract said the opposite, and both
-  conclusions built on the reading were wrong.*
+  it carries their bugs forward as evidence.
 
-- **GP-15** — **Exhaust the cheaper rung before escalating, and never ask a person what the source
-  can answer.** The ladder runs: the authoritative artefact, then your own detective work through
-  source, history and prior discussion, then ask the human, then block on someone else. Skipping up
-  is the visible failure; skipping *down* — guessing where you could have asked — is the quiet one.
+  The reason this rule gets broken is an assumption, not laziness: that the producer is out of
+  reach. Check before believing that. A code search across the organisation's repositories usually
+  answers it in one call, with no access request and no waiting. When it genuinely is unreachable,
+  the conclusion is still available — but it is now *"the callers behave as if X"*, which is a
+  weaker claim than *"the contract is X"*, and it gets written down as the weaker one.
+  *Scar: the meaning of two query parameters was settled by reading a frontend mapping helper,
+  which was itself inverted. The real contract said the opposite, and both conclusions built on the
+  reading were wrong.*
+
+- **GP-15** — **Work the ladder in order, and only descend when a rung genuinely fails.**
+
+  1. **The authoritative artefact** — the spec, the schema, the generated contract. Refresh it
+     first: a stale copy is not the artefact, it is a third-hand account of one.
+  2. **Detective work.** The producer's own source. How the rest of the codebase already does this
+     — an existing caller shows you the *shape*: which call to make, in what order, with what
+     wired up. It does **not** show you what the values mean (GP-14), and the two are easy to
+     conflate precisely because the example is right there and looks authoritative. Documentation.
+     The git history of the lines in question. Past tickets **and their comment threads**, which is
+     where the decision usually lives while the ticket body records only what was asked for.
+  3. **Ask the person you are working with.**
+  4. **Only then block on someone else.**
+
+  Both directions are failures and only one of them is visible. **Skipping up** — handing a person a
+  question that rung 1 or 2 already answered — wastes their time and looks like diligence.
+  **Skipping down** — guessing where you could simply have asked — produces a confident answer with
+  nothing underneath it, and nobody finds out until it is wrong.
   *Scar: two wrong conclusions were escalated to a person while the service's own source, readable
   without asking anyone, went unread.*
 
