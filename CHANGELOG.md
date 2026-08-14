@@ -65,12 +65,14 @@ being careful, each paired with the check that catches it.
 
 Six more came from a **different** codebase — a real product repo whose own north-stars had
 accumulated rules that were never project-specific to begin with. Those generalise cleanly and each
-kept its scar: a consumer's reading of an API is not that API's contract (`GP-14`, settled from a
-frontend helper that was itself inverted); never ask a person what the source can answer (`GP-15`);
+kept its scar: establish a contract from the thing that defines it and never from something that
+calls it (`GP-14` — two parameters were settled from a frontend helper that was itself inverted);
+never ask a person what the source can answer (`GP-15`);
 the same fix in N places is one implementation with N call sites, *across* separate PRs too, and a
 copied explanatory comment is the tell (`GP-16`); when your tooling lies, fix the tooling rather than
 the one-off that hit it (`GP-17`); reporting something as unverified is not a handover, and finding
-the test data is your job (`GP-18`); the report's audience is not you (`GP-19`).
+the test data is your job (`GP-18`); send each fact to the reader who can act on it (`GP-19`) —
+which is about *where* an unverified claim goes, never about omitting it.
 
 What stayed behind in that repo's north-stars is as telling: ticket workflow, plan-document gates,
 who gets told in which channel. Those are the project, not the practice.

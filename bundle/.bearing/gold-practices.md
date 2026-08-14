@@ -89,12 +89,14 @@ better does not prevent.
 
 ## The evidence
 
-- **GP-14** — **A consumer's reading is not the producer's contract.** Code that *calls* an API is
-  evidence of what someone believed it meant, which is not the same thing and is frequently wrong.
-  Rank sources by distance from the source of truth: the producer's own implementation, then its
-  published spec, then anything downstream. *Scar: the meaning of two query parameters was settled
-  by reading a frontend mapping helper — which was itself inverted. The real contract said the
-  opposite, and both conclusions built on it were wrong.*
+- **GP-14** — **Establish a contract from the thing that defines it, never from something that
+  calls it.** Rank every source by distance from where the behaviour is decided: the producer's own
+  implementation, then its published spec, then anything downstream. A call site tells you what one
+  developer *believed* the contract was — which is a claim about them, not about the contract, and
+  it carries their bugs forward as evidence. When the only thing you can reach is downstream, say
+  that is what you have. *Scar: the meaning of two query parameters was settled by reading a
+  frontend mapping helper, which was itself inverted. The real contract said the opposite, and both
+  conclusions built on the reading were wrong.*
 
 - **GP-15** — **Exhaust the cheaper rung before escalating, and never ask a person what the source
   can answer.** The ladder runs: the authoritative artefact, then your own detective work through
@@ -129,9 +131,16 @@ better does not prevent.
   sends someone hunting through a backend for a record that mostly does not exist — the single most
   expensive part of a manual check, and the part that could have been done for them.*
 
-- **GP-19** — **The report's audience is not you.** What you have not got round to verifying, why
-  something is still in draft, your own doubts and plans — those belong in chat or the task-core. The
-  artefact the team reads gets the problem, the cause, the fix, how to check it, and anything you
-  changed outside what was asked. A real limitation the reader must act on belongs there; narrating
-  your process does not. *Scar: a PR body carried internal notes about what remained unverified —
-  written for one person, read by the whole team.*
+- **GP-19** — **Send each fact to the reader who can act on it.** A PR description, a status update
+  and a handover have different readers, and a fact that is essential in one is noise in another.
+  The team-facing artefact carries what a reviewer must act on: the problem, the cause, the fix, how
+  to check it, and anything you changed beyond what was asked. Your route to the answer — what you
+  have not got to yet, why something is still draft, the approach you nearly took — has a reader
+  too, and it is the person you are working with, not everyone who opens the PR later.
+
+  **This is not licence to omit it** (GP-1, GP-8). An unverified claim is still said out loud and
+  still gets a means to check it (GP-18); what changes is *where*, not *whether*. The test is one
+  question: **would this reader do something differently knowing it?** A limitation they must work
+  around, yes. An account of how you got here, no.
+  *Scar: a PR body carried notes on what remained unverified and why a branch was still draft —
+  written for one person, read by the whole team, and useless to every one of them.*
