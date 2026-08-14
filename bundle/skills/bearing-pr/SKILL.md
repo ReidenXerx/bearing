@@ -87,6 +87,13 @@ a config, something that cannot be undone by revert. Omit the section rather tha
   checkbox (GP-1). If you could not run something, say so and say why.
 - **Explain rejected alternatives** — "why not just change all six call sites" is the
   question, and answering it pre-empts a review round trip.
+- **Nothing in the body is for you** (GP-19). What you have not got round to verifying, why something
+  is still in draft, your own doubts and plans — those go to chat or the task-core. A real limitation
+  the reviewer must act on belongs; narrating your process does not.
+- **Anything you changed outside what was asked gets itemised**, however small and however obviously
+  correct. An unreported out-of-scope change is indistinguishable from a mistake.
+- **If you could not verify something, hand over the means to** (GP-18) — a link that opens the exact
+  case in the exact state, not "find an unpaid invoice". Reporting it as unverified is not a handover.
 - **Do not restate the diff.** If a line adds nothing a reviewer could not read faster in the diff
   itself, cut it.
 - **Screenshots for anything visual**, before/after when behaviour changed.

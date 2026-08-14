@@ -38,17 +38,16 @@ anything you put in `.git/info/exclude` yourself.
 
 ### Added — gold practices: the half of the anchor that isn't yours
 
-North-stars are per-project and user-owned. `.bearing/gold-practices.md` is the complement — 13
+North-stars are per-project and user-owned. `.bearing/gold-practices.md` is the complement — 19
 numbered `GP-#` rules for how the work is done *anywhere*, shipped with bearing, cited the same way.
 It rides with the north-stars module: same form, same discipline, one place to look. **`NS-#` wins on
 conflict**, because a project's own invariant is more specific than a general rule.
 
 **Every rule has a scar, and a rule without one is not in the file.** The first draft had 21 and
-included things like *prefer deleting* and *record the alternative you rejected* — which is an agent
-lecturing itself about what it already does, and exactly the capability-not-trigger failure NS-23
-exists to reject. What survived is 13: the mistakes that got made *anyway*, by a careful agent, on
-this codebase, each paired with the check that catches it. They share a shape — every one is a moment
-where **something looked verified and was not**:
+included things like *prefer deleting* and *record the alternative you rejected* — an agent lecturing
+itself about what it already does, which is exactly the capability-not-trigger failure NS-23 exists
+to reject. Thirteen survived the cut: the mistakes that got made *anyway*, by a careful agent, while
+being careful, each paired with the check that catches it.
 
 - **GP-1** — executed, or unverified. *A grep said uninstall left nothing; running it found six leaks.*
 - **GP-2** — a test that has never failed has never been tested. *Revert the fix and watch it fail.*
@@ -64,10 +63,22 @@ where **something looked verified and was not**:
 - **GP-13** — your blast radius includes what you cause OTHER tools to write. *Stealth was verified
   clean at install, then the indexer it triggered dirtied the repo.*
 
-Two guards keep it honest, both computed rather than trusted: every rule must carry a `*Scar:*`, and
-every `GP-#` cited in the contract, the skills or the README must exist. The second one earned itself
-immediately — trimming the list left a citation pointing at a deleted rule, and another that still
-resolved while meaning something entirely different.
+Six more came from a **different** codebase — a real product repo whose own north-stars had
+accumulated rules that were never project-specific to begin with. Those generalise cleanly and each
+kept its scar: a consumer's reading of an API is not that API's contract (`GP-14`, settled from a
+frontend helper that was itself inverted); never ask a person what the source can answer (`GP-15`);
+the same fix in N places is one implementation with N call sites, *across* separate PRs too, and a
+copied explanatory comment is the tell (`GP-16`); when your tooling lies, fix the tooling rather than
+the one-off that hit it (`GP-17`); reporting something as unverified is not a handover, and finding
+the test data is your job (`GP-18`); the report's audience is not you (`GP-19`).
+
+What stayed behind in that repo's north-stars is as telling: ticket workflow, plan-document gates,
+who gets told in which channel. Those are the project, not the practice.
+
+Two guards keep the file honest, both computed rather than trusted: every rule must carry a
+`*Scar:*`, and every `GP-#` cited in the contract, the skills or the README must exist. The second
+earned itself immediately — trimming the list left a citation pointing at a deleted rule, and another
+that still resolved while meaning something entirely different.
 
 Ownership runs opposite to the north-stars and both directions matter: `bearing update` **refreshes**
 the gold practices, so a fix to a rule reaches every repo, and it still never touches

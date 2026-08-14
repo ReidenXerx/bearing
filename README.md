@@ -116,7 +116,7 @@ agent, on this codebase:
 > while the shipped config always passed a number — so the fix could not run, and did not, for two
 > releases.*
 
-Thirteen of them, and two computed guards keep the list honest: every rule must carry a scar, and
+Nineteen of them, and two computed guards keep the list honest: every rule must carry a scar, and
 every `GP-#` cited anywhere must still exist. The second caught a dangling citation within minutes of
 being written.
 

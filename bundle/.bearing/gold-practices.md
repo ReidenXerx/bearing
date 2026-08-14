@@ -14,10 +14,8 @@ rule, so on conflict the `NS-#` wins and you say which one and why.
 **Every rule here has a scar, and the scar is the point.** There is deliberately nothing about
 writing tests, naming things, or keeping commits small: you already do that, and a rule you already
 follow costs context and changes nothing. What is here is the set of mistakes that got made *anyway*
-— by a competent agent, on this codebase, while being careful — because those are the ones knowing
+— by a competent agent, on a real codebase, while being careful — because those are the ones knowing
 better does not prevent.
-
-They share a shape. Every one is a moment where **something looked verified and was not**.
 
 ---
 
@@ -88,3 +86,52 @@ They share a shape. Every one is a moment where **something looked verified and 
   your own writes is not enough if you invoke something that writes too. *Scar: a mode whose entire
   promise was leaving the repository untouched was verified clean at install — then the indexer it
   triggered appended to a tracked file and created another, and the repo went dirty.*
+
+## The evidence
+
+- **GP-14** — **A consumer's reading is not the producer's contract.** Code that *calls* an API is
+  evidence of what someone believed it meant, which is not the same thing and is frequently wrong.
+  Rank sources by distance from the source of truth: the producer's own implementation, then its
+  published spec, then anything downstream. *Scar: the meaning of two query parameters was settled
+  by reading a frontend mapping helper — which was itself inverted. The real contract said the
+  opposite, and both conclusions built on it were wrong.*
+
+- **GP-15** — **Exhaust the cheaper rung before escalating, and never ask a person what the source
+  can answer.** The ladder runs: the authoritative artefact, then your own detective work through
+  source, history and prior discussion, then ask the human, then block on someone else. Skipping up
+  is the visible failure; skipping *down* — guessing where you could have asked — is the quiet one.
+  *Scar: two wrong conclusions were escalated to a person while the service's own source, readable
+  without asking anyone, went unread.*
+
+## The shared path
+
+- **GP-16** — **The same fix in N places is one implementation with N call sites.** This binds
+  *across* separate changes too: three PRs each pasting the same block is the same defect as one
+  file pasting it three times, and splitting the work does not license duplicating it. **A copied
+  explanatory comment is the tell** — if the prose has to travel with the code, the code should have
+  been extracted. *Scar: three separate PRs for one bug each independently reimplemented the same
+  ~10-line mechanism, carrying an identical multi-paragraph comment along with it.*
+
+- **GP-17** — **When your tooling lies, fix the tooling.** A wrong selector, a signal that does not
+  mean what you thought, a check that passes for the wrong reason: fix it in the shared helper, not
+  in the one-off script that happened to hit it. A signal *proven* to lie gets removed, not routed
+  around — leaving it in place means the next person believes it. *Scar: three lessons from one test
+  run were fixed inside a single verification script while the shared helpers kept the broken
+  versions, so every later run inherited them.*
+
+## The handover
+
+- **GP-18** — **Reporting something as unverified is not a handover.** If you could not check it,
+  hand over the means to check it. And **finding the data is your job, not theirs**: a link that
+  opens the exact case in the exact state, created if none exists, opened by you first to confirm it
+  lands where you said — plus why the obvious candidates do not work, because most will not and they
+  will otherwise conclude the feature is broken. *Scar: "find an unpaid invoice and click the vendor"
+  sends someone hunting through a backend for a record that mostly does not exist — the single most
+  expensive part of a manual check, and the part that could have been done for them.*
+
+- **GP-19** — **The report's audience is not you.** What you have not got round to verifying, why
+  something is still in draft, your own doubts and plans — those belong in chat or the task-core. The
+  artefact the team reads gets the problem, the cause, the fix, how to check it, and anything you
+  changed outside what was asked. A real limitation the reader must act on belongs there; narrating
+  your process does not. *Scar: a PR body carried internal notes about what remained unverified —
+  written for one person, read by the whole team.*
