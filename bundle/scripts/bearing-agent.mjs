@@ -243,15 +243,20 @@ function markRefreshOutcome(success, detail = "") {
 }
 
 if (cmd === "refresh") {
-  console.log(
-    "==> GitNexus agent refresh (full analyze --force + embeddings + PDG + sync teaching bundle)",
-  );
+  console.log("==> GitNexus agent refresh (diagnose, then run the cheapest sufficient analyze)");
   console.log(tmpSpaceReport(ROOT));
   try {
-    // Full --force + PDG: guarantees a complete control/data-dependence + taint
-    // layer (pdg_query/explain/impact(mode:pdg)) on every autonomous refresh, same
-    // as the pre-commit hook — no partial-incremental PDG risk.
-    const rc = runAllowFail("npm", ["run", "bearing:full-pdg"], { stdio: "inherit" });
+    // Was an unconditional `bearing:full-pdg` — analyze --force + embeddings + skills + PDG — for
+    // ANY staleness, including two files behind. A full rebuild bought to close a small gap, and on
+    // a large repository that is minutes of the user's time per staleness event.
+    //
+    // refresh-cli reads the diagnosis and picks the tier: nothing when no source moved, incremental
+    // for a normal gap, and --force only where it is genuinely required — a missing index, a
+    // diverged history, or a graph with no embeddings, which cannot be repaired incrementally
+    // because analyze short-circuits on "already up to date" before it ever reaches the embedder.
+    const rc = runAllowFail(process.execPath, [".bearing/lib/refresh-cli.mjs", ROOT], {
+      stdio: "inherit",
+    });
     if (rc !== 0) {
       markRefreshOutcome(false, `analyze exited ${rc} — index could not be refreshed`);
       console.error(

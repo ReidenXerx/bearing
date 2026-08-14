@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Full GitNexus re-index (force) with PDG before each commit; smoke-test graph integrity.
-# Full --force rebuild keeps control/data-dependence + taint flows accurate at commit
-# boundaries (vs. the lighter incremental bearing:pdg used mid-session).
+# Refresh the GitNexus index in proportion to what the commit changed; smoke-test graph integrity.
+# The refresh tier is chosen from the staleness diagnosis: nothing when no source moved, otherwise an
+# incremental analyze. Taint and control/data-dependence (PDG) are built on demand by `bearing:pdg`,
+# not here — they roughly triple node count and four tools read them.
 #
 # THIS HOOK REPORTS. IT DOES NOT GATE.
 #
@@ -35,9 +36,32 @@ mark_failed() {
   fi
 }
 
-if ! npm run bearing:full-pdg; then
+# Refresh the graph in proportion to what changed, rather than rebuilding it wholesale.
+#
+# This ran `bearing:full-pdg` — `analyze --force --embeddings --skills --pdg` — on EVERY commit.
+# Measured: 43s on a 220-file repository, just under ten minutes on a 3,000-file product repo, paid
+# every time anyone committed anything. `analyze` is already incremental and `--force` is the opt-in,
+# so the full rebuild was buying nothing that a plain analyze does not already do.
+#
+# PDG is no longer built here either. It roughly triples node count (1,797 -> 6,487 on the same
+# repository) and exactly four tools read it, so it belongs at the moment someone reaches for taint
+# or statement-level dataflow — `bearing:pdg` — not as a toll on every commit.
+REFRESH_RC=0
+if [[ -f ".bearing/lib/refresh-cli.mjs" ]]; then
+  node .bearing/lib/refresh-cli.mjs . || REFRESH_RC=$?
+elif node -e "process.exit(require('./package.json').scripts?.['bearing:refresh']?0:1)" 2>/dev/null; then
+  # Installed before refresh-cli shipped. Still incremental, still better than the forced rebuild.
+  npm run bearing:refresh || REFRESH_RC=$?
+else
+  # No refresh path installed at all is not a broken graph, and must not be reported as one —
+  # marking it failed would send every later session down the classical-fallback route over a
+  # missing file (NS-5: a false deny is worse than a missed gate).
+  echo "==> no refresh path installed — skipping index refresh"
+fi
+
+if [[ "$REFRESH_RC" != "0" ]]; then
   FAILED="index"
-  mark_failed "pre-commit: bearing:full-pdg failed"
+  mark_failed "pre-commit: index refresh failed"
 fi
 
 # Keep AGENTS.md/CLAUDE.md free of the volatile GitNexus stats block that
