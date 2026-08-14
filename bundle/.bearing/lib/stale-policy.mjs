@@ -7,6 +7,7 @@
  *   classical_fallback — refresh failed OR agent granted a fallback; classical OK with reason
  */
 import { isRefreshFailed, isRefreshPending, fallbackGrant } from './session-primer.mjs';
+import { howToRun } from './how-to-run.mjs';
 
 /**
  * @param {object} stale from check-staleness / load-staleness
@@ -15,7 +16,7 @@ import { isRefreshFailed, isRefreshPending, fallbackGrant } from './session-prim
 /** Ways OUT of a block. A blocked session could not discover either, so a failing analyze looked
  * like a dead end. Kept short so it does not bury the primary instruction. */
 export const ESCAPE_HINT =
-  " If GitNexus itself is wrong/unavailable: `npm run bearing:fallback -- \"<why>\"` (bounded, logged). To downgrade blocks to warnings: set \"mode\":\"guide\" in .bearing/hooks.json.";
+  ` If GitNexus itself is wrong/unavailable: \`${howToRun('bearing:fallback')} -- "<why>"\` (bounded, logged). To downgrade blocks to warnings: set "mode":"guide" in .bearing/hooks.json.`;
 
 export function evaluateStalePolicy(stale, root) {
   // Explicit escape hatch: the agent/user declared GitNexus untrustworthy here

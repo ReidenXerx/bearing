@@ -7,6 +7,7 @@ import fs from 'node:fs';
 import { execSync } from 'node:child_process';
 import path from 'node:path';
 import { loadHookConfig } from './hook-helpers.mjs';
+import { howToRun } from './how-to-run.mjs';
 
 const root = process.argv[2] ?? process.cwd();
 
@@ -115,8 +116,10 @@ function countDrift(at, sourceExtRe) {
 
 const staleHookNote =
   'Hooks block Grep/Read/MCP/shell until refresh succeeds or fails.';
+// Resolved, not hardcoded: a stealth install has no npm scripts, so naming one made every block
+// point at a command that repo did not have (NS-6 — a block whose exit does not exist is a trap).
 const agentFix =
-  `${staleHookNote} Agent MUST run npm run bearing:agent-refresh autonomously (required_permissions: ["all"]).`;
+  `${staleHookNote} Agent MUST run ${howToRun(root, "bearing:agent-refresh")} autonomously (required_permissions: ["all"]).`;
 
 const out = {
   fresh: true,

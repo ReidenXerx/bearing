@@ -30,6 +30,7 @@
  * @property {() => number} [readLines] (read) lazily count lines of the target file.
  */
 import * as helpers from "./hook-helpers.mjs";
+import { howToRun } from './how-to-run.mjs';
 
 /** Strip ONE layer of matching surrounding quotes or /regex/ delimiters. */
 export function coreToken(pattern) {
@@ -888,7 +889,7 @@ export function classifyGraphBehind(toolName, stale) {
     decision: "deny",
     agentMessage:
       `Graph is ${n} source file(s) behind HEAD — gitnexus_${suffix} would answer from the older ` +
-      "code. Resync: `npm run bearing:refresh` (incremental — usually quick), then retry. Read/Grep " +
+      "code. Resync: `" + howToRun("bearing:refresh") + "` (incremental — usually quick), then retry. Read/Grep " +
       "are OPEN meanwhile: this is a small measured gap, not a broken index.",
     userKey: "stale.graph_behind",
     scoreEvent: "graphBehindBlocks",
@@ -910,7 +911,7 @@ export function classifyMcpDrift(toolName, stale, config, phase) {
     decision: "deny",
     agentMessage:
       `Graph is ${count} uncommitted edit(s) behind your working tree — gitnexus_${suffix} would ` +
-      "return STALE results that ignore your changes. Resync first: `npm run bearing:refresh` " +
+      "return STALE results that ignore your changes. Resync first: `" + howToRun("bearing:refresh") + "` " +
       "(incremental — reindexes only your changed files; usually quick), then retry.",
     userKey: "drift.refresh",
     scoreEvent: "driftRefreshBlocks",

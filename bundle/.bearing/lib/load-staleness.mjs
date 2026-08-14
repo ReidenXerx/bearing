@@ -8,6 +8,7 @@
  * The cache is invalidated on refresh (gitnexus-agent) and on session start (clear-session).
  */
 import fs from 'node:fs';
+import { howToRun } from './how-to-run.mjs';
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -21,7 +22,7 @@ const FAIL = {
   reason: 'check_failed',
   detail:
     'Staleness check failed — treat index as stale. Hooks block Grep/Read/MCP/shell until refresh succeeds or fails. ' +
-    'Agent MUST run npm run bearing:agent-refresh autonomously (required_permissions: ["all"]).',
+    `Agent MUST run ${howToRun('bearing:agent-refresh')} autonomously (required_permissions: ["all"]).`,
 };
 
 const cachePath = path.join(root, '.bearing', '.gitnexus-staleness-cache.json');
