@@ -2,6 +2,29 @@
 
 All notable changes to `bearing` are documented here.
 
+## Unreleased
+
+### Fixed — a stealth uninstall left bearing wired in, and hid that it had
+
+`git status` came back clean, so the repo looked untouched. It was not: eleven guards were still
+registered in `.claude/settings.local.json`, every one of them pointing at a hook script the same
+uninstall had just deleted — a failed spawn on every session start, prompt and tool call.
+
+`mergeClaudeSettings` writes to `settings.local.json` under stealth and `settings.json` otherwise;
+`removeClaudeSettings` only ever knew the second. The visible path was fine, which is why no
+existing test saw it — they all install visibly.
+
+Two things made it worse than a leftover file:
+
+- **The concealment survived too.** `removeExclude()` existed and was imported into `kit.mjs`, and
+  was never called. So the leftovers stayed hidden and `git status` reported clean — the repo
+  *looked* uninstalled precisely because the hiding mechanism outlived the thing it hid.
+- **`.bearing/contract.md` was never recorded.** 21KB of generated contract, written at install and
+  absent from `manifest.files`, so uninstall could not know it owned it (NS-22).
+
+All three fixed, with the negative control: a user's own hooks, permissions and `.git/info/exclude`
+entries survive untouched.
+
 ## 1.0.11 — a stealth install, and the two ways it leaked on the first real repo
 
 ### Added — stealth install: bearing for you, invisible to the repo and your teammates
