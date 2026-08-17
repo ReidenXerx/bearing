@@ -2,7 +2,7 @@
 
 All notable changes to `bearing` are documented here.
 
-## Unreleased
+## 1.0.13 — ask about what changes the product, and stop guessing at the context window
 
 ### Added — Consult, a sixth module: ask about what changes the product, decide the rest
 
