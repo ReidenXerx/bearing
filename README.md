@@ -26,13 +26,14 @@ That failure has a name — **losing your bearings**.
 
 ## What you get
 
-**Five independent modules. Pick any combination — each works alone, none depends on another.**
+**Six independent modules. Pick any combination — each works alone, none depends on another.**
 
 | | |
 |---|---|
 | ⚑ **North-stars** | Numbered, authoritative claims about what your project *is*. **Outranks every other doc**, re-injected as the session runs. |
 | 💾 **Task-core** | A dense save-state of the current task, written **before** compaction drops the detail. |
 | 🔬 **Microscope** | A panel of lens agents that reviews as an expert in *your* domain — and must survive its own refutation pass. |
+| 🙋 **Consult** | Asks you about what it *can't* find — which reading you meant, what a user should see — and decides the rest itself. Confirms before anything irreversible. |
 | 🐜 **Minions** | Wide mechanical work split across cheap anchored subagents that return **citations, not opinions**. They gather; your agent concludes. |
 | 🕸 **GitNexus** | Hard gates that redirect symbol greps to a real code graph. Requires the [GitNexus](https://github.com/abhigyanpatwari/GitNexus) MCP server. |
 
@@ -45,7 +46,7 @@ npx bearing                                    # interactive — explains each m
 npx bearing install . --runtime claude --features northstars,taskcore
 ```
 
-`--runtime` `claude` · `cursor` · `zed` · `codex` · `all`  ·  `--features` `northstars` · `taskcore` · `microscope` · `minions` · `gitnexus` · `all`
+`--runtime` `claude` · `cursor` · `zed` · `codex` · `all`  ·  `--features` `northstars` · `taskcore` · `microscope` · `consult` · `minions` · `gitnexus` · `all`
 
 Then restart your IDE. Enforcement needs tool-interception hooks, and only some runtimes expose them:
 
@@ -55,6 +56,7 @@ Then restart your IDE. Enforcement needs tool-interception hooks, and only some 
 | North-stars — re-anchored mid-session | ✅ | — | — | — |
 | Task-core — survives compaction | ✅ | — | — | — |
 | Microscope — domain-expert review | ✅ | ✅ | ✅ | — |
+| Consult — ask vs decide | ✅ | ✅ | ✅ | — |
 | Minions — anchored fan-out | ✅ | — | — | — |
 | GitNexus — hard gates | ✅ | ✅ | — | — |
 
@@ -143,6 +145,20 @@ It maps your change into slices and spawns **one lens agent per slice** — in p
 **Kind B is the part a linter can never do.** It asks *why does this exist?*, *is this the wrong abstraction?* — and catches semantic wrongness: *"this fee is computed on gross, should be net."* Code that runs perfectly and is still wrong.
 
 Then every finding has to survive an adversarial pass that tries to **refute** it. What can't be defended never reaches you.
+
+## 🙋 Consult
+
+**Agents interrupt you for the wrong things, and go quiet for the wrong things.**
+
+Permission to rename a file; silence while they invent a business rule. Consult is the judgment that separates the two, for a senior engineer who does not want to be asked about naming.
+
+**The test that does most of the work: is the answer discoverable in the repo?** Code, tests, config, git history, north-stars — then it goes and finds it, because asking is offloading. If it exists only in *your* head — which of two readings you meant, which tradeoff you prefer, what a user should actually see — no amount of reading produces it. **That** is the question.
+
+And when it does ask: closed options, the tradeoff, a recommendation, and what it will do without an answer. Never *"shall I proceed?"* — that is not a question, it is accountability being handed back to you.
+
+**One-way doors are a different act.** Deleting data, force-pushing, publishing, migrating — it *confirms*, even when the right answer is obvious, because irreversible is the reason, not ambiguity. Reversible work needs no permission.
+
+Then the part that compounds: **an answer that is a RULE gets proposed as a north-star.** Not every answer — a rule constrains future work, an instance doesn't. Ask once, write it down, never ask again.
 
 ## 🐜 Minions
 

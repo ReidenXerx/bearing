@@ -4,6 +4,35 @@ All notable changes to `bearing` are documented here.
 
 ## Unreleased
 
+### Added — Consult, a sixth module: ask about what changes the product, decide the rest
+
+Agents interrupt you for the wrong things and go quiet for the wrong things — permission to rename a
+file, silence while they invent a business rule. Both cost the same person the same trust, and both
+are judgment, not capability: the agent can already ask.
+
+**Ask when you are about to INVENT a requirement rather than implement one.** The test that does most
+of the work: *is the answer discoverable in the repo?* Code, tests, config, git history, north-stars
+— then go and find it, because asking is offloading. If it exists only in your head — which of two
+readings you meant, which tradeoff you prefer, what a user should see — no reading produces it, and
+that is the question.
+
+Not for what the repo answers, not for anything cheaply reversible, and never for insurance:
+*"shall I proceed?"* on an obvious path is accountability handed back to you. When it does ask:
+closed options, the tradeoff, a recommendation, and what it will do without an answer.
+
+**One-way doors are a separate act — it CONFIRMS rather than consults.** Deleting data,
+force-pushing, publishing, migrating anything shared. That fires because the act is irreversible,
+not because the answer is unclear, so it applies even when the right answer is obvious. Reversible
+work needs no permission.
+
+And the part that compounds: **an answer that is a RULE is proposed as a north-star** — not every
+answer, since an instance constrains nothing and a bloated anchor stops being read. The test is
+whether a future agent, not knowing it, would do the wrong thing. Ask once, write it down, never ask
+again.
+
+Claude Code has a structured multiple-choice tool for this; Cursor and Zed get the same judgment and
+ask in prose; Codex gets the contract.
+
 ### Changed — context-fullness warnings are retired; the task-core nudge counts unsaved work
 
 **bearing no longer warns that you are near a context limit.** The window is not knowable at

@@ -184,6 +184,17 @@ Enforcement is **polyglot** — JS/TS, Python, Rust, Go, Java, and more count as
 
 At a **milestone** — feature done / big-task checkpoint / shared-code refactor / pre-ship, or "audit / find real bugs / is this solid?" — **and** only when the work is *substantial* (multi-file or high `impact` blast-radius): run a **microscope-waves** pass → load the `bearing-microscope` skill. Multi-lens, opinionated (not just defects), adversarially verified, iterated in waves. Skip it for small localized changes.
 
+<!-- feature: consult -->
+## Ask, or decide? (intel layer)
+
+You are working with a senior engineer. Interrupting them for something the repository could answer costs their attention for nothing; deciding a **business rule** on your own costs them the product. Both are failures.
+
+**Ask when you are about to INVENT a requirement rather than implement one.** The test that does most of the work: **is the answer discoverable here?** Code, tests, config, git history, north-stars, an existing convention — then go and find it. If it exists only in their head — which of two readings they meant, which tradeoff they prefer, what a user should see — no amount of reading produces it, and that is the question. Load the `bearing-consult` skill.
+
+**Do NOT ask** for what the repo answers, for anything cheaply reversible (decide, state the assumption in one line), or to offload risk — *"shall I proceed?"* on an obvious path is not a question. When you do ask: closed options, the tradeoff, a recommendation, and what you will do without an answer.
+
+**One-way doors are a different act — CONFIRM, do not consult.** Before deleting data, force-pushing, publishing, migrating anything shared, or sending something outward, say what cannot be undone and wait — even when the right answer is obvious. Reversible work needs no permission.
+
 <!-- feature: minions -->
 ## Wide mechanical work — fan it out (intel layer)
 
