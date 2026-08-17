@@ -2,6 +2,21 @@
 
 All notable changes to `bearing` are documented here.
 
+## Unreleased
+
+### Fixed — five dead imports, and a check so they stop accumulating
+
+`removeExclude` was written, exported, imported into `kit.mjs`, and never called — which is how a
+stealth uninstall came to leave its own concealment in place. The import was the visible half of
+that bug and nothing was looking for it.
+
+Five more were sitting there (`substituteRepoName` ×2, `MANIFEST_PATH_LEGACY`, `skillLinkDirs`,
+`STEALTH_CONTRACT_PATH`). All harmless this time — checked one by one, none was a missing call. They
+are gone, and a test now fails on any new one.
+
+An unused import is usually trivial. The reason to fail on it is that it is the cheapest available
+signal that a function meant to be called is not being called.
+
 ## 1.0.12 — an uninstall that stops hiding, and a warning that stopped naming what it forbade
 
 > **1.0.11 was tagged but never published to npm, so its changes ship here.** If you are coming from
