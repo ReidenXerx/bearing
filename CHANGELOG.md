@@ -4,6 +4,20 @@ All notable changes to `bearing` are documented here.
 
 ## Unreleased
 
+### Fixed — `--help` described four modules for a build that ships five
+
+`--features` listed `northstars,taskcore,microscope,gitnexus`. Minions had shipped two releases
+earlier. And `--stealth`, `--mcp` and `--gitnexus-cmd` were accepted by the parser but named nowhere
+in the usage text — a flag nobody can discover is, for most users, a feature that does not exist.
+
+The module list is now derived from the feature registry rather than typed out, so a sixth module
+cannot leave the help describing five. Stealth and MCP each got a line explaining what they actually
+do, since the flag name alone does not say.
+
+A test now compares the flags the parser reads against the flags the help prints, in both
+directions. An over-claim and an omission are the same defect (NS-20) — the help is a claim about
+the program, and nothing was checking it.
+
 ### Fixed — five dead imports, and a check so they stop accumulating
 
 `removeExclude` was written, exported, imported into `kit.mjs`, and never called — which is how a
