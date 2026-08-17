@@ -2,7 +2,11 @@
 
 All notable changes to `bearing` are documented here.
 
-## Unreleased
+## 1.0.12 — an uninstall that stops hiding, and a warning that stopped naming what it forbade
+
+> **1.0.11 was tagged but never published to npm, so its changes ship here.** If you are coming from
+> 1.0.10, this release contains both.
+
 
 ### Fixed — a stealth uninstall left bearing wired in, and hid that it had
 
