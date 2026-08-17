@@ -4,6 +4,31 @@ All notable changes to `bearing` are documented here.
 
 ## Unreleased
 
+### Changed — context-fullness warnings are retired; the task-core nudge counts unsaved work
+
+**bearing no longer warns that you are near a context limit.** The window is not knowable at
+runtime: the transcript does not record it, the model id does not settle it (`claude-opus-5` is the
+same string on a 200k session and a 1M one), and the only real measurement — `preTokens` on a
+compaction — arrives after the compaction has already happened. Two shipped attempts at inferring it
+were wrong in opposite directions, one of them announcing "compaction is near" at 19.7% full. A gate
+on a number that cannot be measured produces confident false alarms, which is worse than no gate.
+
+**What replaces it: edits since the task-core was last written** (`taskCoreEveryEdits`, 25 by
+default, 0 disables). The task-core exists so a long task survives compaction with its decisions
+intact, and what makes that expensive is not how full the window is — it is how much has happened
+that is not written down. Five edits at 95% lose almost nothing; two hundred at 30% lose a great
+deal. Fullness was always a proxy for unsaved work, and one we could not measure.
+
+The reset signal is the core file's own mtime, so there is no second counter to fall out of sync
+with it. Reads and greps do not count — they change nothing a compaction could lose.
+
+Retired with it: `contextWindowTokens`, `contextPressureThreshold`, `contextCheckpointEvery`, the
+`GITNEXUS_CONTEXT_WINDOW` env override, `context-pressure.mjs`, and the periodic percentage
+checkpoints. Update removes files bearing no longer ships, so the old hook goes on its own.
+
+Stated plainly in the contract now: **nothing warns you that compaction is near** — assume it can
+land at any time.
+
 ### Fixed — a stealth install told you to run five commands it had not installed
 
 Stealth installs no npm scripts at all — that is the point, since `package.json` is tracked. The

@@ -224,15 +224,7 @@ Maintain your **Claude Code project memory** — `~/.claude/projects/<this-proje
 <!-- feature: taskcore -->
 ## Task-core (survive compaction without drift)
 
-Long tasks get **compacted** — the transcript is summarized and dropped, and detail drifts. Keep a **task-core**: a dense, **AI-facing** save-state of the CURRENT TASK at **`.bearing/task-cores/<this chat's id>.md`** — the SessionStart brief names the exact path, and it is one file per CHAT so parallel sessions in this repo cannot overwrite each other's save-state. When a PostToolUse nudge says context is filling (~90%), or at a milestone / before a risky pivot, **write or refresh it** — terse, for *you* not humans, no prose tax:
-
-```
-GOAL <what "done" is> · CONSTRAINTS <must/never> · DECISIONS <choice→why (settled)>
-STATE done<✓+anchor> / now / NEXT<exact> / todo<ordered> · ANCHORS <file:line→what/why>
-GOTCHAS <failed approaches, traps, non-obvious> · OPEN-Qs · USER-PREFS(this task)
-```
-
-On recovery **READ the task-core FIRST** and reconstruct from it — it's the one thing guaranteed to survive with full detail. It's distinct from `MEMORY.md` (durable, cross-session, human-shared): the task-core is the *hot working-set for THIS task*, overwritten when the task changes. Full routine: the **`bearing-taskcore`** skill.
+Long tasks get **compacted** — the transcript is summarized and dropped, and detail drifts. Keep a **task-core**: a dense, **AI-facing** save-state of the CURRENT TASK at **`.bearing/task-cores/<this chat's id>.md`** — the SessionStart brief names the exact path, and it is one file per CHAT so parallel sessions in this repo cannot overwrite each other's save-state. When a PostToolUse nudge says edits have piled up since your core was last written, or at a milestone / before a risky pivot, **write or refresh it**. Nothing warns you that compaction is near — the context window is not knowable at runtime — so treat it as able to land at any time. It's distinct from `MEMORY.md` (durable, cross-session, human-shared): the task-core is the *hot working-set for THIS task*, overwritten when the task changes. Full routine: the **`bearing-taskcore`** skill.
 
 <!-- feature: gitnexus -->
 ## Fallback

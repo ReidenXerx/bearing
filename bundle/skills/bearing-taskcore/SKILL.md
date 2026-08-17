@@ -1,6 +1,6 @@
 ---
 name: bearing-taskcore
-description: "Maintain a dense, AI-facing TASK-CORE save-state so a long task survives context COMPACTION without drift. Load it when: a PostToolUse nudge says context is ~90% full, at a milestone / before a risky pivot / when the task shifts, OR on recovery after a compaction (read it back first). The core is for the model, not humans — terse, anchors over prose. Examples: \"context is filling — save state\", \"checkpoint the task before compaction\", \"recover the task after compaction\"."
+description: "Maintain a dense, AI-facing TASK-CORE save-state so a long task survives context COMPACTION without drift. Load it when: a PostToolUse nudge says edits have accumulated since the core was last written, at a milestone / before a risky pivot / when the task shifts, OR on recovery after a compaction (read it back first). The core is for the model, not humans — terse, anchors over prose. Examples: \"context is filling — save state\", \"checkpoint the task before compaction\", \"recover the task after compaction\"."
 ---
 
 # Task-core — a compaction save-state that kills drift
@@ -15,12 +15,13 @@ The fix: **you** decide what survives. Keep a **task-core** — a dense, machine
 
 ## When to write / refresh it
 
-- **Periodic checkpoints** — a PostToolUse hook nudges every 10% of the window (`contextCheckpointEvery`), each band once. These are *skippable*: refresh the core if the task has actually moved, otherwise ignore them. Waiting for the 90% warning is not a plan — on a 1M window that is 900k tokens, which most sessions never reach.
-- **Context-pressure nudge** — at ~90% (`contextPressureThreshold` × the window) it says compaction is near. **Refresh the core immediately** — this is the last reliable window before the summary lands. The window is inferred from evidence, not assumed; if bearing says it is assuming, set `contextWindowTokens` in `.bearing/hooks.local.json`.
+- **Unsaved-work nudge** — a PostToolUse hook counts EDITS since the core was last written and prompts after `taskCoreEveryEdits` of them (25 by default; 0 disables). It is *skippable*: refresh if the task actually moved, ignore it if not.
+  > It no longer watches how full the context is, because **the window is not knowable at runtime** — the transcript does not record it, the model id does not settle it, and the one real measurement arrives only after a compaction has already happened. Two attempts at inferring it shipped wrong in opposite directions. What matters is not how full the window is but **how much has happened that is not written down**: five edits at 95% lose almost nothing, two hundred at 30% lose a great deal.
+- **Nothing warns you that compaction is near.** Assume it can land at any time — that is why the trigger is unsaved work rather than a countdown.
 - **Milestones** — a sub-goal done, a decision settled, a pivot. Cheap insurance so a *sudden* auto-compact never catches you with a stale core.
 - **Task start / task shift** — seed a fresh core when a new task begins (don't carry the old one).
 
-You don't need to rewrite it every turn — that wastes tokens. Refresh on the nudge and at real checkpoints.
+You don't need to rewrite it every turn — that wastes tokens. Refresh on the nudge and at real milestones.
 
 ## The format (dense, for the model — not humans)
 

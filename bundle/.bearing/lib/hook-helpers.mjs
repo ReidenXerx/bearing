@@ -43,7 +43,7 @@ export {
 
 export const CONFIG_FILE = ".bearing/hooks.json";
 // Gitignored per-machine override — same shape as CONFIG_FILE, wins over it. Lets one dev tune the
-// window / mode / thresholds (e.g. contextWindowTokens for a 1M session) without editing the
+// mode / thresholds (e.g. taskCoreEveryEdits) without editing the
 // team-shared file. Precedence: defaults < CONFIG_FILE < LOCAL_CONFIG_FILE < env.
 export const LOCAL_CONFIG_FILE = ".bearing/hooks.local.json";
 
@@ -96,25 +96,10 @@ export function loadHookConfig(root) {
     // Working-tree drift: after this many uncommitted source edits since the index,
     // graph query tools require a fast incremental refresh. 0 disables the drift gate.
     driftRefreshThreshold: 3,
-    // TASK-CORE compaction migration: nudge the agent to refresh its task-core once context
-    // reaches contextPressureThreshold of the window.
-    //
-    // contextWindowTokens is DELIBERATELY ABSENT. It used to default to 200000, and that one line
-    // made every correction below it unreachable: contextPressure treats a set window as the user's
-    // own statement of fact and stops, so the evidence paths — usage above the assumed window, an
-    // auto-compaction, the machine's history — could never run in a real install. The 1.0.9 fix for
-    // "the agent thought every session was a 200k one" passed its test by calling resolveWindow with
-    // `undefined`, a value this pipeline never produced, and shipped dead. Left unset, the estimator
-    // applies its own floor AND stays free to revise it.
-    //
-    // Set it to state a fact: gitignored .bearing/hooks.local.json (repo-scoped, per-machine) or
-    // GITNEXUS_CONTEXT_WINDOW. Precedence: unset < hooks.json < .local.json < env.
-    contextPressureThreshold: 0.9,
-    // Checkpoint the task-core every N of the window (0.1 = every 10%), not just once near the top.
-    // 90% of a correctly-resolved 1M window is 900,000 tokens, which 6 of 404 real sessions reached
-    // — so the single high-water trigger almost never fired. 0 disables the periodic checkpoints and
-    // leaves only the pressure warning.
-    contextCheckpointEvery: 0.1,
+    // TASK-CORE: nudge after this many EDITS since the core was last written. Counts unsaved work
+    // rather than context fullness, because the window is not knowable at runtime — see
+    // bearing-taskcore-nudge.mjs for why two attempts at inferring it both shipped wrong. 0 disables.
+    taskCoreEveryEdits: 25,
     // NORTH-STARS re-anchor: re-inject the numbered NS-# propositions verbatim every N tool calls
     // (and always right after the agent writes a doc/conclusion). Loading them once at session
     // start loses to 100k+ tokens of drift, so the anchor has to RECUR. 0 disables.
@@ -139,9 +124,6 @@ export function loadHookConfig(root) {
 
   // Per-machine env override wins over both files (handy for CI / ad-hoc). The context window is
   // model-specific — a 1M-context session and a teammate's 200k model can't share one committed
-  // value — so scope it via GITNEXUS_CONTEXT_WINDOW or gitnexus-hooks.local.json, not the shared file.
-  const envWindow = Number(process.env.GITNEXUS_CONTEXT_WINDOW);
-  if (Number.isFinite(envWindow) && envWindow > 0) cfg.contextWindowTokens = envWindow;
 
   return cfg;
 }
@@ -162,12 +144,8 @@ function applyHookConfigFile(cfg, cfgPath) {
       cfg.stalenessCacheTtlMs = file.stalenessCacheTtlMs;
     if (typeof file.driftRefreshThreshold === "number")
       cfg.driftRefreshThreshold = file.driftRefreshThreshold;
-    if (typeof file.contextWindowTokens === "number")
-      cfg.contextWindowTokens = file.contextWindowTokens;
-    if (typeof file.contextPressureThreshold === "number")
-      cfg.contextPressureThreshold = file.contextPressureThreshold;
-    if (typeof file.contextCheckpointEvery === "number")
-      cfg.contextCheckpointEvery = file.contextCheckpointEvery;
+    if (typeof file.taskCoreEveryEdits === "number")
+      cfg.taskCoreEveryEdits = file.taskCoreEveryEdits;
     // A non-empty string only: `"minionModel": ""` or a stray number would otherwise be handed to
     // a spawn as a model name.
     if (typeof file.minionModel === "string" && file.minionModel.trim())

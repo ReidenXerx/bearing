@@ -59,7 +59,6 @@ export function sessionPaths(root) {
     stalenessCacheFile: path.join(stateDir, '.gitnexus-staleness-cache.json'),
     scorecardFile: path.join(stateDir, '.gitnexus-scorecard.json'),
     fallbackFlag: path.join(stateDir, '.gitnexus-fallback.json'),
-    pressureNudgedFlag: path.join(stateDir, '.gitnexus-pressure-nudged.flag'),
     northStarCounter: path.join(stateDir, '.gitnexus-northstar-counter.json'),
     checkpointFile: path.join(stateDir, '.gitnexus-checkpoint-band.json'),
   };
@@ -104,7 +103,7 @@ export function setCheckpointBand(root, key, band, window = 0) {
 
 // ── TASK-CORE (compaction-migration save-state) ──────────────────────────────
 // A dense, AI-facing save-state of the CURRENT TASK (goal/constraints/decisions/state/
-// anchors/gotchas/next). The context-pressure hook nudges the agent to refresh it before
+// anchors/gotchas/next). The task-core nudge hook prompts a refresh once enough edits have
 // auto-compaction; the SessionStart(compact) recovery brief reads it back — so the task
 // survives the summary without drift. Lives under .bearing/ (gitignored, survives compaction
 // AND new sessions since a task can span both; the agent overwrites it when the task changes).
@@ -307,26 +306,6 @@ export function bumpNorthStarCounter(root, reset = false) {
     /* best-effort — a missing counter just means we anchor again sooner */
   }
   return next;
-}
-
-/** @param {string} root @param {boolean} on — remember we already nudged this pressure zone. */
-export function setPressureNudged(root, on) {
-  const { stateDir, pressureNudgedFlag } = sessionPaths(root);
-  try {
-    if (on) {
-      fs.mkdirSync(stateDir, { recursive: true });
-      fs.writeFileSync(pressureNudgedFlag, new Date().toISOString());
-    } else {
-      fs.unlinkSync(pressureNudgedFlag);
-    }
-  } catch {
-    /* best effort */
-  }
-}
-
-/** @param {string} root */
-export function isPressureNudged(root) {
-  return fs.existsSync(sessionPaths(root).pressureNudgedFlag);
 }
 
 // ── Classical fallback escape hatch ──────────────────────────────────────────
@@ -814,7 +793,6 @@ export function clearSessionState(root) {
     stalenessCacheFile,
     scorecardFile,
     fallbackFlag,
-    pressureNudgedFlag,
     northStarCounter,
   } = sessionPaths(root);
   fs.mkdirSync(stateDir, { recursive: true });
@@ -831,7 +809,6 @@ export function clearSessionState(root) {
     fallbackFlag,
     // NB the north-stars DOC itself is never touched here (it's user-owned + committed) — only the
     // per-session anchor counter, so a new session re-anchors promptly.
-    pressureNudgedFlag,
     northStarCounter,
   ]) {
     try {

@@ -640,7 +640,7 @@ if (cmd === "scorecard") {
     compactions: "Context compactions",
     classicalFallbackGranted: "Classical-fallback grants (GN distrusted)",
     driftRefreshBlocks: "Graph-drift refresh blocks (edited since index)",
-    contextPressureNudges: "Context-pressure task-core nudges (near compaction)",
+    taskCoreNudges: "Task-core nudges (edits since the core was last written)",
   };
   console.log("GitNexus enforcement scorecard (this session)");
   console.log(
