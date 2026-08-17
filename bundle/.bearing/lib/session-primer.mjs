@@ -64,43 +64,6 @@ export function sessionPaths(root) {
   };
 }
 
-/**
- * The highest context BAND this session has already been checkpointed at.
- *
- * Keyed by session, unlike the older pressure flag which is one file per repo: two chats open on the
- * same repo would otherwise silence each other's checkpoints, and a task-core is per chat.
- * @param {string} root @param {string} key session key
- * @returns {number}
- */
-export function lastCheckpointBand(root, key) {
-  try {
-    const all = JSON.parse(fs.readFileSync(sessionPaths(root).checkpointFile, 'utf8'));
-    const hit = all[key];
-    if (typeof hit === 'number') return { band: hit, window: 0 }; // written before windows were tracked
-    return { band: Number(hit?.band) || 0, window: Number(hit?.window) || 0 };
-  } catch {
-    return { band: 0, window: 0 };
-  }
-}
-
-/** @param {string} root @param {string} key @param {number} band @param {number} window */
-export function setCheckpointBand(root, key, band, window = 0) {
-  const { stateDir, checkpointFile } = sessionPaths(root);
-  try {
-    let all = {};
-    try {
-      all = JSON.parse(fs.readFileSync(checkpointFile, 'utf8'));
-    } catch {
-      /* first checkpoint in this repo */
-    }
-    all[key] = { band, window };
-    fs.mkdirSync(stateDir, { recursive: true });
-    fs.writeFileSync(checkpointFile, JSON.stringify(all));
-  } catch {
-    /* best effort — a lost band means one extra nudge, not a wrong one */
-  }
-}
-
 // ── TASK-CORE (compaction-migration save-state) ──────────────────────────────
 // A dense, AI-facing save-state of the CURRENT TASK (goal/constraints/decisions/state/
 // anchors/gotchas/next). The task-core nudge hook prompts a refresh once enough edits have
@@ -181,17 +144,6 @@ export function taskCoreExists(root, key) {
 /** Path the agent should actually READ on recovery — keyed if present, else the legacy file. */
 export function taskCoreReadPath(root, key) {
   return resolveTaskCore(root, key) ?? taskCorePath(root, key);
-}
-
-/** Age of this chat's task-core in ms (Infinity if none) — the pressure hook nudges harder when stale. */
-export function taskCoreAgeMs(root, key) {
-  const p = resolveTaskCore(root, key);
-  if (!p) return Infinity;
-  try {
-    return Date.now() - fs.statSync(p).mtimeMs;
-  } catch {
-    return Infinity;
-  }
 }
 
 /**
@@ -465,15 +417,6 @@ export function isImpactUsed(root) {
 /** @param {string} root */
 export function isDetectUsed(root) {
   return fs.existsSync(sessionPaths(root).detectUsedFlag);
-}
-
-/** Invalidate the short-TTL staleness cache (after refresh / on session start). */
-export function clearStalenessCache(root) {
-  try {
-    fs.unlinkSync(sessionPaths(root).stalenessCacheFile);
-  } catch {
-    /* ignore */
-  }
 }
 
 /**

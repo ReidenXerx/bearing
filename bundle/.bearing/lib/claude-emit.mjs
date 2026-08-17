@@ -32,11 +32,6 @@ export async function readStdin() {
   }
 }
 
-/** Resolve the project root for a hook invocation. */
-export function hookRoot(input = {}) {
-  return process.env.CLAUDE_PROJECT_DIR || input.cwd || process.cwd();
-}
-
 /** Shared classify context: staleness phase, config, repo, precomputed messages. */
 export function gnContext(root) {
   const r = spawnSync(process.execPath, [path.join(LIB, "load-staleness.mjs"), root], {

@@ -60,6 +60,23 @@ A test now compares the flags the parser reads against the flags the help prints
 directions. An over-claim and an omission are the same defect (NS-20) — the help is a claim about
 the program, and nothing was checking it.
 
+### Fixed — seven dead exports, and an ENOSPC check that missed half the cases
+
+The mirror of the unused-import sweep. Two of the seven were leftovers from the context-fullness
+retirement — `setCheckpointBand` and `lastCheckpointBand` outlived the percentage checkpoints they
+served — and one, `httpServerReachable`, was a dead duplicate of the TCP probe that is actually used.
+
+One was a real gap rather than clutter. `isEnospcError` exists because a disk-full failure does not
+always arrive as `error.code === "ENOSPC"` — a child that prints "no space left on device" and exits
+non-zero reports it in the MESSAGE. The one call site did the bare code check, so those cases got a
+generic failure instead of the "temp directory full" help written for them. It uses the helper now.
+
+A test now fails on any export nothing references. It reads shell, JSON, markdown and YAML as well
+as JavaScript: the first version of the sweep read only `.mjs` and confidently reported
+`writePromptHint` as dead, when it is called from a Cursor shell hook. A checker that looks in fewer
+places than the code lives in produces false positives, and a false positive here deletes a live
+function.
+
 ### Fixed — five dead imports, and a check so they stop accumulating
 
 `removeExclude` was written, exported, imported into `kit.mjs`, and never called — which is how a

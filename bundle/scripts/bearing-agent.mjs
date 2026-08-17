@@ -30,7 +30,7 @@ function howToRun(name) {
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
 
-const { withProjectTmpEnv, tmpSpaceReport, enospcHelp } = await import(
+const { withProjectTmpEnv, tmpSpaceReport, enospcHelp, isEnospcError } = await import(
   pathToFileURL(path.join(ROOT, "scripts/lib/project-tmp.mjs")).href
 );
 const { gitnexusSpawn } = await import(
@@ -88,7 +88,10 @@ function run(cmd, args, opts = {}) {
 function runAllowFail(cmd, args, opts = {}, fatal = false) {
   const env = withProjectTmpEnv(ROOT, opts.env);
   const r = spawnSync(cmd, args, { cwd: ROOT, stdio: "inherit", ...opts, env });
-  if (r.error?.code === "ENOSPC") {
+  // isEnospcError also matches the MESSAGE ("no space left on device"), which a child that printed
+  // the error and exited non-zero reports instead of an error.code — the inline check missed those
+  // and gave a generic failure where the temp-dir help was the useful answer.
+  if (isEnospcError(r.error)) {
     console.error("\n" + enospcHelp(ROOT));
     if (fatal) process.exit(1);
     return r.status ?? 1;
