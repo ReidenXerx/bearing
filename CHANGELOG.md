@@ -25,6 +25,22 @@ Two things made it worse than a leftover file:
 All three fixed, with the negative control: a user's own hooks, permissions and `.git/info/exclude`
 entries survive untouched.
 
+### Fixed — the block named `npx gitnexus analyze` in order to forbid it
+
+Reported with a screenshot. The block correctly said `node scripts/bearing-agent.mjs refresh`, and
+the agent ran `npx gitnexus analyze` anyway — because bearing told it to. The message ended *"Run
+yourself — never ask the user to run npx gitnexus analyze"*, and the only concrete command in that
+sentence is the one it meant to **prohibit**, so it reads as the instruction. Following it lands on
+the raw indexer and reintroduces the `npx` invocation the command resolver exists to remove. Naming a
+command in order to forbid it is naming it; the message now names none.
+
+The same screenshot showed the agent passing `--skip-agents-md` by hand, which bearing should do
+itself under stealth. `analyze` writes its stats block into `AGENTS.md` / `CLAUDE.md` and the
+stabilizer strips it after — but in between, the repo **is** dirty, so anything reading `git status`
+in that window sees bearing having modified tracked files. Not writing it beats writing and
+reverting. Passed on every stealth tier; the stabilizer stays as the net for an indexer run bearing
+did not launch.
+
 ## 1.0.11 — a stealth install, and the two ways it leaked on the first real repo
 
 ### Added — stealth install: bearing for you, invisible to the repo and your teammates
