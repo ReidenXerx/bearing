@@ -4,6 +4,23 @@ All notable changes to `bearing` are documented here.
 
 ## Unreleased
 
+### Fixed — a stealth install told you to run five commands it had not installed
+
+Stealth installs no npm scripts at all — that is the point, since `package.json` is tracked. The
+summary told the user to run `bearing:verify`, `bearing:health`, `bearing:agent-status`,
+`bearing:setup` and a gate doc anyway, and then to *"Read CLAUDE.md"* — a file stealth deliberately
+never writes.
+
+The install computed `features.has("gitnexus") && !stealth`; the summary re-derived the same fact
+without the stealth half, and each adapter re-derived it again. One fact, three derivations, two
+of them wrong — the same shape as the stealth uninstall defect.
+
+The summary is now handed the value the install already computed, adapters are told too, and where
+a command genuinely exists under a different name stealth gets the one that works
+(`node scripts/bearing-agent.mjs verify`) rather than nothing. A test now runs a real install in
+both shapes and checks every `npm run`, every `node scripts/…` and every "Read <file>" the
+installer prints against what is actually on disk.
+
 ### Fixed — `--help` described four modules for a build that ships five
 
 `--features` listed `northstars,taskcore,microscope,gitnexus`. Minions had shipped two releases
