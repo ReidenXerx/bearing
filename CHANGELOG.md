@@ -2,6 +2,24 @@
 
 All notable changes to `bearing` are documented here.
 
+## Unreleased
+
+### Fixed — the runtime column in the README was a claim the installer didn't enforce
+
+Each module declares which runtimes it supports, and **nothing read that field.** So
+`--runtime cursor --features minions` installed the skill *and* wrote the fan-out trigger into
+Cursor's always-on rule — telling a Cursor agent to spawn subagents on a chosen model tier, which
+only Claude Code can do. Overstated parity, shipped by the installer itself (NS-14).
+
+A module no active runtime can support is now skipped, and said out loud rather than silently
+installing less than was asked for.
+
+Two of the declarations were also simply wrong, which is why the first version of this fix deleted
+north-stars from Zed. The field means **where the module delivers something**, not where its hook
+runs: north-stars and task-core both ship their contract to all four runtimes, and only their hooks
+are Claude-only — already gated by hook ownership. Both now declare all four, and the test asserts
+north-stars survives a Zed install.
+
 ## 1.0.13 — ask about what changes the product, and stop guessing at the context window
 
 ### Added — Consult, a sixth module: ask about what changes the product, decide the rest
