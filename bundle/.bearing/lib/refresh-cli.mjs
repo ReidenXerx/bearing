@@ -57,9 +57,21 @@ function gitnexusCmd() {
   return "gitnexus";
 }
 
+/**
+ * Is this a stealth install? Read from the manifest, which is the only record of the choice — the
+ * absence of npm scripts is suggestive but not proof (a non-node repo has none either).
+ */
+function isStealth() {
+  try {
+    return JSON.parse(fs.readFileSync(path.join(root, ".bearing/manifest.json"), "utf8")).stealth === true;
+  } catch {
+    return false; // no manifest → assume the ordinary install, which is the safe direction here
+  }
+}
+
 const { planRefresh } = await lib("refresh-plan.mjs");
 const stale = diagnose();
-const plan = planRefresh(stale, { wantPdg, force });
+const plan = planRefresh(stale, { wantPdg, force, stealth: isStealth() });
 
 if (plan.tier === "none") {
   console.log(`==> GitNexus: ${plan.why}`);

@@ -86,7 +86,11 @@ export function staleRefreshAgentMessage(stale, policy) {
     return (
       `STALE INDEX (${detail}) — mandatory refresh BEFORE Grep/Read/MCP/shell.${pending} ` +
       `Shell NOW: ${howToRun('bearing:agent-refresh')} with required_permissions: ["all"]. ` +
-      'Run yourself — never ask the user to run npx gitnexus analyze.'
+      // Names NO raw indexer command. This read "Run yourself — never ask the user to run npx
+      // gitnexus analyze", where the only concrete command in the sentence was the one it meant to
+      // FORBID — so an agent read it as the instruction and ran `npx gitnexus analyze`, which also
+      // reintroduces the npx invocation the command resolver exists to avoid.
+      'Run it yourself; do not hand the refresh to the user, and do not call the indexer directly.'
     );
   }
 

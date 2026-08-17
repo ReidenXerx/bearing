@@ -28,16 +28,25 @@ const EMBED_CAP = "0"; // no cap — the 50k default silently truncates large re
 
 /**
  * @param {object} stale output of check-staleness
- * @param {{ wantPdg?: boolean, force?: boolean }} [opts]
+ * @param {{ wantPdg?: boolean, force?: boolean, stealth?: boolean }} [opts]
  * @returns {RefreshPlan}
  */
 export function planRefresh(stale, opts = {}) {
   const skills = "--skills";
 
+  // STEALTH: tell the indexer not to write into AGENTS.md / CLAUDE.md at all.
+  //
+  // Without this, `analyze` appends its stats block to those tracked files and we strip it afterwards
+  // — so between the two the repo IS dirty, and anything that reads `git status` in that window (a
+  // teammate's script, a watcher, the user glancing at it) sees bearing having modified their files.
+  // Not writing it is strictly better than writing and reverting; the stabilizer stays as the net for
+  // an indexer run we did not launch. Spotted because a real agent added this flag by hand.
+  const quiet = opts.stealth ? ["--skip-agents-md"] : [];
+
   if (opts.force) {
     return {
       tier: "full",
-      args: ["analyze", "--force", "--embeddings", EMBED_CAP, skills],
+      args: ["analyze", "--force", "--embeddings", EMBED_CAP, skills, ...quiet],
       why: "full rebuild requested",
     };
   }
@@ -47,7 +56,7 @@ export function planRefresh(stale, opts = {}) {
   if (stale?.nodeCount > 0 && stale?.embeddingsReady === false) {
     return {
       tier: "embeddings",
-      args: ["analyze", "--force", "--embeddings", EMBED_CAP, skills],
+      args: ["analyze", "--force", "--embeddings", EMBED_CAP, skills, ...quiet],
       why: `graph has ${stale.nodeCount} symbols and no embeddings — semantic search is unavailable, and an incremental analyze cannot add them`,
     };
   }
@@ -56,7 +65,7 @@ export function planRefresh(stale, opts = {}) {
   if (stale?.reason === "missing" || stale?.reason === "unreadable" || !(stale?.nodeCount > 0)) {
     return {
       tier: "full",
-      args: ["analyze", "--embeddings", EMBED_CAP, skills],
+      args: ["analyze", "--embeddings", EMBED_CAP, skills, ...quiet],
       why: "no usable index — building one",
     };
   }
@@ -66,7 +75,7 @@ export function planRefresh(stale, opts = {}) {
   if (stale?.reason === "diverged") {
     return {
       tier: "full",
-      args: ["analyze", "--force", "--embeddings", EMBED_CAP, skills],
+      args: ["analyze", "--force", "--embeddings", EMBED_CAP, skills, ...quiet],
       why: "history diverged from the indexed commit — incremental cannot reconcile it",
     };
   }
@@ -83,7 +92,7 @@ export function planRefresh(stale, opts = {}) {
     if (opts.wantPdg) {
       return {
         tier: "pdg",
-        args: ["analyze", "--force", "--embeddings", EMBED_CAP, skills, "--pdg"],
+        args: ["analyze", "--force", "--embeddings", EMBED_CAP, skills, "--pdg", ...quiet],
         // Same short-circuit as embeddings: on a current graph, --pdg alone is ignored.
         why: "graph is current but the PDG substrate was asked for",
       };
@@ -95,8 +104,8 @@ export function planRefresh(stale, opts = {}) {
   return {
     tier: opts.wantPdg ? "pdg" : "incremental",
     args: opts.wantPdg
-      ? ["analyze", "--embeddings", EMBED_CAP, skills, "--pdg"]
-      : ["analyze", "--embeddings", EMBED_CAP, skills],
+      ? ["analyze", "--embeddings", EMBED_CAP, skills, "--pdg", ...quiet]
+      : ["analyze", "--embeddings", EMBED_CAP, skills, ...quiet],
     why: `${n || "some"} source file(s) behind — incremental analyze`,
   };
 }
