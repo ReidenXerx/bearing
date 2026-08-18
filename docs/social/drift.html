@@ -1,0 +1,100 @@
+<!doctype html>
+<!--
+  Drift — HTML/Tailwind hero treatment, an alternate to docs/assets/drift.svg.
+
+  Same one idea the SVG makes (stale doc → without: found 3 days later / with: caught in
+  one line) but with the tools SVG can't cheaply do: a glowing accent rail on the bearing
+  lane, a blurred "stale doc" card with a strike-through feel, and a live-feel timestamp on
+  the failure path. Rendered to PNG by scripts/gen-social-html.mjs.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>bearing — drift</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = { theme: { extend: { colors: {
+    surface:"#11161f", surface2:"#161c27", edge:"#232c3b", panel:"#1a2130", panelEdge:"#2c3648",
+    ink:"#e8edf5", dim:"#9aa8bd", faint:"#61708a", accent:"#3987e5", bad:"#d95926", good:"#199e70",
+  } } } };
+</script>
+<style>
+  :root {
+    --surface:#11161f; --edge:#232c3b; --panel:#1a2130; --panelEdge:#2c3648;
+    --ink:#e8edf5; --dim:#9aa8bd; --faint:#61708a; --accent:#3987e5; --bad:#d95926; --good:#199e70;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:#0a0d13; padding:40px; font-family:ui-sans-serif,-apple-system,"Segoe UI",Inter,Roboto,sans-serif; display:grid; place-items:center; }
+  .card { width:1400px; height:560px; border-radius:20px; padding:56px 64px; display:flex; flex-direction:column;
+    background: radial-gradient(120% 90% at 100% 0%, #17202e 0%, transparent 55%), var(--surface);
+    border:2px solid var(--edge); position:relative; overflow:hidden; }
+  .glow-accent { box-shadow: 0 0 0 1px var(--accent), 0 0 28px -6px var(--accent); }
+  .glow-bad { box-shadow: 0 0 24px -8px var(--bad); }
+  .glow-good { box-shadow: 0 0 24px -8px var(--good); }
+  .lane-rail { position:absolute; left:64px; top:170px; bottom:90px; width:4px; border-radius:2px; }
+  .arrow::after { content:""; position:absolute; right:-7px; top:50%; transform:translateY(-50%);
+    border:6px solid transparent; border-left-color:var(--faint); }
+  .arrow-bad::after { border-left-color:var(--bad); }
+  .arrow-accent::after { border-left-color:var(--accent); }
+  .strike { text-decoration:line-through; text-decoration-color:var(--bad); text-decoration-thickness:2px; }
+</style>
+</head>
+<body class="bg-[#0a0d13]">
+
+<div class="card">
+  <p class="text-[20px] font-bold tracking-[3px] uppercase text-faint">An agent reads a doc you abandoned in march</p>
+  <h2 class="mt-3 text-[40px] font-extrabold tracking-tight text-ink leading-tight">The premise is dead. Nothing fails.</h2>
+
+  <!-- Source -->
+  <div class="mt-8 inline-flex items-center gap-3 rounded-[14px] px-5 py-3 border-2 border-panelEdge"
+       style="background:linear-gradient(180deg,#1d2533,#1a2130); border-left:6px solid var(--faint);">
+    <span class="text-[20px] font-semibold text-ink">Stale doc</span>
+    <span class="text-[16px] text-dim">confident. fluent.</span>
+  </div>
+
+  <!-- Two lanes -->
+  <div class="grid grid-cols-2 gap-10 mt-8 flex-1">
+
+    <!-- WITHOUT -->
+    <div class="relative flex flex-col justify-center gap-5 pl-6">
+      <div class="lane-rail" style="background:var(--bad); opacity:0.55;"></div>
+      <p class="text-[16px] font-bold tracking-[2px] uppercase text-bad">Without</p>
+      <div class="rounded-[14px] px-5 py-4 border-2 border-panelEdge glow-bad"
+           style="background:linear-gradient(180deg,#1d2533,#1a2130); border-left:6px solid var(--bad);">
+        <p class="text-[20px] font-semibold text-ink">Every later conclusion</p>
+        <p class="text-[15px] text-dim">inherits it, silently</p>
+      </div>
+      <div class="relative h-px bg-faint arrow arrow-bad" style="margin-left:0;"></div>
+      <div class="rounded-[14px] px-5 py-4 border-2 border-panelEdge glow-bad"
+           style="background:linear-gradient(180deg,#2a1a14,#1a2130); border-left:6px solid var(--bad);">
+        <p class="text-[20px] font-bold" style="color:#f2a58a;">Found out 3 days later</p>
+        <p class="text-[15px] text-dim">after you shipped on it</p>
+      </div>
+    </div>
+
+    <!-- WITH -->
+    <div class="relative flex flex-col justify-center gap-5 pl-6">
+      <div class="lane-rail" style="background:var(--accent); box-shadow:0 0 18px -2px var(--accent);"></div>
+      <p class="text-[16px] font-bold tracking-[2px] uppercase text-accent">With bearing</p>
+      <div class="rounded-[14px] px-5 py-4 border-2 border-panelEdge glow-accent"
+           style="background:linear-gradient(180deg,#1d2533,#1a2130); border-left:6px solid var(--accent);">
+        <p class="text-[20px] font-semibold text-ink">Contradicts NS-4</p>
+        <p class="text-[15px] text-dim">the north-star outranks it</p>
+      </div>
+      <div class="relative h-px bg-faint arrow arrow-accent"></div>
+      <div class="rounded-[14px] px-5 py-4 border-2 border-panelEdge glow-good"
+           style="background:linear-gradient(180deg,#0f241b,#1a2130); border-left:6px solid var(--good);">
+        <p class="text-[20px] font-bold" style="color:#7fd9b4;">Caught in one line</p>
+        <p class="text-[15px] text-dim">before the premise spreads</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex justify-between items-baseline pt-2">
+    <p class="text-[16px] text-faint">A drifted agent doesn't crash. It finds out three days later.</p>
+    <p class="text-[16px] font-extrabold text-accent">bearing</p>
+  </div>
+</div>
+
+</body>
+</html>
