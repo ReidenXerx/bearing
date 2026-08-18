@@ -160,6 +160,38 @@ export function elbowV(x1, y1, x2, y2, band, stroke = C.rule) {
   return `<path d="M${x1} ${y1} V${band} H${x2} V${y2}" fill="none" stroke="${stroke}" stroke-width="1.75" marker-end="url(#ar)"/>`;
 }
 
+/** A filled small circle — the unit of a fan-out / topology diagram. */
+export function dot(cx, cy, r, fill, { opacity = 1, glow } = {}) {
+  const f = glow ? glowDef(glow).ref : "";
+  return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" opacity="${opacity}" ${f}/>`;
+}
+
+/** A thin connector line WITHOUT an arrowhead — for fan-out/topology where arrows are noise. */
+export function link(x1, y1, x2, y2, stroke = C.rule, { width = 1.25, opacity = 0.7, dash } = {}) {
+  const da = dash ? ` stroke-dasharray="${dash}"` : "";
+  return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${stroke}" stroke-width="${width}" opacity="${opacity}"${da}/>`;
+}
+
+/** Ghosted, low-opacity text — for the "erased transcript" panel. */
+export function ghostText(x, y, t, { size = 13, anchor = "start", opacity = 0.22 } = {}) {
+  return `<text x="${x}" y="${y}" text-anchor="${anchor}" font-family="${MONO}" font-size="${size}" fill="${C.dim}" opacity="${opacity}">${esc(t)}</text>`;
+}
+
+/** A vertical "gate wall" — a tall thin rounded rect that reads as a barrier, not a box. */
+export function gate(x, y, h, fill, label) {
+  return [
+    `<rect x="${x}" y="${y}" width="8" height="${h}" rx="4" fill="${fill}" ${glowDef(fill).ref}/>`,
+    label ? `<text x="${x + 18}" y="${y + h / 2}" font-family="${FONT}" font-size="13" font-weight="700" letter-spacing="1.5" fill="${fill}">${esc(label)}</text>` : "",
+  ].join("\n");
+}
+
+/** A mono code line with optional highlighted token range — for the microscope snippet. */
+export function codeLine(x, y, parts, { size = 17 } = {}) {
+  // parts: [{t, fill}] — renders left-to-right in one tspan run.
+  const tspans = parts.map((p) => `<tspan fill="${p.fill}">${esc(p.t)}</tspan>`).join("");
+  return `<text x="${x}" y="${y}" font-family="${MONO}" font-size="${size}" font-weight="500">${tspans}</text>`;
+}
+
 export function svg(w, h, body, title) {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="${esc(
     title,
