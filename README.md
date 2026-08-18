@@ -28,18 +28,20 @@ That failure has a name — **losing your bearings**.
 
 <img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/social/receipts.png" alt="The receipts: 81 docs contradicting each other on live production parameters; 93 bug reports against its own tooling across 47 commits in three weeks; 30 empty results for things that demonstrably existed." width="100%">
 
+**Contributing to a repo that isn't yours?** `npx bearing install . --stealth` keeps `git status` clean — no tracked file is touched. Details under [Install](#install).
+
 ## What you get
 
 **Six independent modules. Pick any combination — each works alone, none depends on another.**
 
 | | |
 |---|---|
-| ⚑ **North-stars** | Numbered, authoritative claims about what your project *is*. **Outranks every other doc**, re-injected as the session runs. |
-| 💾 **Task-core** | A dense save-state of the current task, written **before** compaction drops the detail. |
-| 🔬 **Microscope** | A panel of lens agents that reviews as an expert in *your* domain — and must survive its own refutation pass. |
-| 🙋 **Consult** | Asks you about what it *can't* find — which reading you meant, what a user should see — and decides the rest itself. Confirms before anything irreversible. |
-| 🐜 **Minions** | Wide mechanical work split across cheap anchored subagents that return **citations, not opinions**. They gather; your agent concludes. |
-| 🕸 **GitNexus** | Hard gates that redirect symbol greps to a real code graph. Requires the [GitNexus](https://github.com/abhigyanpatwari/GitNexus) MCP server. |
+| ⚑ **North-stars** | **Stops killed ideas respawning six months later.** Numbered, authoritative claims about what your project *is* — **outranks every other doc**, re-injected as the session runs. |
+| 💾 **Task-core** | **Survives compaction.** A dense save-state of the current task, written **before** the summary lands and drops the detail. |
+| 🔬 **Microscope** | **Catches code that runs perfectly and is still wrong.** A panel of lens agents reviews as an expert in *your* domain — each finding must survive its own refutation pass. |
+| 🙋 **Consult** | **Asks about the right things, decides the rest.** Asks you only what isn't in the repo — which reading you meant, what a user should see — and decides everything else. Confirms before anything irreversible. |
+| 🐜 **Minions** | **Parallelises wide mechanical work.** Cheap anchored subagents return **citations, not opinions** — they gather; your agent concludes. |
+| 🕸 **GitNexus** | **Turns 40 text matches into a real code graph.** Hard gates redirect symbol greps to callers and flows. Requires the [GitNexus](https://github.com/abhigyanpatwari/GitNexus) MCP server. |
 
 **And one thing that isn't a module:** the agent files bug reports against its own tooling, and the kit will tell you when *its own gates* are the problem. → [the receipts](#it-tells-you-when-its-the-problem)
 
