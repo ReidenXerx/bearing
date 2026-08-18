@@ -33,7 +33,8 @@
     "dogfood": "node lib/kit.mjs install . --runtime claude --features northstars,taskcore,microscope,minions --no-setup --skip-verify",
     "release:notes": "node scripts/release-notes.mjs",
     "gen:skills": "node scripts/gen-skill-fragments.mjs",
-    "gen:social": "node scripts/gen-social.mjs"
+    "gen:social": "node scripts/gen-social.mjs",
+    "gen:social:html": "node scripts/gen-social-html.mjs"
   },
   "keywords": [
     "ai",
@@ -59,5 +60,8 @@
     "CHANGELOG.md",
     "LICENSE",
     "!lib/*.test.mjs"
-  ]
+  ],
+  "devDependencies": {
+    "playwright": "^1.62.1"
+  }
 }

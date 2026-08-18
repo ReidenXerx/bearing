@@ -1,0 +1,123 @@
+<!doctype html>
+<!--
+  Terminal-recording mockup — a styled terminal frame showing the drift catch scene.
+  This is the PNG/SVG that sits in the README where the asciinema/VHS embed would link from:
+  a still that reads as "this tool catches things in your session", plus a ▶ play glyph that
+  tells the reader a real recording is one click away.
+
+  Two panes: WITHOUT bearing (agent drifts, ships, nothing fails) and WITH bearing (the same
+  intent is caught against NS-9 in one line). The accent colours match the docs diagrams:
+  bad=#d95926 for the failure path, good=#199e70 for the catch, accent=#3987e5 for bearing itself.
+
+  Rendered to PNG by scripts/gen-social-html.mjs. Open in a browser to tweak, then re-run the
+  script to regenerate docs/social/terminal.png.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>bearing — terminal recording</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          surface: "#11161f", edge: "#232c3b", panel: "#1a2130", panelEdge: "#2c3648",
+          ink: "#e8edf5", dim: "#9aa8bd", faint: "#61708a",
+          accent: "#3987e5", bad: "#d95926", good: "#199e70",
+        },
+        fontFamily: {
+          mono: ["ui-monospace", "SFMono-Regular", "Menlo", "Consolas", "monospace"],
+          sans: ["ui-sans-serif", "-apple-system", "Segoe UI", "Inter", "Roboto", "sans-serif"],
+        },
+      },
+    },
+  };
+</script>
+<style>
+  :root {
+    --surface: #11161f; --edge: #232c3b; --panel: #1a2130; --panelEdge: #2c3648;
+    --ink: #e8edf5; --dim: #9aa8bd; --faint: #61708a;
+    --accent: #3987e5; --bad: #d95926; --good: #199e70;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: #0a0d13; padding: 40px;
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", Inter, Roboto, sans-serif;
+    display: grid; place-items: center;
+  }
+  /* Faint grid so the frame reads as a screen, not a flat rectangle. */
+  .screen-bg {
+    background-image:
+      linear-gradient(rgba(35,44,59,0.35) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(35,44,59,0.35) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+</style>
+</head>
+<body class="bg-[#0a0d13]">
+
+<!-- 1400×760 — landscape, sized for a README hero-adjacent embed. -->
+<div class="card relative w-[1400px] h-[760px] rounded-[20px] overflow-hidden flex flex-col"
+     style="background: radial-gradient(120% 90% at 100% 0%, #17202e 0%, transparent 55%), var(--surface); border: 2px solid var(--edge);">
+
+  <!-- Title bar -->
+  <div class="flex items-center gap-2 px-6 h-12 border-b-2 border-panelEdge bg-panel/60 shrink-0">
+    <span class="w-3.5 h-3.5 rounded-full" style="background:#e0655a"></span>
+    <span class="w-3.5 h-3.5 rounded-full" style="background:#e0b341"></span>
+    <span class="w-3.5 h-3.5 rounded-full" style="background:#56c46b"></span>
+    <span class="ml-4 text-[15px] text-faint font-mono">risk-module — agent session</span>
+    <span class="ml-auto flex items-center gap-2 text-[14px] text-accent font-semibold">
+      <span class="text-[18px]">▶</span> recorded · asciinema
+    </span>
+  </div>
+
+  <!-- Body: two panes -->
+  <div class="grid grid-cols-2 gap-6 p-8 flex-1 screen-bg">
+
+    <!-- WITHOUT -->
+    <div class="flex flex-col">
+      <p class="text-[18px] font-bold tracking-[2px] uppercase text-bad mb-4">Without bearing</p>
+      <div class="flex-1 rounded-[14px] p-6 border-2 border-panelEdge bg-[#0e131b]/80 font-mono text-[17px] leading-[1.9]">
+        <p><span class="text-faint">agent&gt;</span> <span class="text-ink">I'll add averaging-in to the</span></p>
+        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-ink">risk module — it improves</span></p>
+        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-ink">fill rates.</span></p>
+        <p class="mt-3 text-good">✓ wrote src/risk/avg.ts</p>
+        <p class="text-good">✓ tests pass · committed</p>
+        <p class="mt-3 text-dim">(nothing fails. the premise</p>
+        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="text-dim">was measured &amp; killed in Q1)</span></p>
+        <p class="mt-4 text-bad font-semibold">⏱ found out 3 days later</p>
+      </div>
+    </div>
+
+    <!-- WITH -->
+    <div class="flex flex-col">
+      <p class="text-[18px] font-bold tracking-[2px] uppercase text-accent mb-4">With bearing</p>
+      <div class="flex-1 rounded-[14px] p-6 border-2 border-panelEdge bg-[#0e131b]/80 font-mono text-[17px] leading-[1.9]">
+        <p><span class="text-faint">agent&gt;</span> <span class="text-ink">I'll add averaging-in to the</span></p>
+        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-ink">risk module—</span></p>
+        <p class="mt-3"><span class="text-accent font-bold">bearing ⚠</span> <span class="text-ink">NS-9 — REJECTED:</span></p>
+        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="text-ink">averaging into a losing</span></p>
+        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="text-ink">position. Measured: adds</span></p>
+        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="text-ink">fill only on weaker cases.</span></p>
+        <p class="mt-3 text-dim">Cite a north-star or re-open</p>
+        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="text-dim">with new evidence.</span></p>
+        <p class="mt-3"><span class="text-faint">agent&gt;</span> <span class="text-good">Citing NS-9. I will not</span></p>
+        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="text-good">re-propose without new</span></p>
+        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="text-good">evidence.</span></p>
+        <p class="mt-4 text-good font-semibold">✓ caught in one line</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="flex justify-between items-baseline px-8 py-4 border-t-2 border-panelEdge shrink-0">
+    <p class="text-[18px] text-faint">The same intent. One ships a killed feature. One is caught in one line.</p>
+    <p class="text-[18px] font-extrabold text-accent">npx bearing</p>
+  </div>
+
+</div>
+
+</body>
+</html>

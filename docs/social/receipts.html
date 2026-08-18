@@ -1,0 +1,92 @@
+<!doctype html>
+<!--
+  The "receipts" strip — three scar-statistics that are currently buried deep in the README.
+  This is the strip that belongs directly under the hero diagram: the proof a README photo
+  alone can't give. Built with Tailwind (CDN) on your existing color tokens so it matches the
+  hand-authored SVGs without hand-positioning a single coordinate.
+
+  Rendered to PNG by scripts/gen-social-html.mjs. Open in a browser to tweak, then re-run the
+  script to regenerate docs/social/receipts.png.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>bearing — receipts</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          surface: "#11161f", edge: "#232c3b", panel: "#1a2130", panelEdge: "#2c3648",
+          ink: "#e8edf5", dim: "#9aa8bd", faint: "#61708a",
+          accent: "#3987e5", bad: "#d95926", good: "#199e70",
+        },
+      },
+    },
+  };
+</script>
+<style>
+  :root {
+    --surface: #11161f; --edge: #232c3b; --panel: #1a2130; --panelEdge: #2c3648;
+    --ink: #e8edf5; --dim: #9aa8bd; --faint: #61708a;
+    --accent: #3987e5; --bad: #d95926; --good: #199e70;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: #0a0d13; padding: 40px;
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", Inter, Roboto, sans-serif;
+    display: grid; place-items: center;
+  }
+</style>
+</head>
+<body class="bg-[#0a0d13]">
+
+<!-- 1400×420 — a wide strip, sized to sit under a hero diagram in a README. -->
+<div class="card relative w-[1400px] h-[420px] rounded-[20px] p-[56px_64px] flex flex-col justify-between"
+     style="background: radial-gradient(120% 90% at 100% 0%, #17202e 0%, transparent 55%), var(--surface); border: 2px solid var(--edge);">
+
+  <!-- Eyebrow + headline -->
+  <div>
+    <p class="text-[20px] font-bold tracking-[3px] uppercase text-faint">THE RECEIPTS — ONE REAL CODEBASE, THREE WEEKS</p>
+    <h2 class="mt-3 text-[34px] font-bold tracking-tight text-ink leading-tight">
+      Drift isn't a vibe. It was counted.
+    </h2>
+  </div>
+
+  <!-- Three stat cells -->
+  <div class="grid grid-cols-3 gap-6">
+
+    <div class="rounded-[16px] p-[28px_30px] border-2 border-panelEdge bg-panel"
+         style="border-left: 8px solid var(--bad);">
+      <p class="text-[64px] font-extrabold leading-none text-bad" style="letter-spacing:-2px;">81</p>
+      <p class="mt-3 text-[20px] font-semibold text-ink leading-snug">docs contradicting each other</p>
+      <p class="mt-1 text-[16px] text-dim">on live production parameters</p>
+    </div>
+
+    <div class="rounded-[16px] p-[28px_30px] border-2 border-panelEdge bg-panel"
+         style="border-left: 8px solid var(--accent);">
+      <p class="text-[64px] font-extrabold leading-none text-accent" style="letter-spacing:-2px;">93 / 47</p>
+      <p class="mt-3 text-[20px] font-semibold text-ink leading-snug">bug reports against its own tooling</p>
+      <p class="mt-1 text-[16px] text-dim">across 47 commits in three weeks</p>
+    </div>
+
+    <div class="rounded-[16px] p-[28px_30px] border-2 border-panelEdge bg-panel"
+         style="border-left: 8px solid var(--good);">
+      <p class="text-[64px] font-extrabold leading-none text-good" style="letter-spacing:-2px;">30</p>
+      <p class="mt-3 text-[20px] font-semibold text-ink leading-snug">empty results for things that existed</p>
+      <p class="mt-1 text-[16px] text-dim">a coverage limit presented as a fact</p>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="flex justify-between items-baseline pt-2">
+    <p class="text-[18px] text-faint">Nothing leaves your repo. There is no telemetry endpoint.</p>
+    <p class="text-[18px] font-extrabold text-accent">bearing</p>
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -24,6 +24,10 @@ A drifted agent doesn't crash. It reads a doc you abandoned in March, re-propose
 
 That failure has a name — **losing your bearings**.
 
+<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/social/bearing.gif" alt="Terminal recording: without bearing an agent ships a feature that was measured and killed, found out three days later; with bearing the same intent is caught against NS-9 in one line." width="100%">
+
+<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/social/receipts.png" alt="The receipts: 81 docs contradicting each other on live production parameters; 93 bug reports against its own tooling across 47 commits in three weeks; 30 empty results for things that demonstrably existed." width="100%">
+
 ## What you get
 
 **Six independent modules. Pick any combination — each works alone, none depends on another.**
