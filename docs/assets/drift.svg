@@ -1,1 +1,51 @@
-<svg height="300" viewBox="0 0 900 300" width="900" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><radialGradient id="a" cx="100%" cy="0%" r="120%"><stop offset="0" stop-color="#161c27"/><stop offset=".55" stop-color="#11161f"/></radialGradient><rect fill="url(#a)" height="300" rx="14" stroke="#232c3b" width="900"/><text fill="#61708a" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="11.5" font-weight="600" letter-spacing="1.6" x="28" y="34">A STALE PREMISE SPREADS TO EVERY LATER CONCLUSION</text><text fill="#e8edf5" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="21" font-weight="700" x="28" y="62">It spreads — until a north-star stops it.</text><g fill="#d95926"><text font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" x="28" y="104">WITHOUT</text><circle cx="70" cy="150" r="12" visibility="hidden"/><text font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" x="70" y="182">stale doc</text><circle cx="388" cy="116" opacity=".7" r="7"/><circle cx="388" cy="150" opacity=".7" r="7"/><circle cx="388" cy="184" opacity=".7" r="7"/><circle cx="388" cy="218" opacity=".7" r="7"/><circle cx="388" cy="252" opacity=".7" r="7"/></g><text fill="#9aa8bd" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" x="400" y="96">every later conclusion inherits it</text><path d="m450 100v100" stroke="#232c3b" stroke-dasharray="2 5" stroke-width="1.5"/><text fill="#3987e5" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" x="478" y="104">WITH BEARING</text><circle cx="520" cy="150" fill="#d95926" r="12" visibility="hidden"/><text fill="#61708a" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" x="520" y="182">stale doc</text><rect fill="#3987e5" height="84" rx="4" visibility="hidden" width="8" x="620" y="110"/><text fill="#3987e5" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="13" font-weight="700" letter-spacing="1.5" x="638" y="152">NS</text><circle cx="800" cy="116" fill="#199e70" opacity=".35" r="7"/><circle cx="800" cy="150" fill="#199e70" opacity=".35" r="7"/><circle cx="800" cy="184" fill="#199e70" opacity=".35" r="7"/><circle cx="800" cy="218" fill="#199e70" opacity=".35" r="7"/><circle cx="800" cy="252" fill="#199e70" opacity=".35" r="7"/><text fill="#3987e5" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" x="648" y="222">the gate outranks it — spread stops</text><text fill="#61708a" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" x="28" y="276">A drifted agent doesn't crash. You find out three days later — unless a north-star caught it first.</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" width="900" height="300" role="img" aria-label="Without bearing a stale premise spreads silently to every later conclusion; with it a north-star gate stops the spread at the source.">
+<defs>
+  <marker id="ar" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse">
+    <path d="M0 0 L10 5 L0 10 z" fill="#3a465c"/>
+  </marker>
+  <radialGradient id="surfaceGrad" cx="100%" cy="0%" r="120%">
+    <stop offset="0%" stop-color="#161c27"/>
+    <stop offset="55%" stop-color="#11161f"/>
+  </radialGradient>
+  <linearGradient id="panelGrad" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#1d2533"/>
+    <stop offset="100%" stop-color="#1a2130"/>
+  </linearGradient>
+</defs>
+<rect width="900" height="300" rx="14" fill="url(#surfaceGrad)" stroke="#232c3b"/>
+<text x="28" y="34" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="11.5" font-weight="600" letter-spacing="1.6" fill="#61708a">A STALE PREMISE SPREADS TO EVERY LATER CONCLUSION</text>
+<text x="28" y="62" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="21" font-weight="700" fill="#e8edf5">It spreads — until a north-star stops it.</text>
+<text x="28" y="104" text-anchor="start" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="13" fill="#d95926">WITHOUT</text>
+<circle cx="70" cy="150" r="26.400000000000002" fill="#d95926" opacity="0.22"/><circle cx="70" cy="150" r="12" fill="#d95926" opacity="1"/>
+<text x="70" y="182" text-anchor="start" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="13" fill="#d95926">stale doc</text>
+<line x1="82" y1="150" x2="376" y2="116" stroke="#d95926" stroke-width="1.5" opacity="0.55"/>
+<line x1="82" y1="150" x2="376" y2="150" stroke="#d95926" stroke-width="1.5" opacity="0.55"/>
+<line x1="82" y1="150" x2="376" y2="184" stroke="#d95926" stroke-width="1.5" opacity="0.55"/>
+<line x1="82" y1="150" x2="376" y2="218" stroke="#d95926" stroke-width="1.5" opacity="0.55"/>
+<line x1="82" y1="150" x2="376" y2="252" stroke="#d95926" stroke-width="1.5" opacity="0.55"/>
+<circle cx="384" cy="116" r="7" fill="#d95926" opacity="0.7"/>
+<circle cx="384" cy="150" r="7" fill="#d95926" opacity="0.7"/>
+<circle cx="384" cy="184" r="7" fill="#d95926" opacity="0.7"/>
+<circle cx="384" cy="218" r="7" fill="#d95926" opacity="0.7"/>
+<circle cx="384" cy="252" r="7" fill="#d95926" opacity="0.7"/>
+<text x="398" y="96" text-anchor="start" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="13" fill="#9aa8bd">every later conclusion inherits it</text>
+<line x1="450" y1="100" x2="450" y2="200" stroke="#232c3b" stroke-width="1.5" stroke-dasharray="2 5"/>
+<text x="478" y="104" text-anchor="start" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="13" fill="#3987e5">WITH BEARING</text>
+<circle cx="520" cy="150" r="26.400000000000002" fill="#d95926" opacity="0.22"/><circle cx="520" cy="150" r="12" fill="#d95926" opacity="1"/>
+<text x="520" y="182" text-anchor="start" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="13" fill="#61708a">stale doc</text>
+<rect x="618" y="110" width="12" height="84" rx="6" fill="#3987e5" opacity="0.22"/>
+<rect x="620" y="110" width="8" height="84" rx="4" fill="#3987e5"/>
+<text x="638" y="156" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="13" font-weight="700" letter-spacing="1.5" fill="#3987e5">NS</text>
+<line x1="532" y1="150" x2="620" y2="116" stroke="#3987e5" stroke-width="1.5" opacity="0.5" stroke-dasharray="4 4"/>
+<line x1="532" y1="150" x2="620" y2="150" stroke="#3987e5" stroke-width="1.5" opacity="0.5" stroke-dasharray="4 4"/>
+<line x1="532" y1="150" x2="620" y2="184" stroke="#3987e5" stroke-width="1.5" opacity="0.5" stroke-dasharray="4 4"/>
+<line x1="532" y1="150" x2="620" y2="218" stroke="#3987e5" stroke-width="1.5" opacity="0.5" stroke-dasharray="4 4"/>
+<line x1="532" y1="150" x2="620" y2="252" stroke="#3987e5" stroke-width="1.5" opacity="0.5" stroke-dasharray="4 4"/>
+<circle cx="800" cy="116" r="7" fill="#199e70" opacity="0.35"/>
+<circle cx="800" cy="150" r="7" fill="#199e70" opacity="0.35"/>
+<circle cx="800" cy="184" r="7" fill="#199e70" opacity="0.35"/>
+<circle cx="800" cy="218" r="7" fill="#199e70" opacity="0.35"/>
+<circle cx="800" cy="252" r="7" fill="#199e70" opacity="0.35"/>
+<text x="648" y="222" text-anchor="start" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="13" fill="#3987e5">the gate outranks it</text>
+<text x="28" y="276" text-anchor="start" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="13" fill="#61708a">A drifted agent doesn't crash. You find out three days later — unless a north-star caught it first.</text>
+</svg>

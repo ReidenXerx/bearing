@@ -1,1 +1,126 @@
-<svg height="320" viewBox="0 0 900 320" width="900" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><radialGradient id="a" cx="100%" cy="0%" r="120%"><stop offset="0" stop-color="#161c27"/><stop offset=".55" stop-color="#11161f"/></radialGradient><filter id="b" height="140%" width="140%" x="-20%" y="-20%"><feGaussianBlur in="SourceAlpha" stdDeviation="4"/><feOffset dx="0" dy="6" result="off"/><feComponentTransfer><feFuncA slope="0.55" type="linear"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter><rect fill="url(#a)" height="320" rx="14" stroke="#232c3b" width="900"/><text fill="#61708a" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="11.5" font-weight="600" letter-spacing="1.6" x="28" y="34">FORTY FILES, ONE RULE TO CHECK</text><text fill="#e8edf5" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="21" font-weight="700" x="28" y="62">Send forty gatherers, not one thread.</text><circle cx="120" cy="120" fill="#3987e5" r="16" visibility="hidden"/><text fill="#3987e5" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="14" font-weight="700" text-anchor="middle" x="120" y="158">agent</text><path d="m132 120 88 80" opacity=".5" stroke="#3a465c"/><circle cx="220" cy="200" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 104 96.74966" opacity=".5" stroke="#3a465c"/><circle cx="236" cy="216.74966" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 120 105.621693" opacity=".5" stroke="#3a465c"/><circle cx="252" cy="225.621693" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 136 102.443444" opacity=".5" stroke="#3a465c"/><circle cx="268" cy="222.443444" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 152 88.709692" opacity=".5" stroke="#3a465c"/><circle cx="284" cy="208.709692" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 168 70.879636" opacity=".5" stroke="#3a465c"/><circle cx="300" cy="190.879636" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 184 57.33903" opacity=".5" stroke="#3a465c"/><circle cx="316" cy="177.33903" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 200 54.456232" opacity=".5" stroke="#3a465c"/><circle cx="332" cy="174.456232" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 216 63.587067" opacity=".5" stroke="#3a465c"/><circle cx="348" cy="183.587067" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 232 80.437161" opacity=".5" stroke="#3a465c"/><circle cx="364" cy="200.437161" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 248 97.081652" opacity=".5" stroke="#3a465c"/><circle cx="380" cy="217.081652" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 264 105.692374" opacity=".5" stroke="#3a465c"/><circle cx="396" cy="225.692374" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 280 102.219572" opacity=".5" stroke="#3a465c"/><circle cx="412" cy="222.219572" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 296 88.296557" opacity=".5" stroke="#3a465c"/><circle cx="428" cy="208.296557" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 312 70.471543" opacity=".5" stroke="#3a465c"/><circle cx="444" cy="190.471543" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 328 57.12791" opacity=".5" stroke="#3a465c"/><circle cx="460" cy="177.12791" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 344 54.541379" opacity=".5" stroke="#3a465c"/><circle cx="476" cy="174.541379" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 360 63.928435" opacity=".5" stroke="#3a465c"/><circle cx="492" cy="183.928435" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 376 80.874199" opacity=".5" stroke="#3a465c"/><circle cx="508" cy="200.874199" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 392 97.408814" opacity=".5" stroke="#3a465c"/><circle cx="524" cy="217.408814" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 408 105.755791" opacity=".5" stroke="#3a465c"/><circle cx="540" cy="225.755791" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 424 101.989418" opacity=".5" stroke="#3a465c"/><circle cx="556" cy="221.989418" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 440 87.881077" opacity=".5" stroke="#3a465c"/><circle cx="572" cy="207.881077" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 456 70.066143" opacity=".5" stroke="#3a465c"/><circle cx="588" cy="190.066143" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 472 56.923257" opacity=".5" stroke="#3a465c"/><circle cx="604" cy="176.923257" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 488 54.633724" opacity=".5" stroke="#3a465c"/><circle cx="620" cy="174.633724" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 504 64.274347" opacity=".5" stroke="#3a465c"/><circle cx="636" cy="184.274347" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 520 81.31099" opacity=".5" stroke="#3a465c"/><circle cx="652" cy="201.31099" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 536 97.731054" opacity=".5" stroke="#3a465c"/><circle cx="668" cy="217.731054" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 552 105.811927" opacity=".5" stroke="#3a465c"/><circle cx="684" cy="225.811927" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 568 101.753047" opacity=".5" stroke="#3a465c"/><circle cx="700" cy="221.753047" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 584 87.463369" opacity=".5" stroke="#3a465c"/><circle cx="716" cy="207.463369" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 600 69.663552" opacity=".5" stroke="#3a465c"/><circle cx="732" cy="189.663552" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 616 56.725128" opacity=".5" stroke="#3a465c"/><circle cx="748" cy="176.725128" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 632 54.73324" opacity=".5" stroke="#3a465c"/><circle cx="764" cy="174.73324" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 648 64.624704" opacity=".5" stroke="#3a465c"/><circle cx="780" cy="184.624704" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 664 81.74741" opacity=".5" stroke="#3a465c"/><circle cx="796" cy="201.74741" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 680 98.048281" opacity=".5" stroke="#3a465c"/><circle cx="812" cy="218.048281" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 696 105.860764" opacity=".5" stroke="#3a465c"/><circle cx="828" cy="225.860764" fill="#3987e5" opacity=".8" r="4.5"/><path d="m132 120 712 101.510525" opacity=".5" stroke="#3a465c"/><circle cx="844" cy="221.510525" fill="#3987e5" opacity=".8" r="4.5"/><path d="m220 250q230 50 470 0" fill="none" opacity=".5" stroke="#3987e5" stroke-width="1.5"/><circle cx="780" cy="276" fill="#199e70" r="16" visibility="hidden"/><text fill="#199e70" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="14" font-weight="700" text-anchor="middle" x="780" y="314">you conclude</text><g filter="url(#b)"><rect fill="#199e70" height="26" rx="13" width="161" x="300" y="268"/><text fill="#fff" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" font-weight="600" text-anchor="middle" x="380.5" y="285.5">FOUND src/fees.ts:88</text></g><g filter="url(#b)"><rect fill="#61708a" height="26" rx="13" width="64.8" x="520" y="268"/><text fill="#fff" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" font-weight="600" text-anchor="middle" x="552.4" y="285.5">CHECKED</text></g><g filter="url(#b)"><rect fill="#d95926" height="26" rx="13" width="57.4" x="640" y="268"/><text fill="#fff" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" font-weight="600" text-anchor="middle" x="668.7" y="285.5">MISSED</text></g><text fill="#61708a" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" x="700" y="104">SERIAL (the alternative)</text><circle cx="700" cy="120" fill="#d95926" opacity=".6" r="3"/><path d="m700 120h14" opacity=".5" stroke="#d95926" stroke-width="1.25"/><circle cx="714" cy="120" fill="#d95926" opacity=".6" r="3"/><path d="m714 120h14" opacity=".5" stroke="#d95926" stroke-width="1.25"/><circle cx="728" cy="120" fill="#d95926" opacity=".6" r="3"/><path d="m728 120h14" opacity=".5" stroke="#d95926" stroke-width="1.25"/><circle cx="742" cy="120" fill="#d95926" opacity=".6" r="3"/><path d="m742 120h14" opacity=".5" stroke="#d95926" stroke-width="1.25"/><circle cx="756" cy="120" fill="#d95926" opacity=".6" r="3"/><path d="m756 120h14" opacity=".5" stroke="#d95926" stroke-width="1.25"/><circle cx="770" cy="120" fill="#d95926" opacity=".6" r="3"/><path d="m770 120h14" opacity=".5" stroke="#d95926" stroke-width="1.25"/><circle cx="784" cy="120" fill="#d95926" opacity=".6" r="3"/><path d="m784 120h14" opacity=".5" stroke="#d95926" stroke-width="1.25"/><circle cx="798" cy="120" fill="#d95926" opacity=".6" r="3"/><path d="m798 120h14" opacity=".5" stroke="#d95926" stroke-width="1.25"/><circle cx="812" cy="120" fill="#d95926" opacity=".6" r="3"/><path d="m812 120h14" opacity=".5" stroke="#d95926" stroke-width="1.25"/><circle cx="826" cy="120" fill="#d95926" opacity=".6" r="3"/><path d="m826 120h14" opacity=".5" stroke="#d95926" stroke-width="1.25"/><circle cx="840" cy="120" fill="#d95926" opacity=".6" r="3"/><path d="m840 120h14" opacity=".5" stroke="#d95926" stroke-width="1.25"/><circle cx="854" cy="120" fill="#d95926" opacity=".6" r="3"/><text fill="#61708a" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" x="700" y="142">one agent, forty reads</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" width="900" height="340" role="img" aria-label="Forty files checked serially by one agent, versus forty cheap anchored subagents each carrying the project's north-stars and persona; they return citations — FOUND file:line, CHECKED, MISSED — and the main agent draws the conclusion itself.">
+<defs>
+  <marker id="ar" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse">
+    <path d="M0 0 L10 5 L0 10 z" fill="#3a465c"/>
+  </marker>
+  <radialGradient id="surfaceGrad" cx="100%" cy="0%" r="120%">
+    <stop offset="0%" stop-color="#161c27"/>
+    <stop offset="55%" stop-color="#11161f"/>
+  </radialGradient>
+  <linearGradient id="panelGrad" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#1d2533"/>
+    <stop offset="100%" stop-color="#1a2130"/>
+  </linearGradient>
+</defs>
+<rect width="900" height="340" rx="14" fill="url(#surfaceGrad)" stroke="#232c3b"/>
+<text x="28" y="34" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="11.5" font-weight="600" letter-spacing="1.6" fill="#61708a">FORTY FILES, ONE RULE TO CHECK</text>
+<text x="28" y="62" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="21" font-weight="700" fill="#e8edf5">Send forty gatherers, not one thread.</text>
+<circle cx="70" cy="120" r="15" fill="#3987e5"/>
+<text x="70" y="154" text-anchor="middle" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="14" font-weight="700" fill="#3987e5">agent</text>
+<line x1="84" y1="120" x2="180" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
+<circle cx="180" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
+<line x1="84" y1="120" x2="208" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
+<circle cx="208" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
+<line x1="84" y1="120" x2="236" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
+<circle cx="236" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
+<line x1="84" y1="120" x2="264" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
+<circle cx="264" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
+<line x1="84" y1="120" x2="292" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
+<circle cx="292" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
+<line x1="84" y1="120" x2="320" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
+<circle cx="320" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
+<line x1="84" y1="120" x2="348" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
+<circle cx="348" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
+<line x1="84" y1="120" x2="376" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
+<circle cx="376" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
+<line x1="84" y1="120" x2="404" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
+<circle cx="404" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
+<line x1="84" y1="120" x2="432" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
+<circle cx="432" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
+<line x1="84" y1="120" x2="460" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
+<circle cx="460" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
+<line x1="84" y1="120" x2="488" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
+<circle cx="488" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
+<line x1="84" y1="120" x2="516" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
+<circle cx="516" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
+<line x1="84" y1="120" x2="544" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
+<circle cx="544" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
+<line x1="84" y1="120" x2="572" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
+<circle cx="572" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
+<line x1="84" y1="120" x2="600" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
+<circle cx="600" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
+<line x1="84" y1="120" x2="628" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
+<circle cx="628" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
+<line x1="84" y1="120" x2="656" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
+<circle cx="656" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
+<line x1="84" y1="120" x2="684" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
+<circle cx="684" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
+<line x1="84" y1="120" x2="712" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
+<circle cx="712" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
+<line x1="84" y1="120" x2="740" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
+<circle cx="740" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
+<line x1="84" y1="120" x2="768" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
+<circle cx="768" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
+<line x1="84" y1="120" x2="796" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
+<circle cx="796" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
+<line x1="84" y1="120" x2="824" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
+<circle cx="824" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
+<line x1="180" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
+<line x1="208" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
+<line x1="236" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
+<line x1="264" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
+<line x1="292" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
+<line x1="320" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
+<line x1="348" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
+<line x1="376" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
+<line x1="404" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
+<line x1="432" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
+<line x1="460" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
+<line x1="488" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
+<line x1="516" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
+<line x1="544" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
+<line x1="572" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
+<line x1="600" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
+<line x1="628" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
+<line x1="656" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
+<line x1="684" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
+<line x1="712" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
+<line x1="740" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
+<line x1="768" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
+<line x1="796" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
+<line x1="824" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
+<path d="M180 210 Q500 240 820 250" fill="none" stroke="#3987e5" stroke-width="1.5" opacity="0.5"/>
+<rect x="300" y="211" width="164" height="26" rx="13" fill="#000" opacity="0.3"/>
+<rect x="300" y="208" width="164" height="26" rx="13" fill="#199e70"/>
+<text x="382" y="225.5" text-anchor="middle" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" font-weight="600" fill="#ffffff">FOUND src/fees.ts:88</text>
+<rect x="520" y="211" width="67.80000000000001" height="26" rx="13" fill="#000" opacity="0.3"/>
+<rect x="520" y="208" width="67.80000000000001" height="26" rx="13" fill="#61708a"/>
+<text x="553.9" y="225.5" text-anchor="middle" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" font-weight="600" fill="#ffffff">CHECKED</text>
+<rect x="640" y="211" width="60.400000000000006" height="26" rx="13" fill="#000" opacity="0.3"/>
+<rect x="640" y="208" width="60.400000000000006" height="26" rx="13" fill="#d95926"/>
+<text x="670.2" y="225.5" text-anchor="middle" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" font-weight="600" fill="#ffffff">MISSED</text>
+<circle cx="820" cy="268" r="15" fill="#199e70"/>
+<text x="820" y="302" text-anchor="middle" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="14" font-weight="700" fill="#199e70">you conclude</text>
+<text x="700" y="96" text-anchor="start" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="13" fill="#61708a">SERIAL (the alternative)</text>
+
+<circle cx="700" cy="116" r="3" fill="#d95926" opacity="0.6"/>
+<line x1="700" y1="116" x2="716" y2="116" stroke="#d95926" stroke-width="1.25" opacity="0.5"/>
+<circle cx="716" cy="116" r="3" fill="#d95926" opacity="0.6"/>
+<line x1="716" y1="116" x2="732" y2="116" stroke="#d95926" stroke-width="1.25" opacity="0.5"/>
+<circle cx="732" cy="116" r="3" fill="#d95926" opacity="0.6"/>
+<line x1="732" y1="116" x2="748" y2="116" stroke="#d95926" stroke-width="1.25" opacity="0.5"/>
+<circle cx="748" cy="116" r="3" fill="#d95926" opacity="0.6"/>
+<line x1="748" y1="116" x2="764" y2="116" stroke="#d95926" stroke-width="1.25" opacity="0.5"/>
+<circle cx="764" cy="116" r="3" fill="#d95926" opacity="0.6"/>
+<line x1="764" y1="116" x2="780" y2="116" stroke="#d95926" stroke-width="1.25" opacity="0.5"/>
+<circle cx="780" cy="116" r="3" fill="#d95926" opacity="0.6"/>
+<line x1="780" y1="116" x2="796" y2="116" stroke="#d95926" stroke-width="1.25" opacity="0.5"/>
+<circle cx="796" cy="116" r="3" fill="#d95926" opacity="0.6"/>
+<line x1="796" y1="116" x2="812" y2="116" stroke="#d95926" stroke-width="1.25" opacity="0.5"/>
+<circle cx="812" cy="116" r="3" fill="#d95926" opacity="0.6"/>
+<line x1="812" y1="116" x2="828" y2="116" stroke="#d95926" stroke-width="1.25" opacity="0.5"/>
+<circle cx="828" cy="116" r="3" fill="#d95926" opacity="0.6"/>
+<line x1="828" y1="116" x2="844" y2="116" stroke="#d95926" stroke-width="1.25" opacity="0.5"/>
+<circle cx="844" cy="116" r="3" fill="#d95926" opacity="0.6"/>
+<text x="700" y="134" text-anchor="start" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="13" fill="#61708a">one agent, forty reads</text>
+</svg>

@@ -1,1 +1,34 @@
-<svg height="300" viewBox="0 0 900 300" width="900" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><radialGradient id="a" cx="100%" cy="0%" r="120%"><stop offset="0" stop-color="#161c27"/><stop offset=".55" stop-color="#11161f"/></radialGradient><linearGradient id="b" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#1d2533"/><stop offset="1" stop-color="#1a2130"/></linearGradient><filter id="c" height="140%" width="140%" x="-20%" y="-20%"><feGaussianBlur in="SourceAlpha" stdDeviation="4"/><feOffset dx="0" dy="6" result="off"/><feComponentTransfer><feFuncA slope="0.55" type="linear"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter><rect fill="url(#a)" height="300" rx="14" stroke="#232c3b" width="900"/><text fill="#61708a" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="11.5" font-weight="600" letter-spacing="1.6" x="28" y="34">LONG SESSION · COMPACTION INCOMING</text><text fill="#e8edf5" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="21" font-weight="700" x="28" y="62">What compaction erases, the task-core already saved.</text><rect fill="#1a2130" height="84" opacity=".5" rx="10" stroke="#2c3648" width="844" x="28" y="88"/><g fill="#9aa8bd" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13"><text opacity=".18" x="48" y="112">user: let's fix the fee calc so it handles net...</text><text opacity=".14" x="48" y="132">agent: I'll change RATE to net-gated... tried gross*RATE, that</text><text opacity=".1" x="48" y="152">broke the ledger test. gotcha: don't touch the RATE const, gate</text></g><g filter="url(#c)"><rect fill="#d95926" height="26" rx="13" width="161" x="720" y="108"/><text fill="#fff" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" font-weight="600" text-anchor="middle" x="800.5" y="125.5">transcript · dropped</text></g><text fill="#3987e5" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" font-weight="700" text-anchor="middle" x="450" y="192">↓ written before the erasure ↓</text><rect fill="url(#b)" height="70" rx="10" stroke="#3987e5" stroke-width="1.5" visibility="hidden" width="844" x="28" y="206"/><path d="m29 217a10 10 0 0 1 10-10h4v68h-4a10 10 0 0 1 -10-10z" fill="#3987e5"/><text fill="#3987e5" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="14" font-weight="700" x="56" y="232">TASK-CORE</text><text fill="#e8edf5" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" font-weight="500" x="56" y="256">GOAL · CONSTRAINTS · DECISIONS(+why) · STATE · ANCHORS(file:line) · GOTCHAS</text><g filter="url(#c)"><rect fill="#199e70" height="26" rx="13" width="94.4" x="740" y="226"/><text fill="#fff" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" font-weight="600" text-anchor="middle" x="787.2" y="243.5">goal intact</text></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" width="900" height="300" role="img" aria-label="Before compaction erases the transcript, the task-core saves the goal, decisions, and gotchas — and reads them back intact.">
+<defs>
+  <marker id="ar" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse">
+    <path d="M0 0 L10 5 L0 10 z" fill="#3a465c"/>
+  </marker>
+  <radialGradient id="surfaceGrad" cx="100%" cy="0%" r="120%">
+    <stop offset="0%" stop-color="#161c27"/>
+    <stop offset="55%" stop-color="#11161f"/>
+  </radialGradient>
+  <linearGradient id="panelGrad" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#1d2533"/>
+    <stop offset="100%" stop-color="#1a2130"/>
+  </linearGradient>
+</defs>
+<rect width="900" height="300" rx="14" fill="url(#surfaceGrad)" stroke="#232c3b"/>
+<text x="28" y="34" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="11.5" font-weight="600" letter-spacing="1.6" fill="#61708a">LONG SESSION · COMPACTION INCOMING</text>
+<text x="28" y="62" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="21" font-weight="700" fill="#e8edf5">What compaction erases, the task-core already saved.</text>
+<rect x="28" y="88" width="844" height="84" rx="10" fill="#1a2130" stroke="#2c3648" opacity="0.5"/>
+<text x="48" y="112" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" fill="#9aa8bd" opacity="0.32">user: let's fix the fee calc so it handles net...</text>
+<text x="48" y="132" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" fill="#9aa8bd" opacity="0.28">agent: I'll change RATE to net-gated... tried gross*RATE, that</text>
+<text x="48" y="152" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" fill="#9aa8bd" opacity="0.24">broke the ledger test. gotcha: don't touch the RATE const, gate</text>
+<rect x="720" y="111" width="164" height="26" rx="13" fill="#000" opacity="0.3"/>
+<rect x="720" y="108" width="164" height="26" rx="13" fill="#d95926"/>
+<text x="802" y="125.5" text-anchor="middle" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" font-weight="600" fill="#ffffff">transcript · dropped</text>
+<text x="450" y="192" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" font-weight="700" fill="#3987e5">↓ written before the erasure ↓</text>
+<rect x="28" y="201" width="844" height="70" rx="10" fill="#000" opacity="0.3"/>
+<rect x="28" y="206" width="844" height="70" rx="10" fill="url(#panelGrad)" stroke="#3987e5" stroke-width="1.5"/>
+<path d="M29 217 a10 10 0 0 1 10 -10 h4 v68 h-4 a10 10 0 0 1 -10 -10 z" fill="#3987e5"/>
+<text x="56" y="232" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="14" font-weight="700" fill="#3987e5">TASK-CORE</text>
+<text x="56" y="256" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" font-weight="500" fill="#e8edf5">GOAL · CONSTRAINTS · DECISIONS(+why) · STATE · ANCHORS(file:line) · GOTCHAS</text>
+<rect x="740" y="229" width="97.4" height="26" rx="13" fill="#000" opacity="0.3"/>
+<rect x="740" y="226" width="97.4" height="26" rx="13" fill="#199e70"/>
+<text x="788.7" y="243.5" text-anchor="middle" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" font-weight="600" fill="#ffffff">goal intact</text>
+</svg>
