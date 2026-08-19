@@ -521,6 +521,11 @@ if (cmd === "doctor") {
   const lines = ["GitNexus doctor — backend + kit reachability", ""];
   let problems = 0;
 
+  // Cursor-only: a Claude or Zed install has no .cursor/mcp.json and reporting its absence
+  // as a problem told the reader to "restart Cursor" for a file they never wanted (NS-6).
+  const wantsCursorHere = String(
+    (() => { try { return JSON.parse(fs.readFileSync(path.join(ROOT, ".bearing/manifest.json"), "utf8")).runtime; } catch { return "cursor"; } })(),
+  ).split(",").some((t) => ["cursor", "both", "all"].includes(t.trim().toLowerCase()));
   const mcpPath = path.join(ROOT, ".cursor/mcp.json");
   let mcpOk = false;
   try {
@@ -530,8 +535,8 @@ if (cmd === "doctor") {
   } catch {
     /* missing */
   }
-  lines.push(`${mcpOk ? "✓" : "✗"} .cursor/mcp.json gitnexus entry`);
-  if (!mcpOk) problems++;
+  if (wantsCursorHere) lines.push(`${mcpOk ? "✓" : "✗"} .cursor/mcp.json gitnexus entry`);
+if (wantsCursorHere && !mcpOk) problems++;
 
   // Live probe of the GitNexus CLI backend (proxy for MCP server health).
   // Probe the SAME binary everything else runs. Hardcoding npx here meant this reported the STOCK
@@ -593,8 +598,8 @@ if (cmd === "doctor") {
   lines.push("");
   lines.push(
     problems === 0
-      ? "Doctor: backend reachable. If MCP tools still fail in Cursor, restart Cursor to reload the MCP server."
-      : `Doctor: ${problems} problem(s) — fix the ✗ items above, then restart Cursor.`,
+      ? "Doctor: backend reachable. If MCP tools still fail, restart your editor to reload the MCP server."
+      : `Doctor: ${problems} problem(s) — fix the ✗ items above${wantsCursorHere ? ", then restart Cursor" : ""}.`,
   );
   console.log(lines.join("\n"));
   process.exit(problems === 0 ? 0 : 1);

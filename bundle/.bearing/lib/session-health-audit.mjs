@@ -35,10 +35,40 @@ export function loadStaleness(root) {
 /**
  * @param {string} root
  */
+/**
+ * Which runtimes this install actually covers, from the manifest it wrote.
+ *
+ * The three Cursor checks below ran unconditionally, so a correct CLAUDE-ONLY install was reported
+ * broken — "Cursor hooks ✗", "Missing gitnexus MCP entry", "Missing north-star rule" — and
+ * `bearing:doctor` signed off with "restart Cursor". Advice the reader cannot follow, about a
+ * problem that does not exist (NS-6), on three separate commands at once.
+ * @param {string} root
+ */
+function installedRuntimes(root) {
+  for (const rel of [".bearing/manifest.json", ".gitnexus/agent-kit-manifest.json"]) {
+    try {
+      const raw = JSON.parse(fs.readFileSync(path.join(root, rel), "utf8")).runtime;
+      const out = new Set();
+      for (const t of String(raw || "").toLowerCase().split(",").map((x) => x.trim()).filter(Boolean)) {
+        if (t === "both") { out.add("cursor"); out.add("zed"); }
+        else if (t === "all") { out.add("cursor"); out.add("zed"); out.add("claude"); out.add("codex"); }
+        else out.add(t);
+      }
+      if (out.size) return out;
+    } catch {
+      /* try the next location */
+    }
+  }
+  // No manifest — an old or hand-made install. Check everything, as it did before: a false alarm
+  // beats silently verifying nothing.
+  return new Set(["cursor", "zed", "claude", "codex"]);
+}
+
 export function auditKitHealth(root) {
   const stale = loadStaleness(root);
   const config = loadHookConfig(root);
   const repo = repoName(root);
+  const runtimes = installedRuntimes(root);
 
   /** @type {{ id: string, ok: boolean, label: string, detail?: string }[]} */
   const checks = [];
@@ -55,7 +85,7 @@ export function auditKitHealth(root) {
         return false;
       }
     })();
-  checks.push({
+  if (runtimes.has("cursor")) checks.push({
     id: "hooks",
     ok: hooksOk,
     label: "Cursor hooks",
@@ -76,7 +106,7 @@ export function auditKitHealth(root) {
         return false;
       }
     })();
-  checks.push({
+  if (runtimes.has("cursor")) checks.push({
     id: "mcp",
     ok: mcpOk,
     label: "GitNexus MCP",
@@ -87,7 +117,7 @@ export function auditKitHealth(root) {
 
   const rulePath = path.join(root, ".cursor/rules/00-bearing-enforcement.mdc");
   const ruleOk = fs.existsSync(rulePath);
-  checks.push({
+  if (runtimes.has("cursor")) checks.push({
     id: "rule",
     ok: ruleOk,
     label: "Enforcement rule",

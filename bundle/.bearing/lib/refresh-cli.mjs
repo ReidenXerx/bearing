@@ -83,10 +83,36 @@ console.log(`==> GitNexus refresh [${plan.tier}] — ${plan.why}`);
 console.log(`    ${bin} ${plan.args.join(" ")}`);
 if (dryRun) process.exit(0);
 
+const startedAt = Date.now();
 const r = spawnSync(bin, plan.args, { cwd: root, stdio: "inherit", shell: process.platform === "win32" });
+const seconds = Math.round((Date.now() - startedAt) / 1000);
 if (r.status !== 0) {
   console.error(`==> refresh failed (exit ${r.status ?? "signal"})`);
   process.exit(r.status || 1);
+}
+
+// WHAT IT COST, so the next message that suggests a refresh can say so.
+//
+// Every hint shipped the same words — "incremental, usually quick" — regardless of repo. Measured:
+// 52s on a 258-file repo and 573s on a 3,000-file one. An order of magnitude, identical wording, so
+// the reader learned nothing from it and had to guess whether to interrupt themselves.
+//
+// Per machine and per tier: the same repo costs wildly different amounts for an incremental pass
+// versus a forced rebuild, and this is a local measurement, not a fact about the project.
+try {
+  const file = path.join(root, ".bearing", ".gitnexus-refresh-cost.json");
+  let all = {};
+  try {
+    all = JSON.parse(fs.readFileSync(file, "utf8"));
+  } catch {
+    /* first refresh on this machine */
+  }
+  all[plan.tier] = { seconds, at: new Date().toISOString() };
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, JSON.stringify(all, null, 2));
+  console.log(`    took ${seconds}s`);
+} catch {
+  /* a cost we could not record is a missing hint, not a failed refresh */
 }
 
 // The analyzer writes its volatile stats block into AGENTS.md / CLAUDE.md. Strip it here so the

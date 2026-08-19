@@ -66,3 +66,31 @@ export function howToRun(root, name) {
   // Nothing installed can do it. Say so rather than name a command that will fail.
   return `${name} (not installed in this repo)`;
 }
+
+/**
+ * What a refresh actually cost here, last time, as a short phrase for a message.
+ *
+ * Every hint shipped the same words — "incremental — usually quick" — whatever the repo. Measured on
+ * two real ones: 52s and 573s. Same wording, an order of magnitude apart, so the reader learned
+ * nothing and had to guess whether to interrupt themselves. A number they can act on beats an
+ * adjective they cannot.
+ *
+ * Empty string when nothing has been measured yet, so callers can concatenate it unconditionally
+ * rather than each inventing a fallback adjective.
+ * @param {string} [root] @param {string} [tier] which tier to quote; defaults to the cheap one
+ * @returns {string} e.g. " (~52s here last time)" or ""
+ */
+export function refreshCost(root, tier = "incremental") {
+  const dir = root || OWN_ROOT;
+  try {
+    const all = JSON.parse(
+      fs.readFileSync(path.join(dir, ".bearing", ".gitnexus-refresh-cost.json"), "utf8"),
+    );
+    const hit = all[tier] || all.incremental || all.full;
+    const s = Number(hit?.seconds);
+    if (!(s > 0)) return "";
+    return s < 90 ? ` (~${s}s here last time)` : ` (~${Math.round(s / 60)} min here last time)`;
+  } catch {
+    return ""; // never measured — say nothing rather than guess
+  }
+}

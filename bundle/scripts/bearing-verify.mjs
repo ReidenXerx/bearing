@@ -36,11 +36,42 @@ function readRuntime() {
   return fs.existsSync(path.join(root, '.cursor/hooks.json')) ? 'cursor' : 'zed';
 }
 
+/**
+ * Which runtimes an install actually covers.
+ *
+ * This was `r === 'cursor' || r === 'both'`, a second implementation of something the installer
+ * already knew, and it had drifted (GP-11). Bearing accepts `cursor`, `zed`, `claude`, `codex`,
+ * `both` (= cursor+zed), `all` (= every one) and comma lists — of which that expression understood
+ * exactly two. Consequences, both observed:
+ *
+ *   runtime "all"    -> wantsCursor false, so the RECOMMENDED install skipped every Cursor check
+ *                       and reported a clean bill of health it had not verified.
+ *   runtime "claude" -> ungated checks still looked for Cursor files, so a correct Claude-only
+ *                       install was reported broken and told the user to "restart Cursor" (NS-6:
+ *                       advice they cannot follow, about a problem that does not exist).
+ */
+function runtimeSet(r) {
+  const tokens = String(r || 'both')
+    .toLowerCase()
+    .split(',')
+    .map((t) => t.trim())
+    .filter(Boolean);
+  const out = new Set();
+  for (const t of tokens) {
+    if (t === 'both') { out.add('cursor'); out.add('zed'); }
+    else if (t === 'all') { out.add('cursor'); out.add('zed'); out.add('claude'); out.add('codex'); }
+    else out.add(t);
+  }
+  return out;
+}
 function wantsCursor(r) {
-  return r === 'cursor' || r === 'both';
+  return runtimeSet(r).has('cursor');
 }
 function wantsZed(r) {
-  return r === 'zed' || r === 'both';
+  return runtimeSet(r).has('zed');
+}
+function wantsClaude(r) {
+  return runtimeSet(r).has('claude');
 }
 
 function checkFile(rel) {
@@ -93,17 +124,20 @@ function checkSkillsStore() {
 function checkSkillSymlinks(runtime) {
   const cursorOk = fs.existsSync(path.join(root, '.cursor/skills/bearing-workspace/SKILL.md'));
   const zedOk = fs.existsSync(path.join(root, '.agents/skills/bearing-workspace/SKILL.md'));
-  let ok = false;
-  let detail = 'not linked';
-  if (wantsCursor(runtime) && wantsZed(runtime)) {
-    ok = cursorOk && zedOk;
-    detail = ok ? 'cursor + zed symlinks OK' : `cursor=${cursorOk} zed=${zedOk}`;
-  } else if (wantsCursor(runtime)) {
-    ok = cursorOk;
-    detail = ok ? '.cursor/skills linked' : 'missing .cursor/skills symlinks';
-  } else {
-    ok = zedOk;
-    detail = ok ? '.agents/skills linked' : 'missing .agents/skills symlinks';
+  // The `else` branch asserted the ZED directory for every runtime that was not Cursor — so a
+  // Claude-only install failed on "missing .agents/skills symlinks", a Zed path it was never
+  // supposed to have. Check the link dirs the runtimes ACTUALLY installed, and when none of them
+  // uses a symlink farm there is nothing to verify rather than something to fail.
+  const want = [];
+  if (wantsCursor(runtime)) want.push(['.cursor/skills', cursorOk]);
+  if (wantsZed(runtime)) want.push(['.agents/skills', zedOk]);
+  let ok = true;
+  let detail = 'no symlink dirs for this runtime';
+  if (want.length) {
+    ok = want.every(([, linked]) => linked);
+    detail = ok
+      ? `${want.map(([d]) => d).join(' + ')} linked`
+      : want.filter(([, l]) => !l).map(([d]) => `missing ${d}`).join(', ');
   }
   return { id: 'skills_symlinks', ok, label: 'Skill symlinks', detail };
 }
