@@ -8,6 +8,7 @@
  */
 import { isRefreshFailed, isRefreshPending, fallbackGrant } from './session-primer.mjs';
 import { howToRun } from './how-to-run.mjs';
+import { loadHookConfig } from './hook-helpers.mjs';
 
 /**
  * @param {object} stale from check-staleness / load-staleness
@@ -19,6 +20,23 @@ export const ESCAPE_HINT =
   ` If GitNexus itself is wrong/unavailable: \`${howToRun('bearing:fallback')} -- "<why>"\` (bounded, logged). To downgrade blocks to warnings: set "mode":"guide" in .bearing/hooks.json.`;
 
 export function evaluateStalePolicy(stale, root) {
+  // STALENESS GATE OFF (the default). A stale index no longer denies anything: it is reported, the
+  // graph still refreshes on commit and on demand, and the agent is not ordered to rebuild mid-task.
+  //
+  // Every must_refresh denial in the codebase flows from this function, so one branch retires all of
+  // them. Enforcement that is NOT about staleness — graph-first search, impact-before-edit — is
+  // untouched, because none of it depends on this phase being `must_refresh`.
+  if (!stale?.fresh && loadHookConfig(root).stalenessGate !== "block") {
+    return {
+      phase: "fresh",
+      forceRefresh: false,
+      allowClassical: false,
+      allowGraphTools: true,
+      staleNote: stale?.detail || null,
+      gateOff: true,
+    };
+  }
+
   // Explicit escape hatch: the agent/user declared GitNexus untrustworthy here
   // (`npm run bearing:fallback "<why>"`) → classical fallback even on a FRESH index.
   // Bounded (auto-expires), logged, and surfaced so it can't be a silent bypass.

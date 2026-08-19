@@ -901,6 +901,10 @@ export function classifyGraphBehind(toolName, stale) {
 }
 
 export function classifyMcpDrift(toolName, stale, config, phase) {
+  // Same switch as the staleness phase: with the gate off, uncommitted drift reports but never
+  // denies. Kept here as well as in the policy because this gate is reached directly by the MCP
+  // guard on a COMMIT-FRESH index, which never goes through evaluateStalePolicy's stale branch.
+  if (config?.stalenessGate !== "block") return { decision: "allow" };
   // Drift applies ONLY on a commit-FRESH index. Never in classical_fallback (a failed refresh
   // OR a user-granted fallback) — forcing a refresh there would loop or override the escape
   // hatch — nor must_refresh (already handled). Undefined phase = caller pre-checked (allow through).

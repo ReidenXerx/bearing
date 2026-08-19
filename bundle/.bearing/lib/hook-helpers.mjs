@@ -95,6 +95,18 @@ export function loadHookConfig(root) {
     stalenessCacheTtlMs: 2500,
     // Working-tree drift: after this many uncommitted source edits since the index,
     // graph query tools require a fast incremental refresh. 0 disables the drift gate.
+    // Does a STALE INDEX block anything? "off" (default) | "block".
+    //
+    // Off by default because the judgement is not good enough yet to spend the user's attention on.
+    // Deciding that a graph is too far behind to answer with means predicting whether the drift
+    // touches what is being asked about, and neither the file count nor the commit count knows that
+    // — so the gate stopped work it did not need to stop and the cost landed on whoever was typing.
+    // A gate that is wrong often enough to be worked around protects nothing (NS-5).
+    //
+    // What still happens with it off: the graph refreshes on commit and on demand, and the staleness
+    // is REPORTED. What stops: denying tools because of it, and ordering an autonomous refresh.
+    // Set "block" in .bearing/hooks.json to restore the gates.
+    stalenessGate: "off",
     // 8, not 3. Three dirty source files is an ordinary five minutes of work, so the gate fired
     // during normal editing rather than at the point the graph had actually drifted away from the
     // code. A gate that interrupts routine work gets worked around, and a worked-around gate
@@ -146,6 +158,8 @@ function applyHookConfigFile(cfg, cfgPath) {
       cfg.readLineThreshold = file.readLineThreshold;
     if (typeof file.stalenessCacheTtlMs === "number")
       cfg.stalenessCacheTtlMs = file.stalenessCacheTtlMs;
+    if (file.stalenessGate === "block" || file.stalenessGate === "off")
+      cfg.stalenessGate = file.stalenessGate;
     if (typeof file.driftRefreshThreshold === "number")
       cfg.driftRefreshThreshold = file.driftRefreshThreshold;
     if (typeof file.taskCoreEveryEdits === "number")
