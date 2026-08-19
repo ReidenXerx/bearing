@@ -885,8 +885,12 @@ export function classifyGraphBehind(toolName, stale) {
   const suffix = mcpToolSuffix(toolName);
   if (!DRIFT_GATED_TOOLS.has(suffix)) return { decision: "allow" };
   const n = Number(stale?.behindFiles) || 0;
+  // ALLOW, and say why. Below the threshold the two halves of the same condition used to disagree:
+  // a few UNCOMMITTED dirty files left the graph tools open, while the same few files COMMITTED
+  // denied them. Same gap, opposite treatment, decided only by whether you had run `git commit`.
+  // Under the threshold the graph is close enough to answer with; over it, must_refresh still stops.
   return {
-    decision: "deny",
+    decision: "allow",
     agentMessage:
       `Graph is ${n} source file(s) behind HEAD — gitnexus_${suffix} would answer from the older ` +
       "code. Resync: `" + howToRun("bearing:refresh") + "` (incremental — usually quick), then retry. Read/Grep " +

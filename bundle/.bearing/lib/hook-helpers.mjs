@@ -95,7 +95,11 @@ export function loadHookConfig(root) {
     stalenessCacheTtlMs: 2500,
     // Working-tree drift: after this many uncommitted source edits since the index,
     // graph query tools require a fast incremental refresh. 0 disables the drift gate.
-    driftRefreshThreshold: 3,
+    // 8, not 3. Three dirty source files is an ordinary five minutes of work, so the gate fired
+    // during normal editing rather than at the point the graph had actually drifted away from the
+    // code. A gate that interrupts routine work gets worked around, and a worked-around gate
+    // protects nothing (NS-5: a false deny is worse than a missed gate).
+    driftRefreshThreshold: 8,
     // TASK-CORE: nudge after this many EDITS since the core was last written. Counts unsaved work
     // rather than context fullness, because the window is not knowable at runtime — see
     // bearing-taskcore-nudge.mjs for why two attempts at inferring it both shipped wrong. 0 disables.
