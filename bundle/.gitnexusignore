@@ -1,11 +1,35 @@
 # GitNexus-only ignores (gitignore syntax). Complements .gitignore for index speed.
-# See: npx gitnexus analyze --help (reads .gitignore + .gitnexusignore)
+# See: gitnexus analyze --help (reads .gitignore + .gitnexusignore)
 #
 # Add large generated/data directories here so the graph stays code-focused, e.g.:
 #   data/
 #   reports/
 #   fixtures/large/
 #   **/__snapshots__/
+
+# ── The agent layer is not code ───────────────────────────────────────────────
+# The graph exists to answer questions about THIS PROJECT'S SOURCE. Instructions
+# written for an agent are not source: indexing them adds File nodes and symbols
+# that describe the tooling rather than the product, and they turn up in query
+# results competing with real code.
+#
+# It got literal — AGENTS.md was indexed as a File node with its full text stored,
+# so the graph contained a description of the graph.
+#
+# `.claude/skills/gitnexus-area-*` matters most: those are generated FROM this
+# index and are committed so teammates get them, which would feed the index its
+# own output on the next run.
+.claude/
+.bearing/
+.cursor/
+.zed/
+.agents/
+.githooks/
+AGENTS.md
+CLAUDE.md
+docs/GITNEXUS-*
+docs/TEAM-BUNDLE.md
+docs/ARCHITECTURE.gitnexus.md
 
 # Build / dependency output (usually already in .gitignore — listed for clarity)
 dist/
