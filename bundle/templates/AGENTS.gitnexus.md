@@ -150,6 +150,41 @@ letting the answer get cut:
 `epistemic` comes back `"exact"` too, not only `"lower-bound"` — when it says exact, state the number
 plainly. That is the point of reading the field rather than assuming either way.
 
+### `context` carries the same envelope — and `causes` COUNTS WHAT IT LOST
+
+`context` returns `epistemic` / `boundaries` / `causes` exactly like `impact`, and the `causes` fields
+are counts of **missing things**, not descriptions:
+
+- `causes.receiverTyping: 14` — the analyzer **dropped 14 call sites** on this name because it could
+  not type the receiver. They exist; this view does not list them.
+- `causes.externalBoundary: n` — that many calls left the indexed program (`fetch`, stdlib, a
+  framework). Not a gap in the code, a gap in what is indexed.
+- `causes.dispatchBoundary: n` — bound through an interface or dynamic dispatch, not traced to the
+  concrete symbol.
+
+So "no callers" from `context` with `receiverTyping > 0` is not "no callers" — it is "we lost this
+many". That is the most concrete form of the graph being wrong rather than empty, and it is sitting
+in the response.
+
+**Ambiguous `context`: read `totalCandidates`, not `candidates.length`.** When several symbols share
+a name the reply carries ranked candidates, and the array is a WINDOW — `candidatesTruncated: true`
+and a "(showing M)" suffix. `totalCandidates` is the real number. Disambiguate with `kind` and
+`file_path`, or pass the `uid` from any earlier result for a zero-ambiguity lookup; every result
+carries one, so re-resolving by name is a step you rarely need.
+
+### Defaults that quietly narrow the answer
+
+| Tool | Default | Consequence |
+| --- | --- | --- |
+| `query` | `limit: 5` processes, `max_symbols: 10` | one call is a SLICE, not a survey — raise them before concluding "that is all there is" |
+| `impact` | tests excluded, `ACCESSES` excluded | "no callers" means "no non-test callers, ignoring field access" |
+| `context` / `query` | `include_content: false` | names and locations only; ask for content instead of a second Read round trip |
+| all three | `maxTokens` | cap the response deliberately rather than discovering the cap by truncation |
+
+`detect_changes` also takes **`worktree`** — an absolute path to a linked git worktree. The server
+detects the common case itself, but when it was started somewhere other than the worktree you are
+editing, an unstaged diff comes back empty and nothing says why.
+
 ### One query for a file's contents
 
 `DEFINES` (File → symbol) is the largest edge type after the obvious ones and answers "what is in this
