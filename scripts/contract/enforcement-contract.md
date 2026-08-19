@@ -259,11 +259,20 @@ user's call, not something to trigger mid-task.
 
 | Need | Tool |
 | --- | --- |
-| Statement-level blast radius (control + data) | `impact` with `mode: "pdg"` |
+| Statement-level blast radius (control + data) | `impact` with `mode: "pdg"` — add **`line`** to anchor it |
 | What predicate controls a line / why does it run? | `pdg_query` (`mode: "controls"`) |
 | Where does a variable's value flow / reach? | `pdg_query` (`mode: "flows"`) |
 | Source → sink path between two symbols | `trace` |
 | Taint review — injection, path traversal, XSS | `explain` |
+
+**`impact` with `mode: "pdg"` takes a statement anchor.** Pass `line` — 1-based, inside the target
+symbol — and the slice is seeded on THAT statement: `affectedStatements` comes back as line + text,
+so "what does this one assignment reach" is a question you can ask directly instead of reading the
+whole function's dependence graph. Without `line` you get whole-symbol reach, which is the blunter
+answer. Two things not to misread: a PDG result carries `risk: "UNKNOWN"` by design — that is the
+contract, not a low-risk finding — and a degraded result (no PDG layer) still returns the full
+envelope with empty buckets rather than a false-safe zero, so check `note`/`remediation` before
+concluding anything.
 
 <!-- feature: gitnexus -->
 ## Full tool surface — reach for the right one
