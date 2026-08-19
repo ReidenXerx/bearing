@@ -35,6 +35,42 @@ function git(cmd) {
  * @param {string} from indexed commit @param {string} to HEAD @param {RegExp} sourceExtRe
  * @returns {number} count, or -1 if unknown
  */
+/**
+ * Paths bearing installed, from the manifest it wrote.
+ *
+ * These are not the user's work: `bearing update` rewrites them without re-indexing, so counting
+ * them as drift blocks graph queries immediately after an update — the tool gating itself.
+ *
+ * This was a list of PREFIXES (`.bearing/`, `scripts/bearing-`, `.claude/hooks/bearing-`) and it
+ * missed everything bearing ships that is not named `bearing-*`: scripts/lib/setup-ui.mjs,
+ * scripts/run-with-project-tmp.sh, scripts/install-git-hooks.sh and four more. Measured: 12 drift
+ * against 10 edited files right after an install. The manifest is the authoritative record of what
+ * was installed, so read that rather than keep a second list in sync by hand (GP-11).
+ */
+let ownFilesCache = null;
+function ownFiles() {
+  if (ownFilesCache) return ownFilesCache;
+  ownFilesCache = new Set();
+  try {
+    const m = JSON.parse(fs.readFileSync(path.join(root, '.bearing/manifest.json'), 'utf8'));
+    for (const f of m.files ?? []) ownFilesCache.add(f);
+  } catch {
+    /* no manifest — the prefix rules below still apply */
+  }
+  return ownFilesCache;
+}
+
+/** @param {string} f repo-relative path */
+function isOwnFile(f) {
+  return (
+    ownFiles().has(f) ||
+    /^\.bearing\//.test(f) ||
+    /^scripts\/bearing-/.test(f) ||
+    /^\.claude\/hooks\/bearing-/.test(f) ||
+    /^\.cursor\/hooks\/bearing-/.test(f)
+  );
+}
+
 function countBehindSource(from, to, sourceExtRe) {
   let names = '';
   try {
@@ -52,13 +88,7 @@ function countBehindSource(from, to, sourceExtRe) {
     if (!f) continue;
     if (f.startsWith('"') && f.endsWith('"')) f = f.slice(1, -1);
     if (!sourceExtRe.test(f)) continue;
-    if (
-      /^\.bearing\//.test(f) ||
-      /^scripts\/bearing-/.test(f) ||
-      /^\.claude\/hooks\/bearing-/.test(f) ||
-      /^\.cursor\/hooks\/bearing-/.test(f)
-    )
-      continue;
+    if (isOwnFile(f)) continue;
     n++;
   }
   return n;
@@ -94,7 +124,7 @@ function countDrift(at, sourceExtRe) {
     // The kit's OWN files are not the user's work. `bearing update` rewrites them without
     // re-indexing, which otherwise registers as drift and blocks graph queries immediately after
     // an update — the tool gating itself.
-    if (/^\.bearing\//.test(f) || /^scripts\/bearing-/.test(f) || /^\.claude\/hooks\/bearing-/.test(f) || /^\.cursor\/hooks\/bearing-/.test(f)) continue;
+    if (isOwnFile(f)) continue;
     try {
       if (fs.statSync(path.join(root, f)).mtimeMs > atMs) n++;
     } catch {
