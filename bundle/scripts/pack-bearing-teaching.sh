@@ -57,31 +57,8 @@ BUNDLE_PATHS=(
   .cursor/hooks/bearing-commit-guard.sh
   .cursor/hooks/bearing-mcp-allowlist.sh
   .cursor/hooks/bearing-after-git-commit.sh
-  .bearing/lib/check-staleness.mjs
-  .bearing/lib/load-staleness.mjs
-  .bearing/lib/classify.mjs
-  .bearing/lib/cursor-emit.mjs
-  .bearing/lib/claude-emit.mjs
-  .bearing/lib/session-primer.mjs
-  .bearing/lib/context-pressure.mjs
-  .bearing/lib/first-nudge.mjs
-  .bearing/lib/clear-session.mjs
-  .bearing/lib/set-refresh-pending.mjs
-  .bearing/lib/hook-helpers.mjs
-  .bearing/lib/cypher-helpers.mjs
-  .bearing/lib/rename-helpers.mjs
-  .bearing/lib/stale-policy.mjs
-  .bearing/lib/cypher-cli.mjs
-  .bearing/lib/generate-arch-doc.mjs
-  .bearing/lib/stabilize-agent-docs.mjs
-  .bearing/lib/commit-message.mjs
-  .bearing/lib/detect-api-router.mjs
-  .bearing/lib/graph-smoke.mjs
-  .bearing/lib/agent-brief.mjs
-  .bearing/lib/agent-health.mjs
-  .bearing/lib/session-health-audit.mjs
-  .bearing/lib/session-health-context.mjs
-  .bearing/lib/verify-kit.mjs
+  # .bearing/lib/*.mjs is expanded below — a hand-kept list silently stopped packing
+  # every lib added after it was written, and kept naming one that was retired.
   .bearing/hooks.json
   scripts/bearing-verify.mjs
   scripts/bearing-setup.sh
@@ -106,6 +83,11 @@ BUNDLE_PATHS=(
 )
 
 info "Packing GitNexus Cursor teaching bundle v${VERSION}"
+
+# Every hook lib on disk, whatever it is called today.
+for lib in .bearing/lib/*.mjs; do
+  [[ -e "$lib" ]] && BUNDLE_PATHS+=("$lib")
+done
 
 for rel in "${BUNDLE_PATHS[@]}"; do
   [[ -e "$rel" ]] || { echo "Missing bundle file: $rel" >&2; exit 1; }

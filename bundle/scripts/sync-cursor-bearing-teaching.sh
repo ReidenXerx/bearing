@@ -27,38 +27,55 @@ HOOK_SCRIPTS=(
   ".cursor/hooks/bearing-after-git-commit.sh"
 )
 
+# The non-lib files this bundle cannot work without. Fixed set, so listed.
 HOOK_LIBS=(
-  ".bearing/lib/check-staleness.mjs"
-  ".bearing/lib/load-staleness.mjs"
-  ".bearing/lib/classify.mjs"
-  ".bearing/lib/cursor-emit.mjs"
-  ".bearing/lib/claude-emit.mjs"
-  ".bearing/lib/session-primer.mjs"
-  ".bearing/lib/context-pressure.mjs"
-  ".bearing/lib/first-nudge.mjs"
-  ".bearing/lib/clear-session.mjs"
-  ".bearing/lib/set-refresh-pending.mjs"
-  ".bearing/lib/hook-helpers.mjs"
-  ".bearing/lib/cypher-helpers.mjs"
-  ".bearing/lib/rename-helpers.mjs"
-  ".bearing/lib/stale-policy.mjs"
-  ".bearing/lib/cypher-cli.mjs"
-  ".bearing/lib/generate-arch-doc.mjs"
-  ".bearing/lib/stabilize-agent-docs.mjs"
-  ".bearing/lib/commit-message.mjs"
-  ".bearing/lib/detect-api-router.mjs"
-  ".bearing/lib/graph-smoke.mjs"
-  ".bearing/lib/agent-brief.mjs"
-  ".bearing/lib/agent-health.mjs"
-  ".bearing/lib/session-health-audit.mjs"
-  ".bearing/lib/session-health-context.mjs"
-  ".bearing/lib/verify-kit.mjs"
   ".bearing/hooks.json"
   "scripts/bearing-agent.mjs"
   "scripts/bearing-gate-hint.mjs"
   "scripts/bearing-teaching/script-gates.mjs"
   "scripts/lib/setup-ui.mjs"
 )
+
+# .bearing/lib/*.mjs was a hand-kept list, and it drifted in BOTH directions. Retiring
+# `context-pressure.mjs` (NS-19) left this array demanding it, so `bearing update` aborted with
+# "Missing hook lib" on every Cursor repo — a failure the USER hit, mid-install. Meanwhile six libs
+# that did exist had never been added, so nothing checked they arrived. Check the invariant that
+# actually matters instead: every lib something REFERENCES must be present. That covers new files
+# for free and stops naming deleted ones.
+check_referenced_libs() {
+  node - <<'NODE'
+import fs from 'node:fs';
+import path from 'node:path';
+
+const scan = ['.cursor/hooks', '.claude/hooks', '.bearing/lib', 'scripts'];
+const files = [];
+const walk = (d) => {
+  let entries; try { entries = fs.readdirSync(d, { withFileTypes: true }); } catch { return; }
+  for (const e of entries) {
+    const full = path.join(d, e.name);
+    if (e.isDirectory()) walk(full);
+    else if (/\.(mjs|sh|json)$/.test(e.name)) files.push(full);
+  }
+};
+scan.forEach(walk);
+
+const missing = new Map();
+for (const f of files) {
+  let text; try { text = fs.readFileSync(f, 'utf8'); } catch { continue; }
+  for (const m of text.matchAll(/\.bearing\/lib\/([\w.-]+\.mjs)/g)) {
+    const rel = `.bearing/lib/${m[1]}`;
+    if (!fs.existsSync(rel) && !missing.has(rel)) missing.set(rel, f);
+  }
+}
+if (missing.size) {
+  for (const [lib, referrer] of missing) console.error(`    ! missing ${lib} (named by ${referrer})`);
+  process.exit(1);
+}
+const n = fs.readdirSync('.bearing/lib').filter((f) => f.endsWith('.mjs')).length;
+console.log(`    \u001b[1;32m\u2713\u001b[0m ${n} hook libs present, every reference resolves`);
+NODE
+}
+
 
 sync_dir() {
   local src="$1"
@@ -213,7 +230,8 @@ done
 for lib in "${HOOK_LIBS[@]}"; do
   [[ -f "$lib" ]] || fail "Missing hook lib: $lib"
 done
-ok "${#HOOK_SCRIPTS[@]} hook scripts + ${#HOOK_LIBS[@]} lib(s) ready"
+check_referenced_libs || fail "a hook names a .bearing/lib module that is not installed"
+ok "${#HOOK_SCRIPTS[@]} hook scripts + support files ready"
 
 info "  [3/5] Link skills (symlinks from canonical store)"
 STORE=".bearing/skills"
