@@ -2,7 +2,7 @@
 
 All notable changes to `bearing` are documented here.
 
-## Unreleased — teach the graph as it behaves now, and stop trusting a list you kept by hand
+## 1.1.0 — teach the graph as it behaves now, and stop trusting a list you kept by hand
 
 ### Changed — the GitNexus teaching, rewritten against live indexes
 
@@ -125,6 +125,9 @@ are Claude-only — already gated by hook ownership. Both now declare all four, 
 north-stars survives a Zed install.
 
 ## 1.0.13 — ask about what changes the product, and stop guessing at the context window
+
+> Documented but **never published to npm** — 1.0.12 went straight to 1.1.0.
+> Everything below shipped as part of 1.1.0.
 
 ### Added — Consult, a sixth module: ask about what changes the product, decide the rest
 
