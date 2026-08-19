@@ -5,6 +5,20 @@ description: "Use when the user asks how code works, wants to understand archite
 
 # Exploring Codebases with GitNexus
 
+## The type layer is indexed too
+
+On a typed codebase most of the graph is not the call graph:
+
+| Question | Query |
+| --- | --- |
+| Who uses this interface / type? | `USES` → `Interface` / `TypeAlias` |
+| What fields does this type own? | `HAS_PROPERTY` → `Property` |
+| Where is this property actually read or written? | `HAS_PROPERTY` then `ACCESSES` (carries `reason: read`/`write`) |
+| Circular imports between files | `check({ cycles: true })` |
+
+Measured on one real repo: 23,018 `Property` nodes and 7,280 `USES` edges against 27,611 `CALLS`.
+Grepping an interface name is answering with string matching a question the graph answers exactly.
+
 ## When to Use
 
 - "How does authentication work?"

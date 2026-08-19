@@ -32,6 +32,17 @@ The graph is authoritative about what it **finds**, never about what it **fails 
 
 A confident zero is worse than no answer, because it *looks* like knowledge. Treat it as "unknown", not "none".
 
+**And the tool now tells you when it is guessing low — READ THOSE FIELDS.** `impact` returns
+`epistemic`, `boundaries` and `causes` alongside the count. When `epistemic` is `"lower-bound"`, the
+number is a floor, not a total, and `boundaries` says in words why — e.g. *"IDraft is an interface
+with 14 interface-level consumers; callers that bind via the interface are not traced to the
+concrete symbol — actual impact may be higher."* `causes` breaks it down: `dispatchBoundary`,
+`receiverTyping`, `externalBoundary`.
+
+Reporting `impactedCount` as the answer while the same response says *may be higher* is the confident
+zero wearing a number. **Quote the boundary.** "20 affected, and a lower bound — 14 consumers bind
+through the interface and are not traced" is the honest sentence; "20 affected" is not.
+
 <!-- feature: gitnexus -->
 ## Every task (not “unfamiliar code only”)
 
@@ -40,7 +51,8 @@ Use the graph for **all** agent work — explore, debug, fix, refactor, review, 
 | Task type | Graph role |
 | --- | --- |
 | Answer / explain / debug | `query` → `context` → `cypher` if structural → Read offset/limit |
-| Field / property data flow | READ schema → `cypher` (`ACCESSES` read/write) |
+| Field / property data flow | READ schema → `cypher` (`HAS_PROPERTY` owner→field, `ACCESSES` read/write) |
+| Change a type / interface | `impact` (it follows the type layer) → `cypher` `USES` for the exact consumers |
 | N-hop call chains, overrides, process steps | READ schema → `cypher` |
 | Statement-level data/control flow, taint | `pdg_query` / `explain` / `trace` (see deep precision) |
 | Edit runtime source (any size) | `impact` upstream before Write/StrReplace |
@@ -68,11 +80,23 @@ READ `bearing://repo/__GITNEXUS_REPO__/schema` before ad-hoc Cypher.
 | Question | Cypher edge / pattern |
 | --- | --- |
 | Who reads/writes field/property X? | `ACCESSES` with `reason: read` / `write` |
+| **Who uses this interface / type?** | **`USES`** → `Interface` / `TypeAlias` |
+| **What does this type contain?** | **`HAS_PROPERTY`** → `Property` |
+| **Full path of a property** | `HAS_PROPERTY` (owner→property) + `ACCESSES` (property→reader, with `reason`) |
 | Custom N-hop call chain | `CALLS` variable-length path |
 | Method override chain | `METHOD_OVERRIDES` |
 | Ordered steps in a process | `STEP_IN_PROCESS` + `r.step` |
 | All methods on a class | `HAS_METHOD` |
 | Diamond / multi-inheritance | `EXTENDS` multi-path MATCH |
+| Circular file imports | `check({ cycles: true })` — a tool, not a query |
+
+**The TYPE layer is indexed, and it is most of a TypeScript codebase.** Nodes: `Interface`,
+`TypeAlias`, `Property`, `Const`, `Variable` alongside `Function`/`Method`/`Class`. Edges: **`USES`**
+(a function, method, class or file uses a type) and `HAS_PROPERTY` (a type owns a field). Measured on
+one real repo: 23,018 `Property` nodes, 2,941 `Interface`, 7,280 `USES` edges, 17,910 `HAS_PROPERTY`,
+35,511 `ACCESSES` — the type and field layer is *larger* than the call graph. "Who uses this
+interface" and "where does this property actually get read" are graph questions with exact answers.
+Do not grep for them.
 
 **Order:** `query` (orient) → `context` (symbol) → **`cypher`** (structural precision) → `impact` (before edits). Do not start with `cypher` for fuzzy questions — that's what `query` + embeddings are for.
 
@@ -81,7 +105,14 @@ Refresh always includes `--embeddings` (`bearing:refresh` / `agent-refresh`). Mi
 <!-- feature: gitnexus -->
 ## Deep precision — PDG, taint, trace
 
-When `cypher` isn't enough, escalate to statement-level tools (require a PDG index — `bearing:pdg`):
+When `cypher` isn't enough, escalate to statement-level tools.
+
+**These need a PDG index, and it is NOT built by default.** PDG roughly triples node count and four
+tools read it, so bearing stopped building it on every commit — it is opt-in, by `bearing:pdg`, when
+someone decides they want it. Without one, every tool in this table returns **zero rows, which is not
+an answer** (see the section above — a zero is not a finding). If you need statement-level dataflow
+or taint, build it first or say plainly that you could not check. Whether to keep it fresh is the
+user's call, not something to trigger mid-task.
 
 | Need | Tool |
 | --- | --- |
@@ -100,7 +131,9 @@ Know every tool and *when* it wins (single-repo; cross-repo `group_*` is out of 
 | --- | --- |
 | `query` | Orient — "how does X work?", find the execution flow for a concept (BM25 + vectors). Always first for fuzzy work. |
 | `context` | 360° on ONE symbol — callers, callees, categorized refs, the processes it's in. After `query`, or when the symbol is known. |
-| `cypher` | Precise structural questions the canned tools don't express — field `ACCESSES`, N-hop `CALLS`, `METHOD_OVERRIDES`, `STEP_IN_PROCESS`. READ schema first. |
+| `cypher` | Precise structural questions the canned tools don't express — field `ACCESSES`, type `USES`, `HAS_PROPERTY`, N-hop `CALLS`, `METHOD_OVERRIDES`, `STEP_IN_PROCESS`. READ schema first. |
+| `check` | Structural health of the import graph — circular file imports, with deterministic cycle paths. Read-only and CI-shaped; reach for it when untangling module boundaries rather than tracing one symbol. |
+| `tool_map` | This repo DEFINES MCP/RPC tools and you need their definitions, handlers and descriptions — impact analysis for a tool change, or finding where a tool is implemented. |
 | `impact` | BEFORE editing a symbol — upstream blast radius + risk + affected processes. `mode: "pdg"` for statement-level (control+data) precision. |
 | `trace` | "How does A reach B?" — shortest call/member path between two symbols in ONE call (replaces 3–8 manual `context` hops). |
 | `pdg_query` | "What condition gates this line?" (`mode: "controls"`) / "where does this variable flow?" (`mode: "flows"`). Intra-function; needs PDG. |
