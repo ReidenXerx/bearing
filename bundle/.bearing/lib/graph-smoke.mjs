@@ -7,6 +7,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { repoName } from './hook-helpers.mjs';
 import { gitnexusSpawn } from './gitnexus-cmd.mjs';
 
@@ -26,6 +27,30 @@ function runCypher(query) {
 function parseCount(out) {
   const m = out.match(/(\d+)/);
   return m ? Number(m[1]) : null;
+}
+
+/**
+ * Does this repo look like it has an HTTP API the graph failed to see?
+ *
+ * `api_impact`, `route_map` and `shape_check` all read `Route` nodes, and route detection is
+ * FRAMEWORK-DEPENDENT. Measured on a NestJS backend with 33 `@Controller` classes and 210 route
+ * decorators: the index held THREE Route nodes, and all three were URL strings scraped out of
+ * utility code. So `api_impact({route: "/venues"})` answered `error: No routes found matching
+ * "/venues"` for a live endpoint — and a not-found reads as "nothing depends on it, safe to
+ * change". A second NestJS repo indexed zero.
+ *
+ * The smoke test already counted Route nodes and printed the number without comment. Comparing it
+ * against evidence of an API turns a silent trap into a line the reader sees once per refresh.
+ *
+ * Deliberately quiet unless the gap is stark: below FIVE pieces of evidence any repo has an
+ * incidental `/api/` path, and a false warning here would be one more thing to learn to ignore
+ * (NS-5).
+ * @param {number} routeNodes @param {number} routeEvidence controller-ish classes or route-ish files
+ * @returns {boolean}
+ */
+export function routeCoverageWarning(routeNodes, routeEvidence) {
+  if (!(routeEvidence >= 5)) return false;
+  return (routeNodes ?? 0) < routeEvidence / 4;
 }
 
 function main() {
@@ -68,7 +93,32 @@ function main() {
   const routes = routeQ.ok ? parseCount(routeQ.stdout) : null;
   lines.push(`Route nodes      ${routes ?? 0}`);
 
+  // Evidence that an API exists, from the graph itself — no filesystem walk. Two signals, because
+  // one convention never covers every framework: classes named *Controller (NestJS, Spring) and
+  // files living where routes live (Next.js app router, Express, Django).
+  const ctrlQ = runCypher(
+    "MATCH (c:Class) WHERE c.name ENDS WITH 'Controller' RETURN count(c) AS n LIMIT 1"
+  );
+  const fileQ = runCypher(
+    "MATCH (f:File) WHERE f.filePath CONTAINS '.controller.' OR f.filePath CONTAINS '/routes/' " +
+      "OR f.filePath CONTAINS '/controllers/' OR f.filePath ENDS WITH '/route.ts' " +
+      "OR f.filePath CONTAINS '/api/' RETURN count(f) AS n LIMIT 1"
+  );
+  const evidence = Math.max(
+    (ctrlQ.ok ? parseCount(ctrlQ.stdout) : 0) ?? 0,
+    (fileQ.ok ? parseCount(fileQ.stdout) : 0) ?? 0
+  );
+
   let warn = false;
+  if (routeCoverageWarning(routes ?? 0, evidence)) {
+    lines.push('');
+    lines.push(
+      `WARN: ${evidence} route-ish file(s)/controller(s) but only ${routes ?? 0} Route node(s) — ` +
+        'api_impact / route_map / shape_check will report this API as ABSENT. A not-found from ' +
+        'them is NOT evidence the route is unused. Use query/context/cypher on the controllers.'
+    );
+    warn = true;
+  }
   if ((nodeCount ?? 0) > 200 && (accesses ?? 0) === 0) {
     lines.push('');
     lines.push('WARN: large graph but zero ACCESSES — field-level cypher may be empty (indexer/version?)');
@@ -81,4 +131,8 @@ function main() {
   process.exit(0);
 }
 
-main();
+// Importing this module must not run it: the test imports `routeCoverageWarning`, and a top-level
+// main() would process.exit() the test runner out from under it.
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main();
+}
