@@ -24,6 +24,17 @@ grep or a `USES` query, and say which one you ran.
 
 `risk: "UNKNOWN"` is the same thing in a different field: unresolved, not low.
 
+## Hub symbols: ask for the summary first
+
+A central symbol returns hundreds of rows, and a truncated impact result is a blast radius that reads
+smaller than it is. Start with `summaryOnly: true` — counts, risk, affected processes and modules,
+no per-symbol list — then page with `limit`/`offset` only if you need the names.
+
+Other escapes worth knowing: `kind` disambiguates a common name, `relationTypes` narrows the walk
+(`ACCESSES` is excluded by default — ask for it to trace field usage), `minConfidence` drops the
+near-0.5 guesses, and `includeTests: true` before you delete anything, since tests are excluded by
+default and "no callers" without them is not the same claim.
+
 ## Changing a type or interface
 
 `impact` follows the type layer, so it works on an `Interface` or `TypeAlias` directly — pass

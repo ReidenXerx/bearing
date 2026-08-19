@@ -137,6 +137,30 @@ of its docblock. The function is on 150.
 Off by one, silently, on every jump from a cypher result into a file. BasicBlock and PDG statement
 lines are separately 1-based.
 
+### `impact` on a hub symbol — the parameters that stop it truncating
+
+A hub symbol returns hundreds of affected symbols, and a truncated impact result is a blast radius
+that looks smaller than it is — the dangerous direction. The tool has escapes; use them rather than
+letting the answer get cut:
+
+| Parameter | Use |
+| --- | --- |
+| `summaryOnly: true` | counts, risk, affected processes and modules — no per-symbol list. The right first call on anything central. |
+| `limit` / `offset` | page through `byDepth` when you do need the names |
+| `kind: "Interface"` | disambiguate a common name instead of guessing which match it took |
+| `relationTypes: [...]` | narrow the traversal — `ACCESSES` is excluded by default, so ask for it explicitly to trace field usage |
+| `minConfidence` | drop the near-0.5 guesses when you need certainty rather than leads |
+| `includeTests: true` | tests are excluded by default; include them before deleting anything |
+
+`epistemic` comes back `"exact"` too, not only `"lower-bound"` — when it says exact, state the number
+plainly. That is the point of reading the field rather than assuming either way.
+
+### One query for a file's contents
+
+`DEFINES` (File → symbol) is the largest edge type after the obvious ones and answers "what is in this
+file" without reading it — 277 symbols in one result on a real repo. Cheaper than a Read for
+orientation, and it gives you names to feed `context`.
+
 ### Symbol properties worth querying
 
 Nodes carry more than a name, and these turn "read every file and look" into one query:
