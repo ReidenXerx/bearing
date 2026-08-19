@@ -266,13 +266,34 @@ user's call, not something to trigger mid-task.
 | Taint review — injection, path traversal, XSS | `explain` |
 
 **`impact` with `mode: "pdg"` takes a statement anchor.** Pass `line` — 1-based, inside the target
-symbol — and the slice is seeded on THAT statement: `affectedStatements` comes back as line + text,
-so "what does this one assignment reach" is a question you can ask directly instead of reading the
-whole function's dependence graph. Without `line` you get whole-symbol reach, which is the blunter
-answer. Two things not to misread: a PDG result carries `risk: "UNKNOWN"` by design — that is the
-contract, not a low-risk finding — and a degraded result (no PDG layer) still returns the full
-envelope with empty buckets rather than a false-safe zero, so check `note`/`remediation` before
-concluding anything.
+symbol — and the slice is seeded on THAT statement. Measured on a real function: `line` pointing at
+`const project = (job.rawJson ?? {})` returned **52 downstream-dependent statements**, each as line +
+text, correctly including a `project.clientQuestions` read eleven lines below. Without `line` you get
+whole-symbol reach, which is the blunter answer.
+
+**The trap: a `line` that is not a statement DEGRADES SILENTLY.** Point it at a blank line, a comment,
+a brace, or anything outside the body and you get `affectedStatements: []` — *alongside a populated
+`byDepth` and a non-zero `impactedCount`*. It reads like "this statement affects nothing", which is
+the most dangerous wrong answer this tool can give. The ONLY thing that distinguishes the two is
+`epistemic`:
+
+| `epistemic` | Means |
+| --- | --- |
+| `pdg-intra-procedural` | real slice — `affectedStatements` is the answer |
+| `pdg-no-block-at-line` | **no statement starts at your line** — the empty slice says nothing about the code |
+
+Check it before reading the result, every time. Three more fields carry their own weight:
+`scope` is `"intra"` or `"inter"` per statement, so you can see where the slice crossed a call.
+`pdgEvidence.interprocedural: "callgraph-bridge"` means the symbols in `byDepth` arrived by the
+ordinary call graph, NOT by statement-level dependence — do not present them as the latter. And
+`pdgEvidence.ascent.returnFlowFound: false` means a caller depending on a callee's RETURN value is
+missing from the slice; out-parameter ascent, callee-written shared variables and exception ascent
+are not modelled at all. `risk: "UNKNOWN"` is the contract for this mode, not a low-risk finding.
+
+**Zero taint findings is not a clean bill of health.** `explain` on a PDG-built index returns
+`findings: []` with the layer perfectly healthy — closure/callback, property/field and implicit flows
+are not modelled, and the tool says so in its own `note`. Read the note to tell "no flows found" from
+"no layer to look in"; report the difference.
 
 <!-- feature: gitnexus -->
 ## Full tool surface — reach for the right one
