@@ -185,6 +185,38 @@ carries one, so re-resolving by name is a step you rarely need.
 detects the common case itself, but when it was started somewhere other than the worktree you are
 editing, an unstaged diff comes back empty and nothing says why.
 
+### `rename` mixes two kinds of evidence — read the tag on every edit
+
+`rename` is the right tool and it is **not** all graph. Every edit is tagged:
+
+- `confidence: "graph"` — resolved through the knowledge graph. Safe to accept.
+- `confidence: "text_search"` — a REGEX match. This is find-and-replace, labelled.
+
+Measured on a real rename: 7 edits, **4 graph and 3 text_search** — 43% regex. Those three landed on
+an object-literal key in a spec file that happened to share the name. Correct there; in another
+codebase the same pattern hits an unrelated key with the same spelling.
+
+So `dry_run: true` (the default) is not a formality. Read `graph_edits` vs `text_search_edits`,
+review every `text_search` line individually, and never accept a preview wholesale because the tool
+is "safer than find-and-replace" — part of it *is* find-and-replace. Run `detect_changes` after.
+
+### `trace` tells you where the chain broke
+
+When no path exists, `trace` reports the **furthest reachable node** — so a failed trace is a
+diagnosis, not a dead end: that is where the chain stops. Check `truncated: true` before believing
+it, though; that means a traversal cap was hit, so "no path" is really "gave up". `maxDepth`
+defaults to 10 (max 30) and `includeTests` is false.
+
+Each hop carries its own edge type and confidence in `edges[]`, so a path that is technically
+connected through one weak hop is visible as such rather than reading as solid.
+
+### `explain`: an absent flow is not proof of safety
+
+Taint findings need `--pdg`; without it you get a clear "no taint layer" note rather than an error —
+and an empty result then means *nothing was checked*. Cross-function matching is by callee **name**
+and context-insensitive, so a flow into one of two same-named callees over-attributes to both.
+`totalFindings` is the true count; the page you got may be `truncated`.
+
 ### One query for a file's contents
 
 `DEFINES` (File → symbol) is the largest edge type after the obvious ones and answers "what is in this

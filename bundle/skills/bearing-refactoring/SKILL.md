@@ -5,6 +5,17 @@ description: "Use when the user wants to rename, extract, split, move, or restru
 
 # Refactoring with GitNexus
 
+## `rename` is not all graph — check the tag on every edit
+
+Every edit in a `rename` preview is tagged `confidence: "graph"` (resolved through the knowledge
+graph, safe) or `confidence: "text_search"` (a regex match — find-and-replace, labelled). A real
+rename came back **4 graph, 3 text_search**: 43% regex, landing on an object-literal key that merely
+shared the name.
+
+`dry_run: true` is the default for a reason. Compare `graph_edits` against `text_search_edits`, read
+every `text_search` line on its own merits, and run `detect_changes` afterwards. "Safer than
+find-and-replace" is true and does not mean "is not find-and-replace".
+
 ## The graph can be wrong
 
 It is derived from parsing, not ground truth, and it fails in three different ways:
