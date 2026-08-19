@@ -229,8 +229,17 @@ Nodes carry more than a name, and these turn "read every file and look" into one
 | `isAsync`, `isStatic`, `visibility`, `isAbstract` | `Function`, `Method` | "which of these are async", "what is actually public" |
 | `annotations` | `Function`, `Method` | decorator/attribute sweeps |
 | `declaredType` | `Property` | the field's declared type — what resolves field-access chains |
-| `cohesion`, `symbolCount` | `Community` | how tight an area is; a low-cohesion cluster is a naming, not a module |
+| `cohesion`, `symbolCount` | `Community` | how tight an area is; a low-cohesion cluster is a naming, not a module. Measured spread on one repo: **0.04 to 0.98**, so read it before trusting an area name |
 | `processType`, `stepCount` | `Process` | `intra_community` vs `cross_community` — the second crosses a seam and is where contracts break |
+
+**Three `Community` fields are always empty — do not query them.** `keywords`, `description`, and
+`label` are filled by an LLM enrichment pass that the analyzer ships but **never calls**
+(`cluster-enricher.js` is exported and imported by nothing), so `enrichedBy` is written from its
+`|| 'heuristic'` fallback on every node. Measured across three unrelated indexes — 270, 543 and 1126
+communities: `enrichedBy` is `heuristic` 100% of the time, `keywords` and `description` are empty
+100% of the time, and `label` is identical to `heuristicLabel` on every single node. An empty
+`keywords` says nothing about the code; it says the pass did not run. Use `heuristicLabel`,
+`cohesion`, `symbolCount` and `MEMBER_OF`.
 
 **Order:** `query` (orient) → `context` (symbol) → **`cypher`** (structural precision) → `impact` (before edits). Do not start with `cypher` for fuzzy questions — that's what `query` + embeddings are for.
 
