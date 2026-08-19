@@ -2,7 +2,111 @@
 
 All notable changes to `bearing` are documented here.
 
-## Unreleased
+## Unreleased — teach the graph as it behaves now, and stop trusting a list you kept by hand
+
+### Changed — the GitNexus teaching, rewritten against live indexes
+
+The shipped teaching described a graph roughly two years out of date, and the gap was not cosmetic:
+it told the agent things that were no longer true. It was rewritten by **querying real indexes** —
+seven repos, up to 58k nodes — rather than by re-reading the tool documentation, because the
+documentation was where several of the wrong beliefs came from.
+
+**The type layer, which the teaching never mentioned.** `USES` and `HAS_PROPERTY` edges, and
+`Property`, `Interface` and `TypeAlias` nodes. A TypeScript repo yields far more of this than the old
+text assumed, so property-level questions were being answered with file-level greps.
+
+**Edge confidence is not decoration.** ~92% of `USES` edges sit at 0.51–0.55. They are a lead to
+confirm, not an answer to quote. bearing shipped the opposite claim, and this release corrects it.
+
+**Line numbers are 0-based in raw cypher and 1-based in `query`/`context`/`impact`.** Same symbol,
+two different numbers, and nothing said so.
+
+**The escapes and envelopes nobody was using.** `impact` takes `summaryOnly`, `limit`/`offset`,
+`kind`, `relationTypes`, `minConfidence`, `includeTests`. It and `context` return an
+`epistemic`/`boundaries`/`causes` envelope that says *when the tool knows it is guessing low* —
+`causes.receiverTyping` counts call sites the resolver dropped, so an absent caller was never proof
+none exists.
+
+**Defaults that quietly narrow the answer.** `query` returns 5, `context` 10 symbols, `impact`
+excludes tests *and* `ACCESSES` unless asked. A short answer was being read as a small blast radius.
+
+**Ambiguity is a window, not a list.** `context` on an ambiguous name returns `totalCandidates` and
+`candidatesTruncated` — measured on a real repo, `candidates[]` held 20 of 36 matches. Reading
+`.length` understated the truth by 44%.
+
+**`rename` is not all graph.** On a real run 43% of its hits were regex-only — invisible to the
+graph, and tagged as such on every edit. `trace` reports furthest-reachable and truncated; an absent
+flow in `explain` is not proof the path does not exist.
+
+**Three `Community` fields are always empty**, and an agent could not tell that from "this area has
+no keywords". `keywords`, `description` and `label` are filled by an LLM enrichment pass the analyzer
+ships and never calls — `cluster-enricher.js` is exported and imported by nothing. Measured across
+three unrelated indexes (270, 543 and 1126 communities): `enrichedBy` is `heuristic` 100% of the
+time, and `label` is a copy of `heuristicLabel` on every node. `cohesion` IS real and now carries a
+range — 0.04 to 0.98 on one repo — so an area name alone does not tell you whether the area is a
+module or a coincidence.
+
+**Statement-level `impact`.** `mode: "pdg"` takes a `line` anchor and returns the statements that
+depend on that one statement. It also **degrades silently**: a line on a blank, a comment or a brace
+returns an empty slice *beside a populated `byDepth`*, which reads as "this statement affects
+nothing". The `epistemic` field is the only discriminator — `pdg-intra-procedural` versus
+`pdg-no-block-at-line` — and the teaching now says to read it first.
+
+**And the caveat that governs all of it: the graph can be WRONG.** It is derived from parsing, so it
+can be confidently wrong, not only silently empty. Every skill that names a graph tool now says so,
+and says to confirm anything load-bearing with a classical tool and name the check that was run.
+
+### Changed — staleness no longer blocks by default
+
+`stalenessGate` defaults to `"off"`. A stale index degrades an answer; a gate that fires on a
+threshold nobody chose stops the work outright, and the second is worse. Refresh still happens on
+commit and on demand. `driftRefreshThreshold` is 8 changed source files, and the count is now
+measured the same way either side of a commit — it used to jump when the same edits crossed one.
+
+### Fixed — lists that were kept by hand, and had drifted
+
+**Hook-lib manifests are derived from disk.** Two shell scripts listed `.bearing/lib/*.mjs` by hand
+and had drifted in both directions: they still demanded `context-pressure.mjs`, retired in 1.0.13, so
+`bearing update` aborted on every Cursor repo — and six libs that DO ship had never been added, so
+bundles were built missing modules their own hooks import.
+
+**313 dead symlinks were blocking the analyzer from installing its own skills.** The kit directory
+was renamed twice (`.gitnexus/agent-kit/` → `.gnkit/` → `.bearing/`) and each migration moved the
+content while leaving the symlinks that named the old path. `fs.mkdir(recursive)` cannot create
+through a dangling symlink, so six graph skills failed to install on every analyze run, warning into
+a log nobody reads. Migration now clears them — only links that are broken *and* name one of our own
+retired layouts.
+
+### Fixed — stealth installs were not stealthy, and could not update at all
+
+Four failures, each hiding the next, all the same mistake: a step that assumed the ordinary install.
+
+- **`package.json` was rewritten.** The installer removes bearing's npm scripts under stealth, and
+  then setup put all 38 back — 75 lines into a TRACKED file, visible in `git status` to colleagues
+  who have never heard of bearing. That is the one thing the mode exists to prevent, and
+  `.git/info/exclude` cannot hide it.
+- Setup **required files stealth deliberately does not write** — `.claude/settings.json` and
+  `CLAUDE.md`, where stealth writes `settings.local.json` and `.bearing/contract.md`.
+- **Cursor verification ran for a Claude-only repo**, failing on a `.cursor/` directory it is never
+  given.
+- **The git-hook installer chmod'd a hook stealth is not given**, killing setup under `set -e`.
+
+Verification was wrong about those repos too: it failed them for the scripts stealth refuses to add
+and prescribed a remedy that could never clear it, named three commands that do not exist there, and
+reported "no symlink dirs for this runtime" on a repo with 24 linked skills.
+
+### Fixed — smaller things
+
+- The domain persona is inferred from the graph's own area names, not from prose alone.
+- Bearing's own installed files no longer count as your uncommitted drift.
+- Generated area-skills now reach teammates who do not use bearing, and the index no longer walks
+  the agent layer it has no business reading.
+- Deny messages, blocks and hints name a command that exists **in this repo** — a stealth install has
+  no npm scripts, and every exit used to name one anyway. Refresh cost is measured and quoted
+  (`~52s here last time`) instead of an adjective that was wrong by an order of magnitude.
+- A postcheck false alarm: `npm run bearing:*` written in a code comment was read as a script named
+  `bearing` and failed the install.
+
 
 ### Fixed — the runtime column in the README was a claim the installer didn't enforce
 
