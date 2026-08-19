@@ -35,3 +35,16 @@ docs/ARCHITECTURE.gitnexus.md
 dist/
 build/
 coverage/
+
+# Bundled build output. Minified single-line bundles are not code anyone reads, and indexing them
+# is actively harmful: on one real repo 446 of 1123 indexed files (40%) were Capacitor-copied
+# Next.js chunks, which produced 21 `Route` nodes describing a STALE MINIFIED COPY of the app —
+# so a route lookup pointed the reader at a webpack chunk instead of the handler. They also drive
+# the analyzer's `callable-value-flow: candidate set exceeded the cap` warnings.
+# `**/_next/` rather than a Capacitor-specific path, so a copy under android/ or ios/ is caught
+# without naming a layout that only one framework uses.
+.next/
+out/
+**/_next/
+*.min.js
+*.bundle.js
