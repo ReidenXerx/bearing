@@ -116,6 +116,35 @@ you need certainty — `impact` takes `minConfidence`, and `cypher` can compare 
 — and when you report a type's consumers without filtering, say the list is inclusive rather than
 exact. `CALLS` and a resolved `ACCESSES` are a different class of evidence and can be stated plainly.
 
+### Line numbers: raw Cypher is 0-BASED, the tools are 1-BASED
+
+`startLine` / `endLine` are tree-sitter rows. **Raw `cypher` returns them 0-based; `context`, `query`,
+`impact`, `explain` and `pdg_query` present them 1-based** — so the same symbol comes back with
+different numbers depending on how you asked, and nothing warns you.
+
+Verified: `cypher` reports a function at `startLine: 149`; line 149 of that file is ` */`, the close
+of its docblock. The function is on 150.
+
+- From **raw cypher** → read `(startLine+1)..(endLine+1)`, e.g. `sed -n '150,228p' file`.
+- From **context / query / impact** → use the numbers as given.
+- `content` holds the exact symbol span if you would rather not do arithmetic at all.
+
+Off by one, silently, on every jump from a cypher result into a file. BasicBlock and PDG statement
+lines are separately 1-based.
+
+### Symbol properties worth querying
+
+Nodes carry more than a name, and these turn "read every file and look" into one query:
+
+| Property | On | Use |
+| --- | --- | --- |
+| `returnType`, `parameterTypes`, `parameterCount` | `Function`, `Method` | signature-shaped searches — every handler returning `Promise<void>`, everything taking more than five arguments |
+| `isAsync`, `isStatic`, `visibility`, `isAbstract` | `Function`, `Method` | "which of these are async", "what is actually public" |
+| `annotations` | `Function`, `Method` | decorator/attribute sweeps |
+| `declaredType` | `Property` | the field's declared type — what resolves field-access chains |
+| `cohesion`, `symbolCount` | `Community` | how tight an area is; a low-cohesion cluster is a naming, not a module |
+| `processType`, `stepCount` | `Process` | `intra_community` vs `cross_community` — the second crosses a seam and is where contracts break |
+
 **Order:** `query` (orient) → `context` (symbol) → **`cypher`** (structural precision) → `impact` (before edits). Do not start with `cypher` for fuzzy questions — that's what `query` + embeddings are for.
 
 Refresh always includes `--embeddings` (`bearing:refresh` / `agent-refresh`). Missing embeddings = stale (same as commit behind).

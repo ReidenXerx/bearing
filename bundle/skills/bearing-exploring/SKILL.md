@@ -18,6 +18,11 @@ On a typed codebase most of the graph is not the call graph:
 
 Measured on one real repo: 23,018 `Property` nodes and 7,280 `USES` edges against 27,611 `CALLS`.
 
+**Raw cypher line numbers are 0-BASED; every other tool hands them to you 1-BASED.** A function
+reported at `startLine: 149` begins on line 150 — 149 is the last line of its docblock. Jumping
+straight from a cypher result into `Read`/`sed` lands one line early, every time, silently. Add 1 to
+values that came from cypher; use `context`/`query`/`impact` numbers as given.
+
 **Check `r.confidence` before you conclude.** `CALLS` and resolved `ACCESSES` come back at 0.85–1.0;
 **~92% of `USES` edges sit at 0.51–0.55** — the indexer's best guess at a type reference it could not
 fully resolve. Treat a `USES` result as where to look, not as the finding, and say so when you report
