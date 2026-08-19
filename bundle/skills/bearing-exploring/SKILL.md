@@ -17,7 +17,11 @@ On a typed codebase most of the graph is not the call graph:
 | Circular imports between files | `check({ cycles: true })` |
 
 Measured on one real repo: 23,018 `Property` nodes and 7,280 `USES` edges against 27,611 `CALLS`.
-Grepping an interface name is answering with string matching a question the graph answers exactly.
+
+**Check `r.confidence` before you conclude.** `CALLS` and resolved `ACCESSES` come back at 0.85–1.0;
+**~92% of `USES` edges sit at 0.51–0.55** — the indexer's best guess at a type reference it could not
+fully resolve. Treat a `USES` result as where to look, not as the finding, and say so when you report
+it. `cypher` can filter on `r.confidence`; `impact` takes `minConfidence`.
 
 ## When to Use
 
