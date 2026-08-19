@@ -233,16 +233,22 @@ intel only (no graph)   ~2,400
 north-stars + task-core ~1,600
 ```
 
-**What it buys back.** One `what breaks if I change this?` costs a few hundred to a few thousand
-tokens through the graph, against grepping and then reading what grep points at:
+**What it buys back.** Answering `what breaks if I change this?` through the graph, against
+grepping and then reading what grep points at. Two graph numbers, because they answer two different
+questions — `--summary-only` gives counts and risk, the full response gives every call site, which
+is what `git grep` gives you:
 
 ```
-                         graph   grep+read   ratio
-  lead-sniffer   (234 files)     10,505    199,737    19x
-  Sourcerer-Be   (709 files)      7,534    945,338   125x
+                             summary    sites   grep+read   vs sum   vs sites
+  lead-sniffer (234 files)    10,505   65,645     199,737     19x        3.0x
+  Sourcerer-Be (709 files)     7,534   71,446     945,338    125x       13.2x
 ```
 
-On both, the fixed cost is repaid inside the first two questions.
+**`vs sites` is the honest column** — like for like. The 19x/125x figures compare a summary against
+grep's locations, which flatters the graph by however much the call-site list would have cost. Both
+are real questions; pick the row that matches the one you were going to ask.
+
+Repaid inside one to two questions either way.
 
 **Do not take my repos for it — measure yours:**
 
@@ -252,8 +258,8 @@ npm run bearing:token-benchmark          # or: -- --targets 12 --json
 
 It picks your most-called symbols, runs the real `impact` against them, and compares that with
 `git grep` plus a 40-line window around every hit — which is what answering by hand actually costs.
-It reports losses too: on lead-sniffer the graph lost one of eight, and said so. A symbol with three
-callers is cheaper to grep, and a benchmark that never says that is advertising.
+It reports losses too: on lead-sniffer the graph loses one of eight, and says so in the table. A
+symbol with three callers is cheaper to grep, and a benchmark that never admits that is advertising.
 
 <sub>Token figures are estimated at 3.7 chars/token — a calibration constant, not a tokenizer. Assume ±10%.</sub>
 

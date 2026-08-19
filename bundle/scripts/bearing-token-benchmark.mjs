@@ -111,16 +111,21 @@ function pickTargets() {
   return rows;
 }
 
-/** What the graph charges: the real `impact` response, measured. */
+/**
+ * What the graph charges — for BOTH questions, because they are not the same question.
+ *
+ * `--summary-only` answers "how big is the blast radius": counts, risk, affected flows and modules.
+ * The full response answers "show me every call site", which is what `git grep` gives you. On one
+ * real symbol that is 2,722 tokens versus 17,603 — a 6.5x difference, and comparing the cheap one
+ * against grep's locations flatters the graph by exactly that much. Report both and let the reader
+ * pick the row that matches what they were going to ask.
+ */
 function graphCost(t) {
-  const r = gn([
-    "impact", t.name,
-    "--direction", "upstream",
-    "--summary-only",
-    "--file", t.file,
-    "-r", REPO,
-  ]);
-  return r.ok ? tok(r.stdout) : null;
+  const base = ["impact", t.name, "--direction", "upstream", "--file", t.file, "-r", REPO];
+  const summary = gn([...base, "--summary-only"]);
+  const full = gn(base);
+  if (!summary.ok) return null;
+  return { summary: tok(summary.stdout), full: full.ok ? tok(full.stdout) : null };
 }
 
 /** What grep charges: its own output, plus reading what it points at. */
@@ -179,7 +184,14 @@ for (const t of targets) {
   const g = graphCost(t);
   const c = classicalCost(t);
   if (g == null || c == null) continue;
-  rows.push({ ...t, graph: g, ...c, ratio: c.windows / g });
+  rows.push({
+    ...t,
+    graph: g.summary,
+    graphFull: g.full,
+    ...c,
+    ratio: c.windows / g.summary,
+    ratioFull: g.full ? c.windows / g.full : null,
+  });
 }
 
 if (jsonOut) {
@@ -190,22 +202,32 @@ if (jsonOut) {
 const pad = (s, n) => String(s).padEnd(n);
 const num = (s, n) => String(s).padStart(n);
 console.log(`\n  Token cost of one "what breaks if I change this?" — ${path.basename(root)}\n`);
-console.log(`  ${pad("symbol", 26)}${num("callers", 9)}${num("graph", 9)}${num("grep+read", 12)}${num("ratio", 9)}`);
-console.log(`  ${"-".repeat(65)}`);
+console.log(`  ${pad("symbol", 24)}${num("callers", 8)}${num("summary", 9)}${num("sites", 8)}${num("grep+read", 11)}${num("vs sum", 8)}${num("vs sites", 9)}`);
+console.log(`  ${"-".repeat(77)}`);
 for (const r of rows) {
-  const flag = r.ratio < 1 ? "  <- grep is cheaper here" : "";
+  const worst = r.ratioFull ?? r.ratio;
+  const flag = worst < 1 ? "  <- grep is cheaper here" : "";
   console.log(
-    `  ${pad(r.name.slice(0, 25), 26)}${num(r.callers, 9)}${num(r.graph, 9)}${num(r.windows, 12)}${num(r.ratio.toFixed(1) + "x", 9)}${flag}`,
+    `  ${pad(r.name.slice(0, 23), 24)}${num(r.callers, 8)}${num(r.graph, 9)}${num(r.graphFull ?? "-", 8)}${num(r.windows, 11)}` +
+      `${num(r.ratio.toFixed(1) + "x", 8)}${num(r.ratioFull ? r.ratioFull.toFixed(1) + "x" : "-", 9)}${flag}`,
   );
 }
 
 const totG = rows.reduce((s, r) => s + r.graph, 0);
+const totGF = rows.reduce((s, r) => s + (r.graphFull ?? r.graph), 0);
 const totW = rows.reduce((s, r) => s + r.windows, 0);
 const totF = rows.reduce((s, r) => s + r.whole, 0);
-const wins = rows.filter((r) => r.ratio >= 1).length;
-console.log(`  ${"-".repeat(65)}`);
-console.log(`  ${pad(`${rows.length} questions`, 26)}${num("", 9)}${num(totG, 9)}${num(totW, 12)}${num((totW / totG).toFixed(1) + "x", 9)}`);
-console.log(`\n  Graph won ${wins} of ${rows.length}. Reading those files WHOLE would be ${totF} tokens (${(totF / totG).toFixed(0)}x).`);
+// Judge a win on the HONEST comparison — call sites against call sites.
+const wins = rows.filter((r) => (r.ratioFull ?? r.ratio) >= 1).length;
+console.log(`  ${"-".repeat(77)}`);
+console.log(
+  `  ${pad(`${rows.length} questions`, 24)}${num("", 8)}${num(totG, 9)}${num(totGF, 8)}${num(totW, 11)}` +
+    `${num((totW / totG).toFixed(1) + "x", 8)}${num((totW / totGF).toFixed(1) + "x", 9)}`,
+);
+console.log(`\n  summary = "how big is the blast radius" (counts, risk, flows).`);
+console.log(`  sites   = the full response, every call site — what \`git grep\` actually gives you.`);
+console.log(`  Compare like for like: "vs sites" is the honest column. Graph won ${wins} of ${rows.length} on it.`);
+console.log(`  Reading every matched file WHOLE would be ${totF} tokens.`);
 console.log(`  bearing's fixed cost is ~10k tokens/session (contract) + ~15k (graph tool schemas).`);
-console.log(`  On these numbers it pays for itself after ${Math.max(1, Math.ceil(25000 / Math.max(1, (totW - totG) / rows.length)))} question(s).`);
+console.log(`  At ~25k fixed overhead it repays after ${Math.max(1, Math.ceil(25000 / Math.max(1, (totW - totGF) / rows.length)))} question(s).`);
 console.log(`\n  Estimated at ${CPT} chars/token — a calibration constant, not a tokenizer. Assume +-10%.\n`);
