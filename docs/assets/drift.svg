@@ -28,24 +28,30 @@
 <circle cx="384" cy="184" r="7" fill="#d95926" opacity="0.7"/>
 <circle cx="384" cy="218" r="7" fill="#d95926" opacity="0.7"/>
 <circle cx="384" cy="252" r="7" fill="#d95926" opacity="0.7"/>
-<text x="398" y="96" text-anchor="start" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="13" fill="#9aa8bd">every later conclusion inherits it</text>
+<text x="392" y="100" text-anchor="end" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="13" fill="#9aa8bd">every later conclusion inherits it</text>
 <line x1="450" y1="100" x2="450" y2="200" stroke="#232c3b" stroke-width="1.5" stroke-dasharray="2 5"/>
 <text x="478" y="104" text-anchor="start" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="13" fill="#3987e5">WITH BEARING</text>
 <circle cx="520" cy="150" r="26.400000000000002" fill="#d95926" opacity="0.22"/><circle cx="520" cy="150" r="12" fill="#d95926" opacity="1"/>
 <text x="520" y="182" text-anchor="start" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="13" fill="#61708a">stale doc</text>
-<rect x="618" y="110" width="12" height="84" rx="6" fill="#3987e5" opacity="0.22"/>
-<rect x="620" y="110" width="8" height="84" rx="4" fill="#3987e5"/>
-<text x="638" y="156" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="13" font-weight="700" letter-spacing="1.5" fill="#3987e5">NS</text>
-<line x1="532" y1="150" x2="620" y2="116" stroke="#3987e5" stroke-width="1.5" opacity="0.5" stroke-dasharray="4 4"/>
-<line x1="532" y1="150" x2="620" y2="150" stroke="#3987e5" stroke-width="1.5" opacity="0.5" stroke-dasharray="4 4"/>
-<line x1="532" y1="150" x2="620" y2="184" stroke="#3987e5" stroke-width="1.5" opacity="0.5" stroke-dasharray="4 4"/>
-<line x1="532" y1="150" x2="620" y2="218" stroke="#3987e5" stroke-width="1.5" opacity="0.5" stroke-dasharray="4 4"/>
-<line x1="532" y1="150" x2="620" y2="252" stroke="#3987e5" stroke-width="1.5" opacity="0.5" stroke-dasharray="4 4"/>
+<rect x="618" y="106" width="12" height="156" rx="6" fill="#3987e5" opacity="0.22"/>
+<rect x="620" y="106" width="8" height="156" rx="4" fill="#3987e5"/>
+<text x="624" y="98" text-anchor="middle" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="13" font-weight="700" letter-spacing="1.5" fill="#3987e5">NS</text>
+<line x1="532" y1="150" x2="616" y2="116" stroke="#d95926" stroke-width="1.5" opacity="0.5" stroke-dasharray="4 4"/>
+<line x1="532" y1="150" x2="616" y2="150" stroke="#d95926" stroke-width="1.5" opacity="0.5" stroke-dasharray="4 4"/>
+<line x1="532" y1="150" x2="616" y2="184" stroke="#d95926" stroke-width="1.5" opacity="0.5" stroke-dasharray="4 4"/>
+<line x1="532" y1="150" x2="616" y2="218" stroke="#d95926" stroke-width="1.5" opacity="0.5" stroke-dasharray="4 4"/>
+<line x1="532" y1="150" x2="616" y2="252" stroke="#d95926" stroke-width="1.5" opacity="0.5" stroke-dasharray="4 4"/>
+
+<line x1="632" y1="116" x2="793" y2="116" stroke="#199e70" stroke-width="1.5" opacity="0.45"/>
+<line x1="632" y1="150" x2="793" y2="150" stroke="#199e70" stroke-width="1.5" opacity="0.45"/>
+<line x1="632" y1="184" x2="793" y2="184" stroke="#199e70" stroke-width="1.5" opacity="0.45"/>
+<line x1="632" y1="218" x2="793" y2="218" stroke="#199e70" stroke-width="1.5" opacity="0.45"/>
+<line x1="632" y1="252" x2="793" y2="252" stroke="#199e70" stroke-width="1.5" opacity="0.45"/>
 <circle cx="800" cy="116" r="7" fill="#199e70" opacity="0.35"/>
 <circle cx="800" cy="150" r="7" fill="#199e70" opacity="0.35"/>
 <circle cx="800" cy="184" r="7" fill="#199e70" opacity="0.35"/>
 <circle cx="800" cy="218" r="7" fill="#199e70" opacity="0.35"/>
 <circle cx="800" cy="252" r="7" fill="#199e70" opacity="0.35"/>
-<text x="648" y="222" text-anchor="start" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="13" fill="#3987e5">the gate outranks it</text>
+<text x="872" y="100" text-anchor="end" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="13" fill="#3987e5">the gate outranks it</text>
 <text x="28" y="276" text-anchor="start" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="13" fill="#61708a">A drifted agent doesn't crash. You find out three days later — unless a north-star caught it first.</text>
 </svg>
