@@ -327,6 +327,53 @@ Know every tool and *when* it wins (single-repo; cross-repo `group_*` is out of 
 Cheap resource reads (prefer before heavy tools): `READ bearing://repo/__GITNEXUS_REPO__/{context|schema|clusters|processes|process/<name>}`.
 
 <!-- feature: gitnexus -->
+### The three route tools are only as good as `Route` node coverage — CHECK IT FIRST
+
+`api_impact`, `route_map` and `shape_check` all read `Route` nodes, and route detection is
+FRAMEWORK-DEPENDENT. Where the indexer does not recognise a framework's routing, they do not degrade
+politely — they answer as if the API does not exist.
+
+Measured on a NestJS backend with **33 `@Controller` classes and 210 route decorators**:
+
+| | |
+| --- | --- |
+| `Route` nodes in the index | **3** — and all three are URL strings from utility code (`/watch`, `/_next/image`), not endpoints |
+| `route_map({route: "/venues"})` | `"No routes matching \"/venues\""` |
+| `api_impact({route: "/venues"})` | `error: "No routes found matching \"/venues\"."` |
+| `shape_check` | `"No routes with both response shapes and consumers found."` |
+
+`/venues` is a real, live endpoint. An agent that asks *"what depends on /venues before I change
+it?"* is told the route does not exist — and a not-found reads like a safe change. **This is the
+most dangerous shape a wrong answer can take, and it is one query away from being caught:**
+
+```
+MATCH (r:Route) RETURN count(*)
+```
+
+Compare that against the number of handlers you can see in source (`@Controller`, `@app.route`,
+`router.get`, a `pages/api` tree). Near-zero on a repo that plainly has an API means these three
+tools are blind here — say so, and fall back to `query`/`context`/`cypher` on the controller
+symbols, which do work. A second NestJS repo in the same set indexed **0** route nodes.
+
+`shape_check` has its own precondition: it needs `responseKeys`, extracted from `.json({...})`
+calls. A framework that returns objects directly (NestJS, FastAPI) produces none, so an empty
+result means *nothing was extracted*, never *the shapes agree*.
+
+`tool_map` is the one in this family that behaved: on a repo defining MCP tools it returned all 17
+with handler file and description. Its `flows` array was empty for every one of them.
+
+### `check` — cycles, and which ones actually matter
+
+`check({cycles: true})` returns directed `IMPORTS` cycles between files, with
+`enumeration: "complete"` when the list is exhaustive — read that field before treating a count as
+the whole picture. On one real backend: 34 cycles across 5 components.
+
+Read the result before reporting it. Cycles among ORM entity files are usually TYPE-position
+imports and benign in TypeScript; cycles between DI module files (`x.module.ts` ↔ `y.module.ts`) are
+the ones that force `forwardRef` and break initialisation order. Same count, very different
+findings — the tool does not distinguish them, and neither does a raw number in a report.
+
+<!-- feature: gitnexus -->
 ## MCP defaults (generous — local LLM)
 
 Run hook copy-paste calls verbatim; expand freely when needed:
