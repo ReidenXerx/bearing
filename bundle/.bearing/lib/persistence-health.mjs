@@ -5,6 +5,8 @@
  * and classify backend probe output, but do not mutate or repair the graph.
  */
 import fs from 'node:fs';
+import os from 'node:os';
+import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 
 const DB_ERROR_RE = /\b(database|db|sqlite|ladybug|persistence|persist|lock|locked|corrupt|corruption|readonly|read-only|permission denied|EACCES|ENOSPC|no space|disk|IO error|I\/O error)\b/i;
@@ -80,4 +82,87 @@ export function inspectPersistence(root) {
     checks,
     meta,
   };
+}
+
+/**
+ * Is the SHARED MCP server telling the truth about this machine?
+ *
+ * Two failures cost real time in one afternoon, and neither surfaced anywhere:
+ *
+ * 1. A scratch repo was deleted and removed from `~/.gitnexus/registry.json`, but the RUNNING
+ *    server still had it loaded. `context` on it failed with "LadybugDB not found at
+ *    /private/tmp/rt/.gitnexus/lbug" — a path that no longer existed. Registry edits do not reach
+ *    a server that is already running.
+ * 2. `npm i -g gitnexus@rc` upgraded the binary; the launchd server kept serving the OLD one until
+ *    it was kickstarted by hand. Every tool schema and behaviour was a version behind the CLI.
+ *
+ * Both are the same shape — the server's view of the machine has diverged from the machine — and
+ * both are cheap to detect. The doctor previously ended with "if MCP tools still fail, restart your
+ * editor", which is a guess offered in place of a check.
+ *
+ * @param {{home?: string, pkgDir?: string, now?: Date}} [opts] injectable for tests
+ * @returns {{checks: {id: string, ok: boolean, label: string, detail: string}[]}}
+ */
+export function inspectMcpServer(opts = {}) {
+  const checks = [];
+  const home = opts.home ?? os.homedir();
+
+  // ── stale registry entries ────────────────────────────────────────────────
+  let entries = [];
+  try {
+    const raw = JSON.parse(fs.readFileSync(path.join(home, '.gitnexus/registry.json'), 'utf8'));
+    entries = Array.isArray(raw) ? raw : raw.repositories ?? raw.repos ?? Object.values(raw);
+  } catch {
+    entries = [];
+  }
+  const dead = entries
+    .map((e) => ({ name: e?.name, dir: e?.path ?? e?.repoPath }))
+    .filter((e) => e.dir && !fs.existsSync(e.dir));
+  checks.push({
+    id: 'registry_paths',
+    ok: dead.length === 0,
+    label: 'Registry paths exist',
+    detail: dead.length
+      ? `${dead.length} entry(s) point at a deleted directory (${dead
+          .slice(0, 2)
+          .map((d) => `${d.name} -> ${d.dir}`)
+          .join(', ')}). A running server keeps serving them until it restarts.`
+      : `${entries.length} registered repo(s), all present`,
+  });
+
+  // ── server older than the binary it should be running ─────────────────────
+  const pkgDir = opts.pkgDir ?? null;
+  let binMtime = null;
+  if (pkgDir) {
+    try {
+      binMtime = fs.statSync(path.join(pkgDir, 'package.json')).mtime;
+    } catch {
+      /* not installed globally — nothing to compare against */
+    }
+  }
+  let started = null;
+  try {
+    const pid = execFileSync('/bin/sh', ['-c', "launchctl list 2>/dev/null | grep gitnexus | awk '{print $1}'"], {
+      encoding: 'utf8',
+    }).trim();
+    if (pid && /^\d+$/.test(pid)) {
+      const lstart = execFileSync('ps', ['-o', 'lstart=', '-p', pid], { encoding: 'utf8' }).trim();
+      const d = new Date(lstart);
+      if (!Number.isNaN(d.getTime())) started = d;
+    }
+  } catch {
+    /* no launchd service — the editor spawns its own, and restarting the editor covers it */
+  }
+  if (binMtime && started) {
+    const stale = started < binMtime;
+    checks.push({
+      id: 'server_version',
+      ok: !stale,
+      label: 'MCP server matches the installed binary',
+      detail: stale
+        ? `server started ${started.toISOString()} but gitnexus was installed ${binMtime.toISOString()} — it is serving the OLD build. Restart: launchctl kickstart -k gui/$(id -u)/dev.bearing.gitnexus-mcp`
+        : 'server started after the current install',
+    });
+  }
+  return { checks };
 }

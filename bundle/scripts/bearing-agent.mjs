@@ -3,7 +3,7 @@
  * Agent-facing GitNexus maintenance CLI (no MCP required).
  * Usage: node scripts/bearing-agent.mjs status|refresh|brief|health|verify|doctor|review [base]|pr-impact [base]|branch-status [base]|commit-msg|map|scorecard|stats [--json]|graph-smoke|token-benchmark|detect-api|fallback "<why>"|fallback:off|fallback-log [--json]
  */
-import { spawnSync } from "node:child_process";
+import { spawnSync, execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -36,7 +36,8 @@ const { withProjectTmpEnv, tmpSpaceReport, enospcHelp, isEnospcError } = await i
 const { gitnexusSpawn } = await import(
   pathToFileURL(path.join(ROOT, ".bearing/lib/gitnexus-cmd.mjs")).href
 );
-const { inspectPersistence, classifyPersistenceOutput } = await import(
+const { inspectPersistence,
+  inspectMcpServer, classifyPersistenceOutput } = await import(
   pathToFileURL(path.join(ROOT, ".bearing/lib/persistence-health.mjs"))
     .href
 );
@@ -530,6 +531,17 @@ if (cmd === "review" || cmd === "pr-impact") {
   process.exit(0);
 }
 
+/** Where `npm i -g gitnexus` put the package, if it is there at all. */
+function globalGitnexusDir() {
+  try {
+    const prefix = execFileSync("npm", ["prefix", "-g"], { encoding: "utf8" }).trim();
+    const dir = path.join(prefix, "lib/node_modules/gitnexus");
+    return fs.existsSync(dir) ? dir : null;
+  } catch {
+    return null; // no npm on PATH, or gitnexus came from somewhere else
+  }
+}
+
 if (cmd === "doctor") {
   const lines = ["GitNexus doctor — backend + kit reachability", ""];
   let problems = 0;
@@ -608,10 +620,19 @@ if (wantsCursorHere && !mcpOk) problems++;
     if (severe) problems++;
   }
 
+  // The shared server's view of the machine can diverge from the machine. Both ways cost an
+  // afternoon before this existed, and both end in a tool failing for a reason the tool cannot
+  // explain: a repo deleted from the registry that the running server still serves, and a server
+  // still running the binary that `npm i -g` replaced underneath it.
+  for (const c of inspectMcpServer({ pkgDir: globalGitnexusDir() }).checks) {
+    lines.push(`${c.ok ? "✓" : "✗"} ${c.label}: ${c.detail}`);
+    if (!c.ok) problems++;
+  }
+
   lines.push("");
   lines.push(
     problems === 0
-      ? "Doctor: backend reachable. If MCP tools still fail, restart your editor to reload the MCP server."
+      ? "Doctor: backend reachable, server current. If MCP tools still fail, restart your editor."
       : `Doctor: ${problems} problem(s) — fix the ✗ items above${wantsCursorHere ? ", then restart Cursor" : ""}.`,
   );
   console.log(lines.join("\n"));
