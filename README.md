@@ -34,6 +34,12 @@ That failure has a name — **losing your bearings**.
 
 **Contributing to a repo that isn't yours?** `npx bearing install . --stealth` keeps `git status` clean — no tracked file is touched. Details under [Install](#install).
 
+<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/token-cost.svg" alt="bearing costs about 25,200 tokens per session — 13 percent of a 200k context window, 2.5 percent of 1M — split between bearing's own contract (10,300) and the GitNexus tool schemas (14,900). One 'what breaks if I change this' question costs 13.2 times less through the graph than through grep on a 709-file repo, and 3 times less on a 234-file repo." width="100%">
+
+**It will not blow up your context.** ~25,200 tokens a session — and one *what breaks if I change this?*
+costs 3–13× less through the graph than grepping and reading the hits. Measure it on your own repo
+with `npm run bearing:token-benchmark`; [the numbers, and where the graph LOSES](#what-it-costs-your-context).
+
 ## What you get
 
 **Six independent modules. Pick any combination — each works alone, none depends on another.**
