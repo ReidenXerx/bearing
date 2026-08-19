@@ -33,6 +33,7 @@ export const GITNEXUS_SCRIPT_GATES = [
       "Fuzzy work → query (embeddings). Symbols → context. Structural → cypher. Hooks inject MCP calls — not separate npm scripts.",
     scripts: {
       "bearing:graph-smoke": "node scripts/bearing-agent.mjs graph-smoke",
+      "bearing:token-benchmark": "node scripts/bearing-agent.mjs token-benchmark",
       "bearing:detect-api": "node scripts/bearing-agent.mjs detect-api",
       "bearing:scorecard": "node scripts/bearing-agent.mjs scorecard",
       "bearing:stats": "node scripts/bearing-agent.mjs stats",

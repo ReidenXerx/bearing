@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Agent-facing GitNexus maintenance CLI (no MCP required).
- * Usage: node scripts/bearing-agent.mjs status|refresh|brief|health|verify|doctor|review [base]|pr-impact [base]|branch-status [base]|commit-msg|map|scorecard|stats [--json]|graph-smoke|detect-api|fallback "<why>"|fallback:off|fallback-log [--json]
+ * Usage: node scripts/bearing-agent.mjs status|refresh|brief|health|verify|doctor|review [base]|pr-impact [base]|branch-status [base]|commit-msg|map|scorecard|stats [--json]|graph-smoke|token-benchmark|detect-api|fallback "<why>"|fallback:off|fallback-log [--json]
  */
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
@@ -332,6 +332,19 @@ if (cmd === "health") {
   if (r.stdout) process.stdout.write(r.stdout);
   if (r.stderr) process.stderr.write(r.stderr);
   process.exit(r.status ?? 0);
+}
+
+if (cmd === "token-benchmark") {
+  // Pass the tail through so `--targets 12` and `--json` reach the script unchanged.
+  const rest = process.argv.slice(3);
+  const r = spawnSync(
+    process.execPath,
+    [path.join(ROOT, "scripts/bearing-token-benchmark.mjs"), ROOT, ...rest],
+    { encoding: "utf8", env: withProjectTmpEnv(ROOT) },
+  );
+  if (r.stdout) process.stdout.write(r.stdout);
+  if (r.stderr) process.stderr.write(r.stderr);
+  process.exit(r.status ?? 1);
 }
 
 if (cmd === "graph-smoke") {

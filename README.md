@@ -208,6 +208,55 @@ When `impact` grades a change `risk: LOW` but resolved *no* callers, the kit say
 
 A sticky PR comment, not a merge gate: blast radius per changed symbol, affected flows, security-sensitive paths, import cycles. It **never fails your build** — the graph can't distinguish "nothing calls this" from "I couldn't resolve the callers", and a hard block on that fails honest PRs. `GITNEXUS_CI_MODE=block` is opt-in.
 
+## 🧮 What it costs your context
+
+The honest number, measured rather than guessed.
+
+**Fixed, every session:**
+
+| | tokens |
+| --- | --- |
+| bearing's contract block (`CLAUDE.md` / `AGENTS.md`) | ~10,300 |
+| GitNexus MCP tool schemas (17 tools) | ~14,900 |
+| **total** | **~25,200** |
+
+That is **~13% of a 200k window, ~2.5% of a 1M one.** Skills are loaded on demand, not up front —
+a session typically pulls one or two, at ~1,500 tokens each.
+
+The second row is not bearing's — those are the graph tool definitions, present whenever the MCP
+server is connected, with or without this package. And bearing's own share scales with what you
+install:
+
+```
+all modules            ~10,300 tokens
+intel only (no graph)   ~2,400
+north-stars + task-core ~1,600
+```
+
+**What it buys back.** One `what breaks if I change this?` costs a few hundred to a few thousand
+tokens through the graph, against grepping and then reading what grep points at:
+
+```
+                         graph   grep+read   ratio
+  lead-sniffer   (234 files)     10,505    199,737    19x
+  Sourcerer-Be   (709 files)      7,534    945,338   125x
+```
+
+On both, the fixed cost is repaid inside the first two questions.
+
+**Do not take my repos for it — measure yours:**
+
+```bash
+npm run bearing:token-benchmark          # or: -- --targets 12 --json
+```
+
+It picks your most-called symbols, runs the real `impact` against them, and compares that with
+`git grep` plus a 40-line window around every hit — which is what answering by hand actually costs.
+It reports losses too: on lead-sniffer the graph lost one of eight, and said so. A symbol with three
+callers is cheaper to grep, and a benchmark that never says that is advertising.
+
+<sub>Token figures are estimated at 3.7 chars/token — a calibration constant, not a tokenizer. Assume ±10%.</sub>
+
 ## It tells you when it's the problem
 
 Every enforcement tool believes its own rules are correct. This one assumes they might not be, and keeps the evidence.
@@ -236,7 +285,7 @@ npx bearing update <repo>       # keeps your module + transport choices
 npx bearing uninstall <repo>    # restores what it overwrote
 ```
 
-With the GitNexus module: `bearing:northstars` · `bearing:health` · `bearing:refresh` · `bearing:fallback-log` · `bearing:scorecard` · `bearing:verify`
+With the GitNexus module: `bearing:northstars` · `bearing:health` · `bearing:refresh` · `bearing:fallback-log` · `bearing:scorecard` · `bearing:verify` · `bearing:token-benchmark`
 
 **Requirements:** Node ≥ 22.9.0 · a git repo · macOS, Linux, Windows or WSL · *(GitNexus module only)* the GitNexus MCP server.
 
