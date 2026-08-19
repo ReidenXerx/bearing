@@ -22,6 +22,38 @@ const MANIFESTS = [
   '.cursor/gn-kit-manifest.json',
 ];
 
+/**
+ * STEALTH installs deliberately add no npm scripts — package.json is tracked, and not touching it
+ * is the entire point of the mode. Checks that assume those scripts therefore have to know, or they
+ * report a failure the user can never clear.
+ */
+/**
+ * Name a command that exists HERE. These three strings were the last hardcoded `npm run bearing:*`
+ * in this script, and in a stealth repo — which has no npm scripts by design — every one of them
+ * named something the reader could not run. howToRun() falls back to `.bearing/commands.json`.
+ */
+async function run(name) {
+  try {
+    const mod = await import(pathToFileURL(path.join(root, '.bearing/lib/how-to-run.mjs')).href);
+    return mod.howToRun(root, name);
+  } catch {
+    return `npm run ${name}`; // older install without the resolver — the old wording is still right there
+  }
+}
+
+function readStealth() {
+  for (const rel of MANIFESTS) {
+    const p = path.join(root, rel);
+    if (!fs.existsSync(p)) continue;
+    try {
+      return JSON.parse(fs.readFileSync(p, 'utf8')).stealth === true;
+    } catch {
+      return false;
+    }
+  }
+  return false;
+}
+
 function readRuntime() {
   for (const rel of MANIFESTS) {
     const p = path.join(root, rel);
@@ -91,6 +123,16 @@ function checkManifest() {
 
 function checkPackageGates() {
   const p = path.join(root, 'package.json');
+  if (readStealth()) {
+    // Not a pass with a caveat — genuinely not applicable. `.bearing/commands.json` carries the
+    // same commands for a stealth repo, and howToRun() reads them, so nothing is missing.
+    return {
+      id: 'pkg_gates',
+      ok: true,
+      label: 'package.json gates',
+      detail: 'n/a — stealth install (commands live in .bearing/commands.json)',
+    };
+  }
   if (!fs.existsSync(p)) {
     return { id: 'pkg_gates', ok: false, label: 'package.json gates', detail: 'no package.json' };
   }
@@ -128,9 +170,14 @@ function checkSkillSymlinks(runtime) {
   // Claude-only install failed on "missing .agents/skills symlinks", a Zed path it was never
   // supposed to have. Check the link dirs the runtimes ACTUALLY installed, and when none of them
   // uses a symlink farm there is nothing to verify rather than something to fail.
+  // sync-cursor-bearing-teaching.sh links `.claude/skills` for a claude runtime too, so a
+  // claude-only repo DOES have a farm to check. Dropping Zed's path for it (correct) also dropped
+  // Claude's (not), leaving this check vacuous on exactly the install it was rewritten for.
+  const claudeOk = fs.existsSync(path.join(root, '.claude/skills/bearing-workspace/SKILL.md'));
   const want = [];
   if (wantsCursor(runtime)) want.push(['.cursor/skills', cursorOk]);
   if (wantsZed(runtime)) want.push(['.agents/skills', zedOk]);
+  if (wantsClaude(runtime)) want.push(['.claude/skills', claudeOk]);
   let ok = true;
   let detail = 'no symlink dirs for this runtime';
   if (want.length) {
@@ -297,16 +344,16 @@ async function printHuman(report) {
     (c) => !c.ok && !['health:graph_fresh', 'health:embeddings'].includes(c.id)
   );
   if (hardFail) {
-    ui.fail('Kit incomplete — run kit update, then npm run bearing:verify');
+    ui.fail(`Kit incomplete — run kit update, then ${await run('bearing:verify')}`);
     return 1;
   }
   if (!report.health.healthy) {
-    ui.warn('Graph stale or missing embeddings — npm run bearing:agent-refresh');
+    ui.warn(`Graph stale or missing embeddings — ${await run('bearing:agent-refresh')}`);
   } else {
     ui.ok('Kit verified');
   }
 
-  const steps = ['npm run bearing:health'];
+  const steps = [await run('bearing:health')];
   if (wantsCursor(report.runtime)) steps.unshift('Restart Cursor (MCP + hooks)');
   if (wantsZed(report.runtime)) {
     steps.unshift('Restart Zed — trust worktree; profile "Zed + GitNexus"');

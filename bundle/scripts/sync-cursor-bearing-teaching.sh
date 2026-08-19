@@ -7,6 +7,10 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
+# Runtime may be cursor|zed|claude|both|all or a comma-list. both = cursor+zed.
+RUNTIME="${GITNEXUS_RUNTIME:-both}"
+wants_cursor() { case "$RUNTIME" in *cursor*|*both*|*all*) return 0;; esac; return 1; }
+
 info()  { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
 ok()    { printf '\033[1;32m    ✓\033[0m %s\n' "$*"; }
 warn()  { printf '\033[1;33m    !\033[0m %s\n' "$*"; }
@@ -214,24 +218,34 @@ NODE
 
 info "Installing GitNexus agent kit teaching bundle (runtime: ${GITNEXUS_RUNTIME:-both})"
 
-info "  [1/5] Cursor rules (single always-on contract)"
-verify_always_apply_rule ".cursor/rules/00-bearing-enforcement.mdc"
-for ref_rule in ".cursor/rules/bearing.mdc" ".cursor/rules/bearing-first.mdc"; do
-  [[ -f "$ref_rule" ]] || fail "Missing rule: $ref_rule"
-  ok "Reference rule present: $ref_rule (load on demand)"
-done
+# Steps 1, 2, 4 and 5 verify CURSOR's own files. They were unconditional, so a `--runtime claude`
+# repo — which is never given a `.cursor/` directory — failed here with "Missing rule:
+# .cursor/rules/00-bearing-enforcement.mdc" after the install had already written everything. Only
+# an all-runtimes repo has these, so only an all-runtimes repo should be asked for them.
+if wants_cursor; then
+  info "  [1/5] Cursor rules (single always-on contract)"
+  verify_always_apply_rule ".cursor/rules/00-bearing-enforcement.mdc"
+  for ref_rule in ".cursor/rules/bearing.mdc" ".cursor/rules/bearing-first.mdc"; do
+    [[ -f "$ref_rule" ]] || fail "Missing rule: $ref_rule"
+    ok "Reference rule present: $ref_rule (load on demand)"
+  done
 
-info "  [2/5] Cursor agent hooks (blocking guards)"
-verify_hooks_json
-for script in "${HOOK_SCRIPTS[@]}"; do
-  [[ -f "$script" ]] || fail "Missing hook: $script"
-  chmod +x "$script"
-done
-for lib in "${HOOK_LIBS[@]}"; do
-  [[ -f "$lib" ]] || fail "Missing hook lib: $lib"
-done
+  info "  [2/5] Cursor agent hooks (blocking guards)"
+  verify_hooks_json
+  for script in "${HOOK_SCRIPTS[@]}"; do
+    [[ -f "$script" ]] || fail "Missing hook: $script"
+    chmod +x "$script"
+  done
+  for lib in "${HOOK_LIBS[@]}"; do
+    [[ -f "$lib" ]] || fail "Missing hook lib: $lib"
+  done
+  ok "${#HOOK_SCRIPTS[@]} hook scripts + support files ready"
+else
+  info "  [1-2/5] Cursor rules + hooks skipped (runtime: $RUNTIME)"
+fi
+
+# Not Cursor-specific: every runtime's hooks import from .bearing/lib.
 check_referenced_libs || fail "a hook names a .bearing/lib module that is not installed"
-ok "${#HOOK_SCRIPTS[@]} hook scripts + support files ready"
 
 info "  [3/5] Link skills (symlinks from canonical store)"
 STORE=".bearing/skills"
@@ -255,14 +269,14 @@ link_skills() {
   ok "$label → $dest_root ($count skills symlinked)"
 }
 
-# Runtime may be cursor|zed|claude|both|all or a comma-list. both = cursor+zed.
-RUNTIME="${GITNEXUS_RUNTIME:-both}"
 case "$RUNTIME" in *cursor*|*both*|*all*) link_skills ".cursor/skills" "Cursor skills" ;; esac
 case "$RUNTIME" in *zed*|*both*|*all*)    link_skills ".agents/skills" "Zed skills" ;; esac
 case "$RUNTIME" in *claude*|*all*)        link_skills ".claude/skills" "Claude skills" ;; esac
 
-info "  [4/5] Teaching bundle manifest"
-write_manifest
+if wants_cursor; then
+  info "  [4/5] Teaching bundle manifest"
+  write_manifest
+fi
 
 # Drop the volatile GitNexus stats block from AGENTS.md/CLAUDE.md so committed
 # agent docs stay stable across machines (the `analyze` tool re-adds it each refresh).
@@ -270,18 +284,22 @@ if [[ -f ".bearing/lib/stabilize-agent-docs.mjs" ]]; then
   node .bearing/lib/stabilize-agent-docs.mjs . || true
 fi
 
-info "  [5/5] Quick hook smoke test"
-if printf '%s' '{"tool_name":"SemanticSearch","tool_input":{"query":"test"}}' \
-  | bash .cursor/hooks/bearing-grep-guard.sh 2>/dev/null \
-  | grep -q 'deny'; then
-  ok "SemanticSearch block verified"
-else
-  warn "Hook smoke test inconclusive — restart Cursor and check Hooks panel"
+if wants_cursor; then
+  info "  [5/5] Quick hook smoke test"
+  if printf '%s' '{"tool_name":"SemanticSearch","tool_input":{"query":"test"}}' \
+    | bash .cursor/hooks/bearing-grep-guard.sh 2>/dev/null \
+    | grep -q 'deny'; then
+    ok "SemanticSearch block verified"
+  else
+    warn "Hook smoke test inconclusive — restart Cursor and check Hooks panel"
+  fi
 fi
 
 echo ""
 ok "Teaching bundle v2 installed (enforcement hooks active)"
+if wants_cursor; then
 echo "    Enforcement:   00-bearing-enforcement.mdc + grep/read/edit hooks (staleness block)"
+fi
 echo "    Graph imaging: bearing-imaging skill"
 echo "    Master skill:  bearing-workspace"
 echo "    If blocked:    bearing-enforcement skill"

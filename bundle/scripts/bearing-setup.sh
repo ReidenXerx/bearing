@@ -70,6 +70,10 @@ wants_cursor() { case "$GITNEXUS_RUNTIME" in *cursor*|*both*|*all*) return 0;; e
 wants_zed()    { case "$GITNEXUS_RUNTIME" in *zed*|*both*|*all*)    return 0;; esac; return 1; }
 wants_claude() { case "$GITNEXUS_RUNTIME" in *claude*|*all*)        return 0;; esac; return 1; }
 
+# Stealth installs put bearing in someone else's repo without touching a tracked file. Read the
+# mode from the manifest — the only record of it — rather than guessing from what is on disk.
+is_stealth() { [[ "$(node -p "try{require('./.bearing/manifest.json').stealth===true}catch(e){false}" 2>/dev/null)" == "true" ]]; }
+
 info()  { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
 ok()    { printf '\033[1;32m    ✓\033[0m %s\n' "$*"; }
 warn()  { printf '\033[1;33m    !\033[0m %s\n' "$*"; }
@@ -106,9 +110,13 @@ ok "Node.js $NODE_VERSION"
 
 # ── 2. npm scripts (auto-inject / update bearing:* commands) ─────────────────
 
-info "Ensuring GitNexus npm scripts in package.json"
-node scripts/bearing-teaching/merge-package-scripts.mjs --write
-ok "package.json bearing:* scripts injected"
+if is_stealth; then
+  info "Skipping npm scripts (stealth install — package.json stays untouched)"
+else
+  info "Ensuring GitNexus npm scripts in package.json"
+  node scripts/bearing-teaching/merge-package-scripts.mjs --write
+  ok "package.json bearing:* scripts injected"
+fi
 
 # ── 3. verify teaching sources (committed in repo) ───────────────────────────
 
@@ -140,12 +148,28 @@ ZED_SOURCES=(
   "AGENTS.md"
 )
 
-CLAUDE_SOURCES=(
-  ".mcp.json"
-  ".claude/settings.json"
-  "CLAUDE.md"
-  ".bearing/lib/classify.mjs"
-)
+# Stealth delivers the SAME teaching through different files, because the ordinary ones are tracked
+# and writing them is the leak the mode exists to avoid:
+#   settings.json     → settings.local.json  (personal, Claude Code reads both)
+#   CLAUDE.md         → .bearing/contract.md (injected per session by the SessionStart hook)
+#   .mcp.json         → skipped entirely when it is tracked
+# Demanding the ordinary names killed `bearing update` on stealth repos at step 3, with every kit
+# file already written. It only ever *appeared* to work on repos that happened to have their own
+# CLAUDE.md — a coincidence, not a check.
+if is_stealth; then
+  CLAUDE_SOURCES=(
+    ".claude/settings.local.json"
+    ".bearing/contract.md"
+    ".bearing/lib/classify.mjs"
+  )
+else
+  CLAUDE_SOURCES=(
+    ".mcp.json"
+    ".claude/settings.json"
+    "CLAUDE.md"
+    ".bearing/lib/classify.mjs"
+  )
+fi
 
 for f in "${CORE_SOURCES[@]}"; do require_file "$f"; done
 if wants_cursor; then for f in "${CURSOR_SOURCES[@]}"; do require_file "$f"; done; fi
@@ -202,8 +226,12 @@ fi
 
 # ── 6. git hooks (GitNexus refresh only — no personal tooling) ─────────────────
 
-info "Installing git hooks"
-bash scripts/install-git-hooks.sh
+if is_stealth; then
+  info "Skipping git hooks (stealth install — no .githooks/, and no npm scripts for it to call)"
+else
+  info "Installing git hooks"
+  bash scripts/install-git-hooks.sh
+fi
 
 # ── 7. knowledge graph index ─────────────────────────────────────────────────
 

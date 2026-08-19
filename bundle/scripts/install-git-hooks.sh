@@ -5,6 +5,15 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
+# A STEALTH install deliberately ships no .githooks/ — the hook runs `npm run bearing:full-pdg`,
+# and stealth adds no npm scripts, so a wired hook would fail on every commit. Setup called this
+# script anyway and `chmod` aborted the whole install (`set -e`) on a file that was never meant to
+# exist. Nothing to point at is a reason to stop, not to fail.
+if [[ ! -f .githooks/pre-commit ]]; then
+  echo "Git hooks: skipped (.githooks/pre-commit not installed in this repo)"
+  exit 0
+fi
+
 chmod +x .githooks/pre-commit
 chmod +x scripts/install-git-hooks.sh scripts/bearing-setup.sh scripts/pack-bearing-teaching.sh 2>/dev/null || true
 chmod +x scripts/bearing-teaching/install-from-bundle.sh 2>/dev/null || true

@@ -52,6 +52,28 @@ async function resolveGitnexusCmd() {
   }
 }
 
+/**
+ * Is this repo a STEALTH install?
+ *
+ * The whole promise of the mode is that nothing bearing does shows up in `git status` — you are in
+ * a colleague's repo and the tooling is yours alone. installKit honours that (`wantsScripts =
+ * features.has("gitnexus") && !stealth`, then removePackageScripts) and then step 7 runs
+ * bearing-setup.sh, which called this with --write and put all 38 scripts back. Seen on a real
+ * repo: 75 lines added to a TRACKED package.json, so the mode leaked on the one file that cannot
+ * be hidden by `.git/info/exclude`.
+ *
+ * The manifest is the only record of the choice, and it is what refresh-cli.mjs already reads.
+ * Guarding HERE rather than at the call site covers every caller — setup, install-from-bundle, or
+ * someone running the command by hand.
+ */
+function isStealth() {
+  try {
+    return JSON.parse(fs.readFileSync(path.join(ROOT, '.bearing/manifest.json'), 'utf8')).stealth === true;
+  } catch {
+    return false; // no manifest → the ordinary install, which is the safe direction here
+  }
+}
+
 async function main() {
   const args = new Set(process.argv.slice(2));
   const pkgPath = path.join(ROOT, 'package.json');
@@ -68,6 +90,10 @@ async function main() {
   }
 
   if (args.has('--write')) {
+    if (isStealth()) {
+      console.log('GitNexus npm scripts: skipped (stealth install — package.json is not ours to touch)');
+      return;
+    }
     const repoNameIdx = process.argv.indexOf('--repo-name');
     const repoName =
       process.env.GITNEXUS_REPO_NAME ||
