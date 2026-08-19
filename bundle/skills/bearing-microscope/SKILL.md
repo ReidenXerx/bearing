@@ -5,6 +5,17 @@ description: "Deep multi-lens audit ('microscope waves') for MILESTONE moments �
 
 # Microscope waves — deep, opinionated, verified audit
 
+## The graph can be wrong
+
+It is derived from parsing, not ground truth, and it fails in three different ways:
+
+- **A zero is not absence.** Never conclude "unused", "no callers" or "safe to delete" from an empty result.
+- **A low-confidence edge is a lead, not proof.** Check `r.confidence` — `CALLS` and resolved `ACCESSES` come back at 0.85–1.0, while ~92% of `USES` edges sit near 0.5.
+- **A count can be a floor.** `impact` returns `epistemic: "lower-bound"` with a `boundaries` note when it knows it is guessing low; it returns `"exact"` when it is not.
+
+When the conclusion matters — deleting, renaming, "nothing reads this", a security claim — confirm with a scoped `Grep` or by reading the file, and **say which check you ran**. A scoped grep for this is explicitly allowed; it is not a gate violation. When the graph and a classical check disagree, the classical check wins on existence, and the disagreement is a defect worth reporting via `bearing:fallback`.
+
+
 This is **not** a cascade code review or a linter pass. A microscope wave scrutinizes a target from many independent angles, **has real opinions** (is this even needed? is this the right approach? is it over-engineered?), verifies every finding **against real logic — not "does it run"**, and iterates in numbered **waves** until clean. With the GitNexus module installed it is the power-composition of that whole toolset; without it the same routine runs on a classically-built map.
 
 ## When to run (trigger) — and when NOT (scope gate)

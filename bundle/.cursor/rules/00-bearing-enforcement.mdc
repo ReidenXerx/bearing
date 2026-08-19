@@ -34,7 +34,7 @@ __BEARING_PERSONA_NOTE__
 
 The graph is authoritative about what it **finds**, never about what it **fails to find**. `impact`, `context`, `query` and `cypher ACCESSES` return **empty for things that demonstrably exist** — production callers reported as test-only, `ACCESSES` with 0 rows for a field read on every request, an exported const showing no references on a *fresh* index.
 
-- A **positive** result is strong evidence: what it found is really there. Use it.
+- A **positive** result is evidence *in proportion to its confidence*. A resolved edge (`CALLS`, `ACCESSES` at 0.85–1.0) is solid — use it. A near-0.5 edge is the indexer's best guess at something it could not resolve, and ~92% of `USES` edges are exactly that. **The graph is derived, not ground truth: it can be confidently wrong, not only silently empty.**
 - A **zero is not a finding.** Never conclude "dead code", "no callers", "unused field", "nothing reads this" or "safe to delete" from an empty graph result alone.
 - Before any such conclusion, **confirm classically** — a `Grep` scoped to the owning file or directory, a route/registration/DI search, a string search for the name — and **say which check you ran**. A scoped grep is explicitly allowed for this; it is not a gate violation.
 - When the graph and a classical check disagree, the **classical check wins on existence**, and the disagreement is a defect worth reporting: `npm run bearing:fallback -- "context returned 0 callers for X but grep finds N at <file:line>"`.

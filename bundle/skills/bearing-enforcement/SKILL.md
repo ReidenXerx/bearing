@@ -8,6 +8,17 @@ disable-model-invocation: false
 
 # GitNexus Enforcement & Tool Router
 
+## The graph can be wrong
+
+It is derived from parsing, not ground truth, and it fails in three different ways:
+
+- **A zero is not absence.** Never conclude "unused", "no callers" or "safe to delete" from an empty result.
+- **A low-confidence edge is a lead, not proof.** Check `r.confidence` — `CALLS` and resolved `ACCESSES` come back at 0.85–1.0, while ~92% of `USES` edges sit near 0.5.
+- **A count can be a floor.** `impact` returns `epistemic: "lower-bound"` with a `boundaries` note when it knows it is guessing low; it returns `"exact"` when it is not.
+
+When the conclusion matters — deleting, renaming, "nothing reads this", a security claim — confirm with a scoped `Grep` or by reading the file, and **say which check you ran**. A scoped grep for this is explicitly allowed; it is not a gate violation. When the graph and a classical check disagree, the classical check wins on existence, and the disagreement is a defect worth reporting via `bearing:fallback`.
+
+
 ## North star
 
 > **GitNexus is the default reasoning layer for every task.** Prefer graph + embeddings when fresh. Use `query` to orient. Use `cypher` for precise structural questions (field ACCESSES, N-hop CALLS, overrides). Refresh autonomously when stale or embeddings missing. Classical tools **only after refresh fails** (or MCP down / GN wrong) — say why in one sentence.
