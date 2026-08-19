@@ -245,6 +245,12 @@ try {
       out.detail =
         `Index is ${out.commitsBehind} commit(s) behind HEAD, but none of them touched source — ` +
         'every indexed symbol is still accurate.';
+      // Drift still has to be measured. This path declares the index FRESH, and the block below
+      // only measures the working tree when HEAD has not moved — so a single docs commit landing on
+      // top of dirty source made drift read 0 and the planner answer "nothing to do" while four
+      // source files were modified. The optimisation that skips work when nothing was committed
+      // must not also skip LOOKING at what was not committed.
+      if (threshold > 0) out.driftingFiles = countDrift(out.indexedAt, cfg.sourceExtRe);
     } else if (threshold > 0 && out.behindFiles > 0 && out.behindFiles < threshold) {
       // A small gap: the graph is wrong about a few files, not structurally invalid. Gate the graph
       // and leave the rest of the toolbox open, exactly as drift does.
@@ -253,7 +259,10 @@ try {
       out.softBehind = true;
     } else {
       out.fresh = false;
-      out.reason = 'behind';
+      // -1 means git could not answer. Named separately so the planner can force rather than run an
+      // incremental pass over a gap of unknown size — guessing "small" buys a confident answer from
+      // a graph that may no longer describe the repo.
+      out.reason = out.behindFiles < 0 ? 'behind_unmeasured' : 'behind';
     }
   }
 } catch {

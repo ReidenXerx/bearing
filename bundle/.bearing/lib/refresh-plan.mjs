@@ -61,8 +61,27 @@ export function planRefresh(stale, opts = {}) {
     };
   }
 
-  // No index at all, or one the checker could not read: there is nothing to be incremental against.
-  if (stale?.reason === "missing" || stale?.reason === "unreadable" || !(stale?.nodeCount > 0)) {
+  // Nothing to index against, or nothing worth indexing. `not_git` is separated out because running
+  // the analyzer there fails rather than helps, and reporting "building one" would be a claim the
+  // next step disproves.
+  if (stale?.reason === "not_git") {
+    return { tier: "none", args: [], why: "not a git worktree — nothing to index" };
+  }
+
+  // A gap git could not measure. The counter returns -1 there, and an earlier version let that fall
+  // through to the incremental branch because -1 < threshold is true — so an UNKNOWN gap got the
+  // cheapest treatment, which is the one case that must not happen.
+  if (stale?.reason === "behind_unmeasured" || stale?.behindFiles < 0) {
+    return {
+      tier: "full",
+      args: ["analyze", "--force", "--embeddings", EMBED_CAP, skills, ...quiet],
+      why: "git could not measure the gap — rebuilding rather than assuming it is small",
+    };
+  }
+
+  // No index at all, or one the checker could not read. `invalid_meta` is the name the checker
+  // actually emits; `unreadable` was never one of them and matched nothing.
+  if (stale?.reason === "missing" || stale?.reason === "invalid_meta" || !(stale?.nodeCount > 0)) {
     return {
       tier: "full",
       args: ["analyze", "--embeddings", EMBED_CAP, skills, ...quiet],
