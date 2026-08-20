@@ -4,6 +4,32 @@ All notable changes to `bearing` are documented here.
 
 ## 1.1.2 — a file we never overwrite carried instructions we could never correct
 
+### Added — verify reports which modules are actually reachable
+
+A second report from the same install: the agent's own status table listed `microscope` and
+`consult` as **"not available in Claude Code"**. Both are supported there, and both were installed.
+
+They are the only two modules delivered by a **skill and nothing else** — `northstars` has npm
+scripts, `taskcore` a hook, `gitnexus` the MCP tools and 34 scripts. So when the agent could not see
+their skills, it concluded the modules did not exist for its runtime, and **nothing in bearing could
+contradict it**: no check reported what each module ships or whether that shipment arrived. The
+agent had to guess, and guessed wrong in the direction that quietly costs you two modules.
+
+`bearing:verify` now answers it authoritatively:
+
+```
+✓ Modules reachable   6 module(s) installed, every skill readable
+✗ Modules reachable   microscope (not readable at .claude/skills/bearing-microscope) — the module
+  is recorded as installed but its skill cannot be read, so an agent will report it as unavailable
+```
+
+It checks the canonical store AND the per-runtime directory the host actually reads, for every
+runtime the install claims — so "installed" and "reachable" can no longer quietly disagree.
+
+Note for anyone upgrading from **1.0.12 or earlier**: `consult` did not exist then. It was added in
+1.0.13, which was never published to npm, so the first published release containing it is 1.1.0. If
+your agent reports consult as missing on an old install, `npx bearing update .` is the fix.
+
 ### Fixed — hooks.json documented a config path that nothing reads
 
 Reported from a fresh install. `.bearing/hooks.json`'s own comment told the reader that per-machine

@@ -153,6 +153,69 @@ function checkPackageGates() {
   }
 }
 
+/**
+ * Every module in the manifest, and whether its delivery actually landed.
+ *
+ * A user's agent reported `microscope` and `consult` as "not available in Claude Code". Both ARE
+ * supported there and both were installed — but they are the only two modules delivered by a SKILL
+ * and nothing else (northstars has npm scripts, taskcore a hook, gitnexus the MCP tools), so when
+ * the agent could not see their skills it concluded the modules did not exist for its runtime.
+ *
+ * Nothing in bearing could contradict it, because nothing reported what each module ships. The
+ * agent had to guess and guessed wrong. This is the authoritative answer: installed, and reachable
+ * through what.
+ */
+function checkModuleDelivery() {
+  let features = [];
+  for (const rel of MANIFESTS) {
+    try {
+      features = JSON.parse(fs.readFileSync(path.join(root, rel), 'utf8')).features ?? [];
+      if (features.length) break;
+    } catch {
+      /* try the next */
+    }
+  }
+  if (!features.length) {
+    return { id: 'module_delivery', ok: true, label: 'Modules reachable', detail: 'no module list recorded' };
+  }
+
+  // What each module ships to the agent. A module with none of its artifacts present is installed
+  // in name only.
+  const SKILL_OF = {
+    northstars: 'bearing-northstars',
+    taskcore: 'bearing-taskcore',
+    microscope: 'bearing-microscope',
+    consult: 'bearing-consult',
+    minions: 'bearing-minions',
+  };
+  const store = path.join(root, SKILLS_STORE);
+  const broken = [];
+  for (const id of features) {
+    const skill = SKILL_OF[id];
+    if (!skill) continue; // gitnexus is delivered by MCP + npm scripts, checked elsewhere
+    const canonical = path.join(store, skill, 'SKILL.md');
+    if (!fs.existsSync(canonical)) {
+      broken.push(`${id} (no ${SKILLS_STORE}/${skill}/SKILL.md)`);
+      continue;
+    }
+    // And reachable through the per-runtime farm the host actually reads.
+    for (const [rt, dir] of [['claude', '.claude/skills'], ['cursor', '.cursor/skills'], ['zed', '.agents/skills']]) {
+      if (!runtimeSet(readRuntime()).has(rt)) continue;
+      if (!fs.existsSync(path.join(root, dir, skill, 'SKILL.md'))) {
+        broken.push(`${id} (not readable at ${dir}/${skill})`);
+      }
+    }
+  }
+  return {
+    id: 'module_delivery',
+    ok: broken.length === 0,
+    label: 'Modules reachable',
+    detail: broken.length
+      ? `${broken.join('; ')} — the module is recorded as installed but its skill cannot be read, so an agent will report it as unavailable`
+      : `${features.length} module(s) installed, every skill readable`,
+  };
+}
+
 async function checkRetiredHookKeys() {
   // A setting that silently does nothing looks handled, which is why it outlasts the feature it
   // configured. NS-19 retired the context-fullness family, but hooks.json is seed-once — an old
@@ -301,6 +364,7 @@ function checkHookExecutable(name) {
 export async function verifyInstall(repoRoot) {
   const runtime = readRuntime();
   const checks = [checkManifest(), checkPackageGates(), checkSkillsStore(), checkSkillSymlinks(runtime)];
+  checks.push(checkModuleDelivery());
   const retired = await checkRetiredHookKeys();
   if (retired) checks.push(retired);
 
