@@ -2,6 +2,94 @@
 
 All notable changes to `bearing` are documented here.
 
+## 1.1.3 — bearing stops guessing which editor you use, and stops hiding when it guessed wrong
+
+Every fix here came from one user's install reports. All of them are the same shape: bearing knew
+something, did not say it, and an agent drew the wrong conclusion from the silence.
+
+### Fixed — installs no longer pick an editor in silence
+
+The default runtime for a fresh install was `both`, which means **cursor+zed and covers Claude Code
+not at all**. A user installed for zed, worked in Claude Code, and their agent reported `microscope`
+and `consult` as *"not available in Claude Code"* — **correctly**, because a zed-only install writes
+`.agents/skills/` and `AGENTS.md` and no `.claude/` anything. Two modules looked broken; one runtime
+was wrong. Nobody was ever asked.
+
+The evidence was there the whole time. `CLAUDECODE=1` is exported into every Claude Code shell —
+that is the editor announcing itself, not inference — and a repo's own `.cursor/` or `.zed/` records
+which editors have opened it. An install with no `--runtime` now uses it:
+
+```
+✓ Runtime: claude — detected: running inside Claude Code
+  Not right? Re-run with --runtime cursor|zed|claude|codex|all
+```
+
+On a TTY with no signal it **asks** — the picker already existed and was reachable only through
+`--interactive`, the flag this removes the need for. With no signal and no TTY it says what it fell
+back to instead of sneaking. An explicit `--runtime` always wins; detection never overrides it, and
+returns nothing rather than a guess when there is no evidence.
+
+### Added — verify tells you when you are running an agent the install does not cover
+
+For anyone already in that position:
+
+```
+✗ Install covers the agent you are running
+  you are running Claude Code, but this install is "zed" — so .claude/skills, .claude/hooks
+  and CLAUDE.md were never written. Modules delivered only by a skill (microscope, consult)
+  will look unavailable. Fix: npx bearing update . --runtime zed,claude
+```
+
+Settled along the way, with a controlled A/B of a real directory against a symlinked one:
+**Claude Code does follow symlinks for skill discovery.** The skill farm is fine and needed no
+change — that had been the leading suspect, and it is eliminated by evidence rather than argument.
+
+### Fixed — `bearing update` refused to update the repo you were standing in
+
+```
+~/Projects/some-repo (dev) $ npx bearing update
+Missing target repo path. Use: install <path> or install --interactive
+```
+
+Two failures in one line, in a repo that HAD bearing installed. `update` with no argument means
+this repo. And the guidance named `install` to someone who typed `update`. Now: inside an install it
+updates it; in a directory with installs beneath it, it lists them and offers `update-all .`;
+nowhere near one, it says so and names the directory it searched. `uninstall` follows the same rule.
+
+### Fixed — `bearing:agent-refresh` exited 1 on every run of a zed install
+
+```
+Missing rule: .cursor/rules/00-bearing-enforcement.mdc
+```
+
+The index refreshed fine, then the run died verifying a Cursor file the repo was never given.
+`RUNTIME="${GITNEXUS_RUNTIME:-both}"`, and that variable is exported by `bearing-setup.sh` and
+nothing else — so every other caller silently got Cursor checks. It now reads the runtime already
+recorded in `.bearing/manifest.json`.
+
+**And the class behind it.** Everything after the index refresh ran under a helper that throws, so a
+failure in a cosmetic post-step was reported as `agent-refresh failed (ENOSPC or command error)`
+with exit 1 — by which point the graph was already fresh. Since `bearing:agent-status` tells the
+agent to run that command autonomously, exit 1 reads as an unusable graph and can stop work that
+was never broken. Now:
+
+```
+==> Teaching sync exited 1. THE INDEX IS REFRESHED and the graph is usable —
+    this step only re-links skills and rule files. Continuing.
+```
+
+### Changed — smaller things from the same reports
+
+- **`bearing:health` offered a Cursor guide to people not running Cursor.** `docs/GITNEXUS-CURSOR-GUIDE.md`
+  opens *"for anyone using Cursor Agent"*; it is now shown only when the install includes cursor.
+- **Install and update say which BRANCH they wrote to.** An update writes ~60 files and reported
+  only the path, which looks identical on every branch — so the diff can land on in-progress work
+  with nothing to distinguish it.
+- **The 1.1.2 hooks-comment repair no longer reformats the file around it**, and its staleness test
+  is derived rather than hardcoded: a stale comment is one that references something the current
+  comment does not. A key retired in a future release is caught by that rule and could never have
+  been caught by a list.
+
 ## 1.1.2 — a file we never overwrite carried instructions we could never correct
 
 ### Added — verify reports which modules are actually reachable
