@@ -384,6 +384,17 @@ Before grinding through a long list of files or symbols **serially** — every c
 
 **Minions gather; you conclude — they do minimal or zero reasoning.** Spawn them on a MIDDLE tier (`sonnet` by default; `minionModel` in `.bearing/hooks.json` to change it) — cheap is correct *because* they do not reason. Wanting a smarter minion means you delegated judgment and should take it back. They return `FOUND file:line` (verbatim), `CHECKED` (the exact query) and `MISSED` — never a verdict. A subagent that concludes puts a lossy summary between the evidence and your decision. Do not fan out when the judgment IS the work, when the answer only survives verbatim, or when the unit needs context the subagent was never in.
 
+<!-- feature: tsjs -->
+## Writing TypeScript/JavaScript (intel layer)
+
+**`.bearing/lang/typescript.md`** holds numbered `TS-#` rules for code that type-checks, lints clean and is **still wrong at runtime** — cite the number when one decides a choice, and load the `bearing-tsjs` skill for the full writing/review pass. The ones that cost the most:
+
+- **`as` verifies nothing** (`TS-1`) — it silences the compiler, it does not test the value. Anything entering the process (fetch, `JSON.parse`, env, a DB row) is `unknown` (`TS-2`) until a guard or schema parse actually **runs**; one `any` un-types everything downstream of it.
+- **A union switched on without a `never` default** falls through silently the next time a variant is added (`TS-3`).
+- **`||` for a default overwrites a deliberate `0`, `""` or `false`** — `??` (`TS-8`).
+- **A promise neither awaited nor returned** loses its rejection where no caller can catch it (`TS-12`); independent awaits in a loop belong in `Promise.all` (`TS-13`).
+- **A green `tsc` is evidence about declarations, not behaviour** (`TS-17`) — run the code.
+
 <!-- feature: northstars -->
 ## Project north-stars — the semantic anchor (highest authority)
 
@@ -399,7 +410,13 @@ If **`.bearing/northstars.md`** exists, it is the project's **authoritative** st
 - **The GRAVEYARD is settled**: do not re-propose a rejected idea without new evidence that addresses *why* it was rejected, and do not discard a VALIDATED one without evidence that overturns it.
 - Format + maintenance routine: the **`bearing-northstars`** skill.
 
-**`.bearing/gold-practices.md` is the other half**: `GP-#` rules for how the work is done *anywhere*, shipped with bearing, where the north-stars say what *this project* is. Below its END marker sits this project's own `PP-#` practices — that half is yours and survives updates, and it is where a lesson you learned goes (bearing's block above is overwritten). Cite them the same way. **On conflict the `NS-#` wins** — a project's own invariant is more specific than a general rule — and you say which one and why. Every rule there has a scar — they are the mistakes that got made anyway, by a careful agent, on this codebase. The ones that bite most often: a claim from reading rather than running is unverified (`GP-1`); a test that has never failed has never been tested (`GP-2`); a fixture chosen for convenience tests the case that cannot fail (`GP-4`); a failing check is a claim too, so verify the probe before believing it (`GP-7`); every line you print is a claim (`GP-8`); establish a contract from the thing that defines it, never from something that calls it (`GP-14`); never ask a person what the source can answer (`GP-15`).
+<!-- feature: goldpractices -->
+## Gold practices — how the work is done anywhere
+
+**`.bearing/gold-practices.md`** holds numbered `GP-#` rules for how the work is done *anywhere*, shipped with bearing. Below its END marker sits this project's own `PP-#` practices — that half is yours and survives updates, and it is where a lesson you learned goes (bearing's block above is overwritten). Cite them the way you cite any authority here. **Every rule has a scar**: each is a mistake that got made anyway, by a careful agent, on a real codebase — which is why knowing better does not prevent them. The ones that bite most often: a claim from reading rather than running is unverified (`GP-1`); a test that has never failed has never been tested (`GP-2`); a fixture chosen for convenience tests the case that cannot fail (`GP-4`); a failing check is a claim too, so verify the probe before believing it (`GP-7`); every line you print is a claim (`GP-8`); establish a contract from the thing that defines it, never from something that calls it (`GP-14`); never ask a person what the source can answer (`GP-15`).
+
+<!-- feature: northstars -->
+Where this project has north-stars, **`NS-#` outranks `GP-#`** — a project's own invariant is more specific than a general rule — and you say which one and why rather than averaging them.
 
 ## Durable memory (survives compaction + sessions)
 

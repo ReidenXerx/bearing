@@ -225,10 +225,20 @@ function checkModuleDelivery() {
     microscope: 'bearing-microscope',
     consult: 'bearing-consult',
     minions: 'bearing-minions',
+    tsjs: 'bearing-tsjs',
+  };
+  // Modules whose payload is a FILE rather than a skill. Without this the loop below skips them
+  // entirely and reports them as fine when nothing landed — the same failure 1.1.2 fixed for
+  // skills, one delivery mechanism over.
+  const FILE_OF = {
+    goldpractices: '.bearing/gold-practices.md',
+    tsjs: '.bearing/lang/typescript.md',
   };
   const store = path.join(root, SKILLS_STORE);
   const broken = [];
   for (const id of features) {
+    const file = FILE_OF[id];
+    if (file && !fs.existsSync(path.join(root, file))) broken.push(`${id} (no ${file})`);
     const skill = SKILL_OF[id];
     if (!skill) continue; // gitnexus is delivered by MCP + npm scripts, checked elsewhere
     const canonical = path.join(store, skill, 'SKILL.md');

@@ -5,16 +5,15 @@ description: Read, cite, and maintain the project's north-stars — the authorit
 
 # North-stars — the project's semantic anchor
 
-## Two files, one discipline
+## The file
 
-- **`.bearing/northstars.md`** — what **this project** is. Yours; bearing never overwrites it.
-- **`.bearing/gold-practices.md`** — how the work is done. Two halves: bearing's `GP-#` block, which
-  refreshes on update and must not be edited, and **below the END marker, this project's own `PP-#`
-  practices**, which bearing never touches. Put a practice you learned here, not in the north-stars:
-  north-stars say what the project IS, a practice says how work is done.
+**`.bearing/northstars.md`** — what **this project** is. Yours; bearing never overwrites it.
 
-Cite both the same way. **On conflict the `NS-#` wins**, because a project's own invariant is more
-specific than a general rule — say which one and why rather than averaging them.
+**If this repo also installed gold practices**, `.bearing/gold-practices.md` sits beside it with
+`GP-#` rules for how the work is done **anywhere** — bearing's file, refreshed on every update, so
+do not edit it; a project rule belongs here in the north-stars. Cite both the same way, and **on
+conflict the `NS-#` wins**, because a project's own invariant is more specific than a general rule —
+say which one and why rather than averaging them.
 
 ## The problem this solves
 

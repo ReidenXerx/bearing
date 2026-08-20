@@ -346,6 +346,73 @@ appending a second one, `--no-prettierignore` takes it back out, and uninstall d
 when bearing created it. A rule you append after the block survives all of it — the block is
 sentinel-terminated for the same reason `.gitignore`'s is.
 
+### Changed — gold practices are their own module, and north-stars stops speaking for them
+
+`.bearing/gold-practices.md` had no feature id. It was hard-coded to `northstars`, so you could not
+take one without the other, and the north-stars blurb advertised rules that were not really its own.
+
+The question that prompted this was whether the `GP-#` rules are TS/JS content that belongs in the
+new language module. **They are not, and the file's own vocabulary settles it**: across 11 KB there
+are three hits for any TS/JS term, two inside *scars* (illustrations, not rules) and one a false
+positive — "a mode whose entire **promise** was leaving the repository untouched", the English word.
+Every rule's subject is evidence discipline, test design, system design, sourcing a contract, or
+handover; `GP-15`, `GP-18` and `GP-19` are about working with **people** and name no technology at
+all. They read identically in a Python or Rust repo. What made them look JavaScript-flavoured is
+that the scars come from this codebase, which is Node.
+
+So the fix was packaging, not content: `goldpractices` is now its own module with its own contract
+section. North-stars and gold practices are still read together and `NS-#` still outranks `GP-#` —
+that precedence line now ships only when **both** are installed, because in a repo with one of them
+it describes a conflict that cannot happen.
+
+**Upgrading cannot lose the file, and that took explicit work.** Update removes files whose owning
+feature is not selected, and every existing manifest records `northstars` — an id that no longer
+owns this file. Left alone, the split would have deleted `.bearing/gold-practices.md` from every
+installed repo, silently, as a consequence of having said yes to it in an earlier version. A
+recorded feature set now inherits whatever has been split out of what it selected; an explicit
+`--features northstars` does not, because that is a choice made with the new id available and it
+must be honoured as written.
+
+### Added — `tsjs`: TypeScript/JavaScript rules as a module you can decline
+
+Seventh module. `.bearing/lang/typescript.md` — seventeen numbered `TS-#` rules, cited the way
+`NS-#` are — plus a `bearing-tsjs` skill for the writing/review pass and a ~270-token section in the
+always-on contract carrying the five that cost the most.
+
+**Every rule had to pass one entry test: would `tsc --noEmit` AND a standard ESLint config both stay
+silent?** If the tooling already catches it, it is not in the file. What survives that filter is the
+set of constructs that are fully type-correct and still wrong at runtime — `as` that asserts instead
+of verifying, one `any` un-typing everything downstream of it, a union switched on without a `never`
+default that falls through silently the next time a variant is added, `||` overwriting a deliberate
+`0`, a promise neither awaited nor returned losing its rejection where no caller can catch it.
+
+**Why not more gold practices.** That was the obvious home and it is the wrong one. `gold-practices.md`
+is universal by construction — it ships with north-stars to every install, so a TypeScript section
+would be dead weight in every Python repo — and every rule in it is a *scar*, earned from a specific
+defect in a real codebase. A language trap is neither. Keeping them apart is what lets the TS pack
+say "these are properties of the language" honestly, and keeps gold practices short enough to re-read.
+
+**Why it is not a skill alone.** Every skill-delivered module keys off a discrete event: microscope
+on a milestone, consult on the moment you are about to invent a requirement, minions on a long
+serial grind. *"I am writing TypeScript"* is not an event — it is a constant background state that
+applies to every edit, so a skill-only module would sit on disk waiting for a trigger that never
+fires, and, per 1.1.2, nothing would report that it had not. Hence a contract section that carries
+the rules themselves rather than a pointer to the skill.
+
+**Layout is ready for more languages, this release fills only TS/JS.** Packs live at
+`.bearing/lang/<language>.md`, one **feature per language**, so a repo installs rules for the
+languages it actually writes. Adding Python is a pack file, a `FEATURES` entry, a `LANG_PACK_OWNER`
+line and a contract section — no rewiring. A test walks the bundle and fails if any pack is
+unclaimed, because `featureOf` treats an unowned file as core and would ship it to every install.
+
+**bearing does not detect the language** — you select the module (`--features tsjs`, or the
+interactive picker). `--features all` includes it.
+
+The module stands alone, and a test enforces it: the pack, the skill and the contract section may
+not cite a `GP-#`, name `gold-practices.md`, name an npm script or mention a graph tool — every one
+of those is an artifact a different module installs, and a `tsjs`-only repo would be reading a
+confident pointer to something that is not there.
+
 ## 1.1.4 — a refresh that rewrites, and the last check that was guessing
 
 ### Changed — a task-core refresh REPLACES; it does not append
