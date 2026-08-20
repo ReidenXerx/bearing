@@ -153,6 +153,28 @@ function checkPackageGates() {
   }
 }
 
+async function checkRetiredHookKeys() {
+  // A setting that silently does nothing looks handled, which is why it outlasts the feature it
+  // configured. NS-19 retired the context-fullness family, but hooks.json is seed-once — an old
+  // install's own comment still worked-examples `"contextWindowTokens": 1000000`, so following the
+  // documentation configures a no-op and nothing says so.
+  let inUse = [];
+  try {
+    const mod = await import(pathToFileURL(path.join(root, '.bearing/lib/hook-helpers.mjs')).href);
+    inUse = mod.retiredHookKeysInUse?.(root) ?? [];
+  } catch {
+    return null; // older install without the helper — not a finding
+  }
+  return {
+    id: 'retired_hook_keys',
+    ok: inUse.length === 0,
+    label: 'Hook config has no retired keys',
+    detail: inUse.length
+      ? `${inUse.map((k) => `${k.key} (${k.file})`).join(', ')} — retired by NS-19, read by nothing. Remove them; the window is not measurable at runtime.`
+      : 'no dead settings',
+  };
+}
+
 function checkSkillsStore() {
   const store = path.join(root, SKILLS_STORE, 'bearing-workspace/SKILL.md');
   return {
@@ -279,6 +301,8 @@ function checkHookExecutable(name) {
 export async function verifyInstall(repoRoot) {
   const runtime = readRuntime();
   const checks = [checkManifest(), checkPackageGates(), checkSkillsStore(), checkSkillSymlinks(runtime)];
+  const retired = await checkRetiredHookKeys();
+  if (retired) checks.push(retired);
 
   if (wantsCursor(runtime)) {
     for (const rel of CURSOR_CRITICAL) checks.push(checkFile(rel));

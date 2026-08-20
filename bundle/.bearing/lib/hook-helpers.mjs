@@ -47,6 +47,42 @@ export const CONFIG_FILE = ".bearing/hooks.json";
 // team-shared file. Precedence: defaults < CONFIG_FILE < LOCAL_CONFIG_FILE < env.
 export const LOCAL_CONFIG_FILE = ".bearing/hooks.local.json";
 
+/**
+ * Keys that once did something and now do nothing.
+ *
+ * NS-19 retired the whole context-fullness family: the window is not knowable at runtime, so a gate
+ * on a percentage of it produced confident false alarms. The settings kept being SET, though —
+ * hooks.json is seed-once, so an old install's comment still worked-examples
+ * `"contextWindowTokens": 1000000`, and a reader who follows it configures a no-op. A setting that
+ * silently does nothing is worse than one that errors: it looks handled.
+ */
+export const RETIRED_HOOK_KEYS = new Set([
+  "contextWindowTokens",
+  "contextPressureThreshold",
+  "contextCheckpointEvery",
+]);
+
+/**
+ * Retired keys the user has actually set, across the team file and the per-machine override.
+ * @param {string} root @returns {{key: string, file: string}[]}
+ */
+export function retiredHookKeysInUse(root) {
+  const found = [];
+  for (const rel of [CONFIG_FILE, LOCAL_CONFIG_FILE]) {
+    let cfg;
+    try {
+      cfg = JSON.parse(fs.readFileSync(path.join(root, rel), "utf8"));
+    } catch {
+      continue;
+    }
+    if (!cfg || typeof cfg !== "object") continue;
+    for (const key of Object.keys(cfg)) {
+      if (RETIRED_HOOK_KEYS.has(key)) found.push({ key, file: rel });
+    }
+  }
+  return found;
+}
+
 /** @typedef {'enforce' | 'guide'} HookMode */
 /** @typedef {'none' | 'light' | 'medium' | 'full'} EditSensitivity */
 
