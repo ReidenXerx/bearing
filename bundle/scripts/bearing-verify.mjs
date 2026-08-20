@@ -165,6 +165,38 @@ function checkPackageGates() {
  * agent had to guess and guessed wrong. This is the authoritative answer: installed, and reachable
  * through what.
  */
+/**
+ * Are you running an agent this install was never wired for?
+ *
+ * Reported as "microscope and consult are not available in Claude Code" — and the agent was right.
+ * That repo is a ZED install and the user runs Claude Code in it. A zed-only install writes
+ * `.agents/skills/` and `AGENTS.md`, and no `.claude/` anything, so the modules delivered by npm
+ * scripts kept working while the two delivered ONLY by a Claude-readable skill were genuinely
+ * absent. It looked like two broken modules; it was one wrong runtime, and nothing said so.
+ *
+ * Only Claude Code is detected, because `CLAUDECODE=1` is a signal that can be confirmed. Guessing
+ * at the others would be inventing a diagnosis, which is the failure this whole check exists to
+ * prevent.
+ */
+function checkRuntimeCoversAgent() {
+  const runtimes = runtimeSet(readRuntime());
+  const inClaudeCode = Boolean(process.env.CLAUDECODE);
+  const covered = !inClaudeCode || runtimes.has('claude');
+  const recorded = readRuntime();
+  return {
+    id: 'runtime_covers_agent',
+    ok: covered,
+    label: 'Install covers the agent you are running',
+    detail: covered
+      ? inClaudeCode
+        ? 'running Claude Code, and this install wires it'
+        : `runtime: ${recorded}`
+      : `you are running Claude Code, but this install is "${recorded}" — so .claude/skills, ` +
+        `.claude/hooks and CLAUDE.md were never written. Modules delivered only by a skill ` +
+        `(microscope, consult) will look unavailable. Fix: npx bearing update . --runtime ${recorded},claude`,
+  };
+}
+
 function checkModuleDelivery() {
   let features = [];
   for (const rel of MANIFESTS) {
@@ -364,6 +396,7 @@ function checkHookExecutable(name) {
 export async function verifyInstall(repoRoot) {
   const runtime = readRuntime();
   const checks = [checkManifest(), checkPackageGates(), checkSkillsStore(), checkSkillSymlinks(runtime)];
+  checks.push(checkRuntimeCoversAgent());
   checks.push(checkModuleDelivery());
   const retired = await checkRetiredHookKeys();
   if (retired) checks.push(retired);
