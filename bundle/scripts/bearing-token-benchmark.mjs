@@ -194,6 +194,35 @@ for (const t of targets) {
   });
 }
 
+/**
+ * Keep the last runs so the ratio can be TRENDED, not just quoted once.
+ *
+ * The number this prints is a property of the index, not of the repo: if the analyzer quietly stops
+ * resolving a class of callers, `impact` gets cheaper and thinner at the same time and the ratio
+ * IMPROVES while the answer gets worse. A single run cannot tell those apart. A history can — a
+ * ratio that jumps while the codebase did not is a reason to look at the graph, not to celebrate.
+ * @param {string} root @param {object} entry @returns {object|null} the previous run, if any
+ */
+function recordRun(root, entry) {
+  const file = path.join(root, ".bearing", ".token-benchmark.json");
+  let history = [];
+  try {
+    history = JSON.parse(fs.readFileSync(file, "utf8")).runs ?? [];
+  } catch {
+    /* first run here */
+  }
+  const previous = history.length ? history[history.length - 1] : null;
+  history.push(entry);
+  try {
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    // Keep 20: enough to see a trend, small enough that nobody has to think about the file.
+    fs.writeFileSync(file, JSON.stringify({ runs: history.slice(-20) }, null, 2));
+  } catch {
+    /* an unrecordable run is a missing trend, not a failed benchmark */
+  }
+  return previous;
+}
+
 if (jsonOut) {
   console.log(JSON.stringify({ charsPerToken: CPT, window: WINDOW, results: rows }, null, 2));
   process.exit(0);
@@ -230,4 +259,24 @@ console.log(`  Compare like for like: "vs sites" is the honest column. Graph won
 console.log(`  Reading every matched file WHOLE would be ${totF} tokens.`);
 console.log(`  bearing's fixed cost is ~10k tokens/session (contract) + ~15k (graph tool schemas).`);
 console.log(`  At ~25k fixed overhead it repays after ${Math.max(1, Math.ceil(25000 / Math.max(1, (totW - totGF) / rows.length)))} question(s).`);
+// Trend it. `--json` callers get the same via the file.
+const previous = recordRun(root, {
+  questions: rows.length,
+  graphSummary: totG,
+  graphSites: totGF,
+  grepRead: totW,
+  ratioSites: Number((totW / totGF).toFixed(2)),
+});
+if (previous?.ratioSites) {
+  const now = totW / totGF;
+  const delta = ((now - previous.ratioSites) / previous.ratioSites) * 100;
+  const moved = Math.abs(delta) >= 10;
+  console.log(
+    `  Previous run: ${previous.ratioSites.toFixed(1)}x over ${previous.questions} question(s)` +
+      (moved
+        ? `  —  ${delta > 0 ? "+" : ""}${delta.toFixed(0)}%. A ratio that moves while the codebase did not is the INDEX changing: check that impact still resolves the callers it used to.`
+        : `  —  steady.`),
+  );
+}
+
 console.log(`\n  Estimated at ${CPT} chars/token — a calibration constant, not a tokenizer. Assume +-10%.\n`);

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Compare .gitnexus/meta.json lastCommit vs git HEAD.
- * stdout: JSON { fresh, reason, commitsBehind, indexedCommit, headCommit, indexedAt }
+ * stdout: JSON { fresh, reason, commitsBehind, driftSpan, indexedCommit, headCommit, indexedAt }
  */
 import fs from 'node:fs';
 import { execSync } from 'node:child_process';
@@ -155,6 +155,7 @@ const out = {
   fresh: true,
   reason: null,
   commitsBehind: 0,
+  driftSpan: null,
   indexedCommit: null,
   headCommit: null,
   indexedAt: null,
@@ -252,11 +253,37 @@ if (out.indexedCommit === out.headCommit) {
   process.exit(0);
 }
 
+/**
+ * How much TIME the index is behind, not just how many commits.
+ *
+ * "236 commits behind" is a number without a scale — it reads the same whether that is a busy
+ * afternoon or most of a year. On a real repo it was seven weeks: the graph was answering questions
+ * about code from a different era, confidently, and the count alone never conveyed that. A span is
+ * what makes a reader act.
+ * @param {string} indexedCommit @returns {string|null} e.g. "7 weeks" — null when git cannot say
+ */
+function driftSpan(indexedCommit) {
+  try {
+    const at = parseInt(git(`git log -1 --format=%ct ${indexedCommit}`), 10);
+    if (!Number.isFinite(at)) return null;
+    const days = Math.floor((Date.now() / 1000 - at) / 86400);
+    if (days < 1) return "today";
+    if (days === 1) return "1 day";
+    if (days < 14) return `${days} days`;
+    if (days < 60) return `${Math.round(days / 7)} weeks`;
+    if (days < 730) return `${Math.round(days / 30)} months`;
+    return `${(days / 365).toFixed(1)} years`;
+  } catch {
+    return null; // shallow clone, or the commit is no longer reachable
+  }
+}
+
 try {
   git(`git merge-base --is-ancestor ${out.indexedCommit} ${out.headCommit}`);
   out.commitsBehind =
     parseInt(git(`git rev-list --count ${out.indexedCommit}..${out.headCommit}`), 10) || 0;
   if (out.commitsBehind > 0) {
+    out.driftSpan = driftSpan(out.indexedCommit);
     // COUNT WHAT MOVED, not merely that something moved.
     //
     // This branch used to read `commitsBehind > 0 → stale → block everything`. A commit touching a
@@ -311,7 +338,10 @@ if (!out.fresh) {
     out.detail = `Index commit ${(out.indexedCommit || '').slice(0, 7)} diverged from HEAD ${(out.headCommit || '').slice(0, 7)} — ${agentFix}`;
   } else {
     const n = out.commitsBehind ?? '?';
-    out.detail = `Index is ${n} commit(s) behind HEAD (indexed ${(out.indexedCommit || '').slice(0, 7)} → HEAD ${(out.headCommit || '').slice(0, 7)}). ${agentFix}`;
+    // Say how much TIME that is. A count has no scale — 236 commits reads the same whether it is
+    // an afternoon or most of a year, and on one real repo it was seven weeks of drift.
+    const span = out.driftSpan ? `, ${out.driftSpan} of drift` : '';
+    out.detail = `Index is ${n} commit(s) behind HEAD${span} (indexed ${(out.indexedCommit || '').slice(0, 7)} → HEAD ${(out.headCommit || '').slice(0, 7)}). ${agentFix}`;
   }
 }
 

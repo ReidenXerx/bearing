@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Agent-facing GitNexus maintenance CLI (no MCP required).
- * Usage: node scripts/bearing-agent.mjs status|refresh|brief|health|verify|doctor|review [base]|pr-impact [base]|branch-status [base]|commit-msg|map|scorecard|stats [--json]|graph-smoke|token-benchmark|detect-api|fallback "<why>"|fallback:off|fallback-log [--json]
+ * Usage: node scripts/bearing-agent.mjs status|refresh|brief|health|verify|doctor|review [base]|pr-impact [base]|branch-status [base]|commit-msg|map|scorecard|stats [--json]|graph-smoke|capabilities|token-benchmark|detect-api|fallback "<why>"|fallback:off|fallback-log [--json]
  */
 import { spawnSync, execFileSync } from "node:child_process";
 import fs from "node:fs";
@@ -341,6 +341,17 @@ if (cmd === "token-benchmark") {
   const r = spawnSync(
     process.execPath,
     [path.join(ROOT, "scripts/bearing-token-benchmark.mjs"), ROOT, ...rest],
+    { encoding: "utf8", env: withProjectTmpEnv(ROOT) },
+  );
+  if (r.stdout) process.stdout.write(r.stdout);
+  if (r.stderr) process.stderr.write(r.stderr);
+  process.exit(r.status ?? 1);
+}
+
+if (cmd === "capabilities") {
+  const r = spawnSync(
+    process.execPath,
+    [path.join(ROOT, ".bearing/lib/graph-capabilities.mjs"), ROOT, ...process.argv.slice(3)],
     { encoding: "utf8", env: withProjectTmpEnv(ROOT) },
   );
   if (r.stdout) process.stdout.write(r.stdout);
