@@ -2,6 +2,53 @@
 
 All notable changes to `bearing` are documented here.
 
+## 1.1.2 — a file we never overwrite carried instructions we could never correct
+
+### Fixed — hooks.json documented a config path that nothing reads
+
+Reported from a fresh install. `.bearing/hooks.json`'s own comment told the reader that per-machine
+overrides belong in:
+
+```
+.gnkit/gitnexus-hooks.local.json
+```
+
+The code reads `.bearing/hooks.local.json`. **Following the instruction creates a file nothing
+reads** — it fails silently, which is the worst way a config override can fail: no error, no
+warning, and settings that appear to be in place.
+
+That path is two renames old (`.gitnexus/agent-kit/` → `.gnkit/` → `.bearing/`), and the bundle's
+copy was corrected long ago. The correction could never arrive, because **`.bearing/hooks.json` is
+seed-once** — written at install and never overwritten, since it is team-shared config a user edits
+and an update must not clobber. That rule protects their *settings*. It was also freezing our
+*documentation*, and nothing had noticed.
+
+Same vintage, second defect: the comment's worked example is `"contextWindowTokens": 1000000`, a key
+**1.0.13 retired**. Even at the corrected path it does nothing — the documentation was teaching a
+no-op.
+
+Two fixes, because there are two populations:
+
+- **Migration repairs the comment, and only the comment.** Verified against a byte-accurate
+  reproduction of the reported file: path repointed, retired example removed, and `mode`,
+  `readLineThreshold` and `sourceGlobs` preserved exactly. It only rewrites prose that is
+  demonstrably stale — one that names `.gnkit`, the old filename, or a retired key. A team that
+  rewrote the comment for themselves has said something bearing must not overwrite.
+- **`bearing:verify` names retired keys that are actually set**, across `hooks.json` and
+  `hooks.local.json`:
+
+  ```
+  ✗ Hook config has no retired keys  contextWindowTokens (.bearing/hooks.json) — retired by
+    NS-19, read by nothing. Remove them; the window is not measurable at runtime.
+  ```
+
+**If you hit this, `npx bearing update .` is the whole fix** — no hand-editing, and it is durable
+because it is a migration rather than a manual edit that the next setup could overwrite.
+
+The general lesson, since seed-once is used deliberately: **a file we never overwrite can carry
+instructions we can never correct.** Any seed-once file that DOCUMENTS something needs a repair
+path, or its documentation is write-once too.
+
 ## 1.1.1 — the tools bearing tells you to trust, measured against what they actually return
 
 ### Fixed — `api_impact` reports a live route as non-existent, and that reads as "safe to change"
