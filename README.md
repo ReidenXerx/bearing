@@ -42,15 +42,17 @@ with `npm run bearing:token-benchmark`; [the numbers, and where the graph LOSES]
 
 ## What you get
 
-**Seven independent modules. Pick any combination — each works alone, none depends on another.**
+**Nine independent modules. Pick any combination — each works alone, none depends on another.**
 
 | | |
 |---|---|
 | ⚑ **North-stars** | **Stops killed ideas respawning six months later.** Numbered, authoritative claims about what your project *is* — **outranks every other doc**, re-injected as the session runs. |
+| 🏅 **Gold practices** | **The mistakes that get made anyway.** Numbered `GP-#` rules earned from real defects — a claim from reading rather than running is unverified, a test that has never failed has never been tested. Language- and project-neutral. |
 | 💾 **Task-core** | **Survives compaction.** A dense save-state of the current task, written **before** the summary lands and drops the detail. |
 | 🔬 **Microscope** | **Catches code that runs perfectly and is still wrong.** A panel of lens agents reviews as an expert in *your* domain — each finding must survive its own refutation pass. |
 | 🙋 **Consult** | **Asks about the right things, decides the rest.** Asks you only what isn't in the repo — which reading you meant, what a user should see — and decides everything else. Confirms before anything irreversible. |
 | 🐜 **Minions** | **Parallelises wide mechanical work.** Cheap anchored subagents return **citations, not opinions** — they gather; your agent concludes. |
+| 🧪 **TS/JS rules** | **Catches code that compiles and is still wrong.** Numbered `TS-#` rules for the traps `tsc` and ESLint both stay silent about — `as` that verifies nothing, a union that falls through on the next variant, `||` overwriting a deliberate `0`. |
 | 🕸 **GitNexus** | **Turns 40 text matches into a real code graph.** Hard gates redirect symbol greps to callers and flows. Requires the [GitNexus](https://github.com/abhigyanpatwari/GitNexus) MCP server. |
 | 🎭 **E2E** | **Turns "I checked it in the browser" into an exit code.** A harness your agent finishes: working substrate plus the scars, and a way to test a destructive write *without performing it*. Opt-in — it writes `.e2e/` and needs Playwright. |
 
@@ -63,11 +65,18 @@ npx bearing                                    # interactive — explains each m
 npx bearing install . --runtime claude --features northstars,taskcore
 ```
 
+<<<<<<< HEAD
 `--runtime` `claude` · `zed` · `codex` · `all`  ·  `--features` `northstars` · `taskcore` · `microscope` · `consult` · `minions` · `gitnexus` · `e2e` · `all`
+||||||| parent of 5272885 (Add tsjs module and split gold practices)
+`--runtime` `claude` · `cursor` · `zed` · `codex` · `all`  ·  `--features` `northstars` · `taskcore` · `microscope` · `consult` · `minions` · `gitnexus` · `e2e` · `all`
+=======
+`--runtime` `claude` · `cursor` · `zed` · `codex` · `all`  ·  `--features` `northstars` · `goldpractices` · `taskcore` · `microscope` · `consult` · `minions` · `tsjs` · `gitnexus` · `e2e` · `all`
+>>>>>>> 5272885 (Add tsjs module and split gold practices)
 
 Then restart your IDE. Enforcement needs tool-interception hooks, and **only Claude Code** exposes
 them:
 
+<<<<<<< HEAD
 | | Claude Code | Zed | Codex |
 |---|:---:|:---:|:---:|
 | North-stars — loaded as authority | ✅ | ✅ | ✅ |
@@ -78,6 +87,29 @@ them:
 | Minions — anchored fan-out | ✅ | — | — |
 | GitNexus — hard gates | ✅ | — | — |
 | E2E — browser verification | ✅ | ✅ | ✅ |
+||||||| parent of 5272885 (Add tsjs module and split gold practices)
+| | Claude Code | Cursor | Zed | Codex |
+|---|:---:|:---:|:---:|:---:|
+| North-stars — loaded as authority | ✅ | ✅ | ✅ | ✅ |
+| North-stars — re-anchored mid-session | ✅ | — | — | — |
+| Task-core — survives compaction | ✅ | — | — | — |
+| Microscope — domain-expert review | ✅ | ✅ | ✅ | — |
+| Consult — ask vs decide | ✅ | ✅ | ✅ | — |
+| Minions — anchored fan-out | ✅ | — | — | — |
+| GitNexus — hard gates | ✅ | ✅ | — | — |
+=======
+| | Claude Code | Cursor | Zed | Codex |
+|---|:---:|:---:|:---:|:---:|
+| North-stars — loaded as authority | ✅ | ✅ | ✅ | ✅ |
+| North-stars — re-anchored mid-session | ✅ | — | — | — |
+| Gold practices — cited as authority | ✅ | ✅ | ✅ | ✅ |
+| Task-core — survives compaction | ✅ | — | — | — |
+| Microscope — domain-expert review | ✅ | ✅ | ✅ | — |
+| Consult — ask vs decide | ✅ | ✅ | ✅ | — |
+| Minions — anchored fan-out | ✅ | — | — | — |
+| TS/JS rules — cited in-context | ✅ | ✅ | ✅ | ✅ |
+| GitNexus — hard gates | ✅ | ✅ | — | — |
+>>>>>>> 5272885 (Add tsjs module and split gold practices)
 
 ✅ means it fires without being asked. A `—` is not always absence: the **task-core** skill and its
 contract section install on every runtime, so you can invoke it by name — what Claude Code adds is
