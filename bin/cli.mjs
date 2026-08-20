@@ -47,4 +47,11 @@ const effective = implied
     ? ["install", ...argv]
     : argv;
 
-cliMain(effective, invokedAs);
+// cliMain is async (it may prompt for the runtime). An unhandled rejection here would print a bare
+// stack after the install had already reported progress, so failures are surfaced deliberately.
+cliMain(effective, invokedAs).catch((e) => {
+  console.error(`\n✗ ${e?.message ?? e}`);
+  if (process.env.BEARING_DEBUG) console.error(e?.stack ?? "");
+  else console.error("  (BEARING_DEBUG=1 for the stack trace)");
+  process.exitCode = 1;
+});
