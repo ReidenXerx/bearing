@@ -286,7 +286,7 @@ cat <<'ONBOARD'
   ──────────
   1. RESTART CURSOR on this project (MCP + hooks load on restart)
   2. Open a new Agent chat and describe your task
-  3. Share docs/GITNEXUS-CURSOR-GUIDE.md with your team
+  3. Share docs/GITNEXUS-CURSOR-GUIDE.md with your team (Cursor installs)
 
   Quick check:  npm run bearing:health
   Full audit:   npm run bearing:verify

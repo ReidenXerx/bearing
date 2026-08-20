@@ -10,6 +10,19 @@ import { auditKitHealth } from "./session-health-audit.mjs";
 
 const root = process.argv[2] ?? process.cwd();
 
+/** Runtimes this install actually covers, from the manifest. */
+function installedRuntime(root) {
+  for (const rel of ['.bearing/manifest.json', '.gitnexus/agent-kit-manifest.json']) {
+    try {
+      const r = JSON.parse(fs.readFileSync(path.join(root ?? '.', rel), 'utf8')).runtime;
+      if (r) return String(r).split(',').map((t) => t.trim().toLowerCase());
+    } catch {
+      /* try the next */
+    }
+  }
+  return ['both']; // unknown — keep the historical behaviour rather than hide the guide
+}
+
 function mark(ok) {
   return ok ? "✓" : "✗";
 }
@@ -69,7 +82,12 @@ async function main() {
   lines.push(`  ${howToRun('bearing:agent-brief')}   session orientation (agents)`);
   lines.push(`  ${howToRun('bearing:agent-status')}  staleness check (agents)`);
   lines.push("");
-  lines.push("Team guide: docs/GITNEXUS-CURSOR-GUIDE.md");
+  // Only offer the Cursor guide to a Cursor install. It opens "for anyone using Cursor Agent" and
+  // names Cursor behaviour throughout, so on a zed- or claude-only repo this pointed the reader at
+  // a document written for a tool they are not running.
+  if (installedRuntime(root).some((r) => ['cursor', 'both', 'all'].includes(r))) {
+    lines.push("Team guide: docs/GITNEXUS-CURSOR-GUIDE.md");
+  }
 
   if (!audit.healthy) {
     lines.push("");

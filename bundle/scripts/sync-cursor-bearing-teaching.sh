@@ -8,7 +8,20 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
 # Runtime may be cursor|zed|claude|both|all or a comma-list. both = cursor+zed.
-RUNTIME="${GITNEXUS_RUNTIME:-both}"
+#
+# The env var is set by bearing-setup.sh, and by NOTHING ELSE. Defaulting to `both` when it is unset
+# therefore turned Cursor checks back on for every other caller — `bearing:agent-refresh` on a
+# zed-only install exited 1 on every run with "Missing rule: .cursor/rules/00-bearing-enforcement
+# .mdc", after a refresh that had succeeded. The agent is told to run that command autonomously, so
+# it read exit 1 as an unusable graph.
+#
+# The runtime is already RECORDED at install time. Ask the manifest rather than guessing, and keep
+# `both` only as the last resort for a pre-manifest install.
+runtime_from_manifest() {
+  node -p "try{require('./.bearing/manifest.json').runtime||''}catch(e){''}" 2>/dev/null
+}
+RUNTIME="${GITNEXUS_RUNTIME:-$(runtime_from_manifest)}"
+RUNTIME="${RUNTIME:-both}"
 wants_cursor() { case "$RUNTIME" in *cursor*|*both*|*all*) return 0;; esac; return 1; }
 
 info()  { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
@@ -216,7 +229,7 @@ NODE
 
 # ── main ─────────────────────────────────────────────────────────────────────
 
-info "Installing GitNexus agent kit teaching bundle (runtime: ${GITNEXUS_RUNTIME:-both})"
+info "Installing GitNexus agent kit teaching bundle (runtime: ${RUNTIME})"
 
 # Steps 1, 2, 4 and 5 verify CURSOR's own files. They were unconditional, so a `--runtime claude`
 # repo — which is never given a `.cursor/` directory — failed here with "Missing rule:
