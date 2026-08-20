@@ -270,12 +270,27 @@ if (cmd === "refresh") {
       );
       process.exit(rc);
     }
+    // The INDEX is refreshed by this point — rc was 0 above. What follows re-syncs teaching files,
+    // and a failure there is a tidiness problem, not a graph problem.
+    //
+    // It used to run under `run()`, which throws into the catch below and reports "agent-refresh
+    // failed (ENOSPC or command error)" with exit 1. A zed install hit exactly that: the sync
+    // verified a Cursor rule the repo never had, and every refresh looked catastrophic. Since
+    // `bearing:agent-status` tells the agent to run this AUTONOMOUSLY, exit 1 reads as an unusable
+    // graph and can stop work that was never broken. The runtime bug is fixed; this makes the
+    // whole class survivable.
     if (
       fs.existsSync(path.join(ROOT, "scripts/sync-cursor-bearing-teaching.sh"))
     ) {
-      run("bash", ["scripts/sync-cursor-bearing-teaching.sh"], {
+      const syncRc = runAllowFail("bash", ["scripts/sync-cursor-bearing-teaching.sh"], {
         stdio: "inherit",
       });
+      if (syncRc !== 0) {
+        console.error(
+          `\n==> Teaching sync exited ${syncRc}. THE INDEX IS REFRESHED and the graph is usable —\n` +
+            "    this step only re-links skills and rule files. Continuing.",
+        );
+      }
     }
   } catch (err) {
     console.error("\n" + enospcHelp(ROOT));
