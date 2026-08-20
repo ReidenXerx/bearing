@@ -2,6 +2,135 @@
 
 All notable changes to `bearing` are documented here.
 
+## 1.1.1 — the tools bearing tells you to trust, measured against what they actually return
+
+### Fixed — `api_impact` reports a live route as non-existent, and that reads as "safe to change"
+
+Counting rather than guessing whether the graph teaching was finished: every tool the server
+exposes, against how often the contract taught it. Four were **named and never taught** —
+`api_impact`, `route_map`, `shape_check`, `tool_map` — against 32 mentions for `query` and 34 for
+`context`. Audited against live indexes like the rest, and the route family had a false-safe in it.
+
+All three route tools read `Route` nodes, and **route detection is framework-dependent**. On a
+NestJS backend with 33 `@Controller` classes and 210 route decorators, the index held **three**
+`Route` nodes — all of them URL strings scraped out of utility code (`/watch` from a YouTube helper,
+`/_next/image` from an image normaliser). A second NestJS repo indexed **zero**.
+
+```
+route_map({route: "/venues"})   → "No routes matching \"/venues\""
+api_impact({route: "/venues"})  → error: "No routes found matching \"/venues\"."
+```
+
+`/venues` is live. Ask *"what depends on this before I change it?"* and you are told the route does
+not exist — **a not-found reads as a safe change**, on the tool whose documented purpose is
+pre-change safety. The contract now says to run `MATCH (r:Route) RETURN count(*)` FIRST and compare
+it against the handlers visible in source.
+
+`shape_check` has a second precondition: it needs `responseKeys` from `.json({...})` calls, so a
+framework returning objects directly produces none. Empty means *nothing was extracted*, never *the
+shapes agree*.
+
+### Added — `bearing:capabilities`, so the repo states its own limits
+
+Five traps found this cycle are all per-repo facts the agent otherwise carries as rules. Rules
+decay. Six probes now answer, for THIS repo, what a negative result from each tool means:
+
+```
+! api_impact / route_map / shape_check   0 Route nodes against 9 controllers
+    → these report the API as ABSENT; a not-found is not evidence the route is unused
+✓ explain — taint findings               0 taint edges, layer present
+    → the layer looked and found nothing. NOT proof of safety.
+```
+
+That pair is the point: **zero findings with a healthy taint layer and zero with no layer look
+identical and mean opposite things.** Also probed: embeddings, `ACCESSES`, the PDG layer, and the
+three `Community` fields that are empty in every index in existence.
+
+It also classifies circular imports. `check` reported "34 cycles" on one backend — a number that
+treats a compile-time non-event and a real design smell alike:
+
+```
+6 between DI module files — force forwardRef and break initialisation order
+12 between entity/type files — type-position imports, erased at compile time
+2 other
+```
+
+### Added — `bearing:token-benchmark`, which can and does report losses
+
+"How many extra tokens will I spend?" now has a measured answer: **~25,200 per session** —
+~10,300 for bearing's contract, ~14,900 for the GitNexus tool schemas. 13% of a 200k window, 2.5%
+of 1M. Intel-only, without the graph, is ~2,400.
+
+The overhead means nothing without the other side, so the benchmark measures it **on your repo**:
+most-called symbols, the real `impact` against each, versus `git grep` plus a 40-line window around
+every hit.
+
+```
+                          summary    sites   grep+read   vs sum   vs sites
+lead-sniffer (234 files)   10,505   65,645     199,737     19x       3.0x
+Sourcerer-Be (709 files)    7,534   71,446     945,338    125x      13.2x
+```
+
+**`vs sites` is the honest column** — call sites against call sites. The bigger figures compare a
+summary against grep's locations and flatter the graph by however much the call-site list costs.
+And it reports losses: on lead-sniffer the graph loses one of eight, and prints `<- grep is cheaper
+here`. A symbol with three callers IS cheaper to grep. A benchmark that can only flatter what it
+benchmarks is advertising.
+
+It also trends. The ratio is a property of the INDEX, not the repo: if the analyzer quietly stops
+resolving a class of callers, `impact` gets cheaper and thinner at once — the ratio improves while
+the answer degrades, and one run cannot tell those apart.
+
+### Fixed — the doctor stopped guessing that a restart might help
+
+Its closing line was *"If MCP tools still fail, restart your editor"* — advice offered in place of a
+diagnosis. Twice in one afternoon the server WAS the problem, in two ways, neither surfaced:
+
+- A repo deleted and removed from `~/.gitnexus/registry.json` stayed loaded in the RUNNING shared
+  server. `context` failed with `LadybugDB not found` at a path that no longer existed. Registry
+  edits do not reach a server that is already running.
+- `npm i -g gitnexus@rc` replaced the binary while launchd kept serving the old build.
+
+Both are now checked, and name the fix rather than the symptom.
+
+### Changed — staleness in time, not only commits
+
+```
+Index is 260 commit(s) behind HEAD, 8 weeks of drift (indexed 1055745 → HEAD f949531)
+```
+
+A count has no scale — 236 commits reads the same whether it is an afternoon or most of a year. One
+repo was 236 behind and its graph described a different era of the code, confidently.
+
+### Fixed — the README's diagrams argued against their own captions
+
+`drift.svg` is captioned "a north-star stops the spread", and its gate bar spanned `y=110..194`
+while the fan of rays reached `y=252` — the bottom two rays sailed straight past it. The rays were
+also blue, the gate's own colour, so it read as bearing emitting them rather than stopping them; and
+the five green "clean" dots connected to nothing at all.
+
+`gitnexus.svg`'s grep panel rendered as the literal string **"use0"**, eighty times. It was a grid of
+two fragments — `· use.` plus a bold `O` — meant to suggest `useOrderService` hits; at 11px the O
+reads as a zero. Replaced with fragments that ARE grep output.
+
+### Fixed — bundled build output was 69% of one repo's graph
+
+`.gitnexusignore` shipped `dist/ build/ coverage/`, none of which is where Next.js puts its output.
+On one repo the indexer walked 512 minified bundle files:
+
+```
+                before     after
+indexed files    1,123       873
+nodes           35,322    10,900
+Route nodes         21         8   (21 were ALL from bundles; 8 are all from source)
+execution flows    286       538
+```
+
+Execution flows nearly **doubled**. The analyzer ranks candidate entry points against a budget and
+the bundles were consuming it — indexing junk does not merely add junk, it displaces signal. Every
+`Route` node in that index came from a webpack chunk, so asking where a route is handled returned a
+stale minified bundle.
+
 ## 1.1.0 — teach the graph as it behaves now, and stop trusting a list you kept by hand
 
 ### Changed — the GitNexus teaching, rewritten against live indexes
