@@ -45,6 +45,34 @@ USER-PREFS(this task): <corrections + constraints the user gave THIS task>
 
 **Include** the things a summary drops: the *why* behind decisions, dead-ends already ruled out, exact anchors, the user's precise wording on constraints, the immediate next action. **Exclude** narrative recap, tool-by-tool history, and anything re-derivable from the code in seconds.
 
+## On refresh — a rewrite, not an append
+
+The nudge fires every N edits and says *refresh*. **That means rewriting the file so it describes
+the task as it is NOW** — not adding today's paragraph to yesterday's. A core that only ever grows
+becomes the thing it exists to replace: a transcript, with the same problem of burying the load-
+bearing detail in narrative.
+
+One test per line, applied on every refresh:
+
+> **If I deleted this line, would a future me redo work or repeat a mistake?**
+
+Keep it if yes. Delete it if no. Specifically:
+
+| Drop | Keep |
+| --- | --- |
+| Finished steps whose outcome is now IN THE CODE — the code says it better | The **why** behind a decision, when it still constrains what comes next |
+| Resolved OPEN-Qs (fold the answer into DECISIONS, delete the question) | Gotchas that would still bite — a trap you could walk into again today |
+| GOTCHAS about code that no longer exists | The user's exact wording on a constraint |
+| ANCHORS to files you are finished with | ANCHORS you will open again |
+| A DONE list that has become a changelog | One line of DONE, if it stops you re-opening a settled question |
+
+**Git already keeps the log.** Completed work lives in commits, which are searchable, dated and
+permanent — a task-core that duplicates them is paying context for a worse copy.
+
+A healthy core stays roughly the same SIZE across refreshes: things leave as things arrive. If it
+grows every time, it is being appended to rather than rewritten, and the signal is thinning with
+every pass.
+
 ## On recovery (post-compaction / resume)
 
 The SessionStart brief points you here. **Read the task-core FIRST**, before acting:

@@ -112,6 +112,8 @@ emitContext(
     `Refresh \`${corePath}\` — GOAL · CONSTRAINTS · DECISIONS(+why) · STATE(done/now/NEXT) · ` +
     "ANCHORS(file:line) · GOTCHAS(what you already tried that failed) · OPEN-Qs. Terse, for you, " +
     "not for a human. A compaction can land at any time and the transcript does not survive it; " +
-    "this file is what does. Skip it if the task has not moved.",
+    "this file is what does. REWRITE it rather than appending — drop finished steps whose outcome " +
+    "is now in the code, and resolved questions; git already keeps the log. Skip it if the task " +
+    "has not moved.",
   "PostToolUse",
 );

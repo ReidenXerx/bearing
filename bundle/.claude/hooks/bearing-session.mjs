@@ -1,7 +1,25 @@
 #!/usr/bin/env node
 // Claude Code SessionStart → reset per-session gate flags and inject the GitNexus brief.
+import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+
+/**
+ * How cold this save-state is, when that is worth saying.
+ *
+ * The brief tells the agent to READ THE CORE FIRST and reconstruct from it, so an old core is not
+ * merely unhelpful — it is read and TRUSTED. One user's agent worked the age out by hand and
+ * reported "the artifact is 9 days stale"; bearing had the mtime on disk and never mentioned it.
+ * Silent below two days, where the answer is "it is current" and a number would be noise.
+ */
+function coreAge(p) {
+  try {
+    const days = Math.floor((Date.now() - fs.statSync(p).mtimeMs) / 86400000);
+    return days >= 2 ? ` (last written ${days} days ago — VERIFY its anchors before acting)` : "";
+  } catch {
+    return "";
+  }
+}
 
 let raw = "";
 for await (const c of process.stdin) raw += c;
@@ -90,7 +108,7 @@ if (recovering) {
   lines = [
     `Context was ${source === "compact" ? "COMPACTED" : "resumed"} — the task CONTINUES${graphEnabled ? "; enforcement and this session's satisfied gates are PRESERVED" : ""}.`,
     hasCore
-      ? `READ your TASK-CORE FIRST — \`${tcp}\`: a dense save-state of THIS task (goal/constraints/decisions/state/anchors/gotchas/next). Reconstruct from it, verify against reality, then continue — do not re-derive what it already settles.`
+      ? `READ your TASK-CORE FIRST — \`${tcp}\`${coreAge(tcp)}: a dense save-state of THIS task (goal/constraints/decisions/state/anchors/gotchas/next). Reconstruct from it, verify against reality, then continue — do not re-derive what it already settles.`
       : `No TASK-CORE saved — reconstruct THIS task (goal/decisions/state/next) from your memory + the code before acting, and write \`${tcp}\` next time so compaction can't drift you. That path is THIS chat's own; other sessions in this repo have their own.`,
     // Graph-first discipline MUST be re-stated here, not only on fresh start: post-compaction is
     // exactly where agents drift back to grep/blind-read. "Gates preserved" ≠ "stop using the graph".
@@ -123,7 +141,7 @@ if (recovering) {
     // agent could name from memory. Say it on a fresh start too, or the agent cannot write a
     // task-core proactively at a milestone and only learns where it lives once compaction hits,
     // which is exactly too late.
-    `Your TASK-CORE for this chat is \`${taskCorePath(root, sessionKey(input.transcript_path))}\` — one file per chat, so parallel sessions here cannot overwrite each other. Write it at a milestone or when context fills.`,
+    `Your TASK-CORE for this chat is \`${taskCorePath(root, sessionKey(input.transcript_path))}\` — one file per chat, so parallel sessions here cannot overwrite each other. Write it at a milestone, or when the nudge says edits have piled up since it was last written.`,
     staleLine,
   ];
 }
