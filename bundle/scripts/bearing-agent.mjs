@@ -37,7 +37,7 @@ const { gitnexusSpawn } = await import(
   pathToFileURL(path.join(ROOT, ".bearing/lib/gitnexus-cmd.mjs")).href
 );
 const { inspectPersistence,
-  inspectMcpServer, classifyPersistenceOutput } = await import(
+  inspectMcpServer, probeMcpEndpoint, classifyPersistenceOutput } = await import(
   pathToFileURL(path.join(ROOT, ".bearing/lib/persistence-health.mjs"))
     .href
 );
@@ -557,6 +557,19 @@ if (cmd === "review" || cmd === "pr-impact") {
   process.exit(0);
 }
 
+/** The MCP transport this repo recorded at install time, or null. */
+function recordedTransport(root) {
+  for (const rel of [".bearing/manifest.json", ".gitnexus/agent-kit-manifest.json"]) {
+    try {
+      const t = JSON.parse(fs.readFileSync(path.join(root, rel), "utf8")).mcpTransport;
+      if (t) return t;
+    } catch {
+      /* try the next */
+    }
+  }
+  return null;
+}
+
 /** Where `npm i -g gitnexus` put the package, if it is there at all. */
 function globalGitnexusDir() {
   try {
@@ -655,10 +668,21 @@ if (wantsCursorHere && !mcpOk) problems++;
     if (!c.ok) problems++;
   }
 
+  // And ask the endpoint we RECORDED whether it is answering. Everything above probes the CLI and
+  // the registry — a different process from the shared server the editor actually talks to, which
+  // is why a dead server produced a clean bill of health and a closing line that guessed.
+  const endpoint = await probeMcpEndpoint(recordedTransport(ROOT));
+  if (endpoint) {
+    lines.push(`${endpoint.ok ? "✓" : "✗"} ${endpoint.label}: ${endpoint.detail}`);
+    if (!endpoint.ok) problems++;
+  }
+
   lines.push("");
   lines.push(
     problems === 0
-      ? "Doctor: backend reachable, server current. If MCP tools still fail, restart your editor."
+      ? endpoint
+        ? "Doctor: backend reachable, server current, endpoint answering. If MCP tools still fail, restart your editor to reload its client."
+        : "Doctor: backend reachable, server current. If MCP tools still fail, restart your editor."
       : `Doctor: ${problems} problem(s) — fix the ✗ items above${wantsCursorHere ? ", then restart Cursor" : ""}.`,
   );
   console.log(lines.join("\n"));

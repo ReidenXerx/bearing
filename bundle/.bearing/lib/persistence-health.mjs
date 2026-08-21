@@ -166,3 +166,53 @@ export function inspectMcpServer(opts = {}) {
   }
   return { checks };
 }
+
+/**
+ * Is the MCP endpoint bearing RECORDED actually answering?
+ *
+ * The manifest stores the transport it wrote — `{mode:"http", url:"http://127.0.0.1:39100/mcp"}` —
+ * and nothing ever asked that URL a question. When the shared server is down, every MCP tool fails
+ * in the editor while `doctor` reports "backend reachable, server current": it probes the CLI and
+ * the registry, which are a different process entirely. The reader was then told "If MCP tools still
+ * fail, restart your editor" — a guess, in the one line left after the registry and version checks
+ * replaced the others.
+ *
+ * Returns null, not a passing check, when there is nothing to probe: a `stdio` install spawns the
+ * server per client and HAS no endpoint, so reporting one would be inventing a subsystem.
+ *
+ * @param {{mode?: string, url?: string}|null} transport @param {number} [timeoutMs]
+ * @returns {Promise<{id:string, ok:boolean, label:string, detail:string}|null>}
+ */
+export async function probeMcpEndpoint(transport, timeoutMs = 2500) {
+  if (!transport || transport.mode !== 'http' || !transport.url) return null;
+  let origin;
+  try {
+    origin = new URL(transport.url).origin;
+  } catch {
+    return null; // an unparseable URL is a config problem other checks already surface
+  }
+  try {
+    const res = await fetch(`${origin}/health`, { signal: AbortSignal.timeout(timeoutMs) });
+    if (res.ok) {
+      return {
+        id: 'mcp_endpoint',
+        ok: true,
+        label: 'MCP endpoint answering',
+        detail: `${origin} responded`,
+      };
+    }
+    return {
+      id: 'mcp_endpoint',
+      ok: false,
+      label: 'MCP endpoint answering',
+      detail: `${origin} replied ${res.status} — the shared server is up but unhealthy. Restart: launchctl kickstart -k gui/$(id -u)/dev.bearing.gitnexus-mcp`,
+    };
+  } catch {
+    return {
+      id: 'mcp_endpoint',
+      ok: false,
+      label: 'MCP endpoint answering',
+      detail: `${origin} is not answering — every MCP tool will fail until it is back, and restarting your editor will NOT help. Start it: launchctl kickstart -k gui/$(id -u)/dev.bearing.gitnexus-mcp`,
+    };
+  }
+}
