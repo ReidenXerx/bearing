@@ -2,6 +2,69 @@
 
 All notable changes to `bearing` are documented here.
 
+## 1.1.4 — a refresh that rewrites, and the last check that was guessing
+
+### Changed — a task-core refresh REPLACES; it does not append
+
+The nudge fires every N edits and says *refresh*. The skill covered what to **include** when writing
+one and how to **read** it on recovery, and said nothing about what a refresh **removes** — so the
+file only ever grew and became the thing it exists to replace: a transcript, with the same burial of
+load-bearing detail in narrative, at the same cost in context.
+
+One test per line now, applied on every refresh:
+
+> **If I deleted this line, would a future me redo work or repeat a mistake?**
+
+Drop finished steps whose outcome is now in the code, resolved OPEN-Qs, gotchas about code that no
+longer exists, anchors to files you are done with, a DONE list that has become a changelog.
+**Git already keeps the log** — dated, searchable, permanent — so a core duplicating it pays context
+for a worse copy. A healthy core stays roughly the same SIZE across refreshes; monotonic growth
+means it is being appended to. The nudge itself now says `REWRITE it rather than appending`.
+
+### Added — the task-core's age, at the moment it is trusted
+
+The SessionStart brief tells the agent to **read the task-core first and reconstruct from it**, so a
+cold core is not merely unhelpful — it is read and believed. On compaction or resume:
+
+```
+READ your TASK-CORE FIRST — <path> (last written 9 days ago — VERIFY its anchors before acting)
+```
+
+Silent under two days, where the answer is "it is current" and a number would be noise.
+
+### Fixed — doctor never asked the endpoint it wrote down
+
+bearing records the transport it configured — `{mode:"http", url:"http://127.0.0.1:39100/mcp"}` —
+and nothing ever asked that URL a question. Every other check probes the CLI and the registry, which
+live in a **different process** from the shared server the editor talks to. So with the server down,
+doctor reported everything green and signed off with *"If MCP tools still fail, restart your
+editor"* — advice that cannot work, because restarting an editor does not start a launchd service.
+
+```
+✗ MCP endpoint answering: http://127.0.0.1:39100 is not answering — every MCP tool will fail
+  until it is back, and restarting your editor will NOT help.
+  Start it: launchctl kickstart -k gui/$(id -u)/dev.bearing.gitnexus-mcp
+```
+
+Returns nothing rather than a passing check for `stdio` installs, which spawn per client and have no
+endpoint to probe.
+
+### Changed — install and update warn when the diff lands on a non-default branch
+
+1.1.3 added a Branch line to the summary. Passive display was not enough — that line was already
+there when a kit update landed on an active feature branch the following day. A line you do not read
+is a line that does not exist, so it now compares against `origin/HEAD` and says so:
+
+```
+! Branch  payers-v2 — NOT main; this diff lands here
+```
+
+### Fixed — two instructions still naming a trigger 1.0.13 retired
+
+The session brief told the agent to write its task-core *"when context fills"*, and the Claude
+adapter's comment still described the nudge hook as estimating context fullness. The context window
+is not knowable at runtime, which is why that trigger was replaced by counting unsaved edits.
+
 ## 1.1.3 — bearing stops guessing which editor you use, and stops hiding when it guessed wrong
 
 Every fix here came from one user's install reports. All of them are the same shape: bearing knew
