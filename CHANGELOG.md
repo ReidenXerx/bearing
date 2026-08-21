@@ -2,6 +2,41 @@
 
 All notable changes to `bearing` are documented here.
 
+## Unreleased — two tools that both own the same ninety files
+
+### Added — the installer offers to keep Prettier off the files bearing owns
+
+An install puts ~90 tracked, formattable files into a repo — `.bearing/lib/` alone is 31 `.mjs`
+modules — and every one of them is bearing's, replaced wholesale on the next update. In a repo that
+formats on commit the two tools take turns: Prettier reformats all 90, `bearing update` overwrites
+them back, and the diff returns every cycle. Neither is wrong. They simply both claim the file.
+
+The installer now detects Prettier — `.prettierrc*` in any of its eight extensions,
+`prettier.config.*`, a `prettier` key or dependency in `package.json`, or a lone `.prettierignore`
+— and **asks**, quoting the evidence back rather than asserting it. Saying nothing means no:
+`.prettierignore` is the repo's own configuration and editing it uninvited is exactly what bearing
+does not do. `--prettierignore` / `--no-prettierignore` answer it without a TTY.
+
+Scope is what bearing **wholly owns**. `CLAUDE.md` and `AGENTS.md` are deliberately absent — bearing
+owns a marked block inside them, not the file, and silently exempting someone's own prose from their
+own formatter is not ours to do. That block is rewritten on update anyway, so the churn self-heals
+in one file rather than ninety.
+
+The pattern list is written by hand, because a `.prettierignore` nobody can read is a worse artifact
+than one that is slightly redundant. It is kept honest by a test that walks the bundle and fails if
+any formattable file an install ships is matched by no pattern — which caught
+`scripts/lib/setup-ui.mjs` on its first run.
+
+**Stealth refuses it**, through the same channel that already reports skipped Codex and Zed wiring.
+Stealth's promise is that `git status` is exactly as clean afterwards, and `.prettierignore` is
+tracked — or, if absent, visibly untracked the moment it is created. Either way the promise breaks,
+so the offer is withdrawn and explained instead of quietly taken.
+
+Reversible in both directions: the answer is recorded, an update refreshes the block rather than
+appending a second one, `--no-prettierignore` takes it back out, and uninstall deletes the file only
+when bearing created it. A rule you append after the block survives all of it — the block is
+sentinel-terminated for the same reason `.gitignore`'s is.
+
 ## 1.1.4 — a refresh that rewrites, and the last check that was guessing
 
 ### Changed — a task-core refresh REPLACES; it does not append
