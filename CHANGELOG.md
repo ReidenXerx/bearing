@@ -23,9 +23,18 @@ own formatter is not ours to do. That block is rewritten on update anyway, so th
 in one file rather than ninety.
 
 The pattern list is written by hand, because a `.prettierignore` nobody can read is a worse artifact
-than one that is slightly redundant. It is kept honest by a test that walks the bundle and fails if
-any formattable file an install ships is matched by no pattern — which caught
-`scripts/lib/setup-ui.mjs` on its first run.
+than one that is slightly redundant. It is kept honest by a test that does a **real install** for
+every runtime and fails if any formattable file left on disk is matched by no pattern.
+
+That test walked the *bundle* first, and was green while three gaps sat in plain sight — because
+`.zed/settings.json`, `.mcp.json` and `.cursor/mcp.json` are written by ADAPTERS rather than copied
+from `bundle/`, so a bundle walk could not see them at all. A probe blind to a whole category of
+output reports success in exactly the shape of real coverage. It took installing into a scratch repo
+and running Prettier by hand to find them, which is the whole of `GP-1`.
+
+One more thing that surfaced the same way: bearing writes `.claude/skills/generated/` and
+`.claude/skills/gitnexus/` during setup **even on a zed-only install**, so the skill farms are
+exempted regardless of the runtime that nominally owns them.
 
 **Stealth refuses it**, through the same channel that already reports skipped Codex and Zed wiring.
 Stealth's promise is that `git status` is exactly as clean afterwards, and `.prettierignore` is
