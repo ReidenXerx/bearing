@@ -21,14 +21,20 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { gitnexusSpawn } from "../.bearing/lib/gitnexus-cmd.mjs";
-import { repoName } from "../.bearing/lib/hook-helpers.mjs";
+import { assertKitInstalled } from "./lib/require-kit.mjs";
 
 const args = process.argv.slice(2);
 const root = path.resolve(args.find((a) => !a.startsWith("--")) || process.cwd());
 const jsonOut = args.includes("--json");
 const nTargets = Number(args[args.indexOf("--targets") + 1]) || 8;
 const WINDOW = 40; // lines of context a careful reader takes around a hit
+
+// STATIC imports are hoisted, so a guard cannot run before one — `.bearing/lib` had to become a
+// dynamic import for the check below to mean anything. Without it this died on
+// ERR_MODULE_NOT_FOUND before printing a single line.
+assertKitInstalled(root);
+const { gitnexusSpawn } = await import("../.bearing/lib/gitnexus-cmd.mjs");
+const { repoName } = await import("../.bearing/lib/hook-helpers.mjs");
 
 /**
  * Characters per token. Not a tokenizer — a calibration constant, and the report says so. English

@@ -30,6 +30,13 @@ function howToRun(name) {
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
 
+// Refuse with a diagnosis rather than a stack trace when .bearing/lib is not there. Lives in
+// scripts/lib/ because a check for a missing directory cannot import from it.
+const { assertKitInstalled } = await import(
+  pathToFileURL(path.join(ROOT, "scripts/lib/require-kit.mjs")).href
+);
+assertKitInstalled(ROOT);
+
 const { withProjectTmpEnv, tmpSpaceReport, enospcHelp, isEnospcError } = await import(
   pathToFileURL(path.join(ROOT, "scripts/lib/project-tmp.mjs")).href
 );

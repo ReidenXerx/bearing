@@ -26,9 +26,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execSync, spawnSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
-import { gitnexusSpawn } from '../.bearing/lib/gitnexus-cmd.mjs';
+import { assertKitInstalled } from './lib/require-kit.mjs';
 
 const ROOT = process.cwd();
+
+// Same hoisting problem as the benchmark: a static `.bearing/lib` import runs before any guard, so
+// a CI job on a damaged install failed with a stack trace instead of a reason.
+assertKitInstalled(ROOT);
+const { gitnexusSpawn } = await import('../.bearing/lib/gitnexus-cmd.mjs');
 const baseRef = process.argv[2] || process.env.GITHUB_BASE_REF || 'main';
 const mode = (process.env.GITNEXUS_CI_MODE || 'report').toLowerCase();
 const highThreshold = Number(process.env.GITNEXUS_CI_HIGH || 8);
