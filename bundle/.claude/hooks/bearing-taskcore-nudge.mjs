@@ -39,10 +39,25 @@ try {
 const tool = input.tool_name || "";
 // Only tools that CHANGE the repo. A Read or a Grep produces nothing that a compaction could lose.
 const EDITS = new Set(["Write", "Edit", "NotebookEdit"]);
-if (!EDITS.has(tool)) process.exit(0);
 
 const root = process.env.CLAUDE_PROJECT_DIR || input.cwd || process.cwd();
 const lib = (rel) => import(pathToFileURL(path.join(root, ".bearing/lib", rel)).href);
+
+// A shell command that WRITES counts too. Watching only the edit tools measured ~6 of ~96 real
+// edits in one long session, so the counter crawled and the nudge never arrived. The check is in
+// hook-helpers so all three counters agree on what an edit is.
+let isEdit = EDITS.has(tool);
+if (!isEdit && tool === "Bash") {
+  try {
+    const { bashWritesFiles } = await import(
+      pathToFileURL(path.join(root, ".bearing/lib/hook-helpers.mjs")).href
+    );
+    isEdit = bashWritesFiles(input.tool_input?.command);
+  } catch {
+    /* no lib → not an edit we can see */
+  }
+}
+if (!isEdit) process.exit(0);
 
 let config;
 let sp;

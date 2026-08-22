@@ -45,6 +45,37 @@ export const CONFIG_FILE = ".bearing/hooks.json";
 // Gitignored per-machine override — same shape as CONFIG_FILE, wins over it. Lets one dev tune the
 // mode / thresholds (e.g. taskCoreEveryEdits) without editing the
 // team-shared file. Precedence: defaults < CONFIG_FILE < LOCAL_CONFIG_FILE < env.
+/**
+ * Did this shell command CHANGE a file?
+ *
+ * The edit counters watched Write|Edit|MultiEdit|NotebookEdit and nothing else. Measured on a real
+ * three-day session: ~6 edits went through those tools and ~90 went through Bash — python heredocs,
+ * `sed -i`, redirection — so the counter reached 6 against a threshold of 25 and the task-core
+ * nudge never fired once. The core sat 67 hours stale while the work it describes was being done.
+ * An agent that works through the shell is not exotic, and it was invisible.
+ *
+ * Deliberately generous. A false positive makes the nudge arrive slightly early, which costs a line;
+ * a false negative is what produced silence for three days.
+ * @param {string} command @returns {boolean}
+ */
+export function bashWritesFiles(command) {
+  const cmd = String(command ?? "");
+  if (!cmd.trim()) return false;
+
+  // Redirection to a real path. `> /dev/null` and `2>&1` are plumbing, not edits — counting them
+  // would mean counting nearly every command that reports anything.
+  const redirect = /(?:^|[^0-9<>|&])>>?\s*(?!\/dev\/)(?![&|])[^\s;|&]+/.test(cmd);
+  const inPlace = /\bsed\s+-i|\bperl\s+-\w*i|\bgit\s+apply\b|\bpatch\b/.test(cmd);
+  const writers = /\b(?:cp|mv|install|tee|truncate|touch|mkdir|rmdir|rm|ln)\s/.test(cmd);
+  const formatters = /\b(?:prettier|eslint|black|gofmt|rustfmt)\b[^|]*--(?:write|fix|in-place)/.test(cmd);
+  // A heredoc fed to an interpreter is how most scripted edits are actually made.
+  const scripted =
+    /<<-?\s*['"]?\w+['"]?/.test(cmd) &&
+    /\b(?:python3?|node|ruby|perl|php|bash|sh)\b/.test(cmd);
+
+  return redirect || inPlace || writers || formatters || scripted;
+}
+
 export const LOCAL_CONFIG_FILE = ".bearing/hooks.local.json";
 
 /**
