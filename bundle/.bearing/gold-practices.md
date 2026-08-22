@@ -163,3 +163,18 @@ better does not prevent.
   around, yes. An account of how you got here, no.
   *Scar: a PR body carried notes on what remained unverified and why a branch was still draft —
   written for one person, read by the whole team, and useless to every one of them.*
+
+- **GP-20** — **Attempt the operation; do not count a proxy for it.** A measurement scoped to part of
+  reality reports success in exactly the shape of success, and stays silent about the part it cannot
+  see. Pressing submit answers "is this form fillable"; counting filled fields answers "how many of
+  the fields I thought to look for have values". *Scar: a completeness check counted
+  `input[type=text]` with a value and reported "all filled" while a date picker and two selects sat
+  empty — neither is an `input[type=text]`. The same run counted error elements BEFORE any submit,
+  where the answer is always zero. Both passed. Both were blind by construction, not by accident.*
+
+- **GP-21** — **Hand a human a decision, never a chore.** When you need someone else — for
+  judgement, for an approval, for eyes on something you cannot see — do every mechanical step first
+  and leave exactly the part that needed them. Prefill the form, open the page in the right state,
+  put the diff in front of them. Typing you could have done is time taken from the judgement you
+  actually asked for, and it is the part most likely to make them defer the whole request. *Scar:
+  handing over a blank KYC form to be filled by hand, when every field but one was already known.*
