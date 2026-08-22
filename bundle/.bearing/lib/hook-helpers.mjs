@@ -95,7 +95,13 @@ export function bashWriteTargets(command) {
   const out = new Set();
   const add = (p) => {
     const clean = String(p || "").replace(/^['"]|['"]$/g, "").trim();
-    if (clean && !clean.startsWith("/dev/") && !clean.startsWith("-")) out.add(clean);
+    if (!clean || clean.startsWith("/dev/") || clean.startsWith("-")) return;
+    // Must LOOK like a path. A capture with no separator and no extension is far more likely to be
+    // a string that happened to sit where a path goes — which is how `write_text('x')` once
+    // registered a file called `x`. Rejecting it costs a missed count; accepting it costs a wrong
+    // one AND suppresses the fallback that would have been right.
+    if (!clean.includes("/") && !/\.[A-Za-z0-9]{1,6}$/.test(clean)) return;
+    out.add(clean);
   };
 
   // `> path`, `>> path`
@@ -107,8 +113,11 @@ export function bashWriteTargets(command) {
   }
   // `cp a b` / `mv a b` / `install a b` — the DESTINATION is what changed
   for (const m of cmd.matchAll(/\b(?:cp|mv|install)\s+(?:-\S+\s+)*(\S+)\s+(\S+)/g)) add(m[2]);
-  // A quoted path inside a heredoc body: write_text / writeFileSync / open(...)
-  for (const m of cmd.matchAll(/(?:write_text|writeFileSync|Path)\s*\(\s*['"]([^'"]+)['"]/g)) add(m[1]);
+  // A quoted path inside a heredoc body. `Path(...)` and `writeFileSync(path, data)` take the path
+  // first; `write_text(...)` takes the CONTENT and was captured here by mistake — it recorded a
+  // file's text as its name, and worse, a non-empty bogus target suppressed the git fallback that
+  // would have got the answer right.
+  for (const m of cmd.matchAll(/(?:writeFileSync|Path|open)\s*\(\s*['"]([^'"]+)['"]/g)) add(m[1]);
 
   return [...out];
 }

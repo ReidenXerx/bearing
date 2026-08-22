@@ -44,15 +44,6 @@ let targets = [input.tool_input?.file_path || input.tool_input?.notebook_path].f
 const root = process.env.CLAUDE_PROJECT_DIR || input.cwd || process.cwd();
 const lib = (rel) => import(pathToFileURL(path.join(root, ".bearing/lib", rel)).href);
 
-if (!targets.length && tool === "Bash") {
-  try {
-    const { bashWriteTargets } = await lib("hook-helpers.mjs");
-    targets = bashWriteTargets(input.tool_input?.command);
-  } catch {
-    /* no lib → nothing countable */
-  }
-}
-if (!targets.length) process.exit(0);
 
 let config;
 let sp;
@@ -74,13 +65,61 @@ const MAX_TRACKED = 200; // bounded work per call (NS-7)
 function read() {
   try {
     const s = JSON.parse(fs.readFileSync(STATE, "utf8"));
-    return { files: Array.isArray(s.files) ? s.files : [], nudged: Boolean(s.nudged) };
+    return {
+      files: Array.isArray(s.files) ? s.files : [],
+      nudged: Boolean(s.nudged),
+      // undefined until the first git fallback runs — `null` would be indistinguishable from
+      // "recorded, and the tree was clean".
+      baseline: Array.isArray(s.baseline) ? s.baseline : undefined,
+    };
   } catch {
-    return { files: [], nudged: false };
+    return { files: [], nudged: false, baseline: undefined };
   }
 }
 
 const state = read();
+let baselineJustSet = false;
+if (!targets.length && tool === "Bash") {
+  try {
+    const { bashWriteTargets } = await lib("hook-helpers.mjs");
+    targets = bashWriteTargets(input.tool_input?.command);
+  } catch {
+    /* no lib → nothing countable */
+  }
+
+  // Reading the path off the command line fails whenever a heredoc computes it — which is how most
+  // of a real session's edits are made. Guessing would inflate a DISTINCT-file count with files
+  // nobody touched, so ask git instead: it knows exactly what changed, whatever wrote it.
+  //
+  // Only as a fallback, and only for Bash. `git status` costs ~12ms on a large repo; paying it on
+  // every tool call would be unbounded work on a hot path (NS-7), and paying it when the command
+  // line already named the file would be paying twice for the same answer.
+  if (!targets.length) {
+    try {
+      const { execSync } = await import("node:child_process");
+      const porcelain = execSync("git -c core.quotePath=false status --porcelain -uall", {
+        cwd: root,
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+      });
+      const dirty = porcelain.split("\n").filter(Boolean).map((l) => l.slice(3).trim()).filter(Boolean);
+      // Files already dirty when this chat started are not this session's work. Recorded once, on
+      // the first fallback, so a repo with existing changes does not jump straight to the threshold.
+      if (!Array.isArray(state.baseline)) {
+        // Everything already dirty is pre-session work — EXCEPT what this session has already been
+        // credited with. Without that subtraction, a session that edited five files through the
+        // Write tool and then ran one shell command would fold all five into the baseline and
+        // forget them.
+        state.baseline = dirty.filter((f) => !state.files.some((k) => f.endsWith(k) || k.endsWith(f)));
+        baselineJustSet = true;
+      }
+      targets = dirty.filter((f) => !state.baseline.includes(f));
+    } catch {
+      /* not a git repo, or git unavailable → nothing countable */
+    }
+  }
+}
+if (!targets.length && !baselineJustSet) process.exit(0);
 if (state.nudged) process.exit(0);
 for (const t of targets) if (!state.files.includes(t)) state.files.push(t);
 if (state.files.length > MAX_TRACKED) state.files = state.files.slice(-MAX_TRACKED);
@@ -88,7 +127,7 @@ if (state.files.length > MAX_TRACKED) state.files = state.files.slice(-MAX_TRACK
 const enough = state.files.length >= threshold;
 try {
   fs.mkdirSync(path.dirname(STATE), { recursive: true });
-  fs.writeFileSync(STATE, JSON.stringify({ files: state.files, nudged: enough }));
+  fs.writeFileSync(STATE, JSON.stringify({ files: state.files, nudged: enough, baseline: state.baseline }));
 } catch {
   process.exit(0); // unwritable → silent rather than nudging on every edit (NS-8)
 }
