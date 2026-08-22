@@ -129,6 +129,8 @@ export function loadHookConfig(root) {
     broadGlobRes: DEFAULT_BROAD_GLOB_RES,
     sourceExtRe: DEFAULT_SOURCE_EXT_RE,
     stalenessCacheTtlMs: 2500,
+    // Pose the consult test once per chat, at the first edit. false/0 disables.
+    consultNudge: true,
     // Working-tree drift: after this many uncommitted source edits since the index,
     // graph query tools require a fast incremental refresh. 0 disables the drift gate.
     // Does a STALE INDEX block anything? "off" (default) | "block".
@@ -200,6 +202,10 @@ function applyHookConfigFile(cfg, cfgPath) {
       cfg.driftRefreshThreshold = file.driftRefreshThreshold;
     if (typeof file.taskCoreEveryEdits === "number")
       cfg.taskCoreEveryEdits = file.taskCoreEveryEdits;
+    // Boolean OR 0, because "off" is spelled both ways by different people and a setting that
+    // silently ignores the spelling you chose is the same defect as one nothing reads at all.
+    if (file.consultNudge === false || file.consultNudge === 0) cfg.consultNudge = false;
+    if (file.consultNudge === true || file.consultNudge === 1) cfg.consultNudge = true;
     // A non-empty string only: `"minionModel": ""` or a stray number would otherwise be handed to
     // a spawn as a model name.
     if (typeof file.minionModel === "string" && file.minionModel.trim())
