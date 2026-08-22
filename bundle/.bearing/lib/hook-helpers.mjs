@@ -76,6 +76,43 @@ export function bashWritesFiles(command) {
   return redirect || inPlace || writers || formatters || scripted;
 }
 
+/**
+ * Which FILES a shell command writes, where that is knowable.
+ *
+ * `bashWritesFiles` answers "was this an edit", which is enough to COUNT edits. The deep-review
+ * nudge counts DISTINCT FILES — twenty passes over one file is iteration, five files touched once
+ * is a change with a shape — so it needs the paths, and a Bash call does not hand you one.
+ *
+ * Best-effort by design, and partial on purpose: a python heredoc that computes its target at
+ * runtime cannot be read off the command line, and guessing would inflate the distinct-file count
+ * with paths that were never touched. Returning fewer, certain paths keeps the threshold meaning
+ * what it says.
+ * @param {string} command @returns {string[]} repo-relative-ish paths, deduped
+ */
+export function bashWriteTargets(command) {
+  const cmd = String(command ?? "");
+  if (!cmd.trim()) return [];
+  const out = new Set();
+  const add = (p) => {
+    const clean = String(p || "").replace(/^['"]|['"]$/g, "").trim();
+    if (clean && !clean.startsWith("/dev/") && !clean.startsWith("-")) out.add(clean);
+  };
+
+  // `> path`, `>> path`
+  for (const m of cmd.matchAll(/(?:^|[^0-9<>|&])>>?\s*(?!\/dev\/)([^\s;|&<>]+)/g)) add(m[1]);
+  // `sed -i [ext] 's/…/…/' path…` — the trailing operands are the files
+  for (const m of cmd.matchAll(/\bsed\s+-i\b[^\n;|&]*/g)) {
+    const tail = m[0].split(/\s+/).slice(1).filter((t) => !t.startsWith("-") && !/^['"]?s[\/|]/.test(t));
+    for (const t of tail.slice(1)) add(t);
+  }
+  // `cp a b` / `mv a b` / `install a b` — the DESTINATION is what changed
+  for (const m of cmd.matchAll(/\b(?:cp|mv|install)\s+(?:-\S+\s+)*(\S+)\s+(\S+)/g)) add(m[2]);
+  // A quoted path inside a heredoc body: write_text / writeFileSync / open(...)
+  for (const m of cmd.matchAll(/(?:write_text|writeFileSync|Path)\s*\(\s*['"]([^'"]+)['"]/g)) add(m[1]);
+
+  return [...out];
+}
+
 export const LOCAL_CONFIG_FILE = ".bearing/hooks.local.json";
 
 /**

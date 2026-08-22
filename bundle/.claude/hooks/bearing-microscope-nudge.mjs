@@ -29,14 +29,30 @@ try {
 
 const tool = input.tool_name || "";
 const EDITS = new Set(["Write", "Edit", "MultiEdit", "NotebookEdit"]);
-if (!EDITS.has(tool)) process.exit(0);
+// Bash counts too — its targets are extracted below, once `lib` exists.
+if (!EDITS.has(tool) && tool !== "Bash") process.exit(0);
 
-// The file this call changed. Without one there is nothing to count as distinct.
-const target = input.tool_input?.file_path || input.tool_input?.notebook_path || "";
-if (!target) process.exit(0);
+// The file(s) this call changed. Without one there is nothing to count as distinct.
+//
+// A Bash write counts too — measured on a real session, ~90 of ~96 edits went through the shell, so
+// watching only the edit tools left this counter reading 6. The paths come from the command where
+// they are knowable (redirection, `sed -i`, cp/mv, a quoted path in a heredoc); a target computed
+// at runtime is not guessed, because inflating a DISTINCT-file count with paths that were never
+// touched would make the threshold mean less than it says.
+let targets = [input.tool_input?.file_path || input.tool_input?.notebook_path].filter(Boolean);
 
 const root = process.env.CLAUDE_PROJECT_DIR || input.cwd || process.cwd();
 const lib = (rel) => import(pathToFileURL(path.join(root, ".bearing/lib", rel)).href);
+
+if (!targets.length && tool === "Bash") {
+  try {
+    const { bashWriteTargets } = await lib("hook-helpers.mjs");
+    targets = bashWriteTargets(input.tool_input?.command);
+  } catch {
+    /* no lib → nothing countable */
+  }
+}
+if (!targets.length) process.exit(0);
 
 let config;
 let sp;
@@ -66,7 +82,7 @@ function read() {
 
 const state = read();
 if (state.nudged) process.exit(0);
-if (!state.files.includes(target)) state.files.push(target);
+for (const t of targets) if (!state.files.includes(t)) state.files.push(t);
 if (state.files.length > MAX_TRACKED) state.files = state.files.slice(-MAX_TRACKED);
 
 const enough = state.files.length >= threshold;
