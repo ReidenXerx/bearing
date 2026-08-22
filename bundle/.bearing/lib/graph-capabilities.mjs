@@ -57,6 +57,27 @@ const COUNT = {
   communities: 'MATCH (c:Community) RETURN count(c) AS n',
 };
 
+/** The most-read field in the repo — the best case for "who touches this field?". */
+const BUSIEST_FIELD =
+  "MATCH (a)-[r:CodeRelation {type:'ACCESSES'}]->(b) WHERE b.name IS NOT NULL " +
+  'RETURN b.name AS name, b.filePath AS file, count(*) AS n ORDER BY n DESC LIMIT 1';
+
+/** First data row of the CLI's markdown table, as cells. */
+export function firstRow(stdout) {
+  let md;
+  try {
+    md = JSON.parse(stdout).markdown ?? '';
+  } catch {
+    return null;
+  }
+  for (const line of md.split('\n')) {
+    const cells = line.split('|').map((c) => c.trim()).filter(Boolean);
+    if (cells.length < 2 || cells[0] === 'name' || cells[0].startsWith('---')) continue;
+    return cells;
+  }
+  return null;
+}
+
 /**
  * Two-node import cycles, which are the ones worth naming: `a` imports `b` imports `a`. Longer
  * cycles exist and this does NOT find them — said plainly in the output rather than left for the
@@ -109,7 +130,7 @@ export function classifyCycles(pairs) {
  * @param {(query: string) => {ok: boolean, stdout: string}} run injected so this is testable
  *   without a graph
  */
-export function probeCapabilities(run) {
+export function probeCapabilities(run, runImpact = null) {
   const n = (key) => {
     const r = run(COUNT[key]);
     return r.ok ? firstNumber(r.stdout) ?? 0 : null;
@@ -128,16 +149,42 @@ export function probeCapabilities(run) {
       : 'no embeddings: `query` cannot rank by meaning here, so a thin result is the INDEX being blunt, not the concept being absent. Refresh with embeddings, or use cypher.',
   );
 
+  // COUNTING THE EDGES IS NOT THE SAME AS ASKING THE QUESTION.
+  //
+  // This probe used to report "field reads work" whenever ACCESSES edges existed. On a live index a
+  // property with 57 ACCESSES edges pointing at it got `impactedCount: 0` from
+  // `impact --direction upstream`, because impact walks CALLS and does not traverse ACCESSES. So the
+  // report said the capability was live while the tool that consumes it answered nothing — the
+  // exact false-negative this file exists to prevent, produced by the file itself.
+  //
+  // Probing the DATA tells you the data is there. Only probing the CONSUMER tells you the question
+  // is answerable. One extra spawn, against the busiest field in the repo — its best case.
   const accesses = n('accesses');
-  push(
-    'field_access',
-    (accesses ?? 0) > 0,
-    'ACCESSES — field reads/writes',
-    accesses == null ? 'could not probe' : `${accesses} edge(s)`,
-    (accesses ?? 0) > 0
-      ? null
-      : 'no ACCESSES edges: "who reads this field" returns nothing REGARDLESS of the code. Do not report a field as unused from this graph.',
-  );
+  let fieldOk = (accesses ?? 0) > 0;
+  let fieldDetail = accesses == null ? 'could not probe' : `${accesses} edge(s)`;
+  let fieldNegative =
+    fieldOk === false
+      ? 'no ACCESSES edges: "who reads this field" returns nothing REGARDLESS of the code. Do not report a field as unused from this graph.'
+      : null;
+
+  if (fieldOk && runImpact) {
+    const row = firstRow(run(BUSIEST_FIELD).stdout ?? '');
+    if (row && row.length >= 2) {
+      const [fname, ffile] = row;
+      const walked = runImpact(fname, ffile);
+      if (walked === false) {
+        fieldOk = false;
+        fieldDetail = `${accesses} edge(s), but impact resolved 0 callers for \`${fname}\` (the most-read field here)`;
+        fieldNegative =
+          'the edges exist and `impact` does not walk them: it follows CALLS, not ACCESSES. ' +
+          '"What breaks if I change this FIELD" is not an `impact` question on this index — it answers ' +
+          '`impactedCount: 0` for a field with hundreds of readers, which reads as "safe to change". ' +
+          'Use cypher on ACCESSES directly, or a text search.';
+      }
+    }
+  }
+
+  push('field_access', fieldOk, 'ACCESSES — field reads/writes', fieldDetail, fieldNegative);
 
   const routes = n('routes') ?? 0;
   const evidence = Math.max(n('controllers') ?? 0, n('routeFiles') ?? 0);
@@ -219,7 +266,28 @@ function main() {
     process.exit(1);
   }
 
-  const caps = probeCapabilities(run);
+  /** Did `impact` resolve ANY caller for this symbol? null when we could not tell. */
+  const runImpact = (name, file) => {
+    const args = ['impact', name, '--direction', 'upstream', '--summary-only', '-r', repo];
+    if (file) args.push('--file', file);
+    const gn = gitnexusSpawn(args, root);
+    const r = spawnSync(gn.command, gn.args, {
+      cwd: root,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+      maxBuffer: 32 * 1024 * 1024,
+    });
+    if (r.status !== 0) return null;
+    try {
+      const j = JSON.parse(r.stdout ?? '');
+      if (j.status === 'ambiguous') return null; // could not tell, not a failure to walk
+      return Number(j.impactedCount) > 0;
+    } catch {
+      return null;
+    }
+  };
+
+  const caps = probeCapabilities(run, runImpact);
   const cycleProbe = run(CYCLE_QUERY);
   const cycles = classifyCycles(cycleProbe.ok ? parseCyclePairs(cycleProbe.stdout) : []);
 
