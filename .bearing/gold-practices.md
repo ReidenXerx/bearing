@@ -163,3 +163,39 @@ better does not prevent.
   around, yes. An account of how you got here, no.
   *Scar: a PR body carried notes on what remained unverified and why a branch was still draft —
   written for one person, read by the whole team, and useless to every one of them.*
+
+- **GP-20** — **An instrument that sees a subset reports success in the shape of the whole.** Before
+  trusting a count, ask what it CANNOT see — then check whether the thing you are claiming lives
+  there. The failure is silent by construction: the part outside the instrument's scope never shows
+  up as a zero, it never shows up at all. Where you can, observe the OUTCOME rather than enumerate
+  the inputs you happened to think of — press submit instead of counting filled fields, read what
+  landed on disk instead of trusting the write. *Scar: two, from opposite ends of a stack — a completeness
+  check counted `input[type=text]` with a value and reported "all filled" while a date picker and two
+  selects sat empty — neither is an `input[type=text]`; the same run counted error elements BEFORE
+  any submit, where the answer is always zero. And a hook meant to count file edits watched the
+  edit-tool calls: in a three-day session it saw 6 of ~96, because the other 90 were made through the
+  shell, so the threshold it guarded was never once reached.*
+
+- **GP-21** — **Hand over a decision, not a chore.** Whatever mechanical step you leave undone
+  becomes the recipient's step — and it is the part most likely to make them defer the whole request.
+  Do everything that does not need them, then hand over exactly what does: the prefilled form rather
+  than the blank one, the exact command rather than "run the tests", the diff rather than "review the
+  branch", closed options with a recommendation rather than an open question. This holds for whoever
+  is next, not only a human — a subagent, a reviewer, or your own next session reading the notes you
+  left. *Scar: a blank KYC form handed to a person to fill in, when every field but one was already
+  known and could have been filled programmatically.*
+
+- **GP-22** — **Declining to answer is the cheapest possible answer, so any comparison by cost
+  ranks it first.** Whenever you score two things by what they consume — tokens, time, queries, lines
+  — check that both actually produced a result before comparing the cost of producing it. Nothing in
+  a cost metric distinguishes a fast answer from a fast refusal, so the failing side does not merely
+  escape the penalty, it takes the prize, and the worse it fails the more it wins. The same shape
+  appears wherever success is inferred from a proxy: a cache that reports its best hit rate when it
+  is returning nulls, a test suite that gets fastest as more of it skips, a search that looks most
+  precise when its query matches nothing. Score the answer first, the cost second — and report the
+  non-answers by name, because a comparison that silently drops what one side could not handle is
+  reporting the score of a team it also picked. *Scar: a benchmark priced `impact` against grep and
+  printed 5294x. The graph had returned `impactedCount: 0` in ~250 tokens for a field with 57
+  references it could not traverse, against grep's 1.3M — its own advice on that response was
+  "confirm with a text search", which the benchmark reported as a 5294x win over text search.*
+

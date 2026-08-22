@@ -184,3 +184,18 @@ better does not prevent.
   is next, not only a human — a subagent, a reviewer, or your own next session reading the notes you
   left. *Scar: a blank KYC form handed to a person to fill in, when every field but one was already
   known and could have been filled programmatically.*
+
+- **GP-22** — **Declining to answer is the cheapest possible answer, so any comparison by cost
+  ranks it first.** Whenever you score two things by what they consume — tokens, time, queries, lines
+  — check that both actually produced a result before comparing the cost of producing it. Nothing in
+  a cost metric distinguishes a fast answer from a fast refusal, so the failing side does not merely
+  escape the penalty, it takes the prize, and the worse it fails the more it wins. The same shape
+  appears wherever success is inferred from a proxy: a cache that reports its best hit rate when it
+  is returning nulls, a test suite that gets fastest as more of it skips, a search that looks most
+  precise when its query matches nothing. Score the answer first, the cost second — and report the
+  non-answers by name, because a comparison that silently drops what one side could not handle is
+  reporting the score of a team it also picked. *Scar: a benchmark priced `impact` against grep and
+  printed 5294x. The graph had returned `impactedCount: 0` in ~250 tokens for a field with 57
+  references it could not traverse, against grep's 1.3M — its own advice on that response was
+  "confirm with a text search", which the benchmark reported as a 5294x win over text search.*
+
