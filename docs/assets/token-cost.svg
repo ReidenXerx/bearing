@@ -53,7 +53,7 @@
 
 <!-- row 1 — bar widths are the measured token ratios, not decoration -->
 <text x="464" y="112" class="t lbl">Sourcerer-Be</text>
-<text x="551" y="112" class="t mut">709 files</text>
+<text x="551" y="112" class="t mut">894 files</text>
 <rect x="464" y="120" width="270" height="14" rx="4" fill="#d95926" opacity="0.85"/>
 <rect x="464" y="138" width="20" height="14" rx="4" fill="#3987e5"/>
 <text x="852" y="132" text-anchor="end" class="t win">13.2×</text>
@@ -61,7 +61,7 @@
 
 <!-- row 2 -->
 <text x="464" y="190" class="t lbl">lead-sniffer</text>
-<text x="546" y="190" class="t mut">234 files</text>
+<text x="546" y="190" class="t mut">374 files</text>
 <rect x="464" y="198" width="270" height="14" rx="4" fill="#d95926" opacity="0.85"/>
 <rect x="464" y="216" width="89" height="14" rx="4" fill="#3987e5"/>
 <text x="852" y="210" text-anchor="end" class="t win">3.0×</text>
