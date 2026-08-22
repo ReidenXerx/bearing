@@ -173,8 +173,22 @@ const DEFAULT_BROAD_GLOB_RES = [
 
 // Polyglot: GitNexus indexes many languages — enforcement should not be JS/TS-only.
 // Override in .bearing/hooks.json via "sourceExts": ["js","py","rs", …].
+// Every extension the ANALYZER indexes, plus a few it does not — the asymmetry is deliberate.
+//
+// This list decides what counts as drift, and drift decides whether the graph is too stale to
+// answer with. An extension missing here is not a wrong count, it is NO count: those edits never
+// register and the gate never fires. `.vue` was missing while the analyzer ships a vue module —
+// a whole framework whose graph went stale on exactly the files being edited, silently. `.cbl`,
+// `.cob` and `.cpy` were missing the same way.
+//
+// The extras (scala, lua, ex/exs, clj) have no analyzer module today. They are kept because the
+// two directions are not symmetric: an extra extension makes drift fire slightly early, which
+// costs a refresh; a missing one makes it never fire, which costs correctness.
+//
+// Re-derive when the analyzer gains a language:
+//   ls $(npm root -g)/gitnexus/dist/core/ingestion/languages/*.js | xargs grep -h "extensions:"
 const DEFAULT_SOURCE_EXT_RE =
-  /\.(js|mjs|cjs|jsx|ts|tsx|mts|cts|py|pyi|rb|go|rs|java|kt|kts|swift|php|cs|cpp|cc|cxx|hpp|hh|c|h|cu|cuh|scala|m|mm|dart|lua|ex|exs|clj)$/i;
+  /\.(js|mjs|cjs|jsx|ts|tsx|mts|cts|vue|py|pyi|rb|go|rs|java|kt|kts|swift|php|cs|cpp|cc|cxx|hpp|hh|c|h|cu|cuh|scala|m|mm|dart|lua|ex|exs|clj|cbl|cob|cpy)$/i;
 
 /** @param {string[]} exts */
 function buildExtRe(exts) {
