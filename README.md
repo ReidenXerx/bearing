@@ -76,6 +76,34 @@ Then restart your IDE. Enforcement needs tool-interception hooks, and only some 
 | Minions — anchored fan-out | ✅ | — | — | — |
 | GitNexus — hard gates | ✅ | ✅ | — | — |
 
+### 🎨 Prettier — so two tools stop rewriting each other
+
+An install puts ~90 tracked, formattable files into your repo — the hook lib alone is 31 `.mjs`
+modules — and every one is bearing's, replaced wholesale on the next update. If you format on
+commit, Prettier reformats all 90, the next `bearing update` overwrites them back, and that diff
+returns every cycle.
+
+If the installer finds Prettier (`.prettierrc*`, `prettier.config.*`, a `prettier` key or
+dependency in `package.json`, or just a `.prettierignore`), it **asks** — and quotes back what it
+found, since you are being asked to let an installer edit your formatter's config:
+
+```
+This repo runs Prettier (found package.json: devDependencies.prettier)
+Add 5 bearing-owned paths to .prettierignore?
+  1  Yes — stop the two tools rewriting each other's work
+  2  No — leave .prettierignore alone (your files, your call)
+```
+
+Non-interactive installs decide with `--prettierignore` / `--no-prettierignore`; **saying nothing
+means no**, because `.prettierignore` is your repo's configuration and bearing does not edit it
+uninvited. The answer is remembered, so an update refreshes the block rather than re-asking, and
+`--no-prettierignore` later takes it back out. Only paths bearing **wholly owns** are listed —
+`CLAUDE.md` and `AGENTS.md` are yours, so they keep being formatted. Uninstall removes the block,
+and deletes the file only if bearing created it.
+
+Stealth installs skip this and say so: `.prettierignore` is a tracked file, and writing it would
+break the one promise stealth makes.
+
 ### 🥷 Stealth — for repos that aren't yours to change
 
 ```bash
@@ -292,7 +320,7 @@ Nothing leaves your repo. There is no telemetry endpoint.
 ## Commands
 
 ```bash
-npx bearing install <repo> [--runtime ...] [--features ...] [--mcp http|stdio|<port>] [--stealth]
+npx bearing install <repo> [--runtime ...] [--features ...] [--mcp http|stdio|<port>] [--stealth] [--prettierignore]
 npx bearing update <repo>       # keeps your module + transport choices
 npx bearing uninstall <repo>    # restores what it overwrote
 ```
