@@ -164,17 +164,23 @@ better does not prevent.
   *Scar: a PR body carried notes on what remained unverified and why a branch was still draft —
   written for one person, read by the whole team, and useless to every one of them.*
 
-- **GP-20** — **Attempt the operation; do not count a proxy for it.** A measurement scoped to part of
-  reality reports success in exactly the shape of success, and stays silent about the part it cannot
-  see. Pressing submit answers "is this form fillable"; counting filled fields answers "how many of
-  the fields I thought to look for have values". *Scar: a completeness check counted
-  `input[type=text]` with a value and reported "all filled" while a date picker and two selects sat
-  empty — neither is an `input[type=text]`. The same run counted error elements BEFORE any submit,
-  where the answer is always zero. Both passed. Both were blind by construction, not by accident.*
+- **GP-20** — **An instrument that sees a subset reports success in the shape of the whole.** Before
+  trusting a count, ask what it CANNOT see — then check whether the thing you are claiming lives
+  there. The failure is silent by construction: the part outside the instrument's scope never shows
+  up as a zero, it never shows up at all. Where you can, observe the OUTCOME rather than enumerate
+  the inputs you happened to think of — press submit instead of counting filled fields, read what
+  landed on disk instead of trusting the write. *Scar: two, from opposite ends of a stack — a completeness
+  check counted `input[type=text]` with a value and reported "all filled" while a date picker and two
+  selects sat empty — neither is an `input[type=text]`; the same run counted error elements BEFORE
+  any submit, where the answer is always zero. And a hook meant to count file edits watched the
+  edit-tool calls: in a three-day session it saw 6 of ~96, because the other 90 were made through the
+  shell, so the threshold it guarded was never once reached.*
 
-- **GP-21** — **Hand a human a decision, never a chore.** When you need someone else — for
-  judgement, for an approval, for eyes on something you cannot see — do every mechanical step first
-  and leave exactly the part that needed them. Prefill the form, open the page in the right state,
-  put the diff in front of them. Typing you could have done is time taken from the judgement you
-  actually asked for, and it is the part most likely to make them defer the whole request. *Scar:
-  handing over a blank KYC form to be filled by hand, when every field but one was already known.*
+- **GP-21** — **Hand over a decision, not a chore.** Whatever mechanical step you leave undone
+  becomes the recipient's step — and it is the part most likely to make them defer the whole request.
+  Do everything that does not need them, then hand over exactly what does: the prefilled form rather
+  than the blank one, the exact command rather than "run the tests", the diff rather than "review the
+  branch", closed options with a recommendation rather than an open question. This holds for whoever
+  is next, not only a human — a subagent, a reviewer, or your own next session reading the notes you
+  left. *Scar: a blank KYC form handed to a person to fill in, when every field but one was already
+  known and could have been filled programmatically.*
