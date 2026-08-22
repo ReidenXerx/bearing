@@ -263,10 +263,15 @@ for (const t of targets) {
  * @param {string} root @param {object} entry @returns {object|null} the previous run, if any
  */
 function recordRun(root, entry) {
-  const file = path.join(root, ".bearing", ".token-benchmark.json");
+  // `.bearing/.bearing-*` is the ignore rule for generated local state. This file was named
+  // `.token-benchmark.json`, which matches neither that pattern nor `.gitnexus-*`, so on a normal
+  // (committed `.bearing/`) install it showed up untracked in every teammate's `git status`. Named
+  // to the convention rather than given its own ignore line, so there is one rule and not N entries.
+  const file = path.join(root, ".bearing", ".bearing-token-benchmark.json");
+  const legacy = path.join(root, ".bearing", ".token-benchmark.json");
   let history = [];
   try {
-    history = JSON.parse(fs.readFileSync(file, "utf8")).runs ?? [];
+    history = JSON.parse(fs.readFileSync(fs.existsSync(file) ? file : legacy, "utf8")).runs ?? [];
   } catch {
     /* first run here */
   }
@@ -276,6 +281,8 @@ function recordRun(root, entry) {
     fs.mkdirSync(path.dirname(file), { recursive: true });
     // Keep 20: enough to see a trend, small enough that nobody has to think about the file.
     fs.writeFileSync(file, JSON.stringify({ runs: history.slice(-20) }, null, 2));
+    // Carried its runs over on the first write; leaving it would strand an unignored file behind.
+    if (fs.existsSync(legacy)) fs.rmSync(legacy, { force: true });
   } catch {
     /* an unrecordable run is a missing trend, not a failed benchmark */
   }
