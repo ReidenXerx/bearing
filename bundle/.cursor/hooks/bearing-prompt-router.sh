@@ -6,7 +6,12 @@ ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 export GITNEXUS_HOOK_INPUT="$(cat)"
 export GITNEXUS_ROOT="$ROOT"
 
-node <<'NODE'
+# FAIL OPEN if anything inside fails. With `.bearing/lib` missing — partial uninstall, an update
+# that died mid-copy, `git clean -xdf` in a stealth repo — the node block threw ERR_MODULE_NOT_FOUND
+# and `set -e` turned that into a non-zero hook exit. Nine of twelve hooks did it at once, so a repo
+# whose only fault was a missing directory had its guards failing instead of guarding. A verdict we
+# cannot compute is not a denial (NS-5): emit nothing and let the call through.
+node <<'NODE' || exit 0
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 

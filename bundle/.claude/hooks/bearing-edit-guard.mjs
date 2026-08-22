@@ -15,9 +15,19 @@ const root = process.env.CLAUDE_PROJECT_DIR || input.cwd || process.cwd();
 const lib = (rel) =>
   import(pathToFileURL(path.join(root, ".bearing/lib", rel)).href);
 
-const { classifyEdit } = await lib("classify.mjs");
-const { gnContext, emitVerdict } = await lib("claude-emit.mjs");
-const { isImpactUsed } = await lib("session-primer.mjs");
+// FAIL OPEN when our own libs are gone. A missing `.bearing/lib` — partial uninstall, a failed
+// update mid-copy, `git clean -xdf` in a stealth repo — threw ERR_MODULE_NOT_FOUND and exited 1
+// here. A non-zero PreToolUse exit DENIES the call, so all five guards failing at once blocked Grep,
+// Read, Edit, Bash and MCP simultaneously, explained by a raw Node stack trace. A false deny is
+// worse than a missed gate (NS-5); with no libs there is no verdict to give, so give none.
+let classifyEdit, gnContext, emitVerdict, isImpactUsed;
+try {
+  ({ classifyEdit } = await lib("classify.mjs"));
+  ({ gnContext, emitVerdict } = await lib("claude-emit.mjs"));
+  ({ isImpactUsed } = await lib("session-primer.mjs"));
+} catch {
+  process.exit(0);
+}
 
 const ctx = gnContext(root);
 const verdict = classifyEdit(

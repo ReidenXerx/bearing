@@ -15,4 +15,6 @@ if [[ "$composer_mode" == "ask" ]]; then
   exit 0
 fi
 
-node "$ROOT/.bearing/lib/session-health-context.mjs" "$ROOT"
+# FAIL OPEN, same as every other hook: with .bearing/lib gone this threw and `set -e` turned the
+# missing directory into a failing hook. A briefing we cannot produce is not a reason to fail.
+node "$ROOT/.bearing/lib/session-health-context.mjs" "$ROOT" || exit 0

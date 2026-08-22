@@ -64,17 +64,37 @@ check_referenced_libs() {
 import fs from 'node:fs';
 import path from 'node:path';
 
-const scan = ['.cursor/hooks', '.claude/hooks', '.bearing/lib', 'scripts'];
-const files = [];
-const walk = (d) => {
-  let entries; try { entries = fs.readdirSync(d, { withFileTypes: true }); } catch { return; }
-  for (const e of entries) {
-    const full = path.join(d, e.name);
-    if (e.isDirectory()) walk(full);
-    else if (/\.(mjs|sh|json)$/.test(e.name)) files.push(full);
+// ONLY the files bearing installed. Walking `scripts/` wholesale caught bearing's own maintainer
+// script naming historical libs it copies from elsewhere — five "missing" libs and an aborted
+// install, in a repo where nothing was wrong. A repo may contain any number of scripts that mention
+// a path bearing does not install, and none of them are bearing's business. The manifest records
+// exactly what was written; ask it.
+const MANIFESTS = ['.bearing/manifest.json', '.gitnexus/agent-kit-manifest.json'];
+let files = [];
+for (const rel of MANIFESTS) {
+  try {
+    const owned = JSON.parse(fs.readFileSync(rel, 'utf8')).files;
+    if (Array.isArray(owned) && owned.length) {
+      files = owned.filter((f) => /\.(mjs|sh|json)$/.test(f) && fs.existsSync(f));
+      break;
+    }
+  } catch {
+    /* try the next */
   }
-};
-scan.forEach(walk);
+}
+if (!files.length) {
+  // No manifest yet (first install, mid-flight). Fall back to the directories bearing owns
+  // outright — never the repo's own `scripts/`.
+  const walk = (d) => {
+    let entries; try { entries = fs.readdirSync(d, { withFileTypes: true }); } catch { return; }
+    for (const e of entries) {
+      const full = path.join(d, e.name);
+      if (e.isDirectory()) walk(full);
+      else if (/\.(mjs|sh|json)$/.test(e.name)) files.push(full);
+    }
+  };
+  ['.cursor/hooks', '.claude/hooks', '.bearing/lib'].forEach(walk);
+}
 
 const missing = new Map();
 for (const f of files) {

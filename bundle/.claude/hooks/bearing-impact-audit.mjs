@@ -67,9 +67,19 @@ if (!emptyCallers && !testOnly) process.exit(0);
 // no resolvable production caller is the dangerous pattern.
 if (risk && !["LOW", "NONE", "MINIMAL"].includes(risk)) process.exit(0);
 
-const { emitContext } = await lib("claude-emit.mjs");
-const { bumpScore } = await lib("session-primer.mjs");
-const { howToRun } = await lib("how-to-run.mjs");
+// FAIL OPEN when our own libs are gone. A missing `.bearing/lib` — partial uninstall, a failed
+// update mid-copy, `git clean -xdf` in a stealth repo — threw ERR_MODULE_NOT_FOUND and exited 1
+// here. A non-zero PreToolUse exit DENIES the call, so all five guards failing at once blocked Grep,
+// Read, Edit, Bash and MCP simultaneously, explained by a raw Node stack trace. A false deny is
+// worse than a missed gate (NS-5); with no libs there is no verdict to give, so give none.
+let emitContext, bumpScore, howToRun;
+try {
+  ({ emitContext } = await lib("claude-emit.mjs"));
+  ({ bumpScore } = await lib("session-primer.mjs"));
+  ({ howToRun } = await lib("how-to-run.mjs"));
+} catch {
+  process.exit(0);
+}
 
 const symptom = emptyCallers
   ? "resolved NO callers"
