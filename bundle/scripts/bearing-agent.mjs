@@ -733,18 +733,27 @@ if (cmd === "scorecard") {
     classicalFallbackGranted: "Classical-fallback grants (GN distrusted)",
     driftRefreshBlocks: "Graph-drift refresh blocks (edited since index)",
     taskCoreNudges: "Task-core nudges (edits since the core was last written)",
+    northStarAnchors: "North-star re-anchors (mid-session drift guards)",
+    impactVerdictsQuestioned: "Impact verdicts questioned (LOW from unresolved callers)",
+    consultNudges: "Consult prompts (invent-vs-implement, at first edit)",
+    microscopeNudges: "Deep-review nudges (change grew multi-file)",
   };
   console.log("GitNexus enforcement scorecard (this session)");
   console.log(
     card.startedAt ? `  since ${card.startedAt}` : "  (no activity yet)",
   );
-  const keys = Object.keys(labels).filter((k) => counts[k]);
+  // Derive from what was actually COUNTED, not from the label map. Filtering by `labels` meant a
+  // counter without a label was written on every event and shown to nobody — four were, two of
+  // them for months. A hand-kept list on the read side of a counter is the same drift as one on
+  // the write side; the fallback humanises an unlabelled key rather than hiding it.
+  const keys = Object.keys(counts).filter((k) => counts[k]);
+  const labelFor = (k) => labels[k] ?? k.replace(/([A-Z])/g, " $1").replace(/^./, (c) => c.toUpperCase());
   if (!keys.length) {
     console.log(
       "  No enforcement events yet — run some tools in a chat first.",
     );
   } else {
-    for (const k of keys) console.log(`  ${labels[k]}: ${counts[k]}`);
+    for (const k of keys) console.log(`  ${labelFor(k)}: ${counts[k]}`);
   }
   // The numbers alone never told anyone whether the gates were helping. Say it outright.
   const { diagnoseEnforcement } = await import(
@@ -809,7 +818,7 @@ if (cmd === "stats") {
   } else {
     for (const k of keys) {
       console.log(
-        `  ${labels[k].padEnd(36)}${String(s.totals[k]).padEnd(8)}${s.avgPerSession[k]}`,
+        `  ${labelFor(k).padEnd(36)}${String(s.totals[k]).padEnd(8)}${s.avgPerSession[k]}`,
       );
     }
   }
