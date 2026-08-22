@@ -16,5 +16,15 @@ jobs:
         with:
           node-version: '22.9.0'
 
+      # The suite installs into throwaway repos and COMMITS in them — that is how staleness, drift
+      # and the pre-commit path are exercised at all. A runner has no global git identity, so every
+      # one of those `git commit` calls failed with "Author identity unknown", taking 30 tests down
+      # and leaving main red for more than sixty consecutive runs. Nothing was wrong with the code;
+      # the pipeline had never been able to run the tests that matter.
+      - name: Give git an identity for the throwaway repos
+        run: |
+          git config --global user.email "ci@bearing.invalid"
+          git config --global user.name "bearing CI"
+
       - name: Run kit tests
         run: npm test
