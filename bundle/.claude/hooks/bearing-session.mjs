@@ -34,29 +34,19 @@ const lib = (rel) =>
   import(pathToFileURL(path.join(root, ".bearing/lib", rel)).href);
 
 const { existsSync } = await import("node:fs");
-const { gnContext, emitContext } = await lib("claude-emit.mjs");
-const { howToRun } = await lib("how-to-run.mjs");
-const {
-  clearSessionState,
-  shouldClearOnSource,
-  isImpactUsed,
-  isDetectUsed,
-  memoryPath,
-  fallbackGrant,
-  taskCorePath,
-  taskCoreReadPath,
-  taskCoreExists,
-  pruneTaskCores,
-  ensureTaskCoreDir,
-  sessionKey,
-  northStarsPath,
-  northStarsExists,
-  graphFeatureEnabled,
-  readTelemetry,
-  summarizeTelemetry,
-  readScorecard,
-  diagnoseEnforcement,
-} = await lib("session-primer.mjs");
+// FAIL OPEN when our own libs are gone. A missing `.bearing/lib` — partial uninstall, a failed
+// update mid-copy, `git clean -xdf` in a stealth repo — threw ERR_MODULE_NOT_FOUND and exited 1
+// here. A non-zero PreToolUse exit DENIES the call, so all five guards failing at once blocked Grep,
+// Read, Edit, Bash and MCP simultaneously, explained by a raw Node stack trace. A false deny is
+// worse than a missed gate (NS-5); with no libs there is no verdict to give, so give none.
+let gnContext, emitContext, howToRun, clearSessionState, shouldClearOnSource, isImpactUsed, isDetectUsed, memoryPath, fallbackGrant, taskCorePath, taskCoreReadPath, taskCoreExists, pruneTaskCores, ensureTaskCoreDir, sessionKey, northStarsPath, northStarsExists, graphFeatureEnabled, readTelemetry, summarizeTelemetry, readScorecard, diagnoseEnforcement;
+try {
+  ({ gnContext, emitContext } = await lib("claude-emit.mjs"));
+  ({ howToRun } = await lib("how-to-run.mjs"));
+  ({ clearSessionState, shouldClearOnSource, isImpactUsed, isDetectUsed, memoryPath, fallbackGrant, taskCorePath, taskCoreReadPath, taskCoreExists, pruneTaskCores, ensureTaskCoreDir, sessionKey, northStarsPath, northStarsExists, graphFeatureEnabled, readTelemetry, summarizeTelemetry, readScorecard, diagnoseEnforcement } = await lib("session-primer.mjs"));
+} catch {
+  process.exit(0);
+}
 
 // The brief names a path the agent is expected to write; make sure it can.
 ensureTaskCoreDir(root);

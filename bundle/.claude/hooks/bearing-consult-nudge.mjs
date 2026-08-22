@@ -62,7 +62,17 @@ try {
   process.exit(0); // unwritable → stay silent rather than nudge on every edit (NS-8)
 }
 
-const { emitContext } = await lib("claude-emit.mjs");
+// FAIL OPEN when our own libs are gone. A missing `.bearing/lib` — partial uninstall, a failed
+// update mid-copy, `git clean -xdf` in a stealth repo — threw ERR_MODULE_NOT_FOUND and exited 1
+// here. A non-zero PreToolUse exit DENIES the call, so all five guards failing at once blocked Grep,
+// Read, Edit, Bash and MCP simultaneously, explained by a raw Node stack trace. A false deny is
+// worse than a missed gate (NS-5); with no libs there is no verdict to give, so give none.
+let emitContext;
+try {
+  ({ emitContext } = await lib("claude-emit.mjs"));
+} catch {
+  process.exit(0);
+}
 try {
   sp.bumpScore(root, "consultNudges");
 } catch {
