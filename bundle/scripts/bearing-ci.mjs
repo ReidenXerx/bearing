@@ -25,7 +25,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { execSync, spawnSync } from 'node:child_process';
-import { pathToFileURL } from 'node:url';
+import { pathToFileURL, fileURLToPath } from 'node:url';
 import { assertKitInstalled } from './lib/require-kit.mjs';
 
 const ROOT = process.cwd();
@@ -327,7 +327,7 @@ const isMain =
         return path.resolve(p);
       }
     };
-    return real(new URL(import.meta.url).pathname) === real(process.argv[1]);
+    return real(fileURLToPath(import.meta.url)) === real(process.argv[1]);
   })();
 
 if (isMain) {
