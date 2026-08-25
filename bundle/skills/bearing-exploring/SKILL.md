@@ -57,34 +57,23 @@ it. `cypher` can filter on `r.confidence`; `impact` takes `minConfidence`.
 | `gitnexus://repo/{name}/cluster/{name}` | Area members with file paths (~500 tokens)              |
 | `gitnexus://repo/{name}/process/{name}` | Step-by-step execution trace (~200 tokens)              |
 
-## Tools
-
-**query** — find execution flows related to a concept:
+## Worked example — "how does payment processing work?"
 
 ```
-query({search_query: "payment processing"})
-→ Processes: CheckoutFlow, RefundFlow, WebhookHandler
-→ Symbols grouped by flow with file locations
-```
-
-**context** — 360-degree view of a symbol:
-
-```
-context({name: "validateUser"})
-→ Incoming calls: loginHandler, apiMiddleware
-→ Outgoing calls: checkToken, getUserById
-→ Processes: LoginFlow (step 2/5), TokenRefresh (step 1/3)
-```
-
-## Example: "How does payment processing work?"
-
-```
-1. READ gitnexus://repo/my-app/context       → 918 symbols, 45 processes
-2. query({search_query: "payment processing"})
+1. READ gitnexus://repo/{repo}/context      → 918 symbols, 45 processes
+2. query({ search_query: "payment processing" })
    → CheckoutFlow: processPayment → validateCard → chargeStripe
-   → RefundFlow: initiateRefund → calculateRefund → processRefund
-3. context({name: "processPayment"})
+   → RefundFlow:   initiateRefund → calculateRefund → processRefund
+3. context({ name: "processPayment" })
    → Incoming: checkoutHandler, webhookHandler
    → Outgoing: validateCard, chargeStripe, saveTransaction
-4. Read src/payments/processor.ts for implementation details
+   → Processes: CheckoutFlow (step 2/5)
+4. Read src/payments/processor.ts at the lines context cited — offset/limit, not the whole file
 ```
+
+Two things there that a grep does not give you: the flow NAME each symbol belongs to, and its
+position in that flow. "step 2/5" is what turns a list of callers into an order of operations.
+
+`context` also carries `epistemic` / `causes`. A non-zero `causes.receiverTyping` means call sites
+were dropped because the analyzer could not type the receiver — "no incoming" then means "we lost
+this many", not "nothing calls it".
