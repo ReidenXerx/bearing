@@ -98,7 +98,7 @@ if (recovering) {
   lines = [
     `Context was ${source === "compact" ? "COMPACTED" : "resumed"} — the task CONTINUES${graphEnabled ? "; enforcement and this session's satisfied gates are PRESERVED" : ""}.`,
     hasCore
-      ? `READ your TASK-CORE FIRST — \`${tcp}\`${coreAge(tcp)}: a dense save-state of THIS task (goal/constraints/decisions/state/anchors/gotchas/next). Reconstruct from it, verify against reality, then continue — do not re-derive what it already settles.`
+      ? `READ your TASK-CORE FIRST — \`${tcp}\`${coreAge(tcp)}: a dense save-state of THIS task (goal/constraints/decisions/state/anchors/gotchas/next). **Read it WHOLE — no offset, no limit, no skim.** It is one screen, it is the only thing that survived the summary, and a partial read cannot tell you which part it missed. Reconstruct from it, verify against reality, then continue — do not re-derive what it already settles.`
       : `No TASK-CORE saved — reconstruct THIS task (goal/decisions/state/next) from your memory + the code before acting, and write \`${tcp}\` next time so compaction can't drift you. That path is THIS chat's own; other sessions in this repo have their own.`,
     // Graph-first discipline MUST be re-stated here, not only on fresh start: post-compaction is
     // exactly where agents drift back to grep/blind-read. "Gates preserved" ≠ "stop using the graph".

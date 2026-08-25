@@ -56,12 +56,23 @@ first, then delete it here. The core is per-chat; anything left in it dies with 
 
 Git already keeps the log. A core that duplicates commits pays context for a worse copy.
 
-## On recovery (post-compaction / resume)
+## On recovery — read it WHOLE
 
-The SessionStart brief points you here. **Read the task-core FIRST**, before acting:
-1. Reconstruct the task from it — goal, constraints, decisions, state, next.
-2. **Verify against reality** (the core is a point-in-time snapshot; a file may have moved). Don't trust an anchor blindly — confirm it.
-3. Continue from `NEXT`. Do **not** re-derive what the core already settles, and do **not** repeat anything in `GOTCHAS`.
+The SessionStart brief points you here. **Read the entire file: no `offset`, no `limit`, no skim.**
+
+The one file where the usual discipline is wrong. The contract says to page large source with
+offset/limit, because source is huge and you want one part of it. This is one screen, every line
+survived a prune because deleting it would cost you work, and you cannot tell which line that is
+until you have read it. A partial read is this file's own failure mode wearing the costume of
+recovery: you do not know what you missed, so you proceed confidently on the rest.
+
+Then:
+
+1. Reconstruct the task — goal, constraints, decisions, state, next.
+2. **Verify against reality.** It is a point-in-time snapshot; a file may have moved. Confirm an
+   anchor before trusting it.
+3. Continue from `NEXT`. Do not re-derive what `DECISIONS` settles, and do not repeat what is in
+   `GOTCHAS` — that section is there because it already cost someone the time.
 
 ## Task-core vs. MEMORY.md
 

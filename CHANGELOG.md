@@ -60,6 +60,16 @@ The 25 skills lost 13% the same way — nine wrote the workflow twice, eleven op
 being loaded, five taught the same tools three times. The uncertainty rule that was hand-copied into
 17 of them now renders from one source with a test that fails on drift.
 
+### Fixed — the recovery brief said READ THE TASK-CORE and never said how much of it
+
+An agent recovering from a compaction pages large files with `offset`/`limit` — a habit the contract
+itself teaches, correctly, for source. Applied to the task-core it destroys the thing: one screen,
+every line kept because deleting it would cost you work, and no way to know which line that is until
+you have read it. A partial read is the file's own failure mode wearing the costume of recovery.
+
+The SessionStart(compact) brief and the skill now both say it plainly: read it WHOLE, no offset, no
+limit, no skim.
+
 ### Added — GP-22 and GP-23
 
 **GP-22** — declining to answer is the cheapest possible answer, so any comparison by cost ranks it
