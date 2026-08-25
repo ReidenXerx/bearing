@@ -15,41 +15,6 @@ can be a floor — `impact` says which in `epistemic`. Before a conclusion that 
 scoped `Grep` (allowed here, not a gate violation) and say which check you ran.
 
 
-## North star
-
-> **GitNexus is the default reasoning layer for every task.** Prefer graph + embeddings when fresh. Use `query` to orient. Use `cypher` for precise structural questions (field ACCESSES, N-hop CALLS, overrides). Refresh autonomously when stale or embeddings missing. Classical tools **only after refresh fails** (or MCP down / GN wrong) — say why in one sentence.
-
-GitNexus tools are for **reasoning throughout the task**, not only the first lookup or unfamiliar code. Local LLM: rebuild context freely; do not skip gates.
-
-## Graph + embeddings + cypher (layered)
-
-| Task | Tool |
-| --- | --- |
-| Fuzzy concept, flow trace, "how does X work?" | `query` (BM25 + embedding vectors) |
-| Known symbol, callers, 360° | `context` |
-| Known A→B call path | `trace` |
-| Control/data flow | `pdg_query` (`flows` / `controls`) when PDG layer exists |
-| Field read/write, overrides, process steps | READ schema → `cypher` |
-| Security taint/source→sink | `explain` + `pdg_query` + `trace` |
-| Pre-edit safety | `impact` (`mode: "pdg"` for high-risk/PDG-backed precision) |
-| Pre-commit / done | `detect_changes` |
-
-`SemanticSearch` is blocked → always `query`. Field/property grep → `cypher` (`ACCESSES`). Missing embeddings = **stale** → `agent-refresh` (includes `--embeddings`).
-
-## MCP defaults (generous)
-
-| Tool | Default |
-| --- | --- |
-| `context` | `include_content: false` |
-| `query` | `limit: 5`, `max_symbols: 12` |
-| `trace` | Use when both source and target symbols are known |
-| `pdg_query` | `mode: "flows"` for variables; `mode: "controls"` for guards |
-| `explain` | Taint findings for files/symbols; absence is not proof of safety |
-| `cypher` | READ `bearing://repo/__GITNEXUS_REPO__/schema` first; use `$params` |
-| `impact` | `summaryOnly: false`, `limit: 100` |
-
-Hooks inject calls with these defaults — run verbatim; expand when needed.
-
 ## Decision tree (follow in order)
 
 ```
@@ -105,6 +70,17 @@ gitnexus_cypher({ statement: "MATCH (f)-[r:CodeRelation {type: 'ACCESSES'}]->(p:
 gitnexus_impact({ target: "<symbol>", direction: "upstream", repo: "__GITNEXUS_REPO__", summaryOnly: false, limit: 100 })
 ```
 
+| Blocked | Replacement |
+| --- | --- |
+| `Grep("someFunctionName")` | `context({name: "someFunctionName"})` |
+| `Grep("address")` (field/property) | READ schema → `cypher` ACCESSES on `$name: "address"` |
+| `SemanticSearch("auth flow")` | `query({search_query: "auth flow", task_context, goal})` — uses embeddings |
+| `Glob("src/**/*.js")` | `query({search_query: "module area", goal: "entry points"})` |
+| `Read(entire large source file)` | `query` → `context` → Read offset/limit |
+| Scoped Grep before any GN MCP call | `context` first — scoped Grep only after graph use + suspicion |
+
+When index is **stale**, hooks **block** classical patterns until refresh succeeds or fails — run `agent-refresh` first.
+
 ## Classical fallback (when NOT to trust GitNexus)
 
 | Signal | What to do |
@@ -117,19 +93,6 @@ gitnexus_impact({ target: "<symbol>", direction: "upstream", repo: "__GITNEXUS_R
 | **MCP unreachable** | Warn user; classical OK |
 
 **Always:** one sentence to the user explaining the bypass.
-
-## Hook block → replacement (fresh index)
-
-| Blocked | Replacement |
-| --- | --- |
-| `Grep("someFunctionName")` | `context({name: "someFunctionName"})` |
-| `Grep("address")` (field/property) | READ schema → `cypher` ACCESSES on `$name: "address"` |
-| `SemanticSearch("auth flow")` | `query({search_query: "auth flow", task_context, goal})` — uses embeddings |
-| `Glob("src/**/*.js")` | `query({search_query: "module area", goal: "entry points"})` |
-| `Read(entire large source file)` | `query` → `context` → Read offset/limit |
-| Scoped Grep before any GN MCP call | `context` first — scoped Grep only after graph use + suspicion |
-
-When index is **stale**, hooks **block** classical patterns until refresh succeeds or fails — run `agent-refresh` first.
 
 ## Autonomous agent CLI
 

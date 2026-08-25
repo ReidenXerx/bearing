@@ -14,13 +14,6 @@ scoped `Grep` (allowed here, not a gate violation) and say which check you ran.
 
 GitNexus does **not** profile runtime — it exposes the *structure* that makes code expensive: deep call chains, high fan-in hubs, work repeated across a flow, and values recomputed instead of reused. Use it to **localize** the cost, then confirm with a profiler/benchmark.
 
-## When to Use
-
-- "This request/job is slow — where's the cost?"
-- "Find the hot path for X"
-- "Is this called in a loop / on every iteration?"
-- "Reduce redundant computation"
-
 ## Workflow
 
 ```

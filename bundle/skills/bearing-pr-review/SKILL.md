@@ -12,12 +12,6 @@ can be a floor — `impact` says which in `epistemic`. Before a conclusion that 
 scoped `Grep` (allowed here, not a gate violation) and say which check you ran.
 
 
-## When to Use
-
-- Reviewing a branch before merge
-- Assessing risk of a teammate's changes
-- Preparing PR description / test plan from actual blast radius
-
 ## Workflow
 
 ```

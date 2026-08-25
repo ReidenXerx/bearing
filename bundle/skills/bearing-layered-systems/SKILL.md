@@ -16,14 +16,6 @@ Layered systems (controller → service → repository → model; or hexagonal/o
 
 This is the *operate* counterpart to `bearing-architecture-review` (which *judges* structure).
 
-## When to Use
-
-- "Trace this request/event through the layers end-to-end"
-- "Which layer should this change go in?"
-- "What crosses this boundary (interface / DTO / port)?"
-- "Change the contract between two layers safely"
-- Monorepo: "what depends on this package across the others?"
-
 ## Workflow
 
 ```

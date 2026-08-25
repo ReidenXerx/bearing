@@ -55,15 +55,6 @@ cypher: MATCH (a)-[:CodeRelation {type:'USES'}]->(t {name:'IDraft'}) RETURN a.na
 codebase this layer is *larger* than the call graph, so a type change whose blast radius you checked
 only through `CALLS` was not checked.
 
-## When to Use
-
-- "Is it safe to change this function?"
-- "What will break if I modify X?"
-- "Show me the blast radius"
-- "Who uses this code?"
-- Before making non-trivial code changes
-- Before committing — to understand what your changes affect
-
 ## Workflow
 
 ```

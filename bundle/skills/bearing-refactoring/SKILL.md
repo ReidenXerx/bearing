@@ -23,14 +23,6 @@ can be a floor — `impact` says which in `epistemic`. Before a conclusion that 
 scoped `Grep` (allowed here, not a gate violation) and say which check you ran.
 
 
-## When to Use
-
-- "Rename this function safely"
-- "Extract this into a module"
-- "Split this service"
-- "Move this to a new file"
-- Any task involving renaming, extracting, splitting, or restructuring code
-
 ## Workflow
 
 ```

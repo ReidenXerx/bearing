@@ -14,13 +14,6 @@ scoped `Grep` (allowed here, not a gate violation) and say which check you ran.
 
 Don't guess what to test — let the graph turn a change's **blast radius into the exact test surface**, and find the symbols with no test coverage.
 
-## When to Use
-
-- "What should I test for this change?"
-- "Is X covered by tests?"
-- "Write tests for this feature/fix"
-- "Which execution flows does my change put at risk?"
-
 ## Workflow
 
 ```

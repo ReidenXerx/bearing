@@ -16,12 +16,6 @@ in writing. Confirm anything load-bearing with a scoped `Grep` and say which che
 `epistemic` is not `"exact"`, write the number as a floor, not a total.
 
 
-## When to Use
-
-- You are about to open a PR, or have just opened one with a placeholder body
-- A PR came back with "what does this actually change?"
-- A branch is finished and you are deciding whether it is reviewable
-
 ## The problem this solves
 
 A reviewer's real questions are *what breaks if this is wrong*, *what else does it touch*, and *how

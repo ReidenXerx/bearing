@@ -14,13 +14,6 @@ scoped `Grep` (allowed here, not a gate violation) and say which check you ran.
 
 Refactoring changes existing code; **this is about adding it well** — reuse the codebase's patterns instead of reinventing, and wire into the *right* place. The graph is how you find both.
 
-## When to Use
-
-- "Implement a feature that does X"
-- "Where should this new code live / wire in?"
-- "Is there existing logic I should reuse?"
-- "Add a new handler/service/job following the existing style"
-
 ## Workflow
 
 ```

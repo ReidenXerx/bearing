@@ -14,13 +14,6 @@ scoped `Grep` (allowed here, not a gate violation) and say which check you ran.
 
 `bearing-exploring`/`imaging` help you *understand* a codebase; this skill *judges* it — and backs every claim with a graph query, not vibes.
 
-## When to Use
-
-- "Review the architecture / call out structural problems"
-- "Where is the coupling / are layers respected?"
-- "Find import cycles, god objects, dead seams"
-- Pre-refactor scoping, or a design-health pass
-
 ## Workflow
 
 ```

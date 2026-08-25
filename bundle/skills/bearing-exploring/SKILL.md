@@ -35,14 +35,6 @@ values that came from cypher; use `context`/`query`/`impact` numbers as given.
 fully resolve. Treat a `USES` result as where to look, not as the finding, and say so when you report
 it. `cypher` can filter on `r.confidence`; `impact` takes `minConfidence`.
 
-## When to Use
-
-- "How does authentication work?"
-- "What's the project structure?"
-- "Show me the main components"
-- "Where is the database logic?"
-- Understanding code you haven't seen before
-
 ## Workflow
 
 ```
