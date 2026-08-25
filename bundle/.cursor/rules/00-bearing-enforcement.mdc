@@ -57,30 +57,13 @@ through the interface and are not traced" is the honest sentence; "20 affected" 
 
 Use the graph for **all** agent work — explore, debug, fix, refactor, review, rename, commit — not only architecture questions.
 
-| Task type | Graph role |
-| --- | --- |
-| Answer / explain / debug | `query` → `context` → `cypher` if structural → Read offset/limit |
-| Field / property data flow | READ schema → `cypher` (`HAS_PROPERTY` owner→field, `ACCESSES` read/write) |
-| Change a type / interface | `impact` (it follows the type layer) → `cypher` `USES` for the exact consumers |
-| N-hop call chains, overrides, process steps | READ schema → `cypher` |
-| Statement-level data/control flow, taint | `pdg_query` / `explain` / `trace` (see deep precision) |
-| Edit runtime source (any size) | `impact` upstream before Write/StrReplace |
-| Refactor / rename / shared code | `impact` + `rename` dry_run OR `context` on hub symbols |
-| Review / “what did I change?” | `detect_changes`; `query` to orient |
-| Session start | `agent-brief` or repo context; confirm kit health |
-
 **Anti-patterns:** reserving GitNexus for big exploratory prompts; grep/read from memory on “familiar” files; grepping field names instead of `cypher`; **StrReplace/find-and-replace for symbol renames** instead of `rename` dry_run; skipping `impact` on “small” edits; jumping to `context`/`impact`/`grep` without `query` first (skips embeddings). `SemanticSearch` is blocked — use `query`.
 
 <!-- feature: gitnexus -->
-## Graph + embeddings + cypher (layered)
+## Reading the tools — where each is silently wrong
 
-| Need | Tool | Why |
-| --- | --- | --- |
-| Orient — any fuzzy or grounding step | `query` | Hybrid BM25 + **embedding** vectors (RRF) |
-| One symbol, callers, 360° | `context` | Structural graph (canned API) |
-| **Precise structural graph questions** | **`cypher`** | Raw traversals the canned tools don't express |
-| Pre-edit blast radius | `impact` | Graph traversal |
-| Pre-commit / done | `detect_changes` | Diff → processes |
+Every subsection here is a way to be confidently wrong that the tool REPORTS in its own response and
+you have to read. None of them is an error; each looks like an answer.
 
 ### When to escalate to `cypher` (after `query` / `context`)
 
@@ -186,6 +169,10 @@ carries one, so re-resolving by name is a step you rarely need.
 | `context` / `query` | `include_content: false` | names and locations only; ask for content instead of a second Read round trip |
 | all three | `maxTokens` | cap the response deliberately rather than discovering the cap by truncation |
 
+Phrase `query`'s `search_query` as a natural-language **concept** ("where tokens are validated"),
+not a keyword — that is what feeds the embedding ranker; pass `task_context` + `goal`. A known symbol
+name is a `context` call, not a `query`.
+
 `detect_changes` also takes **`worktree`** — an absolute path to a linked git worktree. The server
 detects the common case itself, but when it was started somewhere other than the worktree you are
 editing, an unstaged diff comes back empty and nothing says why.
@@ -230,27 +217,17 @@ orientation, and it gives you names to feed `context`.
 
 ### Symbol properties worth querying
 
-Nodes carry more than a name, and these turn "read every file and look" into one query:
+Nodes carry more than a name — `returnType`, `parameterCount`, `isAsync`, `visibility`,
+`annotations`, `declaredType` on symbols; `cohesion` and `symbolCount` on a `Community`; `processType`
+and `stepCount` on a `Process`. Signature-shaped searches are one query instead of reading every file.
+`cohesion` measured 0.04–0.98 on one repo, so read it before trusting an area name. Full list: the
+`bearing-guide` skill.
 
-| Property | On | Use |
-| --- | --- | --- |
-| `returnType`, `parameterTypes`, `parameterCount` | `Function`, `Method` | signature-shaped searches — every handler returning `Promise<void>`, everything taking more than five arguments |
-| `isAsync`, `isStatic`, `visibility`, `isAbstract` | `Function`, `Method` | "which of these are async", "what is actually public" |
-| `annotations` | `Function`, `Method` | decorator/attribute sweeps |
-| `declaredType` | `Property` | the field's declared type — what resolves field-access chains |
-| `cohesion`, `symbolCount` | `Community` | how tight an area is; a low-cohesion cluster is a naming, not a module. Measured spread on one repo: **0.04 to 0.98**, so read it before trusting an area name |
-| `processType`, `stepCount` | `Process` | `intra_community` vs `cross_community` — the second crosses a seam and is where contracts break |
-
-**Three `Community` fields are always empty — do not query them.** `keywords`, `description`, and
-`label` are filled by an LLM enrichment pass that the analyzer ships but **never calls**
-(`cluster-enricher.js` is exported and imported by nothing), so `enrichedBy` is written from its
-`|| 'heuristic'` fallback on every node. Measured across three unrelated indexes — 270, 543 and 1126
-communities: `enrichedBy` is `heuristic` 100% of the time, `keywords` and `description` are empty
-100% of the time, and `label` is identical to `heuristicLabel` on every single node. An empty
-`keywords` says nothing about the code; it says the pass did not run. Use `heuristicLabel`,
-`cohesion`, `symbolCount` and `MEMBER_OF`.
-
-**Order:** `query` (orient) → `context` (symbol) → **`cypher`** (structural precision) → `impact` (before edits). Do not start with `cypher` for fuzzy questions — that's what `query` + embeddings are for.
+**Three `Community` fields are always empty — do not query them.** `keywords`, `description` and
+`label` are filled by an enrichment pass the analyzer ships and never calls. Measured across three
+unrelated indexes (270, 543, 1126 communities): empty 100% of the time, and `label` identical to
+`heuristicLabel` on every node. An empty `keywords` says the pass did not run, not that the area has
+no keywords. Use `heuristicLabel`, `cohesion`, `symbolCount`, `MEMBER_OF`.
 
 Refresh always includes `--embeddings` (`bearing:refresh` / `agent-refresh`). Missing embeddings = stale (same as commit behind).
 
@@ -259,12 +236,10 @@ Refresh always includes `--embeddings` (`bearing:refresh` / `agent-refresh`). Mi
 
 When `cypher` isn't enough, escalate to statement-level tools.
 
-**These need a PDG index, and it is NOT built by default.** PDG roughly triples node count and four
-tools read it, so bearing stopped building it on every commit — it is opt-in, by `bearing:pdg`, when
-someone decides they want it. Without one, every tool in this table returns **zero rows, which is not
-an answer** (see the section above — a zero is not a finding). If you need statement-level dataflow
-or taint, build it first or say plainly that you could not check. Whether to keep it fresh is the
-user's call, not something to trigger mid-task.
+**These need a PDG index, and it is NOT built by default.** PDG roughly triples node count, so
+bearing stopped building it on every commit — it is opt-in, by `bearing:pdg`. Without one every tool
+below returns **zero rows, which is not an answer**: build it first, or say plainly you could not
+check. Keeping it fresh is the user's call, not something to trigger mid-task.
 
 | Need | Tool |
 | --- | --- |
@@ -274,60 +249,43 @@ user's call, not something to trigger mid-task.
 | Source → sink path between two symbols | `trace` |
 | Taint review — injection, path traversal, XSS | `explain` |
 
-**`impact` with `mode: "pdg"` takes a statement anchor.** Pass `line` — 1-based, inside the target
-symbol — and the slice is seeded on THAT statement. Measured on a real function: `line` pointing at
-`const project = (job.rawJson ?? {})` returned **52 downstream-dependent statements**, each as line +
-text, correctly including a `project.clientQuestions` read eleven lines below. Without `line` you get
-whole-symbol reach, which is the blunter answer.
+**`impact` with `mode: "pdg"` takes a statement anchor.** Pass `line` — 1-based, inside the symbol —
+and the slice seeds on THAT statement; without it you get blunter whole-symbol reach. Measured: a
+`line` on `const project = (job.rawJson ?? {})` returned 52 downstream statements, correctly
+including a read eleven lines below.
 
-**The trap: a `line` that is not a statement DEGRADES SILENTLY.** Point it at a blank line, a comment,
-a brace, or anything outside the body and you get `affectedStatements: []` — *alongside a populated
-`byDepth` and a non-zero `impactedCount`*. It reads like "this statement affects nothing", which is
-the most dangerous wrong answer this tool can give. The ONLY thing that distinguishes the two is
-`epistemic`:
+**The trap: a `line` that is not a statement DEGRADES SILENTLY.** A blank line, comment or brace
+returns `affectedStatements: []` *alongside a populated `byDepth` and a non-zero `impactedCount`* —
+it reads as "this statement affects nothing", the most dangerous wrong answer this tool gives. Only
+`epistemic` separates them: `pdg-intra-procedural` is a real slice, `pdg-no-block-at-line` means no
+statement started at your line and the empty slice says nothing about the code. Check it every time.
 
-| `epistemic` | Means |
-| --- | --- |
-| `pdg-intra-procedural` | real slice — `affectedStatements` is the answer |
-| `pdg-no-block-at-line` | **no statement starts at your line** — the empty slice says nothing about the code |
+Three more fields carry weight. `scope` (`"intra"`/`"inter"`) shows where the slice crossed a call.
+`pdgEvidence.interprocedural: "callgraph-bridge"` means `byDepth` arrived by the ordinary call graph,
+NOT statement dependence — do not present it as the latter. `pdgEvidence.ascent.returnFlowFound:
+false` means callers depending on a callee's RETURN value are missing; out-parameter ascent,
+callee-written shared variables and exception ascent are not modelled at all. `risk: "UNKNOWN"` is
+this mode's contract, not a low-risk finding.
 
-Check it before reading the result, every time. Three more fields carry their own weight:
-`scope` is `"intra"` or `"inter"` per statement, so you can see where the slice crossed a call.
-`pdgEvidence.interprocedural: "callgraph-bridge"` means the symbols in `byDepth` arrived by the
-ordinary call graph, NOT by statement-level dependence — do not present them as the latter. And
-`pdgEvidence.ascent.returnFlowFound: false` means a caller depending on a callee's RETURN value is
-missing from the slice; out-parameter ascent, callee-written shared variables and exception ascent
-are not modelled at all. `risk: "UNKNOWN"` is the contract for this mode, not a low-risk finding.
-
-**Zero taint findings is not a clean bill of health.** `explain` on a PDG-built index returns
-`findings: []` with the layer perfectly healthy — closure/callback, property/field and implicit flows
-are not modelled, and the tool says so in its own `note`. Read the note to tell "no flows found" from
-"no layer to look in"; report the difference.
+**Zero taint findings is not a clean bill of health.** `explain` returns `findings: []` on a
+perfectly healthy layer — closure/callback, property/field and implicit flows are not modelled, and
+the tool says so in its own `note`. Read it to tell "no flows found" from "no layer to look in", and
+report the difference.
 
 <!-- feature: gitnexus -->
 ## Full tool surface — reach for the right one
 
-Know every tool and *when* it wins (single-repo; cross-repo `group_*` is out of scope for this kit). Don't stop at `query`/`context` — the advanced tools answer in one call what takes many manual hops.
+Every MCP tool ships its own `WHEN TO USE` in its schema, and those schemas are already loaded — so
+this is the surface, not a second description of it. Single-repo; cross-repo `group_*` is out of
+scope for this kit.
 
-| Tool | Reach for it when |
-| --- | --- |
-| `query` | Orient — "how does X work?", find the execution flow for a concept (BM25 + vectors). Always first for fuzzy work. |
-| `context` | 360° on ONE symbol — callers, callees, categorized refs, the processes it's in. After `query`, or when the symbol is known. |
-| `cypher` | Precise structural questions the canned tools don't express — field `ACCESSES`, type `USES`, `HAS_PROPERTY`, N-hop `CALLS`, `METHOD_OVERRIDES`, `STEP_IN_PROCESS`. READ schema first. |
-| `check` | Structural health of the import graph — circular file imports, with deterministic cycle paths. Read-only and CI-shaped; reach for it when untangling module boundaries rather than tracing one symbol. |
-| `tool_map` | This repo DEFINES MCP/RPC tools and you need their definitions, handlers and descriptions — impact analysis for a tool change, or finding where a tool is implemented. |
-| `impact` | BEFORE editing a symbol — upstream blast radius + risk + affected processes. `mode: "pdg"` for statement-level (control+data) precision. |
-| `trace` | "How does A reach B?" — shortest call/member path between two symbols in ONE call (replaces 3–8 manual `context` hops). |
-| `pdg_query` | "What condition gates this line?" (`mode: "controls"`) / "where does this variable flow?" (`mode: "flows"`). Intra-function; needs PDG. |
-| `explain` | Security review — taint source→sink (command/code/sql injection, path-traversal, XSS), intra- AND inter-procedural. Needs PDG. |
-| `detect_changes` | BEFORE commit / "what did my edits affect?" — diff → affected symbols/processes/risk. `scope`: unstaged \| staged \| all \| compare. |
-| `rename` | Coordinated multi-file symbol rename — `dry_run: true` first. Never find-and-replace identifiers. |
-| `api_impact` | BEFORE changing an HTTP route handler (framework router) — consumers, response-shape mismatches, middleware chain, risk. |
-| `route_map` | Map routes → consumers + handler + middleware; find orphaned routes. (Custom router → `context` on the dispatcher instead.) |
-| `shape_check` | Detect API response-shape drift — keys a route returns vs keys consumers access (flags MISMATCH). |
-| `tool_map` | Map MCP/RPC tool definitions → handler files + descriptions (tool-API work, impact of a tool-contract change). |
-| `check` | Structural integrity — detect circular File `IMPORTS` cycles (health / CI gate). |
-| `list_repos` | Only when multiple repos are indexed — discover/disambiguate before passing `repo:` to other tools. |
+Orient `query` · one symbol `context` · structural precision `cypher` · before an edit `impact` ·
+before a commit `detect_changes` · symbol rename `rename` (dry_run) · A→B path `trace` · import
+cycles `check` · MCP/RPC tool definitions `tool_map` · statement-level `pdg_query` · taint `explain` ·
+HTTP routes `api_impact` / `route_map` / `shape_check` · multi-repo disambiguation `list_repos`.
+
+**What the schemas do not tell you is where each one is silently wrong** — that is what the sections
+above are for, and it is the reason to read them rather than trust a tool's own summary.
 
 Cheap resource reads (prefer before heavy tools): `READ bearing://repo/__GITNEXUS_REPO__/{context|schema|clusters|processes|process/<name>}`.
 
@@ -335,37 +293,23 @@ Cheap resource reads (prefer before heavy tools): `READ bearing://repo/__GITNEXU
 ### The three route tools are only as good as `Route` node coverage — CHECK IT FIRST
 
 `api_impact`, `route_map` and `shape_check` all read `Route` nodes, and route detection is
-FRAMEWORK-DEPENDENT. Where the indexer does not recognise a framework's routing, they do not degrade
-politely — they answer as if the API does not exist.
+FRAMEWORK-DEPENDENT. Where the indexer does not recognise a framework they do not degrade politely —
+they answer as if the API does not exist.
 
-Measured on a NestJS backend with **33 `@Controller` classes and 210 route decorators**:
-
-| | |
-| --- | --- |
-| `Route` nodes in the index | **3** — and all three are URL strings from utility code (`/watch`, `/_next/image`), not endpoints |
-| `route_map({route: "/venues"})` | `"No routes matching \"/venues\""` |
-| `api_impact({route: "/venues"})` | `error: "No routes found matching \"/venues\"."` |
-| `shape_check` | `"No routes with both response shapes and consumers found."` |
-
-`/venues` is a real, live endpoint. An agent that asks *"what depends on /venues before I change
-it?"* is told the route does not exist — and a not-found reads like a safe change. **This is the
-most dangerous shape a wrong answer can take, and it is one query away from being caught:**
+Measured: a NestJS backend with **33 `@Controller` classes and 210 route decorators** indexed **3**
+`Route` nodes, none of them endpoints. `api_impact({route: "/venues"})` answers *"No routes found"*
+for a live endpoint, and a not-found reads like a safe change — the most dangerous shape a wrong
+answer can take. One query catches it:
 
 ```
 MATCH (r:Route) RETURN count(*)
 ```
 
-Compare that against the number of handlers you can see in source (`@Controller`, `@app.route`,
-`router.get`, a `pages/api` tree). Near-zero on a repo that plainly has an API means these three
-tools are blind here — say so, and fall back to `query`/`context`/`cypher` on the controller
-symbols, which do work. A second NestJS repo in the same set indexed **0** route nodes.
-
-`shape_check` has its own precondition: it needs `responseKeys`, extracted from `.json({...})`
-calls. A framework that returns objects directly (NestJS, FastAPI) produces none, so an empty
-result means *nothing was extracted*, never *the shapes agree*.
-
-`tool_map` is the one in this family that behaved: on a repo defining MCP tools it returned all 17
-with handler file and description. Its `flows` array was empty for every one of them.
+Near-zero against the handlers visible in source (`@Controller`, `router.get`, a `pages/api` tree)
+means these three are blind here: say so, and use `query`/`context`/`cypher` on the controllers,
+which do work. `shape_check` additionally needs `responseKeys` from `.json({...})` calls, so a
+framework returning objects directly (NestJS, FastAPI) produces none — an empty result means nothing
+was extracted, never that the shapes agree.
 
 ### `check` — cycles, and which ones actually matter
 
@@ -379,21 +323,6 @@ the ones that force `forwardRef` and break initialisation order. Same count, ver
 findings — the tool does not distinguish them, and neither does a raw number in a report.
 
 <!-- feature: gitnexus -->
-## MCP defaults (generous — local LLM)
-
-Run hook copy-paste calls verbatim; expand freely when needed:
-
-| Tool | Default | Notes |
-| --- | --- | --- |
-| `context` | `include_content: false` | Need body → Read offset/limit |
-| `query` | `limit: 5`, `max_symbols: 12` | Phrase `search_query` as a natural-language **concept** ("where tokens are validated"), not a keyword — that feeds the embedding ranker; always pass `task_context` + `goal`. Known symbol name → use `context` instead. |
-| `cypher` | READ schema first | Use `$params` for symbol/field names |
-| `impact` | `summaryOnly: false`, `limit: 100` | Full blast radius before edits; `mode: "pdg"` for statement-level |
-| `pdg_query` | `mode: "controls"` / `"flows"` | Statement-level control/data dependence |
-| `trace` / `explain` | source → sink | Path between symbols; taint analysis |
-| `rename` | `dry_run: true` first | Coordinated multi-file symbol rename |
-| `detect_changes` | `scope: unstaged` | Pre-commit → `staged`; PR → `compare` |
-
 <!-- feature: gitnexus -->
 ## Session (autonomous Shell)
 
