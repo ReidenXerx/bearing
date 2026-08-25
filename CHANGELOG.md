@@ -2,7 +2,69 @@
 
 All notable changes to `bearing` are documented here.
 
-## Unreleased — two tools that both own the same ninety files
+## 1.1.5 — the instructions were teaching things that could not be done
+
+Most of this release is one class of defect, found by running what the docs say instead of reading
+it. Every fix below sat behind a check that passed: the file existed, the name resolved, the suite
+was green.
+
+### Fixed — `bearing:fallback` granted nothing on any repo behind HEAD
+
+The escape hatch named in every deny message, in the contract, and in the stale-refresh hint wrote
+its grant, printed **"Classical fallback GRANTED for ~15 min"**, and the guard never read it.
+`evaluateStalePolicy` returned early at the staleness-gate-off branch — the default configuration —
+before the grant was consulted, so the hatch worked only on a perfectly fresh index while the
+contract advertises it for *"GitNexus fresh but WRONG"*. An explicit human override is now evaluated
+before every automatic phase decision. Enforcement that cannot be escaped is a trap (NS-6), and this
+one announced success while staying shut.
+
+### Fixed — every `READ bearing://...` was a call that could not succeed
+
+92 occurrences across 33 files: every skill that told an agent to read a process trace, a cluster
+map, the graph schema or the repo context, plus the always-on contract, both generated templates and
+the Cursor rules. The scheme belongs to GitNexus's MCP server — `bearing://repo/x/schema` answers
+*"Unknown resource URI"*, `gitnexus://` returns the schema. Almost certainly the gn-kit → bearing
+rename sweeping up a URI scheme that was never bearing's to rename.
+
+### Fixed — a field `rename` never returns, and other unrunnable instructions
+
+`bearing-refactoring` told you to review the `ast_search` edits; the tool tags them `text_search`. An
+agent searching for a value that never appears finds none and concludes every edit resolved through
+the graph, which is how a regex find-and-replace gets accepted as safe. Also: a Cypher query that is
+a parser error, three skills answering "index is stale" with a refresh that leaves it stale, two
+skills pointing at an api-profile path that moved, the master index pointing at a directory
+migration deletes, and a copied `gitnexus wiki` flag table that had already drifted.
+
+### Fixed — `bearing:stats` crashed, and half the counters were invisible before it did
+
+`labelFor` was a local const in the scorecard and `stats` called it anyway — ReferenceError on every
+run. Two `labels` maps had drifted, fourteen keys against seven, and stats filtered by its own copy,
+so seven counters were written every session and shown to nobody. One map at module scope; both
+readers derive keys from what was counted.
+
+### Fixed — the guard denied searches the graph cannot answer
+
+Searching `node_modules/` was blocked with a redirect to `context({name})` — and dependencies are
+not indexed, so the suggested exit returned nothing. A false deny whose escape does not exist
+(NS-5, NS-6). Paths the index never contained are now allowed.
+
+### Changed — the always-on contract is 17% smaller, and says the same things
+
+It stated "which tool when" six times: a task-type table, a layered table, a bare ordering, a
+tool-surface table, an MCP-defaults table, and the Gates ladder. `check` and `tool_map` each appeared
+twice inside one table. Every MCP tool already ships its own WHEN TO USE in a schema that loads
+anyway, so the surface is now one line and the file keeps what nothing else carries: where each tool
+is silently wrong. ~1,740 tokens off every session, permanently.
+
+The 25 skills lost 13% the same way — nine wrote the workflow twice, eleven opened by arguing for
+being loaded, five taught the same tools three times. The uncertainty rule that was hand-copied into
+17 of them now renders from one source with a test that fails on drift.
+
+### Added — GP-22 and GP-23
+
+**GP-22** — declining to answer is the cheapest possible answer, so any comparison by cost ranks it
+first. **GP-23** — verify the exit condition, not that the remedy ran. GP-23 was written in the
+morning and caught `bearing:fallback` that afternoon.
 
 ### Added — the installer offers to keep Prettier off the files bearing owns
 
