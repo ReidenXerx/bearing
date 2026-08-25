@@ -26,6 +26,28 @@ const SKILLS_DIR = path.join(HERE, "../bundle/skills");
 /** fragment id → the skills that embed it. */
 export const FRAGMENT_TARGETS = {
   "anchored-spawn": ["bearing-microscope", "bearing-minions"],
+  // The uncertainty rule is identical in every skill that carries it. bearing-pr keeps its
+  // PR-specific paragraph OUTSIDE the markers: the RULE is shared, the local reason to care is not.
+  "graph-uncertainty": [
+    "bearing-api-routes",
+    "bearing-architecture-review",
+    "bearing-cli",
+    "bearing-debugging",
+    "bearing-enforcement",
+    "bearing-exploring",
+    "bearing-feature-dev",
+    "bearing-imaging",
+    "bearing-impact-analysis",
+    "bearing-layered-systems",
+    "bearing-microscope",
+    "bearing-performance",
+    "bearing-pr",
+    "bearing-pr-review",
+    "bearing-refactoring",
+    "bearing-scenarios",
+    "bearing-security-review",
+    "bearing-testing",
+  ],
 };
 
 // The marker is COPIED INTO USER REPOSITORIES with the skill, so it must not name a command only

@@ -5,11 +5,13 @@ description: "Use when WORKING IN a complex, multi-layered architecture — trac
 
 # Working across layered systems
 
+<!-- BEGIN GENERATED: graph-uncertainty — bearing regenerates this block; edits here are replaced on update -->
 ## The graph can be wrong
 
 A zero is not absence; a near-0.5 `r.confidence` edge is a lead, not proof (~92% of `USES`); a count
 can be a floor — `impact` says which in `epistemic`. Before a conclusion that matters, confirm with a
 scoped `Grep` (allowed here, not a gate violation) and say which check you ran.
+<!-- END GENERATED: graph-uncertainty -->
 
 
 Layered systems (controller → service → repository → model; or hexagonal/onion; or monorepo packages) defeat grep because a single feature is **smeared vertically across layers** and behind interfaces. The graph re-connects them: `trace` and process flows turn "how does the HTTP handler reach the DB write?" into one answer, and cross-layer `impact`/`cypher` keep a change from silently breaking a *different* layer.

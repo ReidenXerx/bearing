@@ -5,11 +5,13 @@ description: "Scenario playbooks for GitNexus — pre-edit, pre-commit, PR revie
 
 # GitNexus Scenario Playbooks
 
+<!-- BEGIN GENERATED: graph-uncertainty — bearing regenerates this block; edits here are replaced on update -->
 ## The graph can be wrong
 
 A zero is not absence; a near-0.5 `r.confidence` edge is a lead, not proof (~92% of `USES`); a count
 can be a floor — `impact` says which in `epistemic`. Before a conclusion that matters, confirm with a
 scoped `Grep` (allowed here, not a gate violation) and say which check you ran.
+<!-- END GENERATED: graph-uncertainty -->
 
 
 Match your task to a playbook. Always start with READ `gitnexus://repo/__GITNEXUS_REPO__/context`.
