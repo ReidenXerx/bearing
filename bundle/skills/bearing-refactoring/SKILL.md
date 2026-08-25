@@ -8,9 +8,11 @@ description: "Use when the user wants to rename, extract, split, move, or restru
 ## `rename` is not all graph — check the tag on every edit
 
 Every edit in a `rename` preview is tagged `confidence: "graph"` (resolved through the knowledge
-graph, safe) or `confidence: "text_search"` (a regex match — find-and-replace, labelled). A real
-rename came back **4 graph, 3 text_search**: 43% regex, landing on an object-literal key that merely
-shared the name.
+graph) or `confidence: "text_search"` (a regex match — find-and-replace, labelled).
+
+**The ratio varies wildly and is not the point.** One measured rename came back 4 graph / 3
+text_search; another, 36 / 1. What matters is WHICH edit is regex — in the second, the lone
+text_search hit was the only production caller, and every confident edit was in the spec file.
 
 `dry_run: true` is the default for a reason. Compare `graph_edits` against `text_search_edits`, read
 every `text_search` line on its own merits, and run `detect_changes` afterwards. "Safer than
