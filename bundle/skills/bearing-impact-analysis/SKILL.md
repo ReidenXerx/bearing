@@ -85,51 +85,30 @@ only through `CALLS` was not checked.
 | >15 symbols or many processes  | HIGH     |
 | Critical path (auth, payments) | CRITICAL |
 
-## Tools
-
-**impact** — the primary tool for symbol blast radius. Use `mode: "pdg"` for high-risk changes after a PDG refresh:
+## Worked example — "what breaks if I change `validateUser`?"
 
 ```
-impact({
-  target: "validateUser",
-  direction: "upstream",
-  minConfidence: 0.8,
-  maxDepth: 3
-})
+1. impact({ target: "validateUser", direction: "upstream",
+            minConfidence: 0.8, maxDepth: 3 })
 
-impact({
-  target: "validateUser",
-  direction: "upstream",
-  mode: "pdg"
-})
+   → epistemic: "exact"                     ← read this BEFORE the count
+   → d=1 (WILL BREAK):
+       loginHandler   src/auth/login.ts:42      [CALLS, 100%]
+       apiMiddleware  src/api/middleware.ts:15  [CALLS, 100%]
+   → d=2 (LIKELY AFFECTED):
+       authRouter     src/routes/auth.ts:22     [CALLS, 95%]
 
-→ d=1 (WILL BREAK):
-  - loginHandler (src/auth/login.ts:42) [CALLS, 100%]
-  - apiMiddleware (src/api/middleware.ts:15) [CALLS, 100%]
+2. READ bearing://repo/{repo}/processes
+   → LoginFlow and TokenRefresh both touch validateUser
 
-→ d=2 (LIKELY AFFECTED):
-  - authRouter (src/routes/auth.ts:22) [CALLS, 95%]
+3. detect_changes({ scope: "staged" })
+   → Changed: 5 symbols in 3 files
+   → Affected: LoginFlow, TokenRefresh, APIMiddlewarePipeline
+   → Risk: MEDIUM
+
+4. Report: 2 direct callers, 2 processes → MEDIUM, and say `epistemic` was exact.
 ```
 
-**detect_changes** — git-diff based impact analysis:
-
-```
-detect_changes({scope: "staged"})
-
-→ Changed: 5 symbols in 3 files
-→ Affected: LoginFlow, TokenRefresh, APIMiddlewarePipeline
-→ Risk: MEDIUM
-```
-
-## Example: "What breaks if I change validateUser?"
-
-```
-1. impact({target: "validateUser", direction: "upstream"})
-   → d=1: loginHandler, apiMiddleware (WILL BREAK)
-   → d=2: authRouter, sessionManager (LIKELY AFFECTED)
-
-2. READ bearing://repo/my-app/processes
-   → LoginFlow and TokenRefresh touch validateUser
-
-3. Risk: 2 direct callers, 2 processes = MEDIUM
-```
+`mode: "pdg"` narrows this to statement level for a high-risk change, but needs the PDG layer and a
+`line` anchor inside the symbol — a `line` that is not a statement returns an empty slice next to a
+populated count, and only `epistemic` tells you which you got.

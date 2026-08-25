@@ -41,7 +41,7 @@ scoped `Grep` (allowed here, not a gate violation) and say which check you ran.
 
 ```
 - [ ] rename({symbol_name: "oldName", new_name: "newName", dry_run: true}) — preview all edits
-- [ ] Review graph edits (high confidence) and ast_search edits (review carefully)
+- [ ] Review graph edits (high confidence) and text_search edits (review carefully)
 - [ ] If satisfied: rename({..., dry_run: false}) — apply edits
 - [ ] detect_changes() — verify only expected files changed
 - [ ] Run tests for affected processes
@@ -70,41 +70,6 @@ scoped `Grep` (allowed here, not a gate violation) and say which check you ran.
 - [ ] Run tests for affected processes
 ```
 
-## Tools
-
-**rename** — automated multi-file rename:
-
-```
-rename({symbol_name: "validateUser", new_name: "authenticateUser", dry_run: true})
-→ 12 edits across 8 files
-→ 10 graph edits (high confidence), 2 ast_search edits (review)
-→ Changes: [{file_path, edits: [{line, old_text, new_text, confidence}]}]
-```
-
-**impact** — map all dependents first:
-
-```
-impact({target: "validateUser", direction: "upstream"})
-→ d=1: loginHandler, apiMiddleware, testUtils
-→ Affected Processes: LoginFlow, TokenRefresh
-```
-
-**detect_changes** — verify your changes after refactoring:
-
-```
-detect_changes({scope: "all"})
-→ Changed: 8 files, 12 symbols
-→ Affected processes: LoginFlow, TokenRefresh
-→ Risk: MEDIUM
-```
-
-**cypher** — custom reference queries:
-
-```cypher
-MATCH (caller)-[:CodeRelation {type: 'CALLS'}]->(f:Function {name: "validateUser"})
-RETURN caller.name, caller.filePath ORDER BY caller.filePath
-```
-
 ## Risk Rules
 
 | Risk Factor         | Mitigation                                |
@@ -114,19 +79,18 @@ RETURN caller.name, caller.filePath ORDER BY caller.filePath
 | String/dynamic refs | query to find them               |
 | External/public API | Version and deprecate properly            |
 
-## Example: Rename `validateUser` to `authenticateUser`
+## Worked example — rename `validateUser` to `authenticateUser`
 
 ```
-1. rename({symbol_name: "validateUser", new_name: "authenticateUser", dry_run: true})
-   → 12 edits: 10 graph (safe), 2 ast_search (review)
-   → Files: validator.ts, login.ts, middleware.ts, config.json...
+1. rename({ symbol_name: "validateUser", new_name: "authenticateUser", dry_run: true })
+   → 12 edits across 8 files
+   → graph_edits: 10   text_search_edits: 2      ← read BOTH numbers
+   → the 2 text_search hits are in config.json — a dynamic reference, not a call
 
-2. Review ast_search edits (config.json: dynamic reference!)
+2. Review every text_search line on its own merits. These are regex matches; one landing on a
+   same-named object key is the normal failure, not a rare one.
 
-3. rename({symbol_name: "validateUser", new_name: "authenticateUser", dry_run: false})
-   → Applied 12 edits across 8 files
-
-4. detect_changes({scope: "all"})
-   → Affected: LoginFlow, TokenRefresh
-   → Risk: MEDIUM — run tests for these flows
+3. rename({ ..., dry_run: false })   → applies 12 edits across 8 files
+4. detect_changes({ scope: "all" })  → Affected: LoginFlow, TokenRefresh · Risk: MEDIUM
 ```
+
