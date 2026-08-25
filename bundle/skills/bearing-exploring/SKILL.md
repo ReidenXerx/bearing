@@ -7,13 +7,9 @@ description: "Use when the user asks how code works, wants to understand archite
 
 ## The graph can be wrong
 
-It is derived from parsing, not ground truth, and it fails in three different ways:
-
-- **A zero is not absence.** Never conclude "unused", "no callers" or "safe to delete" from an empty result.
-- **A low-confidence edge is a lead, not proof.** Check `r.confidence` — `CALLS` and resolved `ACCESSES` come back at 0.85–1.0, while ~92% of `USES` edges sit near 0.5.
-- **A count can be a floor.** `impact` returns `epistemic: "lower-bound"` with a `boundaries` note when it knows it is guessing low; it returns `"exact"` when it is not.
-
-When the conclusion matters — deleting, renaming, "nothing reads this", a security claim — confirm with a scoped `Grep` or by reading the file, and **say which check you ran**. A scoped grep for this is explicitly allowed; it is not a gate violation. When the graph and a classical check disagree, the classical check wins on existence, and the disagreement is a defect worth reporting via `bearing:fallback`.
+A zero is not absence; a near-0.5 `r.confidence` edge is a lead, not proof (~92% of `USES`); a count
+can be a floor — `impact` says which in `epistemic`. Before a conclusion that matters, confirm with a
+scoped `Grep` (allowed here, not a gate violation) and say which check you ran.
 
 
 ## The type layer is indexed too
