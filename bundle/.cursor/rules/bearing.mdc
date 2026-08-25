@@ -78,7 +78,7 @@ Read `.cursor/skills/bearing-scenarios/SKILL.md` for full checklists. Quick map:
 | Refactor / rename | `impact` → `rename` dry_run → apply → `detect_changes(all)` |
 | Cross-module change | `detect_changes` + `impact` on shared symbols |
 | Preset / matrix JSON | Grep is fine; validate with `tests/examples` |
-| Area-focused work | Read `.cursor/skills/generated/<area>/SKILL.md` for entry points |
+| Area-focused work | Read `.claude/skills/gitnexus-area-*/<area>/SKILL.md` for entry points |
 | HTTP route change | `bearing-api-routes` skill → `api_impact` (framework) or dispatcher `context` (custom) |
 
 ## Tools (full surface)
@@ -171,4 +171,4 @@ If GitNexus MCP fails, tell the user: _"GitNexus MCP is unreachable — impact/d
 | Custom HTTP routes (this repo) | `.cursor/skills/bearing-api-routes/SKILL.md` |
 | CLI / index / wiki | `.cursor/skills/bearing-cli/SKILL.md` |
 | Tool reference | `.cursor/skills/bearing-guide/SKILL.md` |
-| Per-area entry points | `.cursor/skills/generated/<area>/SKILL.md` |
+| Per-area entry points | `.claude/skills/gitnexus-area-*/<area>/SKILL.md` |

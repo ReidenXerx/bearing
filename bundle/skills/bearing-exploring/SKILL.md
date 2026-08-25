@@ -45,7 +45,8 @@ it. `cypher` can filter on `r.confidence`; `impact` takes `minConfidence`.
 5. READ gitnexus://repo/{name}/process/{name}      → Trace full execution flow
 ```
 
-> If step 2 says "Index is stale" → run `node .gitnexus/run.cjs analyze` in terminal.
+> Stale index → `npm run bearing:agent-refresh` (always includes `--embeddings`; an index
+> without them counts as stale).
 
 ## Resources
 
