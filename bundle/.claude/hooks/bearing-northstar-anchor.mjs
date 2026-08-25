@@ -52,7 +52,18 @@ const filePath = String(input.tool_input?.file_path || "");
 const wroteDoc = /^(Write|Edit|NotebookEdit)$/.test(tool) && /\.(md|mdx|txt)$/i.test(filePath);
 
 const n = bumpNorthStarCounter(root);
+
+// A doc write fires this regardless of the counter, because writing a doc is when a conclusion gets
+// recorded in durable form — that is the moment worth interrupting. But the counter RESETS on every
+// fire, so a burst of doc writes paid the full anchor once per file, re-emitting byte-identical text
+// while the previous copy was still in the window. Measured on this repo: 24 claims at up to 200
+// chars is ~1,000 tokens an anchor, and a docs-heavy session writes dozens of files.
+//
+// So debounce the doc path only: a low counter means an anchor just fired and the claims are still
+// present. The every-N path is untouched — it is already its own debounce.
+const DOC_DEBOUNCE = 5;
 if (!wroteDoc && n < every) process.exit(0);
+if (wroteDoc && n < DOC_DEBOUNCE) process.exit(0);
 
 // The re-anchor carries the CLAIM of every north-star, not its evidence. A rich proposition
 // ("rejected BECAUSE <mechanism> <numbers> <citation>") is right for reading the file, but
