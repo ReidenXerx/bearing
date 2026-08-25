@@ -63,9 +63,12 @@ difference between "nothing else happens here" and "we stopped looking here".
 When the canned tools do not express the question:
 
 ```cypher
-MATCH path = (a)-[:CodeRelation {type: 'CALLS'}*1..2]->(b:Function {name: "validatePayment"})
-RETURN [n IN nodes(path) | n.name] AS chain
+MATCH (a)-[:CodeRelation {type:'CALLS'}]->(m)-[:CodeRelation {type:'CALLS'}]->(b:Function {name:"validatePayment"})
+RETURN a.name AS caller, m.name AS via, b.name AS target
 ```
+
+A property map does NOT combine with a variable-length hop here — `-[:CodeRelation {type:'CALLS'}*1..2]->`
+is a parser error, not a slow query. Spell the hops out, or drop the map and filter in `WHERE`.
 
 `pdg_query` is intra-function and needs the PDG layer; without it you get zero rows, which is not an
 answer.

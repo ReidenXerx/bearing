@@ -60,15 +60,19 @@ function isDeclSearch(t) {
  * @param {string} [root] repo root, so classification is location-independent
  */
 export /**
- * Paths the graph provably does not contain — so redirecting a search there hands back an empty
- * result and no way forward.
+ * Paths this repo's index is not expected to contain — so redirecting a search there hands back an
+ * empty result and no way forward.
  *
- * Measured on this repo's own index: `MATCH (n:File) WHERE n.filePath CONTAINS 'node_modules'`
- * returns 0. Dependencies, build output and anything outside the repo are never indexed. A search
- * there is not a graph question asked the wrong way, it is a question the graph cannot answer at
- * all, and the redirect names a `context({name})` call that returns nothing — a false deny (NS-5)
- * whose suggested exit does not exist (NS-6). Found by being blocked from reading a dependency's
- * source while doing exactly that.
+ * Measured, not assumed: `MATCH (n:File) WHERE n.filePath CONTAINS '<dir>'` returns 0 for
+ * node_modules, vendor, dist, build and coverage on two real indexes. Anything outside the repo
+ * root is excluded by definition. A search there is not a graph question asked the wrong way, it is
+ * a question the graph cannot answer, and the redirect names a `context({name})` call that returns
+ * nothing — a false deny (NS-5) whose suggested exit does not exist (NS-6). Found by being blocked
+ * from reading a dependency's source while doing exactly that.
+ *
+ * `build` and `dist` are the soft entries: a repo CAN keep real source there, and if one does, the
+ * gate stops covering it. That is a missed gate rather than a false deny, which is the direction
+ * NS-5 says to err in — but it is a heuristic, not a proof, and the two are worth not confusing.
  */
 function isUnindexedPath(pathArg, root) {
   const pa = String(pathArg || "").replace(/\\/g, "/");

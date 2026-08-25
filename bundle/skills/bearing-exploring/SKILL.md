@@ -71,8 +71,8 @@ it. `cypher` can filter on `r.confidence`; `impact` takes `minConfidence`.
 4. Read src/payments/processor.ts at the lines context cited — offset/limit, not the whole file
 ```
 
-Two things there that a grep does not give you: the flow NAME each symbol belongs to, and its
-position in that flow. "step 2/5" is what turns a list of callers into an order of operations.
+A grep gives you neither of the two things that matter here: the flow NAME each symbol belongs
+to, and its position in it. "step 2/5" is what turns a list of callers into an order of operations.
 
 `context` also carries `epistemic` / `causes`. A non-zero `causes.receiverTyping` means call sites
 were dropped because the analyzer could not type the receiver — "no incoming" then means "we lost
