@@ -65,7 +65,7 @@ Run `npm run bearing:detect-api` to refresh the profile after major server chang
 | Security / taint / injection review | `bearing-security-review` |
 | Research HTTP API change | See **HTTP API routing** above |
 | Tool reference / Cypher / CLI | `bearing-guide` / `bearing-cli` |
-| Area entry points | `.cursor/skills/generated/<area>/` |
+| Area entry points | `.claude/skills/gitnexus-area-<area>/` (mirrored to `.agents/skills/`) |
 | Hook blocked Grep/Read | `bearing-enforcement` (staleness + suspicion fallback) |
 | Full agent contract | `.cursor/rules/bearing.mdc` + `00-bearing-enforcement.mdc` |
 
