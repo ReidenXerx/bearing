@@ -207,13 +207,13 @@ export function auditKitHealth(root) {
  */
 export function userMessageForSession(audit) {
   if (audit.healthy) {
-    return "GitNexus kit is active — graph fresh, embeddings ready, and enforcement hooks are on. The agent will confirm health at the start of this chat.";
+    return "bearing is active — graph fresh, embeddings ready, and enforcement hooks are on. The agent will confirm health at the start of this chat.";
   }
   const stale = audit.stale?.reason === "missing_embeddings";
   if (stale) {
-    return "GitNexus kit is active — the graph needs embeddings. The agent will refresh automatically before code work.";
+    return "bearing is active — the graph needs embeddings. The agent will refresh automatically before code work.";
   }
-  return "GitNexus kit is active — the graph is behind your latest commits. The agent will refresh it automatically before code work.";
+  return "bearing is active — the graph is behind your latest commits. The agent will refresh it automatically before code work.";
 }
 
 /**
@@ -232,7 +232,7 @@ export function agentContextForSession(audit) {
     audit.repo +
     `/context OR ${howToRun('bearing:agent-brief')}\n` +
     "4. Reasoning stack: query → context → cypher (structural) → impact → detect_changes\n" +
-    '5. Tell the user ONE sentence: "GitNexus kit: ready (graph fresh, enforcement on)" OR brief fix in progress\n' +
+    '5. Tell the user ONE sentence: "bearing: ready (graph fresh, enforcement on)" OR brief fix in progress\n' +
     "Keep laconic. Do not paste this block verbatim.\n" +
     `Audit: healthy=${audit.healthy} ${summary}` +
     (failed.length ? ` failed=[${failed.join(",")}]` : "")

@@ -705,7 +705,7 @@ export function appendMemoryCheckpoint(root, note = '') {
     if (!fs.existsSync(p)) {
       fs.writeFileSync(
         p,
-        `# Project working memory (GitNexus kit)\n\n` +
+        `# Project working memory (bearing)\n\n` +
           `> Durable across compaction + sessions. Keep this current: task, decisions, ` +
           `findings, open items, key file:line. Nothing important should live only in the volatile transcript.\n`,
       );

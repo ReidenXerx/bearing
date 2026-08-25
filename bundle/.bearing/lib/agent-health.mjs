@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Human-friendly GitNexus + Cursor kit status (for developers and team leads).
+ * Human-friendly bearing + graph status (for developers and team leads).
  * Usage: node .bearing/lib/agent-health.mjs [repoRoot]
  */
 import fs from "node:fs";
@@ -32,7 +32,7 @@ async function main() {
   const { stale, repo, checks, stats } = audit;
   const lines = [];
 
-  lines.push(`GitNexus Cursor Kit — ${repo}`);
+  lines.push(`bearing — ${repo}`);
   lines.push("");
 
   for (const c of checks) {

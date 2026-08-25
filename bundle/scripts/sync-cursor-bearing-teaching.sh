@@ -249,7 +249,7 @@ NODE
 
 # ── main ─────────────────────────────────────────────────────────────────────
 
-info "Installing GitNexus agent kit teaching bundle (runtime: ${RUNTIME})"
+info "Installing bearing teaching bundle (runtime: ${RUNTIME})"
 
 # Steps 1, 2, 4 and 5 verify CURSOR's own files. They were unconditional, so a `--runtime claude`
 # repo — which is never given a `.cursor/` directory — failed here with "Missing rule:
