@@ -171,7 +171,7 @@ function main() {
   const onPass = rows.reduce((s, r) => s + r.on.passes, 0);
 
   const md = [];
-  md.push('# GitNexus kit eval report');
+  md.push('# bearing eval report');
   md.push('');
   md.push(
     `Model: ${args.model || '(runner default)'} · Tasks: ${rows.length} · Trials/condition: ${trials} · ${new Date().toISOString()}`
