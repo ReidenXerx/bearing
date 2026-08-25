@@ -16,6 +16,36 @@ import { fileURLToPath, pathToFileURL } from "node:url";
  * follow (NS-5). Resolve against what actually exists instead of assuming the shared layout.
  * @param {string} name e.g. "bearing:fallback"
  */
+/**
+ * Counter key → human label, and the humaniser. ONE map: there were two local copies, the scorecard's
+ * with 14 keys and the all-sessions stats' with 7, and stats filtered its output BY ITS OWN COPY — so
+ * seven counters were written on every session and shown to nobody, `consultNudges` and
+ * `microscopeNudges` among them. `labelFor` was a local const in the scorecard that stats called
+ * anyway, crashing with a ReferenceError mid-table on every run of `bearing:stats`.
+ *
+ * Both readers now derive their keys from what was actually COUNTED, so a new counter appears without
+ * anyone remembering to add it here; the fallback humanises an unlabelled key rather than hiding it.
+ */
+const labels = {
+  graphCalls: "GitNexus MCP calls",
+  grepRedirects: "Grep → graph redirects",
+  readRedirects: "Large Read → graph redirects",
+  impactGate: "Impact-before-edit gates",
+  commitGate: "detect_changes-before-commit gates",
+  editStaleBlocks: "Stale-edit blocks",
+  compactions: "Context compactions",
+  classicalFallbackGranted: "Classical-fallback grants (GN distrusted)",
+  driftRefreshBlocks: "Graph-drift refresh blocks (edited since index)",
+  taskCoreNudges: "Task-core nudges (edits since the core was last written)",
+  northStarAnchors: "North-star re-anchors (mid-session drift guards)",
+  impactVerdictsQuestioned: "Impact verdicts questioned (LOW from unresolved callers)",
+  consultNudges: "Consult prompts (invent-vs-implement, at first edit)",
+  microscopeNudges: "Deep-review nudges (change grew multi-file)"
+};
+
+const labelFor = (k) => labels[k] ?? k.replace(/([A-Z])/g, " $1").replace(/^./, (c) => c.toUpperCase());
+
+
 function howToRun(name) {
   try {
     const pkg = JSON.parse(fs.readFileSync(new URL("../package.json", import.meta.url), "utf8"));
@@ -736,22 +766,6 @@ if (cmd === "scorecard") {
   );
   const card = readScorecard(ROOT);
   const counts = card.counts ?? {};
-  const labels = {
-    graphCalls: "GitNexus MCP calls",
-    grepRedirects: "Grep → graph redirects",
-    readRedirects: "Large Read → graph redirects",
-    impactGate: "Impact-before-edit gates",
-    commitGate: "detect_changes-before-commit gates",
-    editStaleBlocks: "Stale-edit blocks",
-    compactions: "Context compactions",
-    classicalFallbackGranted: "Classical-fallback grants (GN distrusted)",
-    driftRefreshBlocks: "Graph-drift refresh blocks (edited since index)",
-    taskCoreNudges: "Task-core nudges (edits since the core was last written)",
-    northStarAnchors: "North-star re-anchors (mid-session drift guards)",
-    impactVerdictsQuestioned: "Impact verdicts questioned (LOW from unresolved callers)",
-    consultNudges: "Consult prompts (invent-vs-implement, at first edit)",
-    microscopeNudges: "Deep-review nudges (change grew multi-file)",
-  };
   console.log("GitNexus enforcement scorecard (this session)");
   console.log(
     card.startedAt ? `  since ${card.startedAt}` : "  (no activity yet)",
@@ -761,7 +775,6 @@ if (cmd === "scorecard") {
   // them for months. A hand-kept list on the read side of a counter is the same drift as one on
   // the write side; the fallback humanises an unlabelled key rather than hiding it.
   const keys = Object.keys(counts).filter((k) => counts[k]);
-  const labelFor = (k) => labels[k] ?? k.replace(/([A-Z])/g, " $1").replace(/^./, (c) => c.toUpperCase());
   if (!keys.length) {
     console.log(
       "  No enforcement events yet — run some tools in a chat first.",
@@ -800,15 +813,6 @@ if (cmd === "stats") {
       live: true,
     });
   }
-  const labels = {
-    graphCalls: "GitNexus MCP calls",
-    grepRedirects: "Grep → graph redirects",
-    readRedirects: "Large Read → graph redirects",
-    impactGate: "Impact-before-edit gates",
-    commitGate: "detect_changes-before-commit gates",
-    editStaleBlocks: "Stale-edit blocks",
-    compactions: "Context compactions",
-  };
   const s = summarizeTelemetry(records);
   if (process.argv.includes("--json")) {
     const latestIndex = [...records].reverse().find((r) => r.index)?.index ?? null;
@@ -825,14 +829,17 @@ if (cmd === "stats") {
   if (s.avgDurationMs != null) {
     console.log(`  avg session length: ${Math.round(s.avgDurationMs / 1000)}s`);
   }
-  console.log("  metric".padEnd(38) + "total   avg/session");
-  const keys = Object.keys(labels).filter((k) => s.totals[k]);
+  // Column width from the widest label actually being printed. A hardcoded 36 collided with the
+  // number the moment a label grew past it — "Consult prompts (invent-vs-implement, at first edit)1".
+  const width = Math.max(8, ...Object.keys(s.totals).filter((k) => s.totals[k]).map((k) => labelFor(k).length)) + 2;
+  console.log("  " + "metric".padEnd(width) + "total   avg/session");
+  const keys = Object.keys(s.totals).filter((k) => s.totals[k]);
   if (!keys.length) {
     console.log("  (no enforcement events across recorded sessions)");
   } else {
     for (const k of keys) {
       console.log(
-        `  ${labelFor(k).padEnd(36)}${String(s.totals[k]).padEnd(8)}${s.avgPerSession[k]}`,
+        `  ${labelFor(k).padEnd(width)}${String(s.totals[k]).padEnd(8)}${s.avgPerSession[k]}`,
       );
     }
   }
