@@ -59,8 +59,34 @@ function isDeclSearch(t) {
  * @param {ClassifyCtx['config']} config
  * @param {string} [root] repo root, so classification is location-independent
  */
-export function isNonSourcePath(pathArg, config, root) {
+export /**
+ * Paths the graph provably does not contain — so redirecting a search there hands back an empty
+ * result and no way forward.
+ *
+ * Measured on this repo's own index: `MATCH (n:File) WHERE n.filePath CONTAINS 'node_modules'`
+ * returns 0. Dependencies, build output and anything outside the repo are never indexed. A search
+ * there is not a graph question asked the wrong way, it is a question the graph cannot answer at
+ * all, and the redirect names a `context({name})` call that returns nothing — a false deny (NS-5)
+ * whose suggested exit does not exist (NS-6). Found by being blocked from reading a dependency's
+ * source while doing exactly that.
+ */
+function isUnindexedPath(pathArg, root) {
   const pa = String(pathArg || "").replace(/\\/g, "/");
+  if (!pa) return false;
+  if (/(?:^|\/)(?:node_modules|vendor|dist|build|coverage|\.git|\.gitnexus)(?:\/|$)/.test(pa)) {
+    return true;
+  }
+  // An absolute path that is not under the repo root is, by definition, not in this repo's graph.
+  if (pa.startsWith("/") && root) {
+    const r = String(root).replace(/\\/g, "/").replace(/\/$/, "");
+    if (pa !== r && !pa.startsWith(r + "/")) return true;
+  }
+  return false;
+}
+
+function isNonSourcePath(pathArg, config, root) {
+  const pa = String(pathArg || "").replace(/\\/g, "/");
+  if (isUnindexedPath(pa, root)) return true;
   if (!pa || helpers.isSourceCodePath(pa, config, root)) return false;
   return (
     /\.(json|jsonl|ya?ml|toml|ini|cfg|conf|lock|csv|tsv|env|md|mdc|txt|log|rst|html?|css|scss|less|svg)$/i.test(

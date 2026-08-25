@@ -52,7 +52,7 @@ the dispatcher + handler symbols instead of Route tooling.
 6. gitnexus_detect_changes before commit
 ```
 
-Find the dispatcher symbol from the profile's `customSymbols`, or query for "request handler / router / dispatch".
+Find the dispatcher symbol from the profile's `sourceSignals.customSymbols` (nested, not top-level), or query for "request handler / router / dispatch".
 
 ## Checklist
 
