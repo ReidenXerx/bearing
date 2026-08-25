@@ -67,7 +67,7 @@ you have to read. None of them is an error; each looks like an answer.
 
 ### When to escalate to `cypher` (after `query` / `context`)
 
-READ `bearing://repo/__GITNEXUS_REPO__/schema` before ad-hoc Cypher.
+READ `gitnexus://repo/__GITNEXUS_REPO__/schema` before ad-hoc Cypher.
 
 | Question | Cypher edge / pattern |
 | --- | --- |
@@ -287,7 +287,7 @@ HTTP routes `api_impact` / `route_map` / `shape_check` · multi-repo disambiguat
 **What the schemas do not tell you is where each one is silently wrong** — that is what the sections
 above are for, and it is the reason to read them rather than trust a tool's own summary.
 
-Cheap resource reads (prefer before heavy tools): `READ bearing://repo/__GITNEXUS_REPO__/{context|schema|clusters|processes|process/<name>}`.
+Cheap resource reads (prefer before heavy tools): `READ gitnexus://repo/__GITNEXUS_REPO__/{context|schema|clusters|processes|process/<name>}`.
 
 <!-- feature: gitnexus -->
 ### The three route tools are only as good as `Route` node coverage — CHECK IT FIRST
@@ -328,7 +328,7 @@ findings — the tool does not distinguish them, and neither does a raw number i
 
 New chat: run session health ritual if injected — `npm run bearing:agent-status`, one-sentence confirm to user.
 
-`npm run bearing:agent-brief` or READ `bearing://repo/__GITNEXUS_REPO__/context`. Stale or missing embeddings → **`npm run bearing:agent-refresh` first** (`required_permissions: ["all"]`). Hooks **block** Grep/Read/MCP/shell until refresh succeeds; classical tools only if refresh **fails** (say why). Never ask user to analyze.
+`npm run bearing:agent-brief` or READ `gitnexus://repo/__GITNEXUS_REPO__/context`. Stale or missing embeddings → **`npm run bearing:agent-refresh` first** (`required_permissions: ["all"]`). Hooks **block** Grep/Read/MCP/shell until refresh succeeds; classical tools only if refresh **fails** (say why). Never ask user to analyze.
 
 <!-- feature: gitnexus -->
 ## Stale loop (mandatory)

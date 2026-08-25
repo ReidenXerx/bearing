@@ -65,7 +65,7 @@ gitnexus_context({ name: "<symbol>", repo: "__GITNEXUS_REPO__" })
 gitnexus_trace({ from: "<source>", to: "<target>", repo: "__GITNEXUS_REPO__", maxDepth: 10 })
 gitnexus_pdg_query({ mode: "flows", target: "<function-or-file>", variable: "<var>", repo: "__GITNEXUS_REPO__" })
 gitnexus_explain({ target: "<file-or-symbol>", repo: "__GITNEXUS_REPO__" })
-READ bearing://repo/__GITNEXUS_REPO__/schema
+READ gitnexus://repo/__GITNEXUS_REPO__/schema
 gitnexus_cypher({ statement: "MATCH (f)-[r:CodeRelation {type: 'ACCESSES'}]->(p:Property {name: $name}) RETURN f.name, f.filePath, r.reason", params: { name: "<field>" }, repo: "__GITNEXUS_REPO__" })
 gitnexus_impact({ target: "<symbol>", direction: "upstream", repo: "__GITNEXUS_REPO__", summaryOnly: false, limit: 100 })
 ```

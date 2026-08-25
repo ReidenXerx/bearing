@@ -11,7 +11,7 @@ Quick reference for all GitNexus MCP tools, resources, and the knowledge graph s
 
 For any task involving code understanding, debugging, impact analysis, or refactoring:
 
-1. **Read `bearing://repo/{name}/context`** — codebase overview + check index freshness
+1. **Read `gitnexus://repo/{name}/context`** — codebase overview + check index freshness
 2. **Match your task to a skill below** and **read that skill file**
 3. **Follow the skill's workflow and checklist**
 
@@ -109,16 +109,16 @@ Lightweight reads (~100-500 tokens) for navigation:
 
 | Resource                                       | Content                                   |
 | ---------------------------------------------- | ----------------------------------------- |
-| `bearing://repo/{name}/context`               | Stats, staleness check                    |
-| `bearing://repo/{name}/clusters`              | All functional areas with cohesion scores |
-| `bearing://repo/{name}/cluster/{clusterName}` | Area members                              |
-| `bearing://repo/{name}/processes`             | All execution flows                       |
-| `bearing://repo/{name}/process/{processName}` | Step-by-step trace                        |
-| `bearing://repo/{name}/schema`                | Graph schema for Cypher                   |
+| `gitnexus://repo/{name}/context`               | Stats, staleness check                    |
+| `gitnexus://repo/{name}/clusters`              | All functional areas with cohesion scores |
+| `gitnexus://repo/{name}/cluster/{clusterName}` | Area members                              |
+| `gitnexus://repo/{name}/processes`             | All execution flows                       |
+| `gitnexus://repo/{name}/process/{processName}` | Step-by-step trace                        |
+| `gitnexus://repo/{name}/schema`                | Graph schema for Cypher                   |
 
 ## Graph Schema
 
-Always `READ bearing://repo/{name}/schema` before writing Cypher — it's authoritative for this repo.
+Always `READ gitnexus://repo/{name}/schema` before writing Cypher — it's authoritative for this repo.
 
 **Nodes:** File, Function, Class, Interface, Method, Community, Process (PDG layer adds BasicBlock).
 **Edges (via CodeRelation.type):** CALLS, IMPORTS, EXTENDS, IMPLEMENTS, DEFINES, MEMBER_OF, HAS_METHOD, METHOD_OVERRIDES, STEP_IN_PROCESS, **ACCESSES** (field read/write — carries `reason: "read"|"write"`). PDG layer adds CONTROL_DEP, REACHING_DEF, TAINTED.

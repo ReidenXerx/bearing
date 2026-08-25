@@ -60,7 +60,7 @@ only through `CALLS` was not checked.
 ```
 1. impact({target: "X", direction: "upstream"})  → What depends on this
    ↳ READ `epistemic`, `boundaries`, `causes` — not just `impactedCount`
-2. READ bearing://repo/{name}/processes                   → Check affected execution flows
+2. READ gitnexus://repo/{name}/processes                   → Check affected execution flows
 3. detect_changes()                               → Map current git changes to affected flows
 4. Assess risk and report to user
 ```
@@ -98,7 +98,7 @@ only through `CALLS` was not checked.
    → d=2 (LIKELY AFFECTED):
        authRouter     src/routes/auth.ts:22     [CALLS, 95%]
 
-2. READ bearing://repo/{repo}/processes
+2. READ gitnexus://repo/{repo}/processes
    → LoginFlow and TokenRefresh both touch validateUser
 
 3. detect_changes({ scope: "staged" })

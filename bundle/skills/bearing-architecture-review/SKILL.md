@@ -17,8 +17,8 @@ scoped `Grep` (allowed here, not a gate violation) and say which check you ran.
 ## Workflow
 
 ```
-1. READ bearing://repo/{name}/clusters     → functional areas + cohesion scores (low = poorly factored)
-2. READ bearing://repo/{name}/processes    → long/tangled flows = candidate hotspots
+1. READ gitnexus://repo/{name}/clusters     → functional areas + cohesion scores (low = poorly factored)
+2. READ gitnexus://repo/{name}/processes    → long/tangled flows = candidate hotspots
 3. check({cycles: true})                    → circular File IMPORTS (hard structural smell)
 4. cypher: cross-cluster CALLS              → coupling + layering violations (lower layer calling higher)
 5. cypher: god objects                      → classes with many HAS_METHOD AND high fan-in

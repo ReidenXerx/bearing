@@ -18,7 +18,7 @@ Refactoring changes existing code; **this is about adding it well** — reuse th
 
 ```
 1. query({search_query: "<similar existing feature>", goal: "pattern to reuse"})  → find prior art
-2. READ bearing://repo/{name}/clusters                                           → pick the right functional area
+2. READ gitnexus://repo/{name}/clusters                                           → pick the right functional area
 3. context({name: "<closest existing example>"})                                  → copy its shape (deps, signature, error handling)
 4. context({name: "<integration point>"})                                         → where you'll hook in (router, registry, factory)
 5. impact({target: "<integration point>", direction: "upstream"}) BEFORE wiring   → who else uses it; don't break them

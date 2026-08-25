@@ -18,7 +18,7 @@ Don't guess what to test — let the graph turn a change's **blast radius into t
 
 ```
 1. impact({target: "<changed symbol>", direction: "upstream"})   → everything that could break = the test surface
-2. READ bearing://repo/{name}/processes (or detect_changes)     → which execution FLOWS the change touches → integration tests
+2. READ gitnexus://repo/{name}/processes (or detect_changes)     → which execution FLOWS the change touches → integration tests
 3. cypher: callers of <symbol> that live in test files          → existing coverage vs gaps
 4. query({search_query: "<feature> tests", goal: "test pattern"}) → mirror the repo's existing test style
 5. write tests for: d=1 callers (unit) + each affected process (integration) + the gap symbols
@@ -48,7 +48,7 @@ WHERE NOT EXISTS {
 RETURN s.name, s.filePath
 ```
 
-(READ `bearing://repo/{name}/schema` first — adapt node/edge names to this repo.)
+(READ `gitnexus://repo/{name}/schema` first — adapt node/edge names to this repo.)
 
 ## Example: "what should I test after changing computeDiscount?"
 

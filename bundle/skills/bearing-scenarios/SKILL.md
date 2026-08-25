@@ -12,7 +12,7 @@ can be a floor — `impact` says which in `epistemic`. Before a conclusion that 
 scoped `Grep` (allowed here, not a gate violation) and say which check you ran.
 
 
-Match your task to a playbook. Always start with READ `bearing://repo/__GITNEXUS_REPO__/context`.
+Match your task to a playbook. Always start with READ `gitnexus://repo/__GITNEXUS_REPO__/context`.
 
 Cross-module flows / architecture questions → also read **`bearing-imaging`** skill.
 
@@ -53,7 +53,7 @@ Cross-module flows / architecture questions → also read **`bearing-imaging`** 
 ```
 - [ ] gitnexus_query({search_query: "<error or symptom>", task_context: "debugging", goal: "find throw site"})
 - [ ] gitnexus_context on top suspect from returned processes
-- [ ] READ bearing://repo/__GITNEXUS_REPO__/processes — pick matching flow
+- [ ] READ gitnexus://repo/__GITNEXUS_REPO__/processes — pick matching flow
 - [ ] Optional cypher for call chains (see bearing-debugging skill)
 - [ ] Read source at flagged lines — confirm root cause
 - [ ] If regression: detect_changes on recent commits

@@ -19,7 +19,7 @@ cause is built on.
 ```
 1. query({search_query: "<error or symptom>"})     → related execution flows
 2. context({name: "<suspect>"})                    → callers / callees / processes
-3. READ bearing://repo/{repo}/process/{name}       → the flow, in step order
+3. READ gitnexus://repo/{repo}/process/{name}       → the flow, in step order
 4. trace({from, to})                               → shortest A→B path, in one call
 5. pdg_query({mode: "controls"|"flows"})           → guards / data flow (needs PDG)
 ```
@@ -47,7 +47,7 @@ cause is built on.
    → Incoming: processCheckout, webhookHandler
    → Outgoing: verifyCard, fetchRates   ← external API
 
-3. READ bearing://repo/my-app/process/CheckoutFlow
+3. READ gitnexus://repo/my-app/process/CheckoutFlow
    → step 3/7: validatePayment → fetchRates (external)
 
 4. Root cause: fetchRates calls an external API with no timeout.

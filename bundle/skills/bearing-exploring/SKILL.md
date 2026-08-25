@@ -38,11 +38,11 @@ it. `cypher` can filter on `r.confidence`; `impact` takes `minConfidence`.
 ## Workflow
 
 ```
-1. READ bearing://repo/{name}/context             → Codebase overview, check staleness
+1. READ gitnexus://repo/{name}/context             → Codebase overview, check staleness
 2. query({search_query: "<what you want to understand>"})  → Find related execution flows
 3. context({name: "<symbol>"})            → Deep dive on specific symbol
 4. cypher({statement, params})                → Field ACCESSES, N-hop chains, overrides (READ schema first)
-5. READ bearing://repo/{name}/process/{name}      → Trace full execution flow
+5. READ gitnexus://repo/{name}/process/{name}      → Trace full execution flow
 ```
 
 > If step 2 says "Index is stale" → run `node .gitnexus/run.cjs analyze` in terminal.
@@ -51,10 +51,10 @@ it. `cypher` can filter on `r.confidence`; `impact` takes `minConfidence`.
 
 | Resource                                | What you get                                            |
 | --------------------------------------- | ------------------------------------------------------- |
-| `bearing://repo/{name}/context`        | Stats, staleness warning (~150 tokens)                  |
-| `bearing://repo/{name}/clusters`       | All functional areas with cohesion scores (~300 tokens) |
-| `bearing://repo/{name}/cluster/{name}` | Area members with file paths (~500 tokens)              |
-| `bearing://repo/{name}/process/{name}` | Step-by-step execution trace (~200 tokens)              |
+| `gitnexus://repo/{name}/context`        | Stats, staleness warning (~150 tokens)                  |
+| `gitnexus://repo/{name}/clusters`       | All functional areas with cohesion scores (~300 tokens) |
+| `gitnexus://repo/{name}/cluster/{name}` | Area members with file paths (~500 tokens)              |
+| `gitnexus://repo/{name}/process/{name}` | Step-by-step execution trace (~200 tokens)              |
 
 ## Tools
 
@@ -78,7 +78,7 @@ context({name: "validateUser"})
 ## Example: "How does payment processing work?"
 
 ```
-1. READ bearing://repo/my-app/context       → 918 symbols, 45 processes
+1. READ gitnexus://repo/my-app/context       → 918 symbols, 45 processes
 2. query({search_query: "payment processing"})
    → CheckoutFlow: processPayment → validateCard → chargeStripe
    → RefundFlow: initiateRefund → calculateRefund → processRefund

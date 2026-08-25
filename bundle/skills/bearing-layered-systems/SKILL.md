@@ -20,7 +20,7 @@ This is the *operate* counterpart to `bearing-architecture-review` (which *judge
 
 ```
 1. Map the layers:
-   READ bearing://repo/{name}/clusters        → functional areas ≈ layers/modules
+   READ gitnexus://repo/{name}/clusters        → functional areas ≈ layers/modules
    (HTTP? check .bearing/gitnexus-api-profile.json → framework vs custom router)
 2. Trace one feature top-to-bottom:
    query({search_query:"<feature>"}) → READ process/<flow>   → the cross-layer chain + step order

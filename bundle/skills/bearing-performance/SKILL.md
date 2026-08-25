@@ -18,7 +18,7 @@ GitNexus does **not** profile runtime — it exposes the *structure* that makes 
 
 ```
 1. query({search_query: "<slow concept>", goal: "hot path"})   → orient on the flow
-2. READ bearing://repo/{name}/process/<flow>                  → see the chain + step order
+2. READ gitnexus://repo/{name}/process/<flow>                  → see the chain + step order
 3. trace({from: "<entry>", to: "<expensive sink>"})            → exact call path (depth = cost proxy)
 4. cypher (CALLS variable-length / fan-in)                     → deep chains + high-fan-in hubs
 5. pdg_query({mode: "flows", target})                          → values recomputed vs reused

@@ -30,7 +30,7 @@ or the result looks wrong, say so, verify classically, and say why in one senten
 | Blast radius | `impact` + `detect_changes` | grepping for callers |
 | Field / data flow | `cypher` with `ACCESSES` | grepping the field name |
 
-Every recipe starts by READing `bearing://repo/__GITNEXUS_REPO__/context` for staleness. Stale →
+Every recipe starts by READing `gitnexus://repo/__GITNEXUS_REPO__/context` for staleness. Stale →
 refresh first (`bearing:agent-refresh`); hooks block runtime edits until it is fresh.
 
 ---
@@ -44,7 +44,7 @@ refresh first (`bearing:agent-refresh`); hooks block runtime edits until it is f
            task_context: "<user question verbatim>",
            goal: "find execution flows and entry symbols" })
 2. Pick the top 1–3 processes
-3. READ bearing://repo/__GITNEXUS_REPO__/process/{name} for each
+3. READ gitnexus://repo/__GITNEXUS_REPO__/process/{name} for each
 4. context({name}) on entry + hub symbols — 2–4 symbols, not every leaf
 5. Read source ONLY at the lines context/process cited, with offset/limit
 ```

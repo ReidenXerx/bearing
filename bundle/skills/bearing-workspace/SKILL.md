@@ -15,8 +15,8 @@ This repo replaces grep-first navigation with a **knowledge graph + embeddings +
 Do not skip steps:
 
 ```
-READ bearing://repo/__GITNEXUS_REPO__/context   # or npm run bearing:agent-brief (autonomous)
-READ bearing://repo/__GITNEXUS_REPO__/schema    # before ad-hoc Cypher
+READ gitnexus://repo/__GITNEXUS_REPO__/context   # or npm run bearing:agent-brief (autonomous)
+READ gitnexus://repo/__GITNEXUS_REPO__/schema    # before ad-hoc Cypher
 → query({search_query, task_context, goal, repo, limit: 5, max_symbols: 12})   # graph + embeddings — orient
 → context({name, include_content: false}) or context({uid, include_content: false})
 → trace({from, to}) or pdg_query({mode})   # known paths, control/data flow when relevant
