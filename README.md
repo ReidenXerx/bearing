@@ -76,6 +76,11 @@ Then restart your IDE. Enforcement needs tool-interception hooks, and only some 
 | Minions — anchored fan-out | ✅ | — | — | — |
 | GitNexus — hard gates | ✅ | ✅ | — | — |
 
+✅ means it fires without being asked. A `—` is not always absence: the **task-core** skill and its
+contract section install on every runtime, so you can invoke it by name — what Claude Code adds is
+the nudge that fires it unprompted. **Minions** and the **GitNexus gates** genuinely need hooks and
+are not present at all where the column says `—`.
+
 ### 🎨 Prettier — so two tools stop rewriting each other
 
 An install puts ~90 tracked, formattable files into your repo — the hook lib alone is 31 `.mjs`
