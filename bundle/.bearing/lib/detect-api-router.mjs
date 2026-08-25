@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Detect Express/framework vs custom hand-rolled HTTP router after index build.
- * Writes .cursor/gitnexus-api-profile.json for agent-brief and api-routes skill routing.
+ * Writes .bearing/gitnexus-api-profile.json for agent-brief and api-routes skill routing.
  */
 import fs from 'node:fs';
 import path from 'node:path';

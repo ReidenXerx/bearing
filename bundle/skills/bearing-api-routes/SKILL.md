@@ -12,7 +12,7 @@ can be a floor — `impact` says which in `epistemic`. Before a conclusion that 
 scoped `Grep` (allowed here, not a gate violation) and say which check you ran.
 
 
-The kit auto-detects the router style at install and writes `.cursor/gitnexus-api-profile.json`.
+The kit auto-detects the router style at install and writes `.bearing/gitnexus-api-profile.json`.
 Run `npm run bearing:detect-api` to refresh it after major server changes. Route the work by profile.
 
 | Profile | What it means | Use |
@@ -57,7 +57,7 @@ Find the dispatcher symbol from the profile's `sourceSignals.customSymbols` (nes
 ## Checklist
 
 ```
-- [ ] Profile checked (.cursor/gitnexus-api-profile.json or npm run bearing:detect-api)
+- [ ] Profile checked (.bearing/gitnexus-api-profile.json or npm run bearing:detect-api)
 - [ ] context on dispatcher (custom) OR api_impact (framework)
 - [ ] impact upstream on the handler symbol
 - [ ] Response envelope / schema preserved (or consumers updated in the same change)

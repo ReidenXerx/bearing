@@ -31,7 +31,7 @@ Stale, missing embeddings, or wrong graph? **`npm run bearing:agent-refresh`** a
 
 ## HTTP API routing (auto-detected at install)
 
-After index build, the kit writes `.cursor/gitnexus-api-profile.json`:
+After index build, the kit writes `.bearing/gitnexus-api-profile.json`:
 
 | Profile | Use |
 | --- | --- |
