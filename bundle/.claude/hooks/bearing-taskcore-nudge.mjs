@@ -137,8 +137,9 @@ emitContext(
     `Refresh \`${corePath}\` — GOAL · CONSTRAINTS · DECISIONS(+why) · STATE(done/now/NEXT) · ` +
     "ANCHORS(file:line) · GOTCHAS(what you already tried that failed) · OPEN-Qs. Terse, for you, " +
     "not for a human. A compaction can land at any time and the transcript does not survive it; " +
-    "this file is what does. REWRITE it rather than appending — drop finished steps whose outcome " +
-    "is now in the code, and resolved questions; git already keeps the log. Skip it if the task " +
-    "has not moved.",
+    "this file is what does. REWRITE it rather than appending: clean it from log-like things, keep " +
+    "every lesson and scar — git already keeps the log. A lesson that outlives THIS task goes to " +
+    "`.bearing/gold-practices.md` BEFORE you drop it here, or it dies with the chat. Skip it if " +
+    "the task has not moved.",
   "PostToolUse",
 );
