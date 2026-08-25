@@ -29,21 +29,6 @@ scoped `Grep` (allowed here, not a gate violation) and say which check you ran.
 6. Recommend tests per affected process
 ```
 
-## Checklist
-
-```
-- [ ] `npm run bearing:branch-status -- <base>` confirms branch/base refs
-- [ ] detect_changes compare against main (or PR base branch) with `branch` when multi-branch index is available
-- [ ] Risk level acceptable for change intent?
-- [ ] affected_processes match PR description?
-- [ ] Any surprise cross-community flows (changes spanning unrelated clusters)?
-- [ ] Entry-point symbols get individual impact upstream
-- [ ] HIGH/CRITICAL changes use PDG impact when available
-- [ ] API payload changes paired with their client/consumer (shape_check)
-- [ ] Config/fixture-only changes → relevant tests green
-- [ ] Index was fresh during review (context resource)
-```
-
 ## Risk interpretation
 
 | detect_changes risk | Action |

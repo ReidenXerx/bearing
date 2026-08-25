@@ -45,17 +45,6 @@ Refactoring changes existing code; **this is about adding it well** — reuse th
 | "What's the integration/extension point?" | `context` on the dispatcher/registry/factory symbol |
 | "Who else wires into that point?" | `impact` upstream — match the call convention; avoid breaking siblings |
 
-## Checklist
-
-```
-- [ ] query for existing similar features — REUSE, don't reinvent
-- [ ] context the closest example; mirror its structure + error handling
-- [ ] READ clusters → put new code in the right functional area
-- [ ] context the integration point; impact upstream BEFORE wiring in
-- [ ] implement to the reused pattern (same deps, naming, conventions)
-- [ ] detect_changes + impact on new wiring → verify nothing unexpected moved
-```
-
 ## Example: "add a CSV export endpoint"
 
 ```

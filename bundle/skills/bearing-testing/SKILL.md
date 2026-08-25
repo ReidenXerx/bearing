@@ -57,17 +57,6 @@ RETURN s.name, s.filePath
 
 (READ `bearing://repo/{name}/schema` first — adapt node/edge names to this repo.)
 
-## Checklist
-
-```
-- [ ] impact upstream on the changed symbol → list d=1 (unit) + affected processes (integration)
-- [ ] pdg_query controls (if PDG) → enumerate the guards/branches to cover
-- [ ] cypher → which affected symbols already have test-file callers vs gaps
-- [ ] query for the existing test pattern; mirror it
-- [ ] write unit (callers) + integration (each flow) + gap tests
-- [ ] detect_changes(staged) → every affected process has a test before commit
-```
-
 ## Example: "what should I test after changing computeDiscount?"
 
 ```

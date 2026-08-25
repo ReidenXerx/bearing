@@ -62,17 +62,6 @@ RETURN c.name, methods, count(caller) AS callers
 ORDER BY methods + callers DESC
 ```
 
-## Checklist
-
-```
-- [ ] clusters → note low-cohesion areas
-- [ ] check(cycles) → list every import cycle (cite the file ring)
-- [ ] cypher cross-cluster CALLS → coupling hotspots + wrong-direction (layering) edges
-- [ ] cypher → god objects / wide high-fan-in classes
-- [ ] impact on top hubs → quantify blast radius (the refactor priority list)
-- [ ] Report: each finding + the query that proves it + a concrete remediation
-```
-
 ## Example output
 
 ```

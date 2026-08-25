@@ -40,7 +40,8 @@ scoped `Grep` (allowed here, not a gate violation) and say which check you ran.
 4. Plan update order: interfaces → implementations → callers → tests
 ```
 
-> If "Index is stale" → run `node .gitnexus/run.cjs analyze` in terminal.
+> Stale index → `npm run bearing:agent-refresh` (always includes `--embeddings`; an index
+> without them counts as stale).
 
 ## Checklists
 

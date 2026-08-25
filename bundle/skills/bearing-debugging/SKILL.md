@@ -30,19 +30,8 @@ scoped `Grep` (allowed here, not a gate violation) and say which check you ran.
 5. pdg_query({mode: "controls"|"flows"})            → Guards / data flow when PDG exists
 ```
 
-> If "Index is stale" → run `node .gitnexus/run.cjs analyze` in terminal.
-
-## Checklist
-
-```
-- [ ] Understand the symptom (error message, unexpected behavior)
-- [ ] query for error text or related code
-- [ ] Identify the suspect function from returned processes
-- [ ] context to see callers and callees
-- [ ] Trace execution flow via process resource if applicable
-- [ ] cypher for custom call chain traces if needed
-- [ ] Read source files to confirm root cause
-```
+> Stale index → `npm run bearing:agent-refresh` (always includes `--embeddings`; an index
+> without them counts as stale).
 
 ## Debugging Patterns
 

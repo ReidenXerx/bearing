@@ -30,17 +30,6 @@ Use this when a task touches untrusted input, auth/session data, file paths, she
 
 If PDG/taint returns “no layer”, do **not** call the code safe. Say the repo needs `npm run bearing:pdg` / pre-commit PDG refresh, then fall back to graph + targeted reads.
 
-## Checklist
-
-- [ ] Identify untrusted sources: request params/body/headers, env, files, queue/webhook payloads.
-- [ ] Identify sinks: SQL, shell/process, file path, dynamic eval/codegen, HTML/DOM/template output.
-- [ ] Run `gitnexus_explain` for persisted taint findings on touched file/symbol.
-- [ ] Run `pdg_query flows` for suspicious input variables.
-- [ ] Run `pdg_query controls` to verify guards/validators dominate the sink path.
-- [ ] Confirm sanitizer is real transformation/validation, not just a comment or type.
-- [ ] Use `trace` when you know source and sink symbols and need the shortest call path.
-- [ ] Report false-positive caveats: taint is over-approximated; absent findings are not proof of safety.
-
 ## Tool routing
 
 | Question | Tool |

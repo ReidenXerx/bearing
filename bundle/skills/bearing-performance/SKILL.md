@@ -45,18 +45,6 @@ GitNexus does **not** profile runtime — it exposes the *structure* that makes 
 | **Work inside a flow step** | READ `process/<name>` — a heavy symbol mid-loop-ish flow | Per-item cost on a collection flow |
 | **Cross-layer chatter** | `cypher` cross-cluster `CALLS` | N+1 / round-trips across a boundary (e.g. per-row DB call) |
 
-## Checklist
-
-```
-- [ ] query the slow concept; READ the process flow for step order
-- [ ] trace entry → suspected expensive sink (chain depth = first cost proxy)
-- [ ] cypher: find deepest CALLS chains + highest-fan-in symbols on the path
-- [ ] pdg_query flows: is a value recomputed where one computation would do?
-- [ ] impact upstream on the symbol BEFORE changing its signature/behavior
-- [ ] Benchmark/profile to CONFIRM (graph localizes; it does not measure)
-- [ ] detect_changes after the fix → re-check affected flows
-```
-
 ## Example: "the report endpoint is slow"
 
 ```

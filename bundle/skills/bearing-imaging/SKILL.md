@@ -14,170 +14,118 @@ A zero is not absence; a near-0.5 `r.confidence` edge is a lead, not proof (~92%
 can be a floor — `impact` says which in `epistemic`. Before a conclusion that matters, confirm with a
 scoped `Grep` (allowed here, not a gate violation) and say which check you ran.
 
+Use this when the task needs **structure in your head**, not a single symbol lookup.
 
-Use this skill when the task needs **structure in your head** — not a single symbol lookup.
-
-**Output contract:** Cite a GitNexus **process** or **cluster** for cross-module flows when the index is fresh. If none found or results look wrong, say so and use classical Read/Grep to verify — tell the user why.
-
-## When to fall back to classical tools
-
-| Situation | Action |
-| --- | --- |
-| Index stale | Hooks allow Grep/Read/Search; prefer refresh before edits |
-| 0 callers on known hub | Retry `context({uid})`, then scoped Grep in the file GN named |
-| impact vs detect_changes conflict | Trust detect_changes; verify in source |
-| Cannot cite any process after query | Say index may be stale or GN incomplete; verify with Read |
-
-Always tell the user in one sentence when bypassing graph-first imaging.
-
-## When to use (vs other skills)
-
-| Question type | Skill |
-| --- | --- |
-| "How does feature X flow end-to-end?" | **bearing-imaging** (this) |
-| "What calls `<symbol>`?" | `bearing-exploring` / `context` |
-| "Safe to change X?" | `bearing-impact-analysis` |
-| "Why is this failing?" | `bearing-debugging` |
-| Pre-commit / PR checklist | `bearing-scenarios` |
+**Output contract:** cite a **process** or **cluster** for any cross-module flow. If none is found,
+or the result looks wrong, say so, verify classically, and say why in one sentence.
 
 ## Thinking modes → tools
 
-| Mental model | Tool | Bad habit |
+| Mental model | Tool | Instead of |
 | --- | --- | --- |
-| Business flow ("request → handler → storage") | `query` → **processes** | Read 5 files linearly |
+| Business flow ("request → handler → storage") | `query` → **processes** | reading five files linearly |
 | Call chain ("who calls X?") | `context` (incoming CALLS) | `Grep("X")` |
-| Module map ("what lives in area Y?") | `READ clusters` → `cluster/{Area}` | Broad Glob on `src/` |
-| Pipeline step trace | `READ process/{name}` | Follow imports manually |
-| Blast radius | `impact` + `detect_changes` | Grep callers |
-| Field/data flow | `cypher` with `ACCESSES` | Grep field name |
+| Module map ("what lives in area Y?") | `READ clusters` → `cluster/{Area}` | a broad Glob on `src/` |
+| Pipeline step trace | `READ process/{name}` | following imports by hand |
+| Blast radius | `impact` + `detect_changes` | grepping for callers |
+| Field / data flow | `cypher` with `ACCESSES` | grepping the field name |
 
-## Mandatory prep
-
-```
-READ bearing://repo/__GITNEXUS_REPO__/context   → staleness first
-```
-
-If stale → **Cursor agents:** `npm run bearing:agent-refresh` autonomously. **Humans/CI:** `npm run bearing:refresh` (`bearing:full-pdg` for pre-commit precision). Hooks block runtime edits until fresh.
+Every recipe starts by READing `bearing://repo/__GITNEXUS_REPO__/context` for staleness. Stale →
+refresh first (`bearing:agent-refresh`); hooks block runtime edits until it is fresh.
 
 ---
 
-## Recipe 1 — Explain a pipeline / business flow
+## Recipe 1 — explain a pipeline / business flow
 
 **Trigger:** "How does X work?", "Explain the <feature> pipeline", "What happens when I run Y?"
 
 ```
-1. READ context (staleness)
-2. query({
-     search_query: "<feature or pipeline name>",
-     task_context: "<user question verbatim>",
-     goal: "find execution flows and entry symbols",
-     repo: "__GITNEXUS_REPO__"
-   })
-3. Pick top 1–3 processes from results
-4. READ bearing://repo/__GITNEXUS_REPO__/process/{name} for each
-5. context({name}) on entry + hub symbols (2–4 symbols max)
-6. Read source ONLY at lines cited by context/process — use offset/limit
+1. query({ search_query: "<feature or pipeline name>",
+           task_context: "<user question verbatim>",
+           goal: "find execution flows and entry symbols" })
+2. Pick the top 1–3 processes
+3. READ bearing://repo/__GITNEXUS_REPO__/process/{name} for each
+4. context({name}) on entry + hub symbols — 2–4 symbols, not every leaf
+5. Read source ONLY at the lines context/process cited, with offset/limit
 ```
 
-**Deliverable format:**
-
-```markdown
-## Flow: {ProcessName}
-Entry: `symbol` → … → exit
-Steps: (from process trace)
-Hub nodes: symbols with most callers
-Modules touched: (cluster names from the graph)
-```
+Answer as: flow name → entry symbol → steps → hub symbols → modules touched. Cite `file:line`.
 
 ---
 
-## Recipe 2 — Map a functional area
+## Recipe 2 — map a functional area
 
 **Trigger:** "What's in area X?", "Map the <area> module"
 
 ```
-1. READ bearing://repo/__GITNEXUS_REPO__/clusters
-2. READ bearing://repo/__GITNEXUS_REPO__/cluster/{AreaName}
-3. query({ search_query: "{AreaName} entry points", task_context: "area map", goal: "entry symbols" })
-4. context on 2–3 entry symbols listed in cluster
+1. READ .../clusters  →  READ .../cluster/{AreaName}
+2. query({ search_query: "{AreaName} entry points", goal: "entry symbols" })
+3. context on 2–3 entry symbols the cluster lists
 ```
+
+`cohesion` measured 0.04–0.98 across one repo's clusters — a low-cohesion cluster is a naming
+accident, not a module. Read it before you describe the area as one.
 
 ---
 
-## Recipe 3 — Trace a call chain (depth)
+## Recipe 3 — trace a call chain
 
 **Trigger:** "What calls X?", "Trace from CLI to core"
 
 ```
-1. context({ name: "X", repo: "__GITNEXUS_REPO__" })
-2. Walk incoming CALLS (d=1) — do not grep
-3. For each caller, note which processes include it
-4. Optional: READ process/{name} to see step order
+1. context({ name: "X" })
+2. Walk incoming CALLS at depth 1 — do not grep
+3. Note which processes each caller belongs to
+4. READ process/{name} for step order
 ```
 
-Stop at process / cluster boundaries, not every leaf.
+Stop at process / cluster boundaries, not every leaf. `trace` answers A→B in one call instead of
+3–8 manual hops, and reports the furthest reachable node when no path exists.
 
 ---
 
-## Recipe 4 — Trace a data field
+## Recipe 4 — trace a data field
 
 **Trigger:** "Who reads/writes `<field>`?", "Where is `<field>` consumed?"
 
 ```
-1. READ bearing://repo/__GITNEXUS_REPO__/schema  (if unfamiliar with cypher)
-2. cypher — ACCESSES edges with reason read/write on field name
+1. READ .../schema (if unfamiliar with cypher)
+2. cypher — ACCESSES edges with reason read/write on the field name
 3. context on writers first, then readers
-4. detect_changes if field changed in WIP
+4. detect_changes if the field changed in WIP
 ```
 
-Widen impact with `relationTypes: ["CALLS","IMPORTS","ACCESSES"]` when editing fields.
+`impact` excludes `ACCESSES` by default, so pass
+`relationTypes: ["CALLS","IMPORTS","ACCESSES"]` when editing a field or "no callers" means "no
+callers that aren't field reads".
 
 ---
 
-## Recipe 5 — Cross-module spine
+## Recipe 5 — cross-module spine
 
-**Trigger:** A change spanning several modules (e.g. entry → core → storage → client).
+**Trigger:** a change spanning several modules (entry → core → storage → client).
 
-Discover the repo's high-value spines from the graph instead of guessing:
-
-```
-1. READ bearing://repo/__GITNEXUS_REPO__/clusters   → top functional areas
-2. READ bearing://repo/__GITNEXUS_REPO__/processes  → longest / most-connected flows
-3. query({ search_query: "<feature> end to end", task_context: "cross-module change", goal: "spine processes" })
-```
-
-After `query`, run `detect_changes` on WIP — it often shows cross-community blast that `impact` on a single symbol misses.
-
----
-
-## Worked example (generic)
+Discover the spines from the graph rather than guessing:
 
 ```
-1. READ context
-2. query({
-     search_query: "<top feature> workflow",
-     task_context: "explain the <feature> pipeline",
-     goal: "processes and hub symbols",
-     repo: "__GITNEXUS_REPO__"
-   })
-   → expect a process with the entry symbol + a few hubs
-3. READ process/{top process name}
-4. context({ name: "<entry symbol from the process>" })
-5. Summarize with process name + hub symbols — then cite file:line for details
+1. READ .../clusters    → top functional areas
+2. READ .../processes   → longest / most-connected flows
+3. query({ search_query: "<feature> end to end", goal: "spine processes" })
 ```
+
+Then run `detect_changes` on the WIP: it surfaces cross-community blast that `impact` on a single
+symbol misses. A `processType` of `cross_community` is where contracts break.
 
 ---
 
 ## Anti-patterns
 
-- Describing a 3+ module flow from memory when index is fresh and GN was not tried
-- Reading entire adapter files before `query`
-- Skipping `process/{name}` when user asked "how does the flow work"
-- Trusting `impact` alone on WIP — pair with `detect_changes` for cross-module edits
-- Bypassing GN without a stated reason when index is fresh
+- Describing a 3+ module flow from memory while the index is fresh.
+- Reading whole adapter files before `query`.
+- Skipping `process/{name}` when the question was "how does the flow work".
+- Trusting `impact` alone on WIP — pair it with `detect_changes` for cross-module edits.
 
 ## Related
 
-- Master index: `bearing-workspace`
-- Structured checklists: `bearing-scenarios`
-- HTTP routes: `bearing-api-routes` (framework `api_impact` or custom dispatcher)
+Master index `bearing-workspace` · checklists `bearing-scenarios` · HTTP routes
+`bearing-api-routes`.

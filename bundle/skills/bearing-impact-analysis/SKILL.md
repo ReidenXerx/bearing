@@ -74,19 +74,8 @@ only through `CALLS` was not checked.
 4. Assess risk and report to user
 ```
 
-> If "Index is stale" → run `node .gitnexus/run.cjs analyze` in terminal.
-
-## Checklist
-
-```
-- [ ] impact({target, direction: "upstream"}) to find dependents
-- [ ] For high-risk runtime/security/core edits: impact({target, direction: "upstream", mode: "pdg"}) if PDG layer exists
-- [ ] Review d=1 items first (these WILL BREAK)
-- [ ] Check high-confidence (>0.8) dependencies
-- [ ] READ processes to check affected execution flows
-- [ ] detect_changes() for pre-commit check
-- [ ] Assess risk level and report to user
-```
+> Stale index → `npm run bearing:agent-refresh` (always includes `--embeddings`; an index
+> without them counts as stale).
 
 ## Understanding Output
 

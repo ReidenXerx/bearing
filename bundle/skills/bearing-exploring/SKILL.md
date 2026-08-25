@@ -55,18 +55,6 @@ it. `cypher` can filter on `r.confidence`; `impact` takes `minConfidence`.
 
 > If step 2 says "Index is stale" → run `node .gitnexus/run.cjs analyze` in terminal.
 
-## Checklist
-
-```
-- [ ] READ bearing://repo/{name}/context
-- [ ] query for the concept you want to understand
-- [ ] Review returned processes (execution flows)
-- [ ] context on key symbols for callers/callees
-- [ ] cypher for field data flow or custom call chains if context is not enough (READ schema first)
-- [ ] READ process resource for full execution traces
-- [ ] Read source files for implementation details
-```
-
 ## Resources
 
 | Resource                                | What you get                                            |
