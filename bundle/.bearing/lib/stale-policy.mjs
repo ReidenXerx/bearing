@@ -20,6 +20,26 @@ export const ESCAPE_HINT =
   ` If GitNexus itself is wrong/unavailable: \`${howToRun('bearing:fallback')} -- "<why>"\` (bounded, logged). To downgrade blocks to warnings: set "mode":"guide" in .bearing/hooks.json.`;
 
 export function evaluateStalePolicy(stale, root) {
+  // THE GRANT IS CHECKED FIRST, and the order is the whole point. It used to sit BELOW the
+  // staleness-gate-off branch, which returns early whenever the index is not fresh — the default
+  // configuration and the common case. So `bearing:fallback` wrote its grant, printed "GRANTED for
+  // ~15 min", and was never read: on any repo even one commit behind, the escape hatch NS-6
+  // promises did nothing, silently. An explicit human override outranks every automatic phase
+  // decision, so it is evaluated before all of them.
+  // Explicit escape hatch: the agent/user declared GitNexus untrustworthy here
+  // (`npm run bearing:fallback "<why>"`) → classical fallback even on a FRESH index.
+  // Bounded (auto-expires), logged, and surfaced so it can't be a silent bypass.
+  const grant = fallbackGrant(root);
+  if (grant) {
+    return {
+      phase: 'classical_fallback',
+      forceRefresh: false,
+      allowClassical: true,
+      allowGraphTools: true,
+      override: grant,
+    };
+  }
+
   // STALENESS GATE OFF (the default). A stale index no longer denies anything: it is reported, the
   // graph still refreshes on commit and on demand, and the agent is not ordered to rebuild mid-task.
   //
@@ -34,20 +54,6 @@ export function evaluateStalePolicy(stale, root) {
       allowGraphTools: true,
       staleNote: stale?.detail || null,
       gateOff: true,
-    };
-  }
-
-  // Explicit escape hatch: the agent/user declared GitNexus untrustworthy here
-  // (`npm run bearing:fallback "<why>"`) → classical fallback even on a FRESH index.
-  // Bounded (auto-expires), logged, and surfaced so it can't be a silent bypass.
-  const grant = fallbackGrant(root);
-  if (grant) {
-    return {
-      phase: 'classical_fallback',
-      forceRefresh: false,
-      allowClassical: true,
-      allowGraphTools: true,
-      override: grant,
     };
   }
 

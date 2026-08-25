@@ -114,7 +114,14 @@ function runAllowFail(cmd, args, opts = {}, fatal = false) {
 const cmd = process.argv[2] ?? "status";
 
 if (cmd === "fallback") {
-  const reason = process.argv.slice(3).join(" ").trim();
+  const reason = process.argv
+    .slice(3)
+    // npm eats the `--` separator; a DIRECT `node scripts/bearing-agent.mjs fallback -- "why"`
+    // does not, and that is the form stealth installs are told to use — so it landed verbatim in
+    // every failure report sent to the GitNexus devs.
+    .filter((a, i) => !(i === 0 && a === "--"))
+    .join(" ")
+    .trim();
   if (!reason) {
     console.error(
       `Usage: ${howToRun("bearing:fallback")} -- "<why GitNexus can't be trusted here>"\n` +
