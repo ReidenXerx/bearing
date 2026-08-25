@@ -363,7 +363,7 @@ Symbol grep → `context`. **Field/property grep → READ schema → `cypher` (`
 - **Edit runtime source** → blocked until one `impact` (or `rename`) call this session. Run blast radius first; warn on HIGH/CRITICAL.
 - **`git commit`** → blocked until one `detect_changes` call this session. Confirm affected processes match intent.
 
-Enforcement is **polyglot** — JS/TS, Python, Rust, Go, Java, and more count as source (configure `sourceExts` in `.bearing/hooks.json`).
+Enforcement is **polyglot** — JS/TS, Python, Rust, Go, Java and more count as source. `sourceExts` in `.bearing/hooks.json` REPLACES that list rather than extending it: setting `["cbl"]` to add COBOL silently stops `.ts` being source, and every gate with it. List every extension you want gated, not just the new one.
 
 <!-- feature: microscope -->
 ## Deep review (intel layer)
