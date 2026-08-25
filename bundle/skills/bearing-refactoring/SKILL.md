@@ -79,18 +79,25 @@ scoped `Grep` (allowed here, not a gate violation) and say which check you ran.
 | String/dynamic refs | query to find them               |
 | External/public API | Version and deprecate properly            |
 
-## Worked example — rename `validateUser` to `authenticateUser`
+## Worked example — measured, not invented
+
+`rename({ symbol_name: "handleWebhookEvent", new_name: "...", dry_run: true })` on a real NestJS
+backend:
 
 ```
-1. rename({ symbol_name: "validateUser", new_name: "authenticateUser", dry_run: true })
-   → 12 edits across 8 files
-   → graph_edits: 10   text_search_edits: 2      ← read BOTH numbers
-   → the 2 text_search hits are in config.json — a dynamic reference, not a call
+files_affected: 3   total_edits: 37
+graph_edits: 36     text_search_edits: 1     ← read BOTH numbers
 
-2. Review every text_search line on its own merits. These are regex matches; one landing on a
-   same-named object key is the normal failure, not a rare one.
-
-3. rename({ ..., dry_run: false })   → applies 12 edits across 8 files
-4. detect_changes({ scope: "all" })  → Affected: LoginFlow, TokenRefresh · Risk: MEDIUM
+  stripe.service.ts:586        the definition                    confidence: "graph"
+  stripe.service.spec.ts       35 call sites in the test file    confidence: "graph"
+  stripe.controller.ts:231     await this.stripeService.handle…  confidence: "text_search"
 ```
 
+**The one regex edit is the only production caller.** The graph resolved every call in the spec
+file and fell back to text search for the call that actually ships — because it goes through
+`this.stripeService`, a receiver it could not type. That is `causes.receiverTyping` showing up in a
+rename.
+
+So the edit you most need to be right about is the one tagged lowest-confidence, and a preview that
+is "97% graph" is not 97% safe. Read every `text_search` line on its own merits, then
+`detect_changes({ scope: "all" })`.
