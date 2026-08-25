@@ -165,37 +165,24 @@ better does not prevent.
   written for one person, read by the whole team, and useless to every one of them.*
 
 - **GP-20** — **An instrument that sees a subset reports success in the shape of the whole.** Before
-  trusting a count, ask what it CANNOT see — then check whether the thing you are claiming lives
-  there. The failure is silent by construction: the part outside the instrument's scope never shows
-  up as a zero, it never shows up at all. Where you can, observe the OUTCOME rather than enumerate
-  the inputs you happened to think of — press submit instead of counting filled fields, read what
-  landed on disk instead of trusting the write. *Scar: two, from opposite ends of a stack — a completeness
-  check counted `input[type=text]` with a value and reported "all filled" while a date picker and two
-  selects sat empty — neither is an `input[type=text]`; the same run counted error elements BEFORE
-  any submit, where the answer is always zero. And a hook meant to count file edits watched the
-  edit-tool calls: in a three-day session it saw 6 of ~96, because the other 90 were made through the
-  shell, so the threshold it guarded was never once reached.*
+  trusting a count, ask what it CANNOT see — the part outside its scope never shows up as a zero, it
+  never shows up at all. Prefer observing the OUTCOME to enumerating the inputs you thought of: press
+  submit rather than counting filled fields. *Scar: a completeness check counted `input[type=text]`
+  and reported "all filled" while a date picker and two selects sat empty; a hook counting file edits
+  watched the edit tools and saw 6 of ~96, because the rest went through the shell.*
 
-- **GP-21** — **Hand over a decision, not a chore.** Whatever mechanical step you leave undone
-  becomes the recipient's step — and it is the part most likely to make them defer the whole request.
-  Do everything that does not need them, then hand over exactly what does: the prefilled form rather
-  than the blank one, the exact command rather than "run the tests", the diff rather than "review the
-  branch", closed options with a recommendation rather than an open question. This holds for whoever
-  is next, not only a human — a subagent, a reviewer, or your own next session reading the notes you
-  left. *Scar: a blank KYC form handed to a person to fill in, when every field but one was already
-  known and could have been filled programmatically.*
+- **GP-21** — **Hand over a decision, not a chore.** Whatever mechanical step you leave undone becomes
+  the recipient's, and it is the part most likely to make them defer the whole request. Do everything
+  that does not need them, then hand over exactly what does — the prefilled form, the exact command,
+  the diff, closed options with a recommendation. Holds for whoever is next: a subagent, a reviewer,
+  your own next session. *Scar: a blank KYC form handed to a person when every field but one was
+  already known.*
 
-- **GP-22** — **Declining to answer is the cheapest possible answer, so any comparison by cost
-  ranks it first.** Whenever you score two things by what they consume — tokens, time, queries, lines
-  — check that both actually produced a result before comparing the cost of producing it. Nothing in
-  a cost metric distinguishes a fast answer from a fast refusal, so the failing side does not merely
-  escape the penalty, it takes the prize, and the worse it fails the more it wins. The same shape
-  appears wherever success is inferred from a proxy: a cache that reports its best hit rate when it
-  is returning nulls, a test suite that gets fastest as more of it skips, a search that looks most
-  precise when its query matches nothing. Score the answer first, the cost second — and report the
-  non-answers by name, because a comparison that silently drops what one side could not handle is
-  reporting the score of a team it also picked. *Scar: a benchmark priced `impact` against grep and
-  printed 5294x. The graph had returned `impactedCount: 0` in ~250 tokens for a field with 57
-  references it could not traverse, against grep's 1.3M — its own advice on that response was
-  "confirm with a text search", which the benchmark reported as a 5294x win over text search.*
+- **GP-22** — **Declining to answer is the cheapest possible answer, so any comparison by cost ranks
+  it first.** Check both sides actually produced a result before comparing what producing it cost:
+  nothing in a cost metric separates a fast answer from a fast refusal, so the failing side takes the
+  prize and the worse it fails the more it wins. Same shape in a cache posting its best hit rate while
+  returning nulls. Score the answer first, the cost second, and name the non-answers. *Scar: a
+  benchmark priced `impact` against grep at 5294x — the graph had answered `impactedCount: 0` in ~250
+  tokens for a field it could not traverse, advising "confirm with a text search".*
 
