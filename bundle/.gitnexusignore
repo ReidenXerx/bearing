@@ -1,3 +1,4 @@
+# --- begin bearing (managed — edits here are replaced on update) ---
 # GitNexus-only ignores (gitignore syntax). Complements .gitignore for index speed.
 # See: gitnexus analyze --help (reads .gitignore + .gitnexusignore)
 #
@@ -48,3 +49,12 @@ out/
 **/_next/
 *.min.js
 *.bundle.js
+# --- end bearing ---
+
+# Everything BELOW this line is yours and bearing never touches it.
+# Put repo-specific rules here — including re-includes, which must come AFTER the
+# exclusion they override because the last matching pattern wins. For example, when a
+# directory named `build` is real source rather than output:
+#
+#   !build/
+#   !src/ui/pages/build/
