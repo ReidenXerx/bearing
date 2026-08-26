@@ -35,6 +35,9 @@ export const GITNEXUS_SCRIPT_GATES = [
       "bearing:graph-smoke": "node scripts/bearing-agent.mjs graph-smoke",
       "bearing:capabilities": "node scripts/bearing-agent.mjs capabilities",
       "bearing:token-benchmark": "node scripts/bearing-agent.mjs token-benchmark",
+  // Ordering, never filtering — see the header of the script for why that distinction is
+  // the entire design.
+  "bearing:test-order": "node scripts/bearing-test-order.mjs --report",
       "bearing:detect-api": "node scripts/bearing-agent.mjs detect-api",
       "bearing:scorecard": "node scripts/bearing-agent.mjs scorecard",
       "bearing:stats": "node scripts/bearing-agent.mjs stats",
