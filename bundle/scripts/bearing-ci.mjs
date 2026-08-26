@@ -42,7 +42,7 @@ const MARKER = '<!-- bearing-ci-report -->';
 const CODE_RE = /\.(js|mjs|cjs|jsx|ts|tsx|py|rb|go|rs|java|kt|swift|php|cs|cpp|c|scala)$/i;
 // One definition of 'is this a test', shared with bearing-test-order — there were two and
 // they disagreed on `.test.mjs` (GP-11).
-const { isTestPath } = await import(
+const { isTestPath, parseChangedSymbols } = await import(
   new URL('../.bearing/lib/hook-helpers.mjs', import.meta.url).href
 );
 const SENSITIVE_RE = /(auth|login|session|token|password|secret|crypto|payment|billing|permission|admin)/i;
@@ -99,18 +99,22 @@ function detectChanges(repo, base) {
     symbols: num(/,\s*(\d+)\s*symbols/i),
     processes: num(/Affected processes:\s*(\d+)/i),
     risk: (r.out.match(/Risk level:\s*(\w+)/i) ?? [])[1] ?? 'unknown',
-    changed: [...r.out.matchAll(/^\s*Symbol\s+(.+?)\s+→\s+(.+)$/gm)].map((m) => ({
-      sym: m[1].trim(),
-      file: m[2].trim(),
-    })),
+    // Shared parser. The regex here matched /^\s*Symbol\s+/ and so matched NOTHING — the CLI
+    // prints the KIND ("Function foo → path"). Every run fell through to the basename fallback
+    // below and reported a table of zeros.
+    changed: parseChangedSymbols(r.out).symbols.map((c) => ({ sym: c.name, file: c.filePath })),
+    parsedSymbols: parseChangedSymbols(r.out).parsed,
   };
 }
 
 /** Upstream caller count per changed symbol — the blast-radius signal. */
-function blastRadius(repo, symbols) {
+function blastRadius(repo, symbols, byFile = false) {
   const out = [];
   for (const sym of symbols.slice(0, 25)) {
-    const q = `MATCH (caller)-[:CodeRelation {type: 'CALLS'}]->(f {name: '${sym.replace(/'/g, "\\'")}'}) RETURN count(caller)`;
+    const esc = sym.replace(/'/g, "\\'");
+    const q = byFile
+      ? `MATCH (caller)-[:CodeRelation {type: 'CALLS'}]->(f) WHERE f.filePath = '${esc}' RETURN count(caller)`
+      : `MATCH (caller)-[:CodeRelation {type: 'CALLS'}]->(f {name: '${esc}'}) RETURN count(caller)`;
     const r = gn(['cypher', '-r', repo, q], 60000);
     const n = r.ok ? Number((r.out.match(/(\d+)/) ?? [])[1] ?? 0) : null;
     out.push({ sym, callers: n });
@@ -342,10 +346,16 @@ async function main() {
   // CLAUDE.md filled the blast-radius table with rows like "Always Do" and "npm gates" — every one
   // of them 0 callers, burying the two rows that meant something.
   const codeSymbols = (detected?.changed ?? []).filter((c) => CODE_RE.test(c.file));
-  const symbols = codeSymbols.length
-    ? [...new Set(codeSymbols.map((c) => c.sym))]
-    : [...new Set(diff.code.map((f) => path.basename(f, path.extname(f))))];
-  const radius = indexed ? blastRadius(repo, symbols) : [];
+  // The old fallback used file BASENAMES as symbol names. No graph node is called `gitnexus-cmd`
+  // — the File node is `gitnexus-cmd.mjs` and functions have their own names — so every fallback
+  // row resolved to 0 callers and the table said "nothing here" about a critical change. Ask by
+  // FILE PATH instead, which is a question the graph can actually answer, and mark the rows so the
+  // reader knows they are per-file rather than per-symbol.
+  const byFile = !codeSymbols.length;
+  const symbols = byFile
+    ? [...new Set(diff.code)]
+    : [...new Set(codeSymbols.map((c) => c.sym))];
+  const radius = indexed ? blastRadius(repo, symbols, byFile) : [];
   const struct = indexed ? structural(repo) : null;
 
   const body = render({ diff, detected, radius, struct, indexed, indexNote });

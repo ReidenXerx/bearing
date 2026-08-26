@@ -627,3 +627,36 @@ export function isTestPath(filePath) {
   );
 }
 
+/**
+ * Read the changed symbols out of `detect-changes` output.
+ *
+ * `detect-changes` prints for humans (`impact` prints JSON), and the line carries the KIND, not the
+ * word "Symbol":
+ *
+ *     Changed symbols:
+ *       Function shouldCopyBundleFile → lib/kit-shared.mjs
+ *
+ * bearing-ci matched /^\s*Symbol\s+.../ and therefore matched NOTHING, ever. It fell through to a
+ * fallback that used file basenames as symbol names — which resolve to no graph node, so every row
+ * of the blast-radius table read 0 callers while `Risk level:`, parsed separately, reported the real
+ * value. A table of zeros next to "risk: critical" is worse than no table: it trains people to
+ * ignore the part that works.
+ *
+ * `parsed` distinguishes "no symbols changed" from "could not read the output" so a caller can be
+ * loud about the second (GP-6).
+ * @param {string} text
+ * @returns {{symbols: {kind: string, name: string, filePath: string}[], parsed: boolean}}
+ */
+export function parseChangedSymbols(text) {
+  const src = String(text || "");
+  const start = src.indexOf("Changed symbols:");
+  if (start < 0) return { symbols: [], parsed: false };
+  const out = [];
+  for (const line of src.slice(start).split("\n").slice(1)) {
+    if (!line.startsWith("  ")) break;
+    const m = line.match(/^\s+(\w+)\s+(\S+)\s+(?:\u2192|->)\s+(\S+)/);
+    if (m) out.push({ kind: m[1], name: m[2], filePath: m[3] });
+  }
+  return { symbols: out, parsed: true };
+}
+
