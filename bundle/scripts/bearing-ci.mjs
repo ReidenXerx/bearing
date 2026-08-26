@@ -40,7 +40,11 @@ const highThreshold = Number(process.env.GITNEXUS_CI_HIGH || 8);
 const MARKER = '<!-- bearing-ci-report -->';
 
 const CODE_RE = /\.(js|mjs|cjs|jsx|ts|tsx|py|rb|go|rs|java|kt|swift|php|cs|cpp|c|scala)$/i;
-const TEST_RE = /(^|\/)(tests?|spec|__tests__)\/|\.(test|spec)\./i;
+// One definition of 'is this a test', shared with bearing-test-order — there were two and
+// they disagreed on `.test.mjs` (GP-11).
+const { isTestPath } = await import(
+  new URL('../.bearing/lib/hook-helpers.mjs', import.meta.url).href
+);
 const SENSITIVE_RE = /(auth|login|session|token|password|secret|crypto|payment|billing|permission|admin)/i;
 
 function git(args) {
@@ -79,9 +83,9 @@ function collectDiff() {
   return {
     base,
     all: files,
-    code: files.filter((f) => CODE_RE.test(f) && !TEST_RE.test(f)),
-    tests: files.filter((f) => TEST_RE.test(f)),
-    sensitive: files.filter((f) => CODE_RE.test(f) && SENSITIVE_RE.test(f) && !TEST_RE.test(f)),
+    code: files.filter((f) => CODE_RE.test(f) && !isTestPath(f)),
+    tests: files.filter((f) => isTestPath(f)),
+    sensitive: files.filter((f) => CODE_RE.test(f) && SENSITIVE_RE.test(f) && !isTestPath(f)),
   };
 }
 
@@ -204,6 +208,22 @@ function render({ diff, detected, radius, struct, indexed, indexNote }) {
     L.push('');
   }
 
+  // Blast-radius test order — opt-in at install (`testOrder` in the manifest), because it costs a
+  // graph call per changed symbol and it posts to someone else's review surface. Reported, never
+  // enforced: this is an ORDER, and the graph cannot prove a test is irrelevant.
+  if (testOrderEnabled()) {
+    const order = testOrderLines();
+    if (order.length) {
+      L.push('### Run these tests first');
+      L.push('');
+      L.push('Ranked by how much of the change they reach. **This is an order, not a filter** — run');
+      L.push('the rest too; a test the graph cannot link may still be the one that fails.');
+      L.push('');
+      for (const line of order) L.push(line);
+      L.push('');
+    }
+  }
+
   L.push('<details><summary>How to read this</summary>');
   L.push('');
   L.push('**A positive result is strong evidence; a zero is not a finding.** The graph resolves calls through');
@@ -213,6 +233,45 @@ function render({ diff, detected, radius, struct, indexed, indexNote }) {
   L.push('');
   L.push('</details>');
   return L.join('\n');
+}
+
+/**
+ * Did this repo opt in?
+ *
+ * READ FROM hooks.json, NOT THE MANIFEST. `.bearing/manifest.json` is gitignored by design, so it
+ * does not exist in a CI checkout — a setting stored there reads as `false` on every run and the
+ * feature silently never fires. `.bearing/hooks.json` is tracked and team-shared, which is also the
+ * right home for it on the merits: whether CI spends time on this is a decision for the repo, not
+ * for whichever machine happened to run the installer.
+ */
+function testOrderEnabled() {
+  if (process.env.GITNEXUS_CI_TEST_ORDER === '1') return true;
+  if (process.env.GITNEXUS_CI_TEST_ORDER === '0') return false;
+  try {
+    return JSON.parse(fs.readFileSync(path.join(ROOT, '.bearing/hooks.json'), 'utf8')).ciTestOrder === true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Shell out to the ordering script rather than reimplementing it — one definition of the answer,
+ * and its own header carries the reasoning about why it never skips. Returns markdown rows, or []
+ * for any failure: a CI report that cannot rank tests still has a blast radius worth posting, so
+ * this must never take the whole comment down with it.
+ */
+function testOrderLines() {
+  const script = path.join(ROOT, 'scripts/bearing-test-order.mjs');
+  if (!fs.existsSync(script)) return [];
+  const r = spawnSync(process.execPath, [script, '--base', baseRef], {
+    cwd: ROOT,
+    encoding: 'utf8',
+    timeout: 120000,
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  if (r.status !== 0) return [];
+  const files = (r.stdout ?? '').split('\n').map((x) => x.trim()).filter(Boolean);
+  return files.slice(0, 15).map((f, i) => `${i + 1}. \`${f}\``);
 }
 
 /** Post once, then edit in place. A new comment per push buries the PR. */

@@ -32,7 +32,7 @@ import { assertKitInstalled } from "./lib/require-kit.mjs";
 const ROOT = process.cwd();
 assertKitInstalled(ROOT);
 
-const { repoName } = await import(
+const { repoName, isTestPath } = await import(
   new URL("../.bearing/lib/hook-helpers.mjs", import.meta.url).href
 );
 const { gitnexusSpawn } = await import(
@@ -51,11 +51,6 @@ const SCOPE = BASE ? "compare" : flag("--scope", "unstaged");
 const MAX_SYMBOLS = Number(flag("--max-symbols", "40"));
 const DEPTH = Number(flag("--depth", "3"));
 
-// `[jt]sx?` missed `.mjs`, so this reported "no test found" for lib/kit.test.mjs — a file whose
-// whole name says otherwise. The feature's one job is to distinguish "no test FOUND" from "not
-// tested", and a too-narrow pattern quietly turns the first into the second (GP-20).
-const TEST_RE =
-  /(?:^|\/)(?:tests?|__tests__|spec)\/|\.(?:test|spec)\.[cm]?[jt]sx?$|_test\.(?:go|py|rb|rs)$|(?:^|\/)test_[^/]+\.py$|Test\.java$|Tests?\.cs$/i;
 
 /** @param {string[]} args @returns {{ok: boolean, json: any, text: string}} */
 function gn(args) {
@@ -150,7 +145,7 @@ for (const sym of considered) {
   for (const [depth, rows] of Object.entries(res.byDepth ?? {})) {
     for (const row of rows) {
       const fp = row.filePath;
-      if (!fp || !TEST_RE.test(fp)) continue;
+      if (!fp || !isTestPath(fp)) continue;
       found.add(fp);
       const prev = hits.get(fp) ?? { symbols: new Set(), nearest: Infinity };
       prev.symbols.add(sym.name);

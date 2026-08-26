@@ -610,3 +610,20 @@ export function userMessage(key, vars = {}) {
     "GitNexus is guiding the agent to a better code-reasoning path."
   );
 }
+
+/**
+ * Is this path a test file?
+ *
+ * ONE definition. There were two, and they disagreed: bearing-ci's caught `.test.mjs` while
+ * test-order's `[jt]sx?` did not, so the same repo could be told a file both was and was not a
+ * test depending on which script asked. The one that missed it reported "no test found" for
+ * `lib/kit.test.mjs` — the exact confusion between "not found" and "not tested" that the ordering
+ * feature exists to avoid (GP-11).
+ * @param {string} filePath
+ */
+export function isTestPath(filePath) {
+  return /(?:^|\/)(?:tests?|__tests__|spec)\/|\.(?:test|spec)\.[cm]?[jt]sx?$|_test\.(?:go|py|rb|rs)$|(?:^|\/)test_[^/]+\.py$|Test\.java$|Tests?\.cs$/i.test(
+    String(filePath || ""),
+  );
+}
+
