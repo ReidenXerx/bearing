@@ -156,6 +156,173 @@ tarball of files that no longer exist; the recorded `--gitnexus-cmd` never reach
 table stealth installs read; and the escape the gates print resolved to a command that does not
 exist in any repo without the npm aliases.
 
+### Added — four optional rulebook modules: `goldpractices`, `tsjs`, `frontend`, `react`
+
+_Contributed in #17 by @sudo-bluuuk._
+
+### Added — `tsjs`: TypeScript/JavaScript rules as a module you can decline
+
+Seventh module. `.bearing/lang/typescript.md` — seventeen numbered `TS-#` rules, cited the way
+`NS-#` are — plus a `bearing-tsjs` skill for the writing/review pass and a ~270-token section in the
+always-on contract carrying the five that cost the most.
+
+**Every rule had to pass one entry test: would `tsc --noEmit` AND a standard ESLint config both stay
+silent?** If the tooling already catches it, it is not in the file. What survives that filter is the
+set of constructs that are fully type-correct and still wrong at runtime — `as` that asserts instead
+of verifying, one `any` un-typing everything downstream of it, a union switched on without a `never`
+default that falls through silently the next time a variant is added, `||` overwriting a deliberate
+`0`, a promise neither awaited nor returned losing its rejection where no caller can catch it.
+
+**Why not more gold practices.** That was the obvious home and it is the wrong one. `gold-practices.md`
+is universal by construction — it ships with north-stars to every install, so a TypeScript section
+would be dead weight in every Python repo — and every rule in it is a *scar*, earned from a specific
+defect in a real codebase. A language trap is neither. Keeping them apart is what lets the TS pack
+say "these are properties of the language" honestly, and keeps gold practices short enough to re-read.
+
+**Why it is not a skill alone.** Every skill-delivered module keys off a discrete event: microscope
+on a milestone, consult on the moment you are about to invent a requirement, minions on a long
+serial grind. *"I am writing TypeScript"* is not an event — it is a constant background state that
+applies to every edit, so a skill-only module would sit on disk waiting for a trigger that never
+fires, and, per 1.1.2, nothing would report that it had not. Hence a contract section that carries
+the rules themselves rather than a pointer to the skill.
+
+**Layout is ready for more languages, this release fills only TS/JS.** Packs live at
+`.bearing/lang/<language>.md`, one **feature per language**, so a repo installs rules for the
+languages it actually writes. Adding Python is a pack file, a `FEATURES` entry, a `LANG_PACK_OWNER`
+line and a contract section — no rewiring. A test walks the bundle and fails if any pack is
+unclaimed, because `featureOf` treats an unowned file as core and would ship it to every install.
+
+**bearing does not detect the language** — you select the module (`--features tsjs`, or the
+interactive picker). `--features all` includes it.
+
+The module stands alone, and a test enforces it: the pack, the skill and the contract section may
+not cite a `GP-#`, name `gold-practices.md`, name an npm script or mention a graph tool — every one
+of those is an artifact a different module installs, and a `tsjs`-only repo would be reading a
+confident pointer to something that is not there.
+
+### Added — TS-18 and TS-19: two ways the compiler stops helping
+
+A second section in the TypeScript pack, **Shapes that make the compiler do the work**. The trap
+sections have a bar that enforces itself — a rule only belongs there if `tsc` and ESLint both stay
+silent. Shape rules have no natural gate, since the alternative compiles either way, so each must
+end in a `Cashes out as:` line naming what the compiler or the runtime does differently. A test
+enforces that line, because a bar that is only remembered is how a rulebook becomes a style guide
+and stops being read.
+
+**TS-18 — a `switch` that only picks a value is a lookup function written longhand.** An object plus
+a fallback, where the `default` branch becomes the value returned when the key is not found. Three
+things bite in exactly that pattern and all three compile: falling back with `||` replaces real `0`,
+`""` and `false` entries; an unguarded lookup on an outside key returns a *function* for
+`"constructor"`, so the fallback never fires; and the compiler will not mention the missing fallback
+unless `noUncheckedIndexedAccess` is on. It does **not** apply where a `switch` narrows a
+discriminated union — there the map hands every handler the whole union and the naive fix is an
+assertion, which is worse than the `switch` it replaced.
+
+**TS-19 — a second hand-written type for one contract is a second source of truth, and only one of
+them will be updated.** Before declaring a type for a response, a row or a message: look for a
+generated one, then for an existing hand-written one searched by its FIELDS rather than the name you
+would have chosen. Write from evidence or not at all — with no schema, sample or producer source,
+`unknown` and a narrowed read is honest where an invented type is fiction that compiles and reads as
+authoritative. Cashes out as: one type turns a contract change into a compile error at every
+consumer, two turn it into an error at one and silence at the rest.
+
+### Added — `frontend`: structure, and what it costs to change it
+
+Ninth module. `.bearing/stack/frontend.md` — `UI-#` rules for laying out a rendered interface —
+plus a `bearing-frontend` skill and a short contract section.
+
+Two failures, and the second is the expensive one. **A near-duplicate component** gets written
+because searching for the existing one costs more than writing a new one — you look for
+`UserTable`, the repo has `<DataGrid>`; you look for `BorderedBox`, it is `<Panel>`. So the rule is
+to search by **shape** (what it renders, the props you would need), not by the name you would have
+given it. That one is found in review and costs a rewrite.
+
+**An edit to a shared component** is found in production. You see a five-line diff; the user sees
+every screen that renders it, and you cannot open any of them. The boundary is therefore drawn at
+what existing callers *render*: an **optional** prop whose default preserves today's output is
+yours to decide, and anything else — a changed default, a required prop, different markup, a
+repurposed prop — is an ask carrying the **counted** call sites, what changes on screen rather than
+in props, and the alternative if the answer is no. "Ask about shared components" is a mood; that is
+a rule an agent can apply.
+
+**It names no framework**, and a test enforces it. Frameworks and styling libraries turn over every
+couple of years while the thing the rules are about — a shared unit has many callers, one of which
+is on your screen — does not. The first draft failed that test by listing frameworks in the sentence
+swearing it named none; an enumeration dates a file exactly as fast as an endorsement.
+
+**A second pack axis.** `.bearing/lang/` holds properties of a LANGUAGE; `.bearing/stack/` holds
+properties of a kind of PROGRAM. A TypeScript CLI has no components, so the frontend pack is not a
+language pack with a different name — and a backend repo can decline it while keeping `tsjs`. The
+two ownership maps became one keyed by full path, and the pack test now walks `PACK_DIRS`, so a new
+pack *directory* cannot be added without being policed either.
+
+Caught by an existing guard while being built: `inferInstallFromDisk` did not know the new module,
+which on a manifest-less clone would have made the next `bearing update` delete the pack. That test
+was written one commit earlier for exactly this, and it fired on the first run.
+
+### Added — `react`: the parts the library's own types do not catch
+
+Tenth module, and the counterpart to `frontend` rather than a duplicate of it. `frontend` may name
+no framework — that bar is tested — because what it describes outlives whichever one you picked.
+`react` exists to name one, so the two sit in `.bearing/stack/` as deliberate opposites and neither
+install drags in the other.
+
+Its bar: **the library's own types stay silent.** Nothing here is something a type error would have
+told you, which is why there is no hook tutorial in it.
+
+**REACT-1 — a form field component owns its `Controller`.** Callers pass `name` and `control`, never
+a `render`, so the wiring exists once instead of at every call site. Inside it, **spread `field`**:
+taking `onChange`, `onBlur` and `value` by hand looks more explicit and drops `ref`, which is what
+focus-on-error runs on — a failed submit then scrolls nowhere and highlights nothing, with no error
+and no log. `Controller` is not a default, either: a plain native input wants `register`.
+
+**REACT-2 — a field `name` typed `string` is a value that can vanish from the submitted payload.**
+Rename a field in the schema, or mistype one, and the component compiles, renders, validates clean
+and contributes nothing. No error, no warning, no failing test unless one already asserted that
+exact key; it is found by a user reporting that their data did not save. `FieldPath<T>` turns the
+same rename into a compile error at every site that named the old field — which is the whole reason
+the wrapper is generic rather than concrete.
+
+Both failures are silent, and that is the selection rule for this pack: a form that throws is fixed
+the same day, and these are the ones that are not.
+
+### Added — UI-2: a component that passes a value through is generic
+
+Generic props, with the boundary drawn where they stop paying. A component that hands a value
+onward — `renderItem`, `onChange`, `options` — should be parameterised so the element type flows to
+the call site and a renderer for the wrong shape is a compile error there. A component that **reads
+fields** of the value should not: a constraint naming every field it touches is a concrete type
+written in generic syntax, and an unconstrained parameter the body then asserts into a shape is an
+assertion wearing a type parameter, which reads as checked and is not. One call site is not a
+generic yet either.
+
+### Changed — gold practices are their own module, and north-stars stops speaking for them
+
+`.bearing/gold-practices.md` had no feature id. It was hard-coded to `northstars`, so you could not
+take one without the other, and the north-stars blurb advertised rules that were not really its own.
+
+The question that prompted this was whether the `GP-#` rules are TS/JS content that belongs in the
+new language module. **They are not, and the file's own vocabulary settles it**: across 11 KB there
+are three hits for any TS/JS term, two inside *scars* (illustrations, not rules) and one a false
+positive — "a mode whose entire **promise** was leaving the repository untouched", the English word.
+Every rule's subject is evidence discipline, test design, system design, sourcing a contract, or
+handover; `GP-15`, `GP-18` and `GP-19` are about working with **people** and name no technology at
+all. They read identically in a Python or Rust repo. What made them look JavaScript-flavoured is
+that the scars come from this codebase, which is Node.
+
+So the fix was packaging, not content: `goldpractices` is now its own module with its own contract
+section. North-stars and gold practices are still read together and `NS-#` still outranks `GP-#` —
+that precedence line now ships only when **both** are installed, because in a repo with one of them
+it describes a conflict that cannot happen.
+
+**Upgrading cannot lose the file, and that took explicit work.** Update removes files whose owning
+feature is not selected, and every existing manifest records `northstars` — an id that no longer
+owns this file. Left alone, the split would have deleted `.bearing/gold-practices.md` from every
+installed repo, silently, as a consequence of having said yes to it in an earlier version. A
+recorded feature set now inherits whatever has been split out of what it selected; an explicit
+`--features northstars` does not, because that is a choice made with the new id available and it
+must be honoured as written.
+
 ## 1.1.7 — the harness kit learns which backend it is pointed at
 
 ### Added — e2e: an environment guard, and the session exporter the kit kept naming
@@ -229,7 +396,6 @@ Adding one module used to mean retyping the other six, where a forgotten name si
 it. Signed tokens are now a delta: `+e2e`, `-minions`. And because `update` correctly inherits the
 recorded feature set, a new module could never appear on its own and nothing announced it — the
 update that crosses a module's introducing version now names it once.
-
 ## 1.1.5 — the instructions were teaching things that could not be done
 
 Most of this release is one class of defect, found by running what the docs say instead of reading
@@ -345,73 +511,6 @@ Reversible in both directions: the answer is recorded, an update refreshes the b
 appending a second one, `--no-prettierignore` takes it back out, and uninstall deletes the file only
 when bearing created it. A rule you append after the block survives all of it — the block is
 sentinel-terminated for the same reason `.gitignore`'s is.
-
-### Changed — gold practices are their own module, and north-stars stops speaking for them
-
-`.bearing/gold-practices.md` had no feature id. It was hard-coded to `northstars`, so you could not
-take one without the other, and the north-stars blurb advertised rules that were not really its own.
-
-The question that prompted this was whether the `GP-#` rules are TS/JS content that belongs in the
-new language module. **They are not, and the file's own vocabulary settles it**: across 11 KB there
-are three hits for any TS/JS term, two inside *scars* (illustrations, not rules) and one a false
-positive — "a mode whose entire **promise** was leaving the repository untouched", the English word.
-Every rule's subject is evidence discipline, test design, system design, sourcing a contract, or
-handover; `GP-15`, `GP-18` and `GP-19` are about working with **people** and name no technology at
-all. They read identically in a Python or Rust repo. What made them look JavaScript-flavoured is
-that the scars come from this codebase, which is Node.
-
-So the fix was packaging, not content: `goldpractices` is now its own module with its own contract
-section. North-stars and gold practices are still read together and `NS-#` still outranks `GP-#` —
-that precedence line now ships only when **both** are installed, because in a repo with one of them
-it describes a conflict that cannot happen.
-
-**Upgrading cannot lose the file, and that took explicit work.** Update removes files whose owning
-feature is not selected, and every existing manifest records `northstars` — an id that no longer
-owns this file. Left alone, the split would have deleted `.bearing/gold-practices.md` from every
-installed repo, silently, as a consequence of having said yes to it in an earlier version. A
-recorded feature set now inherits whatever has been split out of what it selected; an explicit
-`--features northstars` does not, because that is a choice made with the new id available and it
-must be honoured as written.
-
-### Added — `tsjs`: TypeScript/JavaScript rules as a module you can decline
-
-Seventh module. `.bearing/lang/typescript.md` — seventeen numbered `TS-#` rules, cited the way
-`NS-#` are — plus a `bearing-tsjs` skill for the writing/review pass and a ~270-token section in the
-always-on contract carrying the five that cost the most.
-
-**Every rule had to pass one entry test: would `tsc --noEmit` AND a standard ESLint config both stay
-silent?** If the tooling already catches it, it is not in the file. What survives that filter is the
-set of constructs that are fully type-correct and still wrong at runtime — `as` that asserts instead
-of verifying, one `any` un-typing everything downstream of it, a union switched on without a `never`
-default that falls through silently the next time a variant is added, `||` overwriting a deliberate
-`0`, a promise neither awaited nor returned losing its rejection where no caller can catch it.
-
-**Why not more gold practices.** That was the obvious home and it is the wrong one. `gold-practices.md`
-is universal by construction — it ships with north-stars to every install, so a TypeScript section
-would be dead weight in every Python repo — and every rule in it is a *scar*, earned from a specific
-defect in a real codebase. A language trap is neither. Keeping them apart is what lets the TS pack
-say "these are properties of the language" honestly, and keeps gold practices short enough to re-read.
-
-**Why it is not a skill alone.** Every skill-delivered module keys off a discrete event: microscope
-on a milestone, consult on the moment you are about to invent a requirement, minions on a long
-serial grind. *"I am writing TypeScript"* is not an event — it is a constant background state that
-applies to every edit, so a skill-only module would sit on disk waiting for a trigger that never
-fires, and, per 1.1.2, nothing would report that it had not. Hence a contract section that carries
-the rules themselves rather than a pointer to the skill.
-
-**Layout is ready for more languages, this release fills only TS/JS.** Packs live at
-`.bearing/lang/<language>.md`, one **feature per language**, so a repo installs rules for the
-languages it actually writes. Adding Python is a pack file, a `FEATURES` entry, a `LANG_PACK_OWNER`
-line and a contract section — no rewiring. A test walks the bundle and fails if any pack is
-unclaimed, because `featureOf` treats an unowned file as core and would ship it to every install.
-
-**bearing does not detect the language** — you select the module (`--features tsjs`, or the
-interactive picker). `--features all` includes it.
-
-The module stands alone, and a test enforces it: the pack, the skill and the contract section may
-not cite a `GP-#`, name `gold-practices.md`, name an npm script or mention a graph tool — every one
-of those is an artifact a different module installs, and a `tsjs`-only repo would be reading a
-confident pointer to something that is not there.
 
 ## 1.1.4 — a refresh that rewrites, and the last check that was guessing
 

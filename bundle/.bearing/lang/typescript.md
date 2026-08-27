@@ -127,3 +127,91 @@ silent?** If the compiler catches it, it is not in here.
   contradiction in what you *declared*. Every rule above is a way for a program to be
   fully type-correct and wrong, so "it compiles" is never the evidence that it works — running it
   is.
+
+## Shapes that make the compiler do the work
+
+**These are not traps — the alternative compiles and runs.** Each rule here earns its place by
+making the **compiler** catch something it otherwise would not, so each ends in a `Cashes out as:`
+line naming what changes at compile time or run time. A rule that cannot say that is a style
+preference, and a style preference in this file is how a rulebook stops being read.
+
+- **TS-18** — **A `switch` that only picks a value is a lookup function written longhand.** Replace
+  it with a function that holds an object and returns from it; the `default` branch becomes the
+  value returned when the key is not found.
+
+  **When:** every branch of a `switch` or `else if` chain returns a value of the same type, and the
+  branches differ only in *what value*, not in *what they do*.
+
+  ```ts
+  // Key is a closed union → the table IS the exhaustiveness check, and no default is reachable.
+  const RATE = { standard: 1, express: 1.8 } as const satisfies Record<Tier, number>;
+  export const rateFor = (tier: Tier) => RATE[tier];
+
+  // Key arrives from outside → guard the lookup, then fall back. This is the `default` branch.
+  const RATE: Record<string, number> = { standard: 1, express: 1.8 };
+  export function rateFor(tier: string): number {
+    return Object.hasOwn(RATE, tier) ? RATE[tier] : 1;
+  }
+  ```
+
+  Three things bite in exactly this pattern, and all three compile:
+
+  - **Fall back with `??`, never `||`** (`TS-8`). A table holding `0`, `""` or `false` is a table
+    whose real entries the `||` replaces with the default — the one case the caller meant.
+  - **Guard the lookup when the key comes from outside.** `RATE["constructor"]` returns a function
+    rather than `undefined`, so `?? fallback` never fires and the function returns something absurd
+    instead of the default. `Object.hasOwn`, a `Map`, or `Object.create(null)` as the table.
+  - **The compiler will not remind you the fallback is needed**: `RATE[key]` is typed as the value
+    type even for a key that was never set, unless `noUncheckedIndexedAccess` is on (`TS-5`).
+
+  **Not when:** the branches **narrow a discriminated union**. `switch (e.kind)` gives each branch
+  the payload type for that variant; a lookup keyed on `e.kind` hands every handler the whole union,
+  and the naive fix is `HANDLERS[e.kind](e as ClickEvent)` — which is `TS-1`, and worse than the
+  `switch` it replaced. Keep the `switch` there, or write the handler map as a mapped type over the
+  union. Likewise when branches do different *work* (early return, throw, differing arity), or when
+  the test is not equality — a table keys on a value, a chain tests a predicate.
+
+  **Cashes out as:** with a closed-union key, adding a variant becomes **one compile error at the
+  table** instead of a silent fallthrough at every site that should have handled it — the guarantee
+  `TS-3` buys with a `never` branch, without needing the branch. And the `default` stops being
+  control flow and becomes a value, which can be read, tested and overridden.
+
+- **TS-19** — **A second hand-written type for one contract is a second source of truth, and only
+  one of them will be updated.**
+
+  **When:** you are about to declare an `interface` or `type` for data that crosses a boundary — an
+  API response, a DB row, a queue message, a config file — or for anything another module in this
+  repo already produces.
+
+  **Look in this order, and stop at the first hit:**
+
+  1. **A generated or schema-derived type** — an OpenAPI or GraphQL output, a Prisma model, the
+     type inferred from a validation schema. Hand-writing a copy of something that *regenerates* is
+     worse than ordinary duplication: the generator cannot update your copy, so it is stale from the
+     producer's first change and nothing anywhere reports it.
+  2. **An existing hand-written type, searched by SHAPE rather than by name.** You look for
+     `UserResponse`; the repo calls it `ApiUser`. Search for two or three distinctive field names
+     together, for the endpoint path, and for the function that already fetches this data — whoever
+     wrote that almost certainly typed the result.
+  3. **Only then write one.**
+
+  **Write it only from evidence.** If you have the shape — a sample response, a schema, the
+  producer's own source — declare it, and still parse at the boundary (`TS-1`, `TS-2`): a
+  hand-written type is a claim about someone else's output, and the compiler cannot check it. If you
+  do **not** have the shape, do not invent fields to fill the gap. Keep the value `unknown`, narrow
+  the fields you actually use, and say what you could not establish. An invented type compiles,
+  reads as authoritative, and is fiction; `unknown` is at least honest about what you know.
+
+  **Put it where the next person will find it:** beside the function that produces or fetches the
+  data, exported once. A type declared inside a component, or dropped into a `types.ts` grab-bag, is
+  a type the next agent will fail to find and will write for a second time.
+
+  **Not when:** the shape is genuinely local — a component's own props, a function's internal return
+  value — which is not a contract and does not become one by being hoisted somewhere shared. And
+  **sameness of shape is not sameness of contract**: two types with identical fields today, owned by
+  different modules, will diverge, and having shared one turns that ordinary divergence into a
+  conflict that has to be negotiated.
+
+  **Cashes out as:** with one type, a change to the contract is a compile error at **every**
+  consumer. With two hand-written copies, it is a compile error at one of them and silence at the
+  rest, which keep compiling against a shape the producer no longer sends.

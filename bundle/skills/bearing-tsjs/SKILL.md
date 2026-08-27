@@ -28,9 +28,12 @@ validation (`TS-7`).
 
 So:
 
-1. Type the entry point `unknown` (`TS-2`), never `any` — `any` un-types everything downstream of it.
-2. Convert it with something that **runs**: a type guard, or a schema parse. One place, at the edge.
-3. After that, the value is trusted and the compiler does the rest. Do not re-check it in nine
+1. **Is this contract already typed here?** Before declaring anything, look for a generated type
+   (OpenAPI, GraphQL, Prisma, a schema's inferred type), then for an existing hand-written one —
+   searched by the FIELDS and the endpoint, not by the name you would have given it (`TS-19`).
+2. Type the entry point `unknown` (`TS-2`), never `any` — `any` un-types everything downstream of it.
+3. Convert it with something that **runs**: a type guard, or a schema parse. One place, at the edge.
+4. After that, the value is trusted and the compiler does the rest. Do not re-check it in nine
    functions — that is the sign the boundary was drawn in the wrong place.
 
 If you are reaching for `as` anywhere other than the edge, ask what would happen if the value were
@@ -51,6 +54,12 @@ Before you write, decide the boundary (above). Then, in order of how often it co
 - **Cleanup that must happen?** `finally` (`TS-14`). Code after an `await` does not run on rejection.
 - **Config or a lookup table?** `satisfies` (`TS-4`) keeps the literal types that an annotation
   would widen away.
+- **About to declare a type for a response or a row?** Search first (`TS-19`) — and if you cannot
+  establish the shape from a schema, a sample or the producer's source, do not invent fields. Keep
+  it `unknown`, narrow what you use, and say what you could not establish.
+- **About to write a `switch`?** If every branch just *returns a value*, it is a lookup function —
+  an object plus a fallback, where the `default` becomes the returned value (`TS-18`). If the
+  branches narrow a discriminated union, keep the `switch`: that is the case where it beats a map.
 
 ## Reviewing
 
@@ -67,6 +76,11 @@ these specifically, in this order:
 | A call to an async fn with no `await`/`return` | `TS-12` | Where does the rejection go? |
 | `catch (e)` touching `e.message` | `TS-11` | What if a string was thrown? |
 | A new `import` used only in a signature | `TS-16` | Should be `import type`. |
+| A new `interface` for an API response, DB row or message | `TS-19` | Is it generated somewhere? Did the existing fetcher already type it? |
+| A type whose fields nobody could have observed | `TS-19` | What evidence names these fields? If none, it should be `unknown`. |
+| A `switch`/`else if` whose branches only return values | `TS-18` | Does any branch narrow a union or do work? If not, it is a table. |
+| A table lookup falling back with `\|\|` | `TS-18`, `TS-8` | Can a real entry be `0`, `""` or `false`? |
+| `table[key]` where `key` came from outside | `TS-18` | What does `table["constructor"]` return? |
 
 A finding here is worth stating even when the code "works today" — every one of these is a bug that
 is already written and simply has not been reached yet.
