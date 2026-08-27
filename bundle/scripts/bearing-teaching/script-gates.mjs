@@ -189,6 +189,12 @@ export function mergeGitnexusScripts(pkg, opts = {}) {
 export function mergeIntoPackageJson(pkgPath, opts = {}) {
   const abs = path.resolve(pkgPath);
   let pkg;
+  // Did WE bring this file into existence? Same question `addedEngines` below already asks about a
+  // FIELD, never asked about the file holding it. In a Python repo there is no package.json, so a
+  // normal install creates one — and uninstall then left `{"name":…,"scripts":{}}` behind: a Node
+  // manifest in a Python project, put there by a tool that had just been removed, which makes npm,
+  // Dependabot and CI treat the repo as a Node package (NS-1, NS-22).
+  const createdPackageJson = !fs.existsSync(abs) && opts.createIfMissing === true;
 
   if (fs.existsSync(abs)) {
     pkg = JSON.parse(fs.readFileSync(abs, "utf8"));
@@ -216,7 +222,7 @@ export function mergeIntoPackageJson(pkgPath, opts = {}) {
   }
 
   fs.writeFileSync(abs, JSON.stringify(pkg, null, 2) + "\n");
-  return { ...stats, addedEngines };
+  return { ...stats, addedEngines, createdPackageJson };
 }
 
 /** @param {string} gateId e.g. "1-session" */
