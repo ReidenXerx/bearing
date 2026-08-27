@@ -226,6 +226,8 @@ function checkModuleDelivery() {
     consult: 'bearing-consult',
     minions: 'bearing-minions',
     tsjs: 'bearing-tsjs',
+    frontend: 'bearing-frontend',
+    react: 'bearing-react',
   };
   // Modules whose payload is a FILE rather than a skill. Without this the loop below skips them
   // entirely and reports them as fine when nothing landed — the same failure 1.1.2 fixed for
@@ -233,6 +235,8 @@ function checkModuleDelivery() {
   const FILE_OF = {
     goldpractices: '.bearing/gold-practices.md',
     tsjs: '.bearing/lang/typescript.md',
+    frontend: '.bearing/stack/frontend.md',
+    react: '.bearing/stack/react.md',
   };
   const store = path.join(root, SKILLS_STORE);
   const broken = [];

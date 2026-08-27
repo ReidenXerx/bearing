@@ -414,6 +414,22 @@ If **`.bearing/northstars.md`** exists, it is the project's **authoritative** st
 - **The GRAVEYARD is settled**: do not re-propose a rejected idea without new evidence that addresses *why* it was rejected, and do not discard a VALIDATED one without evidence that overturns it.
 - Format + maintenance routine: the **`bearing-northstars`** skill.
 
+<!-- feature: frontend -->
+## Writing UI (intel layer)
+
+**`.bearing/stack/frontend.md`** holds numbered `UI-#` rules for laying out a rendered interface; load the `bearing-frontend` skill for the full pass. Two things decide most of it:
+
+- **Search by SHAPE before writing a structural unit** (`UI-1`) — a table, a bordered panel, a card, a modal shell. The component you want is rarely named what you would name it (`UserTable` vs `<DataGrid>`), so search for what it *renders* and for the props you need. A near-duplicate is cheaper to write than to find, which is why it keeps happening.
+- **Editing a shared component is a multi-screen change**: you see a five-line diff, the user sees every page that renders it. An **optional** prop whose default preserves today's output is yours to decide — say what you added. **Anything that changes what an existing caller renders is an ASK**, carrying the counted call sites, what changes *on screen* rather than in props, and what you would build instead if the answer is no.
+
+<!-- feature: react -->
+## React forms (intel layer)
+
+**`.bearing/stack/react.md`** holds numbered `REACT-#` rules for what type-checks against React and its form library and is still wrong — load the `bearing-react` skill when building or reviewing a form input. Every one of them fails by going **quiet**:
+
+- **A form field component owns its `Controller`** (`REACT-1`) — callers pass `name` and `control`, never a `render`, so the wiring exists once. Inside it, **spread `field`**: destructuring `onChange`/`onBlur`/`value` by hand drops `ref`, and focus-on-error stops working with nothing thrown.
+- **Type `name` as `FieldPath<T>`, never `string`** (`REACT-2`). A renamed or mistyped field compiles, renders, validates clean, and contributes nothing to the submitted payload — found by a user reporting that their data did not save.
+
 <!-- feature: goldpractices -->
 ## Gold practices — how the work is done anywhere
 
