@@ -134,8 +134,20 @@ function structural(repo) {
   }
 }
 
+/**
+ * REACH, not quality — and the words matter more than they look.
+ *
+ * This was a traffic light: 🔴 for many callers, 🟢 for none. Both readings are wrong and the green
+ * one is dangerous. A symbol with eleven callers is not BAD, it is load-bearing — the row is telling
+ * you where to look, not that something is broken. And a zero is the most ambiguous cell in the
+ * table: the report's own footer says `0 callers` can mean "none" or "could not resolve", so
+ * painting it the reassuring colour contradicts the paragraph directly beneath it.
+ *
+ * Named by how far the change reaches instead, with nothing on the scale that reads as a verdict.
+ */
 function riskTag(callers) {
   if (callers === null) return 'unknown';
+  if (callers === 0) return 'none-found';
   if (callers >= highThreshold) return 'high';
   if (callers >= Math.ceil(highThreshold / 2)) return 'medium';
   return 'low';
@@ -165,12 +177,18 @@ function render({ diff, detected, radius, struct, indexed, indexNote }) {
   if (radius.length) {
     L.push('### Blast radius — who calls what you changed');
     L.push('');
-    L.push('| symbol | upstream callers | |');
+    L.push('| symbol | upstream callers | reach |');
     L.push('|---|---:|---|');
     for (const f of radius.slice(0, 15)) {
       const tag = riskTag(f.callers);
-      const icon = { high: '🔴 high', medium: '🟠 medium', low: '🟢 low', unknown: '⚪ unknown' }[tag];
-      L.push(`| \`${f.sym}\` | ${f.callers ?? '—'} | ${icon} |`);
+      const label = {
+        high: 'wide reach',
+        medium: 'some reach',
+        low: 'narrow reach',
+        'none-found': 'none found — or unresolved',
+        unknown: 'could not check',
+      }[tag];
+      L.push(`| \`${f.sym}\` | ${f.callers ?? '—'} | ${label} |`);
     }
     if (radius.length > 15) L.push(`\n_…and ${radius.length - 15} more._`);
     L.push('');
