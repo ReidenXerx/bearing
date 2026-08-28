@@ -394,10 +394,12 @@ Before grinding through a long list of files or symbols **serially** — every c
 **`.bearing/lang/typescript.md`** holds numbered `TS-#` rules for code that type-checks, lints clean and is **still wrong at runtime** — cite the number when one decides a choice, and load the `bearing-tsjs` skill for the full writing/review pass. The ones that cost the most:
 
 - **`as` verifies nothing** (`TS-1`) — it silences the compiler, it does not test the value. Anything entering the process (fetch, `JSON.parse`, env, a DB row) is `unknown` (`TS-2`) until a guard or schema parse actually **runs**; one `any` un-types everything downstream of it.
-- **A union switched on without a `never` default** falls through silently the next time a variant is added (`TS-3`).
+- **A union switched on without a `never` default** can fall through silently the next time a variant is added (`TS-3`) — though only where the switch **returns nothing** or its return type is **inferred**; a declared non-nullable return type already makes an unhandled variant a compile error, so adding the branch there guards nothing — but first: **if every branch only RETURNS A VALUE, it is a lookup table, not a switch** (`TS-18`), and the `default` is the value returned when the key is not found. Adding a case, or a `never` branch, to a switch that only picks values is the wrong repair. Keep the `switch` only where the branches **narrow** a discriminated union. The table is for a **closed union** key — that is what makes a missing member a compile error. **If the key is an untrusted `string`** (a query param, a body, config), keep the `switch`: it compares values, so it has no prototype chain, while a table returns a *function* for `constructor` or `toString` and `??` never fires. If you do want a table there, `Object.hasOwn` or a `Map` — `in` walks the prototype chain too and guards nothing.
 - **`||` for a default overwrites a deliberate `0`, `""` or `false`** — `??` (`TS-8`).
 - **A promise neither awaited nor returned** loses its rejection where no caller can catch it (`TS-12`); independent awaits in a loop belong in `Promise.all` (`TS-13`).
 - **A green `tsc` is evidence about declarations, not behaviour** (`TS-17`) — run the code.
+
+**When a `TS-#` rule is what stopped you changing something, name it.** Leaving code alone because a rule says to looks exactly like never having considered it, and the reader cannot tell those apart — one clause (*"kept as a switch per `TS-18`: the branches narrow"*) is the difference between a rule that was applied and a rule that got lucky.
 
 <!-- feature: northstars -->
 ## Project north-stars — the semantic anchor (highest authority)
