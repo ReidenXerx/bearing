@@ -42,7 +42,7 @@ with `npm run bearing:token-benchmark`; [the numbers, and where the graph LOSES]
 
 ## What you get
 
-**Six independent modules. Pick any combination — each works alone, none depends on another.**
+**Seven independent modules. Pick any combination — each works alone, none depends on another.**
 
 | | |
 |---|---|
@@ -52,6 +52,7 @@ with `npm run bearing:token-benchmark`; [the numbers, and where the graph LOSES]
 | 🙋 **Consult** | **Asks about the right things, decides the rest.** Asks you only what isn't in the repo — which reading you meant, what a user should see — and decides everything else. Confirms before anything irreversible. |
 | 🐜 **Minions** | **Parallelises wide mechanical work.** Cheap anchored subagents return **citations, not opinions** — they gather; your agent concludes. |
 | 🕸 **GitNexus** | **Turns 40 text matches into a real code graph.** Hard gates redirect symbol greps to callers and flows. Requires the [GitNexus](https://github.com/abhigyanpatwari/GitNexus) MCP server. |
+| 🎭 **E2E** | **Turns "I checked it in the browser" into an exit code.** A harness your agent finishes: working substrate plus the scars, and a way to test a destructive write *without performing it*. Opt-in — it writes `.e2e/` and needs Playwright. |
 
 **And one thing that isn't a module:** the agent files bug reports against its own tooling, and the kit will tell you when *its own gates* are the problem. → [the receipts](#it-tells-you-when-its-the-problem)
 
@@ -62,7 +63,7 @@ npx bearing                                    # interactive — explains each m
 npx bearing install . --runtime claude --features northstars,taskcore
 ```
 
-`--runtime` `claude` · `cursor` · `zed` · `codex` · `all`  ·  `--features` `northstars` · `taskcore` · `microscope` · `consult` · `minions` · `gitnexus` · `all`
+`--runtime` `claude` · `cursor` · `zed` · `codex` · `all`  ·  `--features` `northstars` · `taskcore` · `microscope` · `consult` · `minions` · `gitnexus` · `e2e` · `all`
 
 Then restart your IDE. Enforcement needs tool-interception hooks, and only some runtimes expose them:
 
@@ -242,6 +243,29 @@ Two gates: a **stale index** blocks until refreshed, and so does **working-tree 
 > **A positive result is strong evidence. A zero is not a finding.** Never conclude "dead code" from an empty graph result — confirm it classically and say which check you ran.
 
 When `impact` grades a change `risk: LOW` but resolved *no* callers, the kit says so before you edit. It warns rather than blocks — re-running returns the same empty answer.
+
+## 🎭 E2E harness
+
+Opt-in: it is the one module off by default, because it writes a new top-level `.e2e/` and wants a
+Playwright download. `--features …,e2e`, or pick it in the wizard.
+
+Not a test framework — Playwright is the capability, and your agent already has it. What it ships is
+the **shape and the scars**: a report whose exit code is the product, polling waits instead of
+sleeps, request readers that assert on the *body* because a 2xx can carry an error envelope, and
+`blockWrites` — intercept a mutation, capture the payload, fulfil it locally, so "does this button
+send the right thing" stops being an irreversible experiment.
+
+Screenshots are keyed by *what they are of*, not by filename. The next capture of a view replaces
+it, so a directory of shots is always current and never accumulates `editor-final-2.png`. It
+catalogues itself.
+
+The harness is meant to **grow**. When a verifier hits something the kit handled badly, the agent
+appends it to the scars list and fixes it at the next milestone — not mid-run, because results from
+a harness that no longer exists are not results.
+
+Every scar in the shipped README is one that produced a **green run over a real failure**: a skip
+stored as a pass turning an all-skipped run into a pass, a URL pattern that matched the list instead
+of the create, a blanket POST block that severed the session and made a working feature look missing.
 
 ## 🤖 CI
 

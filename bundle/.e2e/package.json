@@ -1,0 +1,10 @@
+{
+  "name": "e2e-harness",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Headless UI harness. Deliberately separate from the app's package.json — this kit is local-only and must not become a workspace.",
+  "type": "commonjs",
+  "dependencies": {
+    "playwright": "^1.54.2"
+  }
+}
