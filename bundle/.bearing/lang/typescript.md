@@ -48,8 +48,21 @@ silent?** If the compiler catches it, it is not in here.
   }
   ```
 
-  Without it, a new member of the union compiles everywhere and does nothing at every site that
-  should have handled it. This is the single highest-value TS pattern that is easy to omit.
+  **But only where nothing else is already checking.** Measured, not assumed:
+
+  | the switch | an unhandled variant | `never` branch |
+  |---|---|---|
+  | returns in every branch, return type **declared** non-nullable | `TS2366` at compile time | redundant |
+  | returns nothing (side effects) | compiles clean, silent | **needed** |
+  | returns, but the return type is **inferred** | compiles clean — the type widens to include `undefined` | **needed** |
+
+  So the branch earns its place on a side-effecting switch, or where the return type is inferred.
+  On a function declared `: string` whose body is the switch, adding it guards nothing and reads as
+  though it does — and offering to add one there is advice the compiler has already taken.
+
+  **If every branch only returns a value, stop and read `TS-18` first.** A lookup table gives you
+  this same guarantee without a `never` branch at all, and adding the branch here is how a switch
+  that should have become a table acquires a fresh reason to stay a switch.
 
 - **TS-4** — **`satisfies` when you want the check without losing what you wrote.** `const cfg:
   Config = {...}` widens the value to `Config`, so `cfg.mode` is `string` and the literal is gone.
@@ -135,12 +148,20 @@ making the **compiler** catch something it otherwise would not, so each ends in 
 line naming what changes at compile time or run time. A rule that cannot say that is a style
 preference, and a style preference in this file is how a rulebook stops being read.
 
+**When a `Not when:` clause is what left the code alone, say so and name the rule.** Leaving a
+`switch` because it narrows a union looks exactly like never having considered the alternative, and
+the reader cannot tell the two apart — so one line, *"kept as a switch per `TS-18`: the branches
+narrow"*, is the difference between a rule that was applied and a rule that was lucky. Observed: an
+agent reasoned its way to the right answer, said nothing, and was read as having missed it.
+
 - **TS-18** — **A `switch` that only picks a value is a lookup function written longhand.** Replace
   it with a function that holds an object and returns from it; the `default` branch becomes the
   value returned when the key is not found.
 
   **When:** every branch of a `switch` or `else if` chain returns a value of the same type, and the
-  branches differ only in *what value*, not in *what they do*.
+  branches differ only in *what value*, not in *what they do*. **This includes a switch that already
+  carries a `default`, or a `never` exhaustiveness check** — the table replaces both, and finding one
+  of those in place is not evidence the switch has earned its keep.
 
   ```ts
   // Key is a closed union → the table IS the exhaustiveness check, and no default is reachable.
@@ -161,10 +182,21 @@ preference, and a style preference in this file is how a rulebook stops being re
   - **Guard the lookup when the key comes from outside.** `RATE["constructor"]` returns a function
     rather than `undefined`, so `?? fallback` never fires and the function returns something absurd
     instead of the default. `Object.hasOwn`, a `Map`, or `Object.create(null)` as the table.
+
+    **`in` is not a guard**: `"constructor" in RATES` is `true`, because `in` walks the prototype
+    chain exactly like the lookup does. It is the natural-looking fix and it changes nothing.
   - **The compiler will not remind you the fallback is needed**: `RATE[key]` is typed as the value
     type even for a key that was never set, unless `noUncheckedIndexedAccess` is on (`TS-5`).
 
-  **Not when:** the branches **narrow a discriminated union**. `switch (e.kind)` gives each branch
+  **Not when — the key is not a closed union.** The table pays for itself by making a missing
+  member a compile error, and an untrusted `string` key buys none of that: nothing constrains it, so
+  there is nothing for the compiler to check. What the conversion *does* buy you is a prototype
+  chain the `switch` never had — `switch` compares values and cannot resolve `"constructor"` to
+  anything. Measured: the table form shipped `rateFor("constructor") === Object`; the switch form
+  returned the fallback for every hostile key. Keep the `switch`, or use a `Map`.
+
+  **Not when:** the branches **narrow a discriminated union** — and narrowing is the whole test,
+  not whether a `default` is present. `switch (e.kind)` gives each branch
   the payload type for that variant; a lookup keyed on `e.kind` hands every handler the whole union,
   and the naive fix is `HANDLERS[e.kind](e as ClickEvent)` — which is `TS-1`, and worse than the
   `switch` it replaced. Keep the `switch` there, or write the handler map as a mapped type over the
