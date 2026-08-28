@@ -21,6 +21,14 @@ The first module that is off by default — it writes a top-level `.e2e/` and wa
 download, which is not something a repo should get for pressing Enter. `Enter` in the wizard now
 means the recommended set and says so; `"all"` still means all.
 
+### Added — bearing offers the new module, and sets it up
+
+Reading a notice, retyping a command, then running two more to make the thing work is four steps to
+try one module, which is how an opt-in module stays permanently un-tried. On a terminal the update
+now OFFERS it, and offers to install its dependencies — two questions, both disclosing what they
+do, both defaulting to no. A closed stdin or a non-interactive run prompts for nothing and prints
+the commands instead, and an existing setup is never offered again.
+
 ### Added — `--features +e2e` on update, and a notice when a module is new
 
 Adding one module used to mean retyping the other six, where a forgotten name silently uninstalled
