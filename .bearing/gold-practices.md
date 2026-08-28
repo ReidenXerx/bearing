@@ -193,3 +193,11 @@ better does not prevent.
   migration. *Scar: three skills answered "index is stale" with a bare `analyze`, which omits
   `--embeddings` — and an index without embeddings is stale by the contract's own definition.*
 
+- **GP-24** — **A repair lands on the instance; go find the pattern's other instances.** Before
+  closing a fix, search for the same shape elsewhere — the sibling is usually already written and
+  usually still broken, and it is invisible because the bug you just understood makes the other one
+  look obviously fine. *Scar: five in one session — the scorecard's label map was fixed for drift
+  and `stats`, twenty lines away, was not; `.gitignore` had managed blocks while `.gitnexusignore`
+  was overwritten wholesale; seed-once covered `hooks.json` and not the config beside it;
+  `addedEngines` was recorded so uninstall could reverse it while `createdPackageJson` was not.*
+
