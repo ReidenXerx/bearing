@@ -2,6 +2,32 @@
 
 All notable changes to `bearing` are documented here.
 
+## 1.1.6 — a seventh module, and the fixes that were sitting above npm
+
+### Added — E2E harness (`--features e2e`, off by default)
+
+A browser harness the project finishes. Working substrate — a report whose exit code is the
+product, polling waits, request/response readers, screenshots keyed by view and self-cataloguing —
+plus one contract stub, because how an app holds a session is the one genuinely app-specific piece.
+`blockWrites` intercepts a mutation, captures the payload and fulfils it locally, so a destructive
+button can be verified without pressing it.
+
+What it really ships is the scars, each of which produced a green run over a real failure: a skip
+stored as a pass turning an all-skipped run into a pass, a URL pattern that matched the list
+instead of the create, a 2xx carrying an error envelope, a blanket POST block that severed the
+session and made a working feature look missing.
+
+The first module that is off by default — it writes a top-level `.e2e/` and wants a Playwright
+download, which is not something a repo should get for pressing Enter. `Enter` in the wizard now
+means the recommended set and says so; `"all"` still means all.
+
+### Added — `--features +e2e` on update, and a notice when a module is new
+
+Adding one module used to mean retyping the other six, where a forgotten name silently uninstalled
+it. Signed tokens are now a delta: `+e2e`, `-minions`. And because `update` correctly inherits the
+recorded feature set, a new module could never appear on its own and nothing announced it — the
+update that crosses a module's introducing version now names it once.
+
 ## 1.1.5 — the instructions were teaching things that could not be done
 
 Most of this release is one class of defect, found by running what the docs say instead of reading
