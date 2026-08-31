@@ -21,6 +21,22 @@ The first module that is off by default — it writes a top-level `.e2e/` and wa
 download, which is not something a repo should get for pressing Enter. `Enter` in the wizard now
 means the recommended set and says so; `"all"` still means all.
 
+### Fixed — an update no longer deletes the practices a project wrote
+
+`.bearing/gold-practices.md` was copied wholesale on every update. That was deliberate — bearing
+owning it is what makes a corrected rule reach every repo — and its header duly pointed project
+rules at `.bearing/northstars.md`. Agents ignored that, and they were right to: a lesson learned
+while working is a PRACTICE, not a statement about what the project is, so gold-practices.md is
+exactly where it belongs. One repo had accumulated fourteen. Every one was a single `bearing update`
+from being deleted, silently, by a command that then reported success.
+
+The file is now two: a marked block bearing rewrites, and everything below it, which bearing never
+touches — the same mechanism already used for `.gitignore`, `CLAUDE.md` and `.prettierignore`. The
+first update after this migrates automatically, carrying existing project rules below the marker and
+renumbering them `PP-#`. That prefix matters: one repo's agent wrote a `GP-24` while bearing was
+independently shipping a different `GP-24`, and a citation that still resolves but now means
+something else is worse than one that dangles.
+
 ### Added — bearing offers the new module, and sets it up
 
 Reading a notice, retyping a command, then running two more to make the thing work is four steps to

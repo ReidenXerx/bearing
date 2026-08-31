@@ -1,3 +1,4 @@
+<!-- BEGIN GENERATED: gold-practices — bearing owns this block and rewrites it on update. Add YOUR rules below the END marker, where they are safe. -->
 # Gold practices — what went wrong before
 
 **Ships with bearing. Applies to every project.** Where the north-stars say what *this* project is,
@@ -6,8 +7,9 @@ these say how the work is done anywhere. Numbered `GP-#`, cited the same way.
 **North-stars outrank gold practices.** A project's own invariant is more specific than a general
 rule, so on conflict the `NS-#` wins and you say which one and why.
 
-**This file is bearing's, not yours.** `bearing update` overwrites it — project rules belong in
-`.bearing/northstars.md`, which bearing never touches.
+**This block is bearing's**, and `bearing update` rewrites it. **Your own practices go below the
+END marker at the bottom**, numbered `PP-#`; nothing down there is ever touched. Rules about what
+*this project is* still belong in `.bearing/northstars.md`.
 
 ---
 
@@ -242,3 +244,4 @@ better does not prevent.
   is not a missing guard — it is the direction of the comparison. Same family as GP-9: absence is
   being handled as if it were a value. *Scar: a support rep was shown terms they can never accept, on
   every page load.*
+<!-- END GENERATED: gold-practices -->

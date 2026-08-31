@@ -51,8 +51,9 @@ USER-PREFS(this task): <corrections + constraints the user gave THIS task>
 
 A rewrite, not an append: a core that only grows becomes the transcript it exists to replace.
 
-One exception to "keep" — if a lesson outlives THIS task, move it to `.bearing/gold-practices.md`
-first, then delete it here. The core is per-chat; anything left in it dies with the chat.
+One exception to "keep" — a lesson outliving THIS task is promoted, then deleted here; the core is
+per-chat, so what stays dies with it. Promote WITH ITS SCAR into `.bearing/gold-practices.md` below
+its END marker, as `PP-#`: that half is yours, above it is bearing's and is overwritten.
 
 Git already keeps the log. A core that duplicates commits pays context for a worse copy.
 
@@ -60,11 +61,10 @@ Git already keeps the log. A core that duplicates commits pays context for a wor
 
 The SessionStart brief points you here. **Read the entire file: no `offset`, no `limit`, no skim.**
 
-The one file where the usual discipline is wrong. The contract says to page large source with
-offset/limit, because source is huge and you want one part of it. This is one screen, every line
-survived a prune because deleting it would cost you work, and you cannot tell which line that is
-until you have read it. A partial read is this file's own failure mode wearing the costume of
-recovery: you do not know what you missed, so you proceed confidently on the rest.
+The one file where the usual discipline is wrong. offset/limit is for source — huge, and you want one
+part of it. This is one screen, and every line survived a prune because deleting it would have cost
+you work; you cannot tell which line until you have read it. A partial read is this file's own
+failure mode in costume: you proceed confidently, not knowing what you missed.
 
 Then:
 
