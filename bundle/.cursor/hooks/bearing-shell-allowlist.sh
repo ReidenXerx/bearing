@@ -17,12 +17,18 @@ function out(obj) {
   process.stdout.write(JSON.stringify(obj));
 }
 
+// The CURRENT names first, then the pre-rename ones as aliases (NS-15). These went stale at the
+// rename: the scripts became `bearing-*` and this kept naming `gitnexus-*`, so the direct
+// invocation the gates themselves suggest — `node scripts/bearing-agent.mjs fallback "<why>"` —
+// stopped being pre-approved. It was never BLOCKED (every path below ends in allow), but the agent
+// stopped running it autonomously and started asking the user for permission instead, which is the
+// one thing this hook exists to prevent.
 const allowed =
-  /\bnpm run bearing:[\w:-]+/.test(command) ||
-  /\bnode scripts\/gitnexus-agent\.mjs\b/.test(command) ||
+  /\bnpm run (bearing|gitnexus):[\w:-]+/.test(command) ||
+  /\bnode scripts\/(bearing|gitnexus)-agent\.mjs\b/.test(command) ||
   /\bnpx(?:\s+-y)?\s+gitnexus@latest\b/.test(command) ||
   /\bnpx(?:\s+-y)?\s+gitnexus\b/.test(command) ||
-  /\bbash scripts\/(gitnexus-setup|sync-cursor-bearing-teaching)\.sh\b/.test(command);
+  /\bbash scripts\/((bearing|gitnexus)-setup|sync-cursor-bearing-teaching)\.sh\b/.test(command);
 
 if (allowed) {
   out({

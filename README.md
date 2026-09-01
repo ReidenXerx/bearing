@@ -76,6 +76,7 @@ Then restart your IDE. Enforcement needs tool-interception hooks, and only some 
 | Consult — ask vs decide | ✅ | ✅ | ✅ | — |
 | Minions — anchored fan-out | ✅ | — | — | — |
 | GitNexus — hard gates | ✅ | ✅ | — | — |
+| E2E — browser verification | ✅ | ✅ | ✅ | ✅ |
 
 ✅ means it fires without being asked. A `—` is not always absence: the **task-core** skill and its
 contract section install on every runtime, so you can invoke it by name — what Claude Code adds is

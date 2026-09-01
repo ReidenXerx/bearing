@@ -2,6 +2,34 @@
 
 All notable changes to `bearing` are documented here.
 
+## Unreleased
+
+### Fixed — a stale-index brief showed JavaScript instead of a command
+
+Two shipped strings called the command resolver from inside DOUBLE QUOTES, so what reached the user
+was the literal text `${howToRun('bearing:agent-refresh')}`. One of them was the stale-index branch
+of the session brief — the exact moment a runnable command is the entire point of the message. The
+other wrote the same into every generated architecture doc.
+
+### Fixed — Cursor stopped pre-approving bearing's own maintenance commands
+
+The shell allowlist still named `scripts/gitnexus-agent.mjs` and `scripts/gitnexus-setup.sh` after
+those files were renamed to `bearing-*`. Nothing broke loudly, because every branch of that hook
+ends in `allow` — the only symptom was the agent losing its pre-approval and beginning to ask the
+user for permission to run bearing's own maintenance, which is the one thing the hook exists to
+prevent. The pre-rename names stay as aliases (NS-15).
+
+### Fixed — a Cursor rule pointed at a file migration deliberately deletes
+
+`bearing.mdc` named `.cursor/gitnexus-api-profile.json`; the file moved to `.bearing/` and
+`migrate.mjs` removes the old copy on update, so the rule described a path that could not exist.
+
+### Fixed — the e2e module was missing from the runtime parity table
+
+That table is how someone decides whether bearing does anything for their editor, so a module absent
+from it is invisible to exactly the person deciding. The existing metadata check passed because it
+only asks whether the module is mentioned somewhere in the README, and a prose section satisfied it.
+
 ## 1.1.7 — the harness kit learns which backend it is pointed at
 
 ### Added — e2e: an environment guard, and the session exporter the kit kept naming

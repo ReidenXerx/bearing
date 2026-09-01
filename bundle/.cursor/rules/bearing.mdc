@@ -39,7 +39,7 @@ Run tools in this order — do not skip steps:
 
 ### HTTP API work — route by detected profile
 
-The kit auto-detects the router style at install (`.cursor/gitnexus-api-profile.json`):
+The kit auto-detects the router style at install (`.bearing/gitnexus-api-profile.json`):
 
 - **Framework router** (Route nodes indexed) → `api_impact` / `route_map` / `shape_check`.
 - **Custom hand-rolled router** (zero Route nodes) → `context` on the dispatcher/handler symbols + `query`.
