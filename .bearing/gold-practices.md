@@ -1,3 +1,4 @@
+<!-- BEGIN GENERATED: gold-practices — bearing owns this block and rewrites it on update. Add YOUR rules below the END marker, where they are safe. -->
 # Gold practices — what went wrong before
 
 **Ships with bearing. Applies to every project.** Where the north-stars say what *this* project is,
@@ -6,8 +7,9 @@ these say how the work is done anywhere. Numbered `GP-#`, cited the same way.
 **North-stars outrank gold practices.** A project's own invariant is more specific than a general
 rule, so on conflict the `NS-#` wins and you say which one and why.
 
-**This file is bearing's, not yours.** `bearing update` overwrites it — project rules belong in
-`.bearing/northstars.md`, which bearing never touches.
+**This block is bearing's**, and `bearing update` rewrites it. **Your own practices go below the
+END marker at the bottom**, numbered `PP-#`; nothing down there is ever touched. Rules about what
+*this project is* still belong in `.bearing/northstars.md`.
 
 ---
 
@@ -53,13 +55,20 @@ better does not prevent.
 
 - **GP-7** — **Verify the probe before believing the result.** A failing check is a claim too, and a
   broken harness fails in exactly the shape of a broken feature. When a result is surprising, suspect
-  the measurement first. *Scar: a hook run without its project-directory variable operated on the
-  wrong root and "proved" a working fix was broken; on another day three separate probe harnesses
-  reported confident numbers that were artefacts of shell quoting.*
+  the measurement first. When the result changes and the code under
+  test did not, suspect the ENVIRONMENT before the subject — a suite that suddenly fails everywhere
+  is describing its surroundings, not its subject. *Scar: a hook run without its project-directory
+  variable operated on the wrong root and "proved" a working fix was broken; three probe harnesses
+  reported confident numbers that were artefacts of shell quoting; and two runs regressed to "nothing
+  found" through two edits chasing it, because the dev server had exited and another project's server
+  had taken the port, so every request 404'd.*
 
-- **GP-8** — **Every line you print is a claim.** *Scar: "pushed" printed after a rejected push,
-  because the echo was not conditional on the exit code; a commit hash named before reading the
-  output it came from.*
+- **GP-8** — **Every line you print is a claim, and a command's exit status is the only evidence it
+  worked.** `cmd; echo "done"` prints "done" when cmd failed — the shell moved on. In a pipeline `$?`
+  is the LAST stage, so `cmd | grep x; echo $?` reports grep. Gate the message on the status, or
+  print the command's own output and read it. *Scar: "pushed" printed after a rejected push, and a PR
+  comment posted saying the branch was updated — the echo was unconditional and the rejection
+  scrolled past above it; a commit hash named before reading the output it came from.*
 
 ## The design
 
@@ -201,3 +210,49 @@ better does not prevent.
   was overwritten wholesale; seed-once covered `hooks.json` and not the config beside it;
   `addedEngines` was recorded so uninstall could reverse it while `createdPackageJson` was not.*
 
+- **GP-25** — **Reproduce the failure before you name its cause; a fix aimed at an unreproduced cause
+  is a guess wearing a fix's clothes.** The plausible mechanism arrives before the evidence and feels
+  like understanding, and everything downstream inherits it — the fix, the comment confidently
+  explaining it, the check written to prove it. And point that check at **the code that actually
+  broke, not the replacement you just wrote**: a negative test against your own new module exercises
+  something that never existed on the broken branch, so it passes and certifies nothing. Restore
+  pristine, make it fail, *then* fix. *Scar: a PDF worker failure was diagnosed as a bundler refusing
+  to resolve a bare specifier inside `new URL(…, import.meta.url)`. A shared module and a `?url` fix
+  were written and the negative test passed — because it tested the new module. The bundler resolves
+  that specifier correctly. The real cause was an `if (!workerSrc)` guard that a dependency's major
+  bump had silently invalidated by assigning a placeholder default at import time.*
+
+- **GP-26** — **A measurement whose control arm cannot be seen moving is not evidence.** Prove the
+  setup can register the change at all, then read it. Alternate the arms, repeat, report medians,
+  print the confounder itself, and prefer one metric with no timing in it — "49 chunks after auth"
+  vs "0" is the same claim with no variance to argue about. *Scar: four in one session, each a
+  confident number. a localhost benchmark prices per-request latency at zero, so a change that
+  removes round trips read as noise at −51ms and as −509ms at 40ms RTT — the same change, the same
+  build. One run per arm reported an optimisation 800ms WORSE, because one arm refreshed an expired
+  token and the other did not. A window bounded by a pattern match at BOTH ends read 0 on both arms
+  — not "nothing loaded late" but "the pattern matched an earlier call and collapsed the window", and
+  zero-because-fixed is indistinguishable from zero-because-mismeasured. And appending a comment to
+  test cache invalidation produced byte-identical output and three unchanged hashes, which reads
+  exactly like a pass: the minifier had eaten the only change. Corollary: "it got smaller" cannot
+  tell a deferral that loads late from one that never loads — assert the request happened AND
+  happened after the boot path.*
+
+- **GP-27** — **A negative check answers before its data exists.** `role !== SUPPORT` is true while
+  `role` is still undefined, so it silently answers a question it has no data for; `role === ADMIN`
+  beside it is immune, and not because it was better guarded. When a check can run during boot,
+  prefer the positive form or gate on the "have I loaded this" flag the store already keeps. The bug
+  is not a missing guard — it is the direction of the comparison. Same family as GP-9: absence is
+  being handled as if it were a value. *Scar: a support rep was shown terms they can never accept, on
+  every page load.*
+<!-- END GENERATED: gold-practices -->
+
+## This project's own practices
+
+**Everything below this line is yours. `bearing update` never touches it.** Numbered `PP-#` so a
+citation can never collide with a bearing `GP-#` — they are renumbered upstream as rules are added.
+
+Same bar as above: a rule earns its place with a **scar**. If it has no scar it is advice the model
+already follows, and it costs context to say so. If a rule here turns out to be true of every
+project rather than this one, it belongs upstream — say so and it can be promoted.
+
+<!-- Add PP-1, PP-2, … here. -->

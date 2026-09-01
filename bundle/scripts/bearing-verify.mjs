@@ -72,15 +72,14 @@ function readRuntime() {
  * Which runtimes an install actually covers.
  *
  * This was `r === 'cursor' || r === 'both'`, a second implementation of something the installer
- * already knew, and it had drifted (GP-11). Bearing accepts `cursor`, `zed`, `claude`, `codex`,
- * `both` (= cursor+zed), `all` (= every one) and comma lists — of which that expression understood
- * exactly two. Consequences, both observed:
+ * already knew, and it had drifted (GP-11). Bearing accepts `zed`, `claude`, `codex`, `all` and
+ * comma lists — of which that expression understood two, neither of them current. Consequences,
+ * both observed before the checks were derived from the runtime rather than guessed:
  *
- *   runtime "all"    -> wantsCursor false, so the RECOMMENDED install skipped every Cursor check
- *                       and reported a clean bill of health it had not verified.
- *   runtime "claude" -> ungated checks still looked for Cursor files, so a correct Claude-only
- *                       install was reported broken and told the user to "restart Cursor" (NS-6:
- *                       advice they cannot follow, about a problem that does not exist).
+ *   runtime "all"    -> the recommended install skipped every check for a runtime it HAD, and
+ *                       reported a clean bill of health it had not verified.
+ *   runtime "claude" -> ungated checks looked for another editor's files, so a correct install was
+ *                       reported broken with advice about a problem that did not exist (NS-6).
  */
 function runtimeSet(r) {
   const tokens = String(r || 'both')
@@ -95,9 +94,6 @@ function runtimeSet(r) {
     else out.add(t);
   }
   return out;
-}
-function wantsCursor(r) {
-  return runtimeSet(r).has('cursor');
 }
 function wantsZed(r) {
   return runtimeSet(r).has('zed');
@@ -281,7 +277,6 @@ function checkSkillsStore() {
 }
 
 function checkSkillSymlinks(runtime) {
-  const cursorOk = fs.existsSync(path.join(root, '.cursor/skills/bearing-workspace/SKILL.md'));
   const zedOk = fs.existsSync(path.join(root, '.agents/skills/bearing-workspace/SKILL.md'));
   // The `else` branch asserted the ZED directory for every runtime that was not Cursor — so a
   // Claude-only install failed on "missing .agents/skills symlinks", a Zed path it was never
@@ -292,7 +287,6 @@ function checkSkillSymlinks(runtime) {
   // Claude's (not), leaving this check vacuous on exactly the install it was rewritten for.
   const claudeOk = fs.existsSync(path.join(root, '.claude/skills/bearing-workspace/SKILL.md'));
   const want = [];
-  if (wantsCursor(runtime)) want.push(['.cursor/skills', cursorOk]);
   if (wantsZed(runtime)) want.push(['.agents/skills', zedOk]);
   if (wantsClaude(runtime)) want.push(['.claude/skills', claudeOk]);
   let ok = true;
@@ -365,14 +359,6 @@ function checkZed() {
   return checks;
 }
 
-const CURSOR_CRITICAL = [
-  '.cursor/rules/00-bearing-enforcement.mdc',
-  '.cursor/hooks.json',
-  '.bearing/lib/hook-helpers.mjs',
-  '.bearing/lib/stale-policy.mjs',
-  'scripts/bearing-agent.mjs',
-  'scripts/bearing-verify.mjs',
-];
 
 const HOOK_SCRIPTS = [
   'bearing-session-primer.sh',
@@ -401,12 +387,6 @@ export async function verifyInstall(repoRoot) {
   const retired = await checkRetiredHookKeys();
   if (retired) checks.push(retired);
 
-  if (wantsCursor(runtime)) {
-    for (const rel of CURSOR_CRITICAL) checks.push(checkFile(rel));
-    checks.push(checkHooksJson());
-    for (const h of HOOK_SCRIPTS) checks.push(checkHookExecutable(h));
-    checks.push(checkFile('.cursor/mcp.json'));
-  }
 
   if (wantsZed(runtime)) {
     checks.push(...checkZed());
@@ -475,7 +455,6 @@ async function printHuman(report) {
   }
 
   const steps = [await run('bearing:health')];
-  if (wantsCursor(report.runtime)) steps.unshift('Restart Cursor (MCP + hooks)');
   if (wantsZed(report.runtime)) {
     steps.unshift('Restart Zed — trust worktree; profile "Zed + GitNexus"');
   }
