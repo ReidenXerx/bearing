@@ -9,7 +9,7 @@
  * Driving a hosted login (OAuth + PKCE, SSO, an MFA prompt) from a verifier is slow, brittle, and
  * frequently against the identity provider's terms. Instead: log in once as a human, export the
  * browser's storage to a JSON file, and inject it before the app boots. `tools/export-storage.js`
- * is the companion that produces that file.
+ * is the companion that produces it — a console snippet you paste, not a script you run.
  *
  * BEFORE the app boots is load-bearing — `page.addInitScript`, not `page.evaluate` after
  * `goto`. An app that reads its token during module init has already decided it is logged out by
@@ -63,7 +63,10 @@ const loadStorage = ({ storage = process.env.STORAGE } = {}) => {
   const file = storageFile(storage || 'storage.json');
   if (!fs.existsSync(file)) {
     throw new Error(
-      `No session export at ${file}. Create one with:  node .e2e/tools/export-storage.js`,
+      `No session export at ${file}.\n` +
+        `  Create one: log in in a browser, then paste .e2e/tools/export-storage.js into its\n` +
+        `  console and save what it copies here. It is a console snippet, NOT a node script —\n` +
+        `  node cannot read a logged-in browser's storage.`,
     );
   }
   return JSON.parse(fs.readFileSync(file, 'utf8'));

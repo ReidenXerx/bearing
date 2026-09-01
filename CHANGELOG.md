@@ -2,6 +2,30 @@
 
 All notable changes to `bearing` are documented here.
 
+## Unreleased
+
+### Added — e2e: an environment guard, and the session exporter the kit kept naming
+
+Harvested from four harnesses that have kept growing since the module shipped, including one in a
+project unlike the others — what those have in common is much better evidence of "general" than
+anything three frontends share.
+
+`core/env.js` answers a question nothing else in the kit could: which backend is this app actually
+talking to. Staging and production are routinely the same origin with only the token values
+differing, so a production export in a staging build 401s and reads as "session expired" — people
+re-export a session that was never broken. It refuses production without `ALLOW_PROD=1`, catches
+the mismatch, and — because it needs one project-specific function — says INERT rather than
+reporting protection it is not providing. It never blocks a run just for being unwritten.
+
+`tools/export-storage.js` was NAMED by session.js in 1.1.6 and never shipped, and the instruction
+was wrong twice: the real thing is a console snippet, because node cannot read a logged-in
+browser's storage. A test now walks every path the harness names and fails if the bundle does not
+ship it.
+
+Plus the judgment those harnesses had and this one did not: a screenshot is evidence, never a check;
+a host classifier that is not scoped to your own hosts will read a third party's `api.` host as
+production; and a full-page shot of a long list came out 1600x109241, which is why `full` is off.
+
 ## 1.1.6 — a seventh module, and the fixes that were sitting above npm
 
 ### Added — E2E harness (`--features e2e`, off by default)

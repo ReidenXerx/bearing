@@ -22,6 +22,8 @@ HEADED=1 SLOWMO=250 node .e2e/verify/smoke.js   # watch it happen
 | `core/http.js` | **works** — watch requests/responses, and test a write without performing it |
 | `core/shots.js` | **works** — screenshots keyed by view, freshest wins, self-cataloguing |
 | `core/paths.js` | **works** — resolved once, so a script can move |
+| `core/env.js` | **works, needs one function** — which backend am I actually talking to, and refuse production without an opt-in |
+| `tools/export-storage.js` | template — paste it in a browser console to capture a session |
 | `core/session.js` | **stub — throws until you write it.** How your app holds a session is the most app-specific thing about it |
 | `verify/smoke.js` | the worked example. Copy its shape |
 | `interact/` | yours: navigation, forms, tables, overlays — the vocabulary of *your* UI |
@@ -43,7 +45,12 @@ HEADED=1 SLOWMO=250 node .e2e/verify/smoke.js   # watch it happen
    payload and fulfils it locally. Write every verifier as if it were pointed at production,
    because one env var is usually all that stands between you and that.
 6. **One shot per view, keyed by what it IS.** Freshest wins. These are documentation, not
-   regression baselines — no diffing, no approval step, no `editor-final-2.png`.
+   regression baselines — no diffing, no approval step, no `editor-final-2.png`. A screenshot is
+   EVIDENCE, never a check: an image nobody diffs cannot fail a build, so pair every shot with a
+   `check()` that can.
+7. **Know which backend you are on before you touch it.** `guardEnv` after the first navigation.
+   Staging and production are routinely the same origin with different tokens, and nothing on the
+   page says which you got.
 
 ## Scars — each of these produced a GREEN run over a real failure
 
@@ -70,6 +77,16 @@ HEADED=1 SLOWMO=250 node .e2e/verify/smoke.js   # watch it happen
 - **Injecting a re-stringified token authenticates as nothing.** If the app stores values raw, the
   token looks present and the app renders, empty. Verify how your app stores a session; do not
   assume.
+- **A production token in a staging build reads as "session expired".** Same origin, same storage
+  keys, only the values differ — so the export looks fine and the diagnosis is wrong. People re-export
+  a session that was never broken. Stamp `__env` on the export and let `guardEnv` catch it.
+- **A host classifier that is not scoped to your own hosts will misread a third party.** One app
+  calls `api.country.is` for geolocation; a rule keying off a leading `api.` read that as PRODUCTION
+  and refused a good staging run. That failed safe — the same looseness reading `staging` off a third
+  party while pointed at production is what disarms the write guard.
+- **A full-page screenshot of a long list is unusable.** One came out 1600x109241 — no human opens
+  it and no diff can use it. The viewport is what a person actually sees, so that is the default;
+  pass `{full: true}` deliberately, for a short page.
 
 ## Growing this
 

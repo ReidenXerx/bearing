@@ -78,7 +78,10 @@ const createShots = ({ dir, mask = [], env = process.env.E2E_ENV || 'local' }) =
      * @param {string} key         what this is a shot OF — the identity, not a filename
      * @param {object} [opts]
      * @param {object} [opts.of]   a Locator to shoot instead of the page (an element shot)
-     * @param {boolean} [opts.full] full scrollable page rather than the viewport
+     * @param {boolean} [opts.full] full scrollable page rather than the viewport. Off by default
+     *   for a measured reason: a full-page shot of a list that renders every row came out
+     *   1600x109241 — a file no human opens and no diff can use. The viewport is what a person
+     *   actually sees. Pass it deliberately, for a short page you want whole.
      * @param {string} [opts.note] one line: what a reader is looking at
      */
     async take(page, key, { of = null, full = false, note = '' } = {}) {
