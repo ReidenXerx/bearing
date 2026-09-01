@@ -2,7 +2,7 @@
 
 All notable changes to `bearing` are documented here.
 
-## Unreleased
+## 1.1.7 — the harness kit learns which backend it is pointed at
 
 ### Added — e2e: an environment guard, and the session exporter the kit kept naming
 
