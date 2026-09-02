@@ -805,9 +805,15 @@ function compoundNotice(command) {
 export function classifyShell(req, ctx) {
   const command = req.command || "";
   const { phase } = ctx;
+  // CURRENT script name first, the pre-rename one kept as an alias (NS-15). This named only
+  // `gitnexus-agent.mjs` after the rename to `bearing-*`, so the escape hatch the gates themselves
+  // print — `node scripts/bearing-agent.mjs fallback "<why>"` — was not recognised as maintenance
+  // and got the graph-first redirect instead of a pass. A block whose documented exit is itself
+  // gated is the trap NS-6 exists to prevent. The identical defect was fixed in the Cursor shell
+  // allowlist and this sibling was missed — GP-24, on the path that now matters most.
   const isGitnexusMaint =
-    /\bnpm run bearing:[\w.-]+/.test(command) ||
-    /\bnode scripts\/gitnexus-agent\.mjs\b/.test(command) ||
+    /\bnpm run (bearing|gitnexus):[\w.-]+/.test(command) ||
+    /\bnode scripts\/(bearing|gitnexus)-agent\.mjs\b/.test(command) ||
     /\bnpx(?:\s+-y)?\s+gitnexus(?:@latest)?\b/.test(command);
   const isReadOnlyGit =
     /\bgit\s+(status|diff|log|show|branch|rev-parse|check-ignore|check-attr)\b/.test(command);
