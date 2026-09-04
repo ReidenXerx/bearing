@@ -325,7 +325,7 @@ bundle/
 ├── .cursor/rules/ hooks.json hooks/
 │   └── hooks/lib/          # cypher, rename, verify, graph-smoke, …
 ├── templates/              # AGENTS.gitnexus.md fragment
-├── docs/                   # GITNEXUS-CURSOR-GUIDE, TEAM-BUNDLE
+├── docs/                   # GITNEXUS-TEAM-BUNDLE, GITNEXUS-SKILLS
 ├── scripts/
 ├── .githooks/
 └── .gitnexusignore

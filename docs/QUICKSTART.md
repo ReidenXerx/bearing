@@ -61,7 +61,7 @@ cd bearing
 2. `npm run bearing:verify` — runtime-aware kit audit (also runs at end of install).
 3. `npm run bearing:health` — human-friendly status for your team.
 4. Open a **new Agent chat** and describe your task.
-5. Share [`docs/GITNEXUS-CURSOR-GUIDE.md`](../bundle/docs/GITNEXUS-CURSOR-GUIDE.md) with the team (copied to target on install).
+5. Share [`docs/GITNEXUS-TEAM-BUNDLE.md`](../bundle/docs/GITNEXUS-TEAM-BUNDLE.md) with the team (copied to target on install).
 
 > Install overwrites `.cursor/hooks.json` when runtime includes Cursor. Existing file is backed up to `.cursor/hooks.json.bearing.bak`. Global `~/.cursor/mcp.json` is not modified.
 

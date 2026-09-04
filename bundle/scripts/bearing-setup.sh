@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# __GITNEXUS_REPO__ — all-in-one GitNexus + Cursor teaching + git hooks team installer.
+# __GITNEXUS_REPO__ — all-in-one GitNexus teaching + git hooks team installer.
 #
 # Installs:
-#   • Cursor teaching bundle (rules, hooks, skills sync, manifest)
+#   • Teaching bundle (skills sync, manifest)
 #   • GitNexus MCP (project + optional global)
 #   • Git pre-commit PDG index refresh (no personal tooling)
 #   • Knowledge graph index
@@ -14,7 +14,7 @@
 #   --quick           Hooks + teaching + MCP only; skip index build
 #   --full            Force full re-index (--force)
 #   --skip-index      Same as --quick for index step
-#   --skip-global-mcp Skip global gitnexus setup (~/.cursor/mcp.json)
+#   --skip-global-mcp Accepted and ignored — the global step was Cursor-only
 #   -h, --help        Show usage
 set -euo pipefail
 
@@ -64,9 +64,8 @@ done
 
 export GITNEXUS_RUNTIME
 
-# Runtime membership — GITNEXUS_RUNTIME may be cursor|zed|claude|both|all or a
-# comma-list (e.g. "cursor,claude"). both = cursor+zed; all = every adapter.
-wants_cursor() { case "$GITNEXUS_RUNTIME" in *cursor*|*both*|*all*) return 0;; esac; return 1; }
+# Runtime membership — GITNEXUS_RUNTIME may be zed|claude|codex|both|all or a
+# comma-list (e.g. "zed,claude"). both = zed+claude; all = every adapter.
 wants_zed()    { case "$GITNEXUS_RUNTIME" in *zed*|*both*|*all*)    return 0;; esac; return 1; }
 wants_claude() { case "$GITNEXUS_RUNTIME" in *claude*|*all*)        return 0;; esac; return 1; }
 
@@ -135,10 +134,9 @@ CORE_SOURCES=(
   ".bearing/skills/bearing-enforcement/SKILL.md"
 )
 
-CURSOR_SOURCES=(
-  ".cursor/rules/00-bearing-enforcement.mdc"
-  ".cursor/hooks.json"
-  ".cursor/hooks/bearing-grep-guard.sh"
+# These two moved out of the Cursor list rather than going with it: they are shared hook libs,
+# shipped for every runtime, and nothing else required them.
+CORE_LIB_SOURCES=(
   ".bearing/lib/hook-helpers.mjs"
   ".bearing/lib/stale-policy.mjs"
 )
@@ -172,7 +170,7 @@ else
 fi
 
 for f in "${CORE_SOURCES[@]}"; do require_file "$f"; done
-if wants_cursor; then for f in "${CURSOR_SOURCES[@]}"; do require_file "$f"; done; fi
+for f in "${CORE_LIB_SOURCES[@]}"; do require_file "$f"; done
 if wants_zed;    then for f in "${ZED_SOURCES[@]}";    do require_file "$f"; done; fi
 if wants_claude; then for f in "${CLAUDE_SOURCES[@]}"; do require_file "$f"; done; fi
 ok "Teaching sources OK (runtime: ${GITNEXUS_RUNTIME})"
@@ -183,46 +181,10 @@ info "Sync skills + teaching manifest (runtime: ${GITNEXUS_RUNTIME})"
 chmod +x scripts/sync-cursor-bearing-teaching.sh scripts/bearing-setup.sh
 bash scripts/sync-cursor-bearing-teaching.sh
 
-# ── 4b. Cursor MCP (when runtime includes cursor) ───────────────────────────
-
-if wants_cursor; then
-info "Ensuring GitNexus MCP in .cursor/mcp.json"
-
-node <<'NODE'
-import fs from 'node:fs';
-import path from 'node:path';
-import { pathToFileURL } from 'node:url';
-const p = '.cursor/mcp.json';
-// Ask the resolver rather than hardcoding. This step runs AFTER the installer has already written
-// the entry, so a literal `npx gitnexus@latest` stdio entry here silently undid BOTH the recorded
-// transport (a shared http server reverted to spawning per-client) and the recorded binary.
-let entry = { command: 'npx', args: ['-y', 'gitnexus@latest', 'mcp'] };
-try {
-  const mod = await import(pathToFileURL(path.resolve('.bearing/lib/gitnexus-cmd.mjs')).href);
-  entry = mod.mcpEntryFor(process.cwd());
-} catch {
-  /* resolver absent → keep the zero-config default, which always works */
-}
-let c = { mcpServers: {} };
-if (fs.existsSync(p)) c = JSON.parse(fs.readFileSync(p, 'utf8'));
-c.mcpServers ??= {};
-c.mcpServers.gitnexus = entry;
-fs.writeFileSync(p, JSON.stringify(c, null, 2) + '\n');
-console.log(`    ✓ gitnexus MCP entry in .cursor/mcp.json (${entry.url ?? entry.command})`);
-NODE
-fi
-
-# ── 5. global MCP (optional, Cursor) ─────────────────────────────────────────
-
-if wants_cursor && [[ "$SKIP_GLOBAL_MCP" == false ]]; then
-  info "Global GitNexus MCP (optional — all Cursor projects)"
-  "${GITNEXUS_CLI[@]}" setup 2>/dev/null && ok "Global MCP configured" \
-    || warn "Global setup skipped — project .cursor/mcp.json is sufficient"
-elif ! wants_cursor; then
-  ok "Skipped global Cursor MCP (runtime: ${GITNEXUS_RUNTIME})"
-else
-  ok "Skipped global MCP (--skip-global-mcp)"
-fi
+# Steps 4b (the .cursor/mcp.json entry) and 5 (the global ~/.cursor/mcp.json setup) are gone with
+# Cursor. Claude's MCP entry is written by its adapter into .mcp.json at install time, and zed's
+# into .zed/settings.json — neither needs a step here. `--skip-global-mcp` still parses so an
+# existing caller keeps working (NS-15); it now controls nothing.
 
 # ── 6. git hooks (GitNexus refresh only — no personal tooling) ─────────────────
 
@@ -276,17 +238,17 @@ echo "╚═══════════════════════�
 echo ""
 cat <<'ONBOARD'
 
-  GitNexus is now your Cursor agent's code brain — with enforcement.
+  GitNexus is now your agent's code brain — with enforcement on Claude Code.
 
   ✓ Graph + embeddings indexed (or run bearing:agent-refresh after --quick)
-  ✓ Hooks block grep-first habits when the graph is fresh
+  ✓ Hooks block grep-first habits when the graph is fresh (Claude Code only)
   ✓ Agent refreshes the index autonomously when stale
 
   NEXT STEPS
   ──────────
-  1. RESTART CURSOR on this project (MCP + hooks load on restart)
+  1. RESTART YOUR EDITOR on this project (MCP + hooks load on restart)
   2. Open a new Agent chat and describe your task
-  3. Share docs/GITNEXUS-CURSOR-GUIDE.md with your team (Cursor installs)
+  3. Share docs/GITNEXUS-TEAM-BUNDLE.md with your team
 
   Quick check:  npm run bearing:health
   Full audit:   npm run bearing:verify
@@ -309,7 +271,7 @@ cat <<'ONBOARD'
 
   Hooks DENY (when fresh): symbol Grep, SemanticSearch, broad Glob, large Read
   Hooks ALLOW: gitnexus npm scripts (agent refresh pre-approved)
-  MCP: gitnexus in .cursor/mcp.json · pre-commit → bearing:pdg
+  MCP: gitnexus in .mcp.json (Claude) / .zed/settings.json (Zed) · pre-commit → bearing:pdg
 
 ONBOARD
 echo ""

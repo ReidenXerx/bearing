@@ -76,7 +76,6 @@ BUNDLE_PATHS=(
   scripts/bearing-teaching/merge-package-scripts.mjs
   scripts/bearing-teaching/script-gates.mjs
   docs/GITNEXUS-TEAM-BUNDLE.md
-  docs/GITNEXUS-CURSOR-GUIDE.md
   .github/workflows/gitnexus-ci.yml
   .gitnexusignore
   skills

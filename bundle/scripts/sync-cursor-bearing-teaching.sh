@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
-# Sync GitNexus teaching bundle into Cursor-native paths (.cursor/skills).
-# Source of truth: .bearing/skills/ + .cursor/rules/ + .cursor/hooks/
+# Sync the GitNexus teaching bundle into each runtime's skill directory.
+# Source of truth: .bearing/skills/ (the canonical store); the per-runtime dirs are symlinks to it.
+#
+# The FILENAME still says cursor. It is named in .bearing/commands.json, in the generated
+# `bearing:sync-teaching` npm script and in user-owned git hooks, so renaming it carries an alias
+# obligation (NS-15) and is worth doing on its own, not inside the Cursor removal.
 # Run via: npm run bearing:setup (or directly)
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-# Runtime may be cursor|zed|claude|both|all or a comma-list. both = cursor+zed.
+# Runtime may be zed|claude|codex|both|all or a comma-list. both = zed+claude.
 #
 # The env var is set by bearing-setup.sh, and by NOTHING ELSE. Defaulting to `both` when it is unset
 # therefore turned Cursor checks back on for every other caller — `bearing:agent-refresh` on a
@@ -22,27 +26,12 @@ runtime_from_manifest() {
 }
 RUNTIME="${GITNEXUS_RUNTIME:-$(runtime_from_manifest)}"
 RUNTIME="${RUNTIME:-both}"
-wants_cursor() { case "$RUNTIME" in *cursor*|*both*|*all*) return 0;; esac; return 1; }
+wants_claude() { case "$RUNTIME" in *claude*|*both*|*all*) return 0;; esac; return 1; }
 
 info()  { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
 ok()    { printf '\033[1;32m    ✓\033[0m %s\n' "$*"; }
 warn()  { printf '\033[1;33m    !\033[0m %s\n' "$*"; }
 fail()  { printf '\033[1;31mERROR:\033[0m %s\n' "$*" >&2; exit 1; }
-
-HOOK_SCRIPTS=(
-  ".cursor/hooks/bearing-session-primer.sh"
-  ".cursor/hooks/bearing-session-health.sh"
-  ".cursor/hooks/bearing-session-health-user.sh"
-  ".cursor/hooks/bearing-prompt-router.sh"
-  ".cursor/hooks/bearing-grep-guard.sh"
-  ".cursor/hooks/bearing-read-guard.sh"
-  ".cursor/hooks/bearing-edit-guard.sh"
-  ".cursor/hooks/bearing-shell-staleness-guard.sh"
-  ".cursor/hooks/bearing-shell-allowlist.sh"
-  ".cursor/hooks/bearing-commit-guard.sh"
-  ".cursor/hooks/bearing-mcp-allowlist.sh"
-  ".cursor/hooks/bearing-after-git-commit.sh"
-)
 
 # The non-lib files this bundle cannot work without. Fixed set, so listed.
 HOOK_LIBS=(
@@ -93,7 +82,7 @@ if (!files.length) {
       else if (/\.(mjs|sh|json)$/.test(e.name)) files.push(full);
     }
   };
-  ['.cursor/hooks', '.claude/hooks', '.bearing/lib'].forEach(walk);
+  ['.claude/hooks', '.bearing/lib'].forEach(walk);
 }
 
 const missing = new Map();
@@ -133,154 +122,21 @@ sync_dir() {
   ok "$label → $dest ($count SKILL.md files)"
 }
 
-verify_always_apply_rule() {
-  local rule="$1"
-  [[ -f "$rule" ]] || fail "Missing rule: $rule"
-  grep -q 'alwaysApply: true' "$rule" \
-    || fail "$rule must have 'alwaysApply: true' in frontmatter"
-  ok "Rule active: $rule"
-}
-
-verify_hooks_json() {
-  node <<'NODE'
-import fs from 'node:fs';
-
-const hooksPath = '.cursor/hooks.json';
-const hooks = JSON.parse(fs.readFileSync(hooksPath, 'utf8'));
-const h = hooks.hooks ?? {};
-
-const checks = [
-  ['sessionStart', 'bearing-session-primer'],
-  ['sessionStart', 'bearing-session-health'],
-  ['beforeSubmitPrompt', 'bearing-session-health-user'],
-  ['beforeSubmitPrompt', 'bearing-prompt-router'],
-  ['preToolUse', 'bearing-shell-staleness-guard'],
-  ['preToolUse', 'bearing-grep-guard'],
-  ['preToolUse', 'bearing-read-guard'],
-  ['preToolUse', 'bearing-edit-guard'],
-  ['beforeShellExecution', 'bearing-shell-allowlist'],
-  ['beforeShellExecution', 'bearing-commit-guard'],
-  ['beforeMCPExecution', 'bearing-mcp-allowlist'],
-  ['afterShellExecution', 'bearing-after-git-commit'],
-];
-
-for (const [event, needle] of checks) {
-  const list = h[event] ?? [];
-  if (!list.some(x => (x.command ?? '').includes(needle))) {
-    console.error(`    ! hooks.json missing ${event} → ${needle}`);
-    process.exit(1);
-  }
-}
-console.log('    ✓ hooks.json: session + prompt router + guards + shell/mcp allowlist');
-NODE
-}
-
-write_manifest() {
-  node <<'NODE'
-import fs from 'node:fs';
-import path from 'node:path';
-
-function listSkills(dir) {
-  if (!fs.existsSync(dir)) return [];
-  return fs
-    .readdirSync(dir, { withFileTypes: true })
-    .filter(d => d.isDirectory())
-    .filter(d => fs.existsSync(path.join(dir, d.name, 'SKILL.md')))
-    .map(d => d.name)
-    .sort();
-}
-
-const manifest = {
-  bundle: '__GITNEXUS_REPO__-gitnexus-cursor-teaching',
-  version: 2,
-  installedAt: new Date().toISOString(),
-  repo: '__GITNEXUS_REPO__',
-  enforcement: {
-    blockedTools: ['Grep(symbols)', 'Grep(fields→cypher)', 'SemanticSearch', 'Glob(broad src)', 'Read(large src, no offset)'],
-    gates: ['session status/refresh', 'session health', 'prompt architecture router', 'query/context explore', 'cypher structural', 'staleness pre-edit', 'impact pre-edit', 'detect_changes pre-done'],
-    hookScripts: [
-      'bearing-session-primer.sh',
-      'bearing-session-health.sh',
-      'bearing-session-health-user.sh',
-      'bearing-prompt-router.sh',
-      'bearing-shell-staleness-guard.sh',
-      'bearing-grep-guard.sh',
-      'bearing-read-guard.sh',
-      'bearing-edit-guard.sh',
-      'bearing-shell-allowlist.sh',
-      'bearing-commit-guard.sh',
-      'bearing-mcp-allowlist.sh',
-      'bearing-after-git-commit.sh',
-    ],
-    agentCli: ['npm run bearing:agent-status', 'npm run bearing:agent-refresh'],
-  },
-  components: {
-    rules: [
-      '.cursor/rules/00-bearing-enforcement.mdc',
-      '.cursor/rules/bearing.mdc',
-      '.cursor/rules/bearing-first.mdc',
-    ],
-    hooks: '.cursor/hooks.json',
-    mcp: '.cursor/mcp.json',
-    masterSkill: '.agents/skills/bearing-workspace/SKILL.md',
-    enforcementSkill: '.agents/skills/bearing-enforcement/SKILL.md',
-    gitnexusSkills: listSkills('.bearing/skills').filter((n) => n.startsWith('gitnexus-')),
-    generatedAreaSkills: listSkills('.cursor/skills/generated'),
-  },
-  workflowChain: [
-    'READ bearing://repo/__GITNEXUS_REPO__/context',
-    'READ bearing://repo/__GITNEXUS_REPO__/schema',
-    'query({query, task_context, goal})',
-    'context({name|uid})',
-    'cypher({query, params})',
-    'impact({target, direction: upstream})',
-    'detect_changes({scope})',
-  ],
-};
-
-fs.mkdirSync('.cursor', { recursive: true });
-fs.writeFileSync(
-  '.cursor/bearing-teaching-bundle.json',
-  JSON.stringify(manifest, null, 2) + '\n'
-);
-console.log('    ✓ Wrote .cursor/bearing-teaching-bundle.json (v2 enforcement)');
-NODE
-}
-
 # ── main ─────────────────────────────────────────────────────────────────────
 
 info "Installing bearing teaching bundle (runtime: ${RUNTIME})"
 
-# Steps 1, 2, 4 and 5 verify CURSOR's own files. They were unconditional, so a `--runtime claude`
-# repo — which is never given a `.cursor/` directory — failed here with "Missing rule:
-# .cursor/rules/00-bearing-enforcement.mdc" after the install had already written everything. Only
-# an all-runtimes repo has these, so only an all-runtimes repo should be asked for them.
-if wants_cursor; then
-  info "  [1/5] Cursor rules (single always-on contract)"
-  verify_always_apply_rule ".cursor/rules/00-bearing-enforcement.mdc"
-  for ref_rule in ".cursor/rules/bearing.mdc" ".cursor/rules/bearing-first.mdc"; do
-    [[ -f "$ref_rule" ]] || fail "Missing rule: $ref_rule"
-    ok "Reference rule present: $ref_rule (load on demand)"
-  done
-
-  info "  [2/5] Cursor agent hooks (blocking guards)"
-  verify_hooks_json
-  for script in "${HOOK_SCRIPTS[@]}"; do
-    [[ -f "$script" ]] || fail "Missing hook: $script"
-    chmod +x "$script"
-  done
-  for lib in "${HOOK_LIBS[@]}"; do
-    [[ -f "$lib" ]] || fail "Missing hook lib: $lib"
-  done
-  ok "${#HOOK_SCRIPTS[@]} hook scripts + support files ready"
-else
-  info "  [1-2/5] Cursor rules + hooks skipped (runtime: $RUNTIME)"
-fi
-
-# Not Cursor-specific: every runtime's hooks import from .bearing/lib.
+# Four of the five steps here verified CURSOR's own files, and `wants_cursor` matched `all` and
+# `both` — so once the bundle stopped shipping `.cursor/`, every setup-enabled install died at
+# "[1/5] Cursor rules … Missing rule: .cursor/rules/00-bearing-enforcement.mdc", after the kit files
+# had already been written. Nothing caught it because every test in the suite passes runSetup:false
+# (NS-21: the least-exercised configuration is the least verified).
+for lib in "${HOOK_LIBS[@]}"; do
+  [[ -f "$lib" ]] || fail "Missing hook lib: $lib"
+done
 check_referenced_libs || fail "a hook names a .bearing/lib module that is not installed"
 
-info "  [3/5] Link skills (symlinks from canonical store)"
+info "  [1/2] Link skills (symlinks from canonical store)"
 STORE=".bearing/skills"
 if [[ ! -d "$STORE" ]]; then
   fail "Missing $STORE — run 'npx bearing install .' or 'npx bearing update .' first"
@@ -302,14 +158,11 @@ link_skills() {
   ok "$label → $dest_root ($count skills symlinked)"
 }
 
-case "$RUNTIME" in *cursor*|*both*|*all*) link_skills ".cursor/skills" "Cursor skills" ;; esac
+# `both` is zed+claude now. It used to be cursor+zed, so the claude arm did not match it — and a
+# `both` install got no .claude/skills at all, which is precisely the "module not available in
+# Claude Code" report this whole area exists to prevent.
 case "$RUNTIME" in *zed*|*both*|*all*)    link_skills ".agents/skills" "Zed skills" ;; esac
-case "$RUNTIME" in *claude*|*all*)        link_skills ".claude/skills" "Claude skills" ;; esac
-
-if wants_cursor; then
-  info "  [4/5] Teaching bundle manifest"
-  write_manifest
-fi
+case "$RUNTIME" in *claude*|*both*|*all*) link_skills ".claude/skills" "Claude skills" ;; esac
 
 # Drop the volatile GitNexus stats block from AGENTS.md/CLAUDE.md so committed
 # agent docs stay stable across machines (the `analyze` tool re-adds it each refresh).
@@ -317,21 +170,24 @@ if [[ -f ".bearing/lib/stabilize-agent-docs.mjs" ]]; then
   node .bearing/lib/stabilize-agent-docs.mjs . || true
 fi
 
-if wants_cursor; then
-  info "  [5/5] Quick hook smoke test"
-  if printf '%s' '{"tool_name":"SemanticSearch","tool_input":{"query":"test"}}' \
-    | bash .cursor/hooks/bearing-grep-guard.sh 2>/dev/null \
+# Claude is the only runtime that enforces (NS-14), so this smoke test is the last thing standing
+# between a dead gate and a user who believes they are protected. It drove Cursor's shell wrapper;
+# it drives the Claude hook the way Claude Code does — node, JSON on stdin, CLAUDE_PROJECT_DIR set.
+if wants_claude && [[ -f .claude/hooks/bearing-grep-guard.mjs ]]; then
+  info "  [2/2] Quick hook smoke test"
+  if printf '%s' '{"tool_name":"Grep","tool_input":{"pattern":"handlePayment"}}' \
+    | CLAUDE_PROJECT_DIR="$ROOT" node .claude/hooks/bearing-grep-guard.mjs 2>/dev/null \
     | grep -q 'deny'; then
-    ok "SemanticSearch block verified"
+    ok "Symbol-grep block verified"
   else
-    warn "Hook smoke test inconclusive — restart Cursor and check Hooks panel"
+    warn "Hook smoke test inconclusive — restart Claude Code and re-run bearing:verify"
   fi
 fi
 
 echo ""
 ok "Teaching bundle v2 installed (enforcement hooks active)"
-if wants_cursor; then
-echo "    Enforcement:   00-bearing-enforcement.mdc + grep/read/edit hooks (staleness block)"
+if wants_claude; then
+echo "    Enforcement:   grep/read/edit/bash guards in .claude/hooks (staleness block)"
 fi
 echo "    Graph imaging: bearing-imaging skill"
 echo "    Master skill:  bearing-workspace"

@@ -4,7 +4,7 @@ Portable **rules + hooks + skills + scripts** for graph-first agents (Cursor hoo
 
 > **Standalone installer:** [`bearing`](https://github.com/ReidenXerx/bearing) — `install` / `update` / `uninstall` scripts for any repo (upstream for this teaching bundle). Updates **migrate** legacy `bearing` layouts automatically.
 
-> **Team-facing guide:** `docs/GITNEXUS-CURSOR-GUIDE.md` — plain language for developers (what enforcement feels like, `npm run bearing:health`).
+> **What enforcement feels like** for a developer, in plain language: run `npm run bearing:health`.
 
 ## What's in the bundle
 

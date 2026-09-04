@@ -51,7 +51,8 @@ cp "$SRC/scripts/bearing-teaching/"* "$KIT_ROOT/bundle/scripts/bearing-teaching/
 # from $SRC (the source repo's docs are stale Cursor-only copies).
 #   docs/TEAM-BUNDLE.md -> bundle/docs/GITNEXUS-TEAM-BUNDLE.md
 #   docs/SKILLS.md      -> bundle/docs/GITNEXUS-SKILLS.md
-# bundle/docs/GITNEXUS-CURSOR-GUIDE.md is kit-owned (Cursor handout, no neutral
+# (the Cursor handout that used to live here went with Cursor support)
+# no neutral
 # twin) and is left as-is.
 cp "$KIT_ROOT/docs/TEAM-BUNDLE.md" "$KIT_ROOT/bundle/docs/GITNEXUS-TEAM-BUNDLE.md"
 cp "$KIT_ROOT/docs/SKILLS.md" "$KIT_ROOT/bundle/docs/GITNEXUS-SKILLS.md"
