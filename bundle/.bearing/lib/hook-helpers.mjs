@@ -64,7 +64,19 @@ export function bashWritesFiles(command) {
 
   // Redirection to a real path. `> /dev/null` and `2>&1` are plumbing, not edits — counting them
   // would mean counting nearly every command that reports anything.
-  const redirect = /(?:^|[^0-9<>|&])>>?\s*(?!\/dev\/)(?![&|])[^\s;|&]+/.test(cmd);
+  //
+  // QUOTED TEXT IS NOT SHELL SYNTAX. This tested the raw command, so any `>` inside a string or a
+  // script body counted as a redirect: `node -e "all.filter(l => l.length > 200)"`,
+  // `if (x > 5)`, and `git log --pretty=format:"%h %an <%ae>"` were all classified as file writes.
+  // All three nudges share this detector, so a read-only session was told "25 edits since your
+  // task-core was last written" having edited nothing, and consult could burn its one-per-session
+  // budget on a `git log`. Strip quoted runs first, and require the target to look like a PATH
+  // rather than the number an arrow function or a comparison leaves there.
+  const unquoted = cmd
+    .replace(/'[^']*'/g, " ")
+    .replace(/"(?:\\.|[^"\\])*"/g, " ")
+    .replace(/=>/g, " ");
+  const redirect = /(?:^|[^0-9<>|&=])>>?\s*(?!\/dev\/)(?![&|])(?![0-9]+(?:\s|$))[^\s;|&]+/.test(unquoted);
   const inPlace = /\bsed\s+-i|\bperl\s+-\w*i|\bgit\s+apply\b|\bpatch\b/.test(cmd);
   const writers = /\b(?:cp|mv|install|tee|truncate|touch|mkdir|rmdir|rm|ln)\s/.test(cmd);
   const formatters = /\b(?:prettier|eslint|black|gofmt|rustfmt)\b[^|]*--(?:write|fix|in-place)/.test(cmd);
@@ -72,6 +84,7 @@ export function bashWritesFiles(command) {
   const scripted =
     /<<-?\s*['"]?\w+['"]?/.test(cmd) &&
     /\b(?:python3?|node|ruby|perl|php|bash|sh)\b/.test(cmd);
+  // `sed -n`/`grep` read; only the in-place forms above write. Left as-is deliberately.
 
   return redirect || inPlace || writers || formatters || scripted;
 }

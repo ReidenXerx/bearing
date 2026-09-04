@@ -80,6 +80,16 @@ function isUnindexedPath(pathArg, root) {
   if (/(?:^|\/)(?:node_modules|vendor|dist|build|coverage|\.git|\.gitnexus)(?:\/|$)/.test(pa)) {
     return true;
   }
+  // bearing's OWN installed files. `.gitnexusignore` excludes `.bearing/`, `.claude/`, `.agents/`
+  // and `.zed/` from the index, and this list did not — so reading or grepping the kit's own hook
+  // library was denied and redirected to a graph that provably has zero rows for it (measured:
+  // `MATCH (n:File) WHERE n.filePath CONTAINS '.bearing'` returns nothing). The only exit was
+  // `bearing:fallback`, which is a large share of the fallback grants in the field log — and it
+  // fires on anyone auditing bearing inside their own repo. `editSensitivity` already exempts
+  // `.bearing/`; the search side never did (NS-5, NS-6).
+  if (/(?:^|\/)\.(?:bearing|claude|agents|zed|cursor|githooks)(?:\/|$)/.test(pa)) {
+    return true;
+  }
   // An absolute path that is not under the repo root is, by definition, not in this repo's graph.
   if (pa.startsWith("/") && root) {
     const r = String(root).replace(/\\/g, "/").replace(/\/$/, "");
@@ -303,7 +313,11 @@ export function classifyGrep(req, ctx) {
   // TODO|FIXME|HACK|XXX carve-out in isLiteralPattern unreachable for single-token patterns.
   // The !altSym guard matters: a decl alternation ("isScaleIn =|const oppStop") contains a space,
   // so isLiteralPattern calls it literal — it is still a symbol search.
-  if (literal && !altSym) {
+  // SCOPE and NON-SOURCE beat an alternation; only pattern SHAPE loses to it. A grep over ONE FILE
+  // — or over a .txt/.log — that happens to contain `a|b|c` is not repo-wide symbol discovery, and
+  // the graph has nothing to say about either. Denying it redirected to `context({name:"a"})` for
+  // a word that is not a symbol. Hit while reading a test-run log during this very audit (NS-5).
+  if (nonSource || scoped || (literal && !altSym)) {
     return { decision: "allow", agentMessage: "Grep OK — literal/config/doc search." };
   }
 
@@ -415,6 +429,12 @@ export function classifyRead(req, ctx) {
   const isSmallConfig =
     /\.(json|md|yaml|yml|mdc|sh)$/.test(filePath) || /package\.json$/.test(filePath);
   const isGeneratedSkill = /(\.cursor|\.claude|\.agents)\/skills\//.test(norm);
+  // Can this repo's index contain the file AT ALL? `classifyGrep` has asked this since the day
+  // someone was blocked from reading a dependency's source; `classifyRead` never did. So a Read of
+  // another repo's file, or of node_modules, was denied and redirected at `query({repo:"<this>"})`
+  // — a graph that cannot hold it. `isSourceCodePath` made it worse by matching `/src/` or `/lib/`
+  // anywhere in an absolute path, so any foreign path containing either read as this repo's source.
+  const unindexed = helpers ? isUnindexedPath(norm, root) : false;
 
   if (phase === "classical_fallback") {
     return { decision: "allow", agentMessage: ctx.staleFallbackMsg, userKey: "stale.classical" };
@@ -425,7 +445,7 @@ export function classifyRead(req, ctx) {
     // denied because HEAD had moved one commit — index freshness is irrelevant to all of them
     // (NS-5). Gate SOURCE reads, which is what the graph would actually have answered.
     const staleNonSource = filePath && !helpers.isSourceCodePath(norm, config, ctx.root);
-    if (!filePath || isSmallConfig || isGeneratedSkill || staleNonSource) {
+    if (!filePath || isSmallConfig || isGeneratedSkill || staleNonSource || unindexed) {
       return {
         decision: "allow",
         agentMessage:
@@ -447,6 +467,13 @@ export function classifyRead(req, ctx) {
   const isTest = /(?:^|\/)tests?\//.test(norm);
   if (hasRange || isSmallConfig || isGeneratedSkill || isTest || !isCode) {
     return { decision: "allow" };
+  }
+  if (unindexed) {
+    return {
+      decision: "allow",
+      agentMessage:
+        "Read OK — that path is outside this repo's index (another repo, a dependency, or a directory .gitnexusignore excludes), so the graph has nothing to say about it.",
+    };
   }
 
   const lineCount = typeof ctx.readLines === "function" ? ctx.readLines() : 0;

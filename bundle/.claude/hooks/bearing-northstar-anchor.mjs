@@ -51,7 +51,7 @@ const tool = String(input.tool_name || "");
 const filePath = String(input.tool_input?.file_path || "");
 const wroteDoc = /^(Write|Edit|NotebookEdit)$/.test(tool) && /\.(md|mdx|txt)$/i.test(filePath);
 
-const n = bumpNorthStarCounter(root);
+const n = bumpNorthStarCounter(root, false, input.transcript_path);
 
 // A doc write fires this regardless of the counter, because writing a doc is when a conclusion gets
 // recorded in durable form — that is the moment worth interrupting. But the counter RESETS on every
@@ -102,5 +102,5 @@ emitContext(
   "PostToolUse",
 );
 
-bumpNorthStarCounter(root, true); // reset the window
+bumpNorthStarCounter(root, true, input.transcript_path); // reset THIS chat's window
 bumpScore(root, "northStarAnchors");

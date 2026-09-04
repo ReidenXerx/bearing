@@ -202,7 +202,13 @@ export function auditKitHealth(root) {
  */
 export function userMessageForSession(audit) {
   if (audit.healthy) {
-    return "bearing is active — graph fresh, embeddings ready, and enforcement hooks are on. The agent will confirm health at the start of this chat.";
+    // The hooks half is only true where hooks exist. The `hooks` check is correctly gated to
+    // claude, so on a zed install it is simply absent from the list — and this line then asserted
+    // it anyway (NS-14, NS-20).
+    const enforcing = (audit.checks ?? []).some((c) => c.id === "hooks");
+    return enforcing
+      ? "bearing is active — graph fresh, embeddings ready, and enforcement hooks are on. The agent will confirm health at the start of this chat."
+      : "bearing is active — graph fresh and embeddings ready. This runtime has no tool-interception hooks, so the contract is advisory here.";
   }
   const stale = audit.stale?.reason === "missing_embeddings";
   if (stale) {

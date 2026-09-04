@@ -82,7 +82,12 @@ const verdict = classifyRead(
       try {
         const { spawnSync } = require("node:child_process");
         const rel = path.relative(root, path.resolve(root, filePath));
-        if (!rel || rel.startsWith("..")) return false; // outside the repo — not our business
+        // OUT OF REPO ⇒ UNTRACKED, for our purposes. This returned false, which KEEPS the deny — the
+  // comment says "not our business" while the gate is actively blocking. An absolute path outside
+  // the project root is the strongest possible evidence the index cannot contain the file, so it is
+  // the one case that most needs the escape, not the one that least needs it (NS-5).
+  if (!rel) return false;
+  if (rel.startsWith("..")) return true;
         const r = spawnSync("git", ["ls-files", "--error-unmatch", "--", rel], {
           cwd: root,
           encoding: "utf8",

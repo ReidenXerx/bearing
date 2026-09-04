@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Claude Code hook-protocol adapter — the analog of cursor-emit.mjs.
+ * Claude Code hook-protocol adapter.
  *
  * Maps a vendor-neutral {@link import('./classify.mjs').Verdict} onto Claude
  * Code's PreToolUse JSON (`hookSpecificOutput.permissionDecision` + reason), and

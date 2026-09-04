@@ -64,18 +64,25 @@ async function main() {
   lines.push(
     "• Your agent uses the GitNexus knowledge graph for code reasoning",
   );
-  lines.push(
-    "• When the graph is fresh, grep and broad reads are blocked — by design",
-  );
+  // GATED. `installedRuntime()` was declared in this file and never called, so these two bullets —
+  // the ones describing tool interception — printed on a Zed or Codex install, which has no hooks
+  // at all (NS-14, NS-20).
+  if (installedRuntime(root).some((r) => ["claude", "both", "all"].includes(r))) {
+    lines.push(
+      "• When the graph is fresh, grep and broad reads are blocked — by design",
+    );
+  }
   lines.push(
     "• Field/property searches route to Cypher (ACCESSES) — readers/writers from the graph",
   );
   lines.push(
     "• The agent refreshes the index automatically when it falls behind",
   );
-  lines.push(
-    "• Pre-edit checks reduce “what breaks if I change this?” surprises",
-  );
+  if (installedRuntime(root).some((r) => ["claude", "both", "all"].includes(r))) {
+    lines.push(
+      "• Pre-edit checks reduce “what breaks if I change this?” surprises",
+    );
+  }
   lines.push("");
   lines.push("Commands:");
   lines.push(`  ${howToRun('bearing:health')}        this summary`);

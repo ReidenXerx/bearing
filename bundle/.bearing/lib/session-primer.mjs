@@ -235,12 +235,23 @@ export function northStarsDigest(root, max = 0) {
  * @param {boolean} reset start the count over (called right after an anchor is emitted)
  * @returns {number} the count AFTER this call
  */
-export function bumpNorthStarCounter(root, reset = false) {
+export function bumpNorthStarCounter(root, reset = false, key = null) {
   const { stateDir, northStarCounter } = sessionPaths(root);
+  // ONE COUNTER PER CHAT, not per repo — the same correction the task-core was given, and for the
+  // same reason: several agent sessions in one repository is the normal case, not the edge one.
+  // A single shared counter meant every concurrent agent bumped it, so with N sessions the repo
+  // fired N times as many anchors and each landed in whichever agent happened to make the 25th
+  // call — targeted at random rather than at the one that drifted. Measured on this repo: three
+  // bumps per one of the observing agent's own tool calls, and 391 anchors in a single repo's
+  // telemetry against 8 impact gates fleet-wide. Its neighbours `.bearing-microscope-<key>.json`
+  // and `.bearing-consult-<key>.flag` were already keyed; this one was not.
+  const counterPath = key
+    ? path.join(stateDir, `.gitnexus-northstar-counter-${sessionKey(key)}.json`)
+    : northStarCounter;
   let n = 0;
   if (!reset) {
     try {
-      n = JSON.parse(fs.readFileSync(northStarCounter, 'utf8')).n || 0;
+      n = JSON.parse(fs.readFileSync(counterPath, 'utf8')).n || 0;
     } catch {
       n = 0;
     }
@@ -251,9 +262,9 @@ export function bumpNorthStarCounter(root, reset = false) {
     // Two PostToolUse hooks run per tool call and both touch session state. Write-then-rename so a
     // concurrent reader never observes a partially-written file. (Lost updates are still possible
     // and are benign here: the anchor fires a little later than configured.)
-    const tmp = `${northStarCounter}.${process.pid}.tmp`;
+    const tmp = `${counterPath}.${process.pid}.tmp`;
     fs.writeFileSync(tmp, JSON.stringify({ n: next }));
-    fs.renameSync(tmp, northStarCounter);
+    fs.renameSync(tmp, counterPath);
   } catch {
     /* best-effort — a missing counter just means we anchor again sooner */
   }
@@ -818,8 +829,3 @@ export function firstToolNudge(root, stale) {
   return parts.join('\n');
 }
 
-export function appendNudge(agentMessage, nudge) {
-  if (!nudge) return agentMessage;
-  if (!agentMessage) return nudge;
-  return `${nudge}\n\n${agentMessage}`;
-}
