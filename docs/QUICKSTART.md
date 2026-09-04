@@ -82,6 +82,8 @@ bearing install
 
 Skills live once in `.bearing/skills/` and are **symlinked** — not copied — into IDE skill paths. Updates replace the store and refresh symlinks.
 
+On Claude Code, install also wires a **status line** (`.claude/statusline.sh`) showing context, 5h/7d quota burn with an on-pace warning, prompt-cache TTL, and index freshness — a stale index denies Grep/Read/MCP, so it belongs on screen rather than surfacing as a blocked tool call. It stays quiet unless something is off. A `statusLine` you configured yourself is never overwritten, on install or uninstall. Tunables (`SL_NERD`, `SL_VITALS`, `SL_MEM_WARN_MB`, `SL_IO_WARN`) are documented in the script header; to drop it entirely, delete `statusLine` from `.claude/settings.json`.
+
 ## Update
 
 ```bash
