@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Claude Code PreCompact → SIDE-EFFECT ONLY: checkpoint durable state to memory + log the compaction.
+// Claude Code PreCompact → SIDE-EFFECT ONLY: count the compaction. Writes nothing anywhere else.
 //
 // PreCompact CANNOT inject context: Claude Code allows hookSpecificOutput.additionalContext only on
 // UserPromptSubmit / PostToolUse / Stop / SubagentStop — NOT PreCompact (emitting it errors the hook).
@@ -32,15 +32,13 @@ try {
 } catch {
   process.exit(0);
 }
-const { appendMemoryCheckpoint, isImpactUsed, isDetectUsed, bumpScore } =
-  await lib("session-primer.mjs");
+const { bumpScore } = await lib("session-primer.mjs");
 
-const ctx = gnContext(root);
-bumpScore(root, "compactions"); // surfaced in gitnexus:stats
-appendMemoryCheckpoint(
-  root,
-  `- trigger: ${input.trigger || "auto"} | index: ${ctx.phase} | gates: impact ${isImpactUsed(root) ? "done" : "pending"}, detect_changes ${isDetectUsed(root) ? "done" : "pending"}\n` +
-    `- (transcript about to be summarized — task/decisions/open-items/file:line above must already be current)`,
-);
+// COUNT ONLY. This used to append a breadcrumb to `~/.claude/projects/<slug>/memory/MEMORY.md`,
+// which is Claude Code's memory INDEX — loaded into every session, one pointer line per memory.
+// Nothing read those stanzas back, so every compaction quietly bought a permanent tax on the
+// window it was trying to protect. The task-core is the save-state that actually survives a
+// compaction, and the agent owns it; the nudge already prompts a refresh before one lands.
+bumpScore(root, "compactions"); // surfaced in bearing:stats
 // No stdout: PreCompact has no valid context-injection channel; steering is handled by the
 // contract + SessionStart(compact) recovery.

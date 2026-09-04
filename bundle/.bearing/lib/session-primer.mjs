@@ -708,25 +708,23 @@ export function shouldClearOnSource(source) {
   return source !== 'compact' && source !== 'resume';
 }
 
-/** Append a lightweight state breadcrumb to the memory file (best-effort). */
-export function appendMemoryCheckpoint(root, note = '') {
-  const p = memoryPath(root);
-  try {
-    fs.mkdirSync(path.dirname(p), { recursive: true });
-    if (!fs.existsSync(p)) {
-      fs.writeFileSync(
-        p,
-        `# Project working memory (bearing)\n\n` +
-          `> Durable across compaction + sessions. Keep this current: task, decisions, ` +
-          `findings, open items, key file:line. Nothing important should live only in the volatile transcript.\n`,
-      );
-    }
-    fs.appendFileSync(p, `\n<!-- checkpoint ${new Date().toISOString()} -->\n${note}\n`);
-    return true;
-  } catch {
-    return false;
-  }
-}
+/**
+ * MEMORY.md IS AN INDEX, NOT A NOTEBOOK — so bearing does not write to it.
+ *
+ * `appendMemoryCheckpoint` used to append a two-line PreCompact breadcrumb here. Under the Claude
+ * Code CLI that file is the memory INDEX: it is loaded into context on EVERY session, and its
+ * contract is one `- [Title](file.md) — hook` line per memory, with the content in the files those
+ * point at. So each compaction did not preserve state — it pushed two lines of kit telemetry into
+ * every future session's window and buried the real pointers. One real project accumulated nine
+ * near-identical stanzas around a single genuine entry.
+ *
+ * Nothing ever READ them: the only consumer checked whether the file exists, never its contents.
+ * A write-only append to someone else's index is not a checkpoint, it is litter — and the durable
+ * state it claimed to be preserving already lives in `.bearing/task-cores/<chat>.md`, per chat,
+ * rewritten by the agent that owns it. The compaction COUNT is still recorded, in the scorecard.
+ *
+ * `memoryPath` stays: the session brief points the agent at their own memory, which is correct.
+ */
 
 export function clearSessionState(root) {
   const {
