@@ -40,23 +40,24 @@ info() { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
 ok()   { printf '\033[1;32m    ✓\033[0m %s\n' "$*"; }
 
 # Paths relative to repo root — keep in sync with scripts/bearing-setup.sh TEACHING_SOURCES
+# Every path here was a `.cursor/` file until 1.2.0, so this produced a teaching tarball of files
+# that no longer exist — a secondary command quietly shipping an empty bundle. These are the
+# Claude-side equivalents; a runtime with no hooks contributes its contract, not its gates.
 BUNDLE_PATHS=(
-  .cursor/rules/00-bearing-enforcement.mdc
-  .cursor/rules/bearing.mdc
-  .cursor/rules/bearing-first.mdc
-  .cursor/hooks.json
-  .cursor/hooks/bearing-session-primer.sh
-  .cursor/hooks/bearing-session-health.sh
-  .cursor/hooks/bearing-session-health-user.sh
-  .cursor/hooks/bearing-prompt-router.sh
-  .cursor/hooks/bearing-grep-guard.sh
-  .cursor/hooks/bearing-read-guard.sh
-  .cursor/hooks/bearing-edit-guard.sh
-  .cursor/hooks/bearing-shell-staleness-guard.sh
-  .cursor/hooks/bearing-shell-allowlist.sh
-  .cursor/hooks/bearing-commit-guard.sh
-  .cursor/hooks/bearing-mcp-allowlist.sh
-  .cursor/hooks/bearing-after-git-commit.sh
+  .claude/settings.json
+  .claude/hooks/bearing-session.mjs
+  .claude/hooks/bearing-grep-guard.mjs
+  .claude/hooks/bearing-read-guard.mjs
+  .claude/hooks/bearing-edit-guard.mjs
+  .claude/hooks/bearing-bash-guard.mjs
+  .claude/hooks/bearing-mcp-guard.mjs
+  .claude/hooks/bearing-northstar-anchor.mjs
+  .claude/hooks/bearing-taskcore-nudge.mjs
+  .claude/hooks/bearing-microscope-nudge.mjs
+  .claude/hooks/bearing-consult-nudge.mjs
+  .claude/hooks/bearing-minion-nudge.mjs
+  .claude/hooks/bearing-impact-audit.mjs
+  .claude/hooks/bearing-precompact.mjs
   # .bearing/lib/*.mjs is expanded below — a hand-kept list silently stopped packing
   # every lib added after it was written, and kept naming one that was retired.
   .bearing/hooks.json

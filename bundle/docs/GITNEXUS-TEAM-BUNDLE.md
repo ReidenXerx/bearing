@@ -1,6 +1,6 @@
 # GitNexus agent teaching bundle — team install
 
-Portable **rules + hooks + skills + scripts** for graph-first agents (Cursor hooks, Zed profiles). Built for this repo; reusable on other projects with one rename step.
+Portable **contract + hooks + skills + scripts** for graph-first agents. Claude Code gets the enforcement hooks; Zed and Codex get the contract (only Claude Code can intercept tool calls). Built for this repo; reusable on other projects with one rename step.
 
 > **Standalone installer:** [`bearing`](https://github.com/ReidenXerx/bearing) — `install` / `update` / `uninstall` scripts for any repo (upstream for this teaching bundle). Updates **migrate** legacy `bearing` layouts automatically.
 
@@ -10,8 +10,8 @@ Portable **rules + hooks + skills + scripts** for graph-first agents (Cursor hoo
 
 | Included | Purpose |
 | --- | --- |
-| `.cursor/rules/gitnexus*.mdc` | Always-on agent contract (Cursor) |
-| `.cursor/hooks.json` + `.cursor/hooks/**` | Block grep-first; field grep → Cypher; staleness gate; **auto-refresh on session start** |
+| `CLAUDE.md` / `AGENTS.md` | Always-on agent contract |
+| `.claude/settings.json` + `.claude/hooks/**` | Block grep-first; symbol grep → the graph; impact before edits; **session brief on start** (Claude Code only) |
 | `.bearing/lib/cypher-helpers.mjs` | Copy-paste Cypher recipes (ACCESSES, CALLS, overrides) |
 | `.bearing/skills/` + symlinks | Playbooks (enforcement, scenarios, exploring, …) |
 | `scripts/bearing-setup.sh` | One-shot team installer |
@@ -105,4 +105,4 @@ npm run bearing:setup -- --quick  # hooks/skills only, skip index
 
 - Node.js >= 22.9.0
 - git
-- Cursor and/or Zed with MCP enabled
+- Claude Code, Zed and/or Codex with MCP enabled

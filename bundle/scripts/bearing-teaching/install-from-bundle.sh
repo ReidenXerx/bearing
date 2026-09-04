@@ -59,4 +59,4 @@ fi
 info "Running team setup"
 bash scripts/bearing-setup.sh ${GITNEXUS_SETUP_FLAGS:-}
 
-ok "Install complete — restart Cursor"
+ok "Install complete — restart your editor"

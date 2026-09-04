@@ -76,14 +76,30 @@ const MAX_LINE_CHARS = 200;
 const all = northStarsDigest(root);
 if (!all.length) process.exit(0); // file exists but has no NS-# lines yet
 
+// CLIP AT THE SENTENCE, not at a character count. A 200-char slice cut 18 of this repo's 24 claims
+// mid-thought and left 10 of them ending on a connective — "Before any of them, ask: what if …",
+// "The invariant is COMPUTED …", "a milestone is when to review with …" — so the anchor spent 200
+// characters per claim to deliver a cliffhanger, and the RULE is the half that got cut. The
+// north-stars are already written claim-first, every one leading with a complete headline sentence,
+// so the digest was fighting a format that had already solved this. Measured on this repo: 4,703
+// chars → 1,520, a 68% cut, carrying strictly more meaning.
 const shown = all.slice(0, MAX_LINES).map((l) => {
+  const stop = l.match(/^(.*?[.!?])(?:\s|$)/);
+  if (stop && stop[1].length <= MAX_LINE_CHARS) return stop[1];
   if (l.length <= MAX_LINE_CHARS) return l;
   return l.slice(0, MAX_LINE_CHARS).replace(/\s+\S*$/, "") + " …";
 });
-const more =
-  all.length > shown.length
-    ? `\n…+${all.length - shown.length} more — read \`.bearing/northstars.md\`.`
-    : "";
+// NAME WHAT IS MISSING. `slice(0, MAX_LINES)` keeps the head and drops the tail, and by this
+// project's own convention the tail is where the GRAVEYARD, the OPEN questions and the "do not cite
+// as current" entries live. On a repo with 97 north-stars that silently removed exactly the section
+// the closing discipline line then tells the agent to respect. A count is not enough when the
+// omitted part is the part the instruction depends on.
+const dropped = all.length - shown.length;
+const more = dropped
+  ? `\n…+${dropped} MORE NOT SHOWN, and they are the END of the file — where the graveyard, the ` +
+    `open questions and the superseded entries live. Rule (3) below depends on them: READ ` +
+    `\`.bearing/northstars.md\` before proposing or rejecting anything.`
+  : "";
 
 emitContext(
   `⚑ NORTH-STARS re-anchor${wroteDoc ? " (you just wrote a doc — conclusions are being recorded)" : ""}. ` +
@@ -92,13 +108,11 @@ emitContext(
     "the north-star.\n\n" +
     shown.join("\n") +
     more +
-    "\n\n(Claims only — each is clipped; read `.bearing/northstars.md` for the full text, " +
-    "evidence and sources before citing one.)" +
-    "\n\nDiscipline: (1) cite the relevant **NS-#** when you make a consequential claim, propose a " +
-    "direction, or reject an idea — if you cannot cite one, you may be drifting; (2) if you believe " +
-    "a north-star is wrong or missing, say so EXPLICITLY and propose the edit to the user — never " +
-    "silently work around it, and never edit the file yourself; (3) an idea in the GRAVEYARD is " +
-    "settled — do not re-propose it without new evidence that addresses why it was rejected.",
+    // The 804-char discipline block that used to sit here is VERBATIM the always-on contract's own
+    // north-stars section, which is already permanently in the window — re-sent on every fire, ~20
+    // times a session, to an agent that has it. One pointer line carries the same instruction.
+    "\n\n(Claims only — full text, evidence and the graveyard are in `.bearing/northstars.md`. " +
+    "Cite the NS-# you rely on; propose a change rather than working around one.)",
   "PostToolUse",
 );
 
