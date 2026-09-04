@@ -255,6 +255,19 @@ Same bar as above: a rule earns its place with a **scar**. If it has no scar it 
 already follows, and it costs context to say so. If a rule here turns out to be true of every
 project rather than this one, it belongs upstream — say so and it can be promoted.
 
+- **PP-3** — **A pipeline's exit status is the LAST command's, not the one you care about.**
+  `node x.mjs bad-arg | tail -1` reports 0 for a program that exits 2, so a command can look like it
+  "fails silently" when it fails perfectly well. Measure the exit code without a pipe, or set
+  `pipefail`. *Scar: I reported "unknown subcommands exit 0, so the agent reads a no-op refresh as
+  success" as a defect, twice, and had to retract it — and the field fallback log that first flagged
+  it had made the identical mistake, which is how a measurement artifact became a shared belief.*
+
+- **PP-4** — **`timeout(1)` is not on macOS.** It is GNU coreutils; the system has `gtimeout` only if
+  someone installed it. A `timeout 60 node …` in a verification script does not bound anything — it
+  exits 127 with "command not found" and the thing you meant to test never runs, while the timing you
+  print looks excellent. *Scar: three consecutive "the guard returns in 0s" measurements during a
+  hook-timeout fix were all measuring nothing; the real worst case was unbounded.*
+
 - **PP-1** — **A single control byte can make `grep` skip a whole file, silently.** `grep` classifies
   a file containing a NUL as binary and, in this shell, prints NOTHING — not even "Binary file
   matches" — so it reads exactly like a clean result. `lib/kit.test.mjs` carried one, from a
