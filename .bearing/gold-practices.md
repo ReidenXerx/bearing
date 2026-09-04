@@ -255,4 +255,18 @@ Same bar as above: a rule earns its place with a **scar**. If it has no scar it 
 already follows, and it costs context to say so. If a rule here turns out to be true of every
 project rather than this one, it belongs upstream — say so and it can be promoted.
 
-<!-- Add PP-1, PP-2, … here. -->
+- **PP-1** — **A single control byte can make `grep` skip a whole file, silently.** `grep` classifies
+  a file containing a NUL as binary and, in this shell, prints NOTHING — not even "Binary file
+  matches" — so it reads exactly like a clean result. `lib/kit.test.mjs` carried one, from a
+  control-character regex written with literal control characters instead of `\x00-\x1f`, and every
+  repo-wide sweep silently skipped the largest test file in the project. Write control characters as
+  escapes, and when a census over a large repo comes back suspiciously small, re-run it with
+  `LC_ALL=C grep -a` before believing it. *Scar: the remaining Cursor removal was scoped from that
+  blind sweep at "roughly 45 references"; the real count was 909 across 93 files, and the tree
+  stayed red for days on work nobody knew was there.*
+
+- **PP-2** — **`git rm a b` aborts entirely when one path is missing, and reports it quietly.** The
+  first file is NOT removed. A commit message written from the intent then claims a deletion that
+  did not happen — an untrue commit, which is the same class of defect as an installer printing an
+  unchecked claim (NS-20). Remove paths one at a time, or check the working tree after. *Scar: a
+  packaged Cursor guide survived the commit that says it was deleted; caught only by looking.*
