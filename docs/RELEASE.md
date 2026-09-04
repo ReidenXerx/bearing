@@ -37,11 +37,17 @@ Use this checklist before tagging or publishing `bearing`.
   npm test
   ```
 
+- [ ] Setup RUNS, on the runtime a real user gets — the suite passes `runSetup: false`
+      everywhere, so `bearing-setup.sh` is only ever exercised here (NS-21):
+
+  ```bash
+  GITNEXUS_RUNTIME=all bash scripts/bearing-setup.sh --skip-index   # in a scratch install
+  ```
+
 ## 4. Install/update/uninstall matrix
 
 Use temporary git repos for each runtime.
 
-- [ ] Fresh install: `--runtime cursor --quick --no-setup`
 - [ ] Fresh install: `--runtime zed --quick --no-setup`
 - [ ] Fresh install: `--runtime claude --quick --no-setup`
 - [ ] Fresh install: `--runtime codex --quick --no-setup`
@@ -52,7 +58,8 @@ Use temporary git repos for each runtime.
       config all survive, and that legacy `gitnexus:*` script aliases still resolve
 - [ ] `npm pack` → install the tarball in a scratch consumer → run the symlinked binary (catches
       npm's bin-symlink resolution, which silently broke the old bash wrappers)
-- [ ] Update existing cursor-only → `--runtime both --no-setup --skip-verify`
+- [ ] Update a CURSOR-ERA install (1.1.x, `--runtime all`) → assert `.cursor/` is GONE afterwards,
+      including `.cursor/mcp.json`, which the adapter wrote and the bundle sweep cannot see
 - [ ] Update existing zed-only → `--runtime both --no-setup --skip-verify`
 - [ ] `./bin/update.sh --all <tmp-workspace> --runtime both --no-setup --skip-verify`
 - [ ] Uninstall preserves unrelated user config.
@@ -62,10 +69,10 @@ Use temporary git repos for each runtime.
 
 In a real target repo after update:
 
-- [ ] Cursor files exist when runtime includes Cursor:
-  - `.cursor/hooks.json`
-  - `.cursor/mcp.json`
-  - `.cursor/skills/gitnexus-workspace`
+- [ ] Claude files exist when runtime includes Claude:
+  - `.claude/settings.json` (or `settings.local.json` under stealth)
+  - `.mcp.json`
+  - `.claude/skills/bearing-workspace`
 - [ ] Zed files exist when runtime includes Zed:
   - `.zed/settings.json`
   - `.agents/skills/gitnexus-workspace`
@@ -98,5 +105,5 @@ In a real target repo after update:
 - [ ] Update installed repos with:
 
   ```bash
-  ./bin/update.sh --all /path/to/projects --runtime both --no-setup --skip-verify
+  ./bin/update.sh --all /path/to/projects --no-setup --skip-verify
   ```

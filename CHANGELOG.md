@@ -2,33 +2,80 @@
 
 All notable changes to `bearing` are documented here.
 
-## Unreleased
+## 1.2.0 — Cursor support is removed
 
-### Fixed — a stale-index brief showed JavaScript instead of a command
+**Breaking.** `--runtime cursor` is no longer accepted, and updating an installed repo REMOVES its
+`.cursor/` files. `both` still parses — an existing manifest recording it keeps updating instead of
+throwing — but it now means zed+claude rather than cursor+zed (NS-15).
 
-Two shipped strings called the command resolver from inside DOUBLE QUOTES, so what reached the user
-was the literal text `${howToRun('bearing:agent-refresh')}`. One of them was the stale-index branch
-of the session brief — the exact moment a runnable command is the entire point of the message. The
-other wrote the same into every generated architecture doc.
+1.1.7 was cut in the repository and never published; everything in its section below ships here.
 
-### Fixed — Cursor stopped pre-approving bearing's own maintenance commands
+### Removed — Cursor
 
-The shell allowlist still named `scripts/gitnexus-agent.mjs` and `scripts/gitnexus-setup.sh` after
-those files were renamed to `bearing-*`. Nothing broke loudly, because every branch of that hook
-ends in `allow` — the only symptom was the agent losing its pre-approval and beginning to ask the
-user for permission to run bearing's own maintenance, which is the one thing the hook exists to
-prevent. The pre-rename names stay as aliases (NS-15).
+Enforcement needs tool-interception hooks and, with Cursor gone, exactly one runtime has them
+(NS-14). The 16-file `bundle/.cursor/` tree, the adapter, the always-on rule and the contract
+generator's third output are all deleted. Zed and Codex keep the contract; the README says so
+plainly instead of implying parity.
 
-### Fixed — a Cursor rule pointed at a file migration deliberately deletes
+`.cursor/gn-kit-manifest.json` and the legacy gitignore marker STAY. They are how the oldest
+installs are still recognised — a `.cursor/` path outliving Cursor support is correct there.
 
-`bearing.mdc` named `.cursor/gitnexus-api-profile.json`; the file moved to `.bearing/` and
-`migrate.mjs` removes the old copy on update, so the rule described a path that could not exist.
+### Fixed — `bearing-setup.sh` failed on the default runtime
 
-### Fixed — the e2e module was missing from the runtime parity table
+`wants_cursor` matched `all` and `both`, so once the bundle stopped shipping `.cursor/`, step 3
+demanded `.cursor/rules/00-bearing-enforcement.mdc` and every setup-enabled install died there,
+with the kit files already written. `all` is both the default and the recommended runtime. Nothing
+caught it because every test in the suite passes `runSetup: false` — the least-exercised
+configuration was the most-used one (NS-21). A test now runs setup and asserts its exit code.
 
-That table is how someone decides whether bearing does anything for their editor, so a module absent
-from it is invisible to exactly the person deciding. The existing metadata check passed because it
-only asks whether the module is mentioned somewhere in the README, and a prose section satisfied it.
+### Fixed — a correct install reported four Cursor failures
+
+`--runtime all` printed `✗ Cursor hooks`, `✗ GitNexus MCP`, `✗ Enforcement rule` and five
+unreachable modules, then offered a Cursor team guide. Four places expand the runtime aliases and
+three kept their own copy of the table; those copies still resolved `all` and `both` to include
+cursor, so checks that had been gated to suppress exactly this fired again. postcheck now uses the
+installer's own expansion, and the health checks point at `.claude/settings*.json` and `.mcp.json`.
+
+### Fixed — a repo with a `.cursor/` directory could not install
+
+`detectRuntimes` still emitted `"cursor"` from `CURSOR_TRACE_ID` or a `.cursor/` directory, and
+detection feeds `--runtime` straight through — so any repo that had ever been opened in Cursor
+installed itself into `Invalid runtime "cursor"`. A detector may only name runtimes the parser
+accepts.
+
+### Fixed — `both` linked no Claude skills
+
+The teaching sync matched claude on `*claude*|*all*`, which never included `both`. Correct while
+`both` meant cursor+zed; wrong the moment it became zed+claude. Microscope and consult are
+delivered ONLY by a skill, so a `both` install reported them unavailable in Claude Code — the exact
+user report the runtime-detection work was built from.
+
+### Fixed — `.cursor/mcp.json` survived the update
+
+The adapter wrote it, so the "the bundle no longer ships this" sweep never saw it: a real 1.1.6
+`--runtime all` install lost 16 of its 17 `.cursor/` files and kept that one, still pointing Cursor
+at the GitNexus MCP server. Migration removes it, and `.cursor/` itself when nothing of the user's
+remains. Only bearing's own entry goes — a user's own server keyed `gitnexus` stays (NS-1).
+
+### Fixed — grep could not see the largest file in the repo
+
+`lib/kit.test.mjs` carried one literal NUL byte, from a control-character regex written with real
+control characters. grep classified 8,727 lines as binary and reported nothing at all — not even
+"Binary file matches" — so every repo-wide sweep silently skipped it. The remaining Cursor removal
+had been measured through that blind spot at "roughly 45 references"; the real figure was 909
+across 93 files (GP-7).
+
+### Changed — the enforcement smoke test drives Claude
+
+The teaching sync's hook smoke test drove Cursor's shell wrapper. It now drives
+`.claude/hooks/bearing-grep-guard.mjs` the way Claude Code does and asserts a symbol grep is
+denied. With one enforcing runtime left, that test is the last thing between a dead gate and a user
+who believes they are protected, so its coverage goes up rather than away.
+
+### Known
+
+`bearing:pack` still bundles `.cursor/rules/*` and will produce a teaching tarball of files that no
+longer exist. It is a secondary command and has its own fix pending.
 
 ## 1.1.7 — the harness kit learns which backend it is pointed at
 
