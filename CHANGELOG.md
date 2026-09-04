@@ -72,10 +72,74 @@ The teaching sync's hook smoke test drove Cursor's shell wrapper. It now drives
 denied. With one enforcing runtime left, that test is the last thing between a dead gate and a user
 who believes they are protected, so its coverage goes up rather than away.
 
-### Known
+### Fixed — a pre-ship audit, and what a fleet of ten installs had been logging
 
-`bearing:pack` still bundles `.cursor/rules/*` and will produce a teaching tarball of files that no
-longer exist. It is a secondary command and has its own fix pending.
+The release was audited before publishing: six review lenses over the changed surface, plus
+telemetry from the ten repos bearing is installed in — 44 classical-fallback grants (the agent
+explicitly saying "the graph is wrong here, let me out") and 1,031 tool redirects against 973 graph
+calls. Roughly half those escapes turned out to be bearing's fault, not the graph's.
+
+**Four that stopped a repo working.**
+
+- A manifest recording a **retired runtime** locked the repo out of `update` AND `uninstall`.
+  `parseRuntime` is the reader for recorded state, not just the CLI validator, and 1.1.x's own
+  auto-detection wrote `cursor` into manifests with no user input. `uninstall` takes no `--runtime`
+  to override with, so the only exit was hand-editing JSON — and the throw happened before the
+  migration written to clean those files could run. A retired token now parses and is dropped.
+- A **stale index was announced as "Index is fresh"** in the session brief — the first thing loaded
+  into an agent's context and the one message its reader cannot check. The policy sets `staleNote`
+  and `gateOff` so the truth can still be told; nothing read them.
+- The **interactive installer could not install Codex**. Adapter menu keys were hardcoded and
+  `allKey` was `ADAPTERS.length + 1`, so it collided with the last adapter's key: picking that
+  adapter installed everything, and the default fell through to the runtime that cannot enforce.
+- **`npm run bearing:setup`** — printed by the installer itself — exited 1 on a claude-only install,
+  and on `both` skipped the Claude checks while still printing "Teaching sources OK".
+
+**Four that risked someone's files.**
+
+- Migration `rm -rf`'d a **user-authored `.claude/skills/<name>/`** whose name merely matched one of
+  ours, on a first install, with no backup — and a **user-owned `.cursor/hooks/lib/`**
+  unconditionally.
+- **`--features all` replaced an existing `.e2e/` harness**, breaking every `verify/*.js` that
+  imported the old API while the install exited 0. Ownership is recorded at first install now.
+- **Uninstall left a Cursor-era install worse than 1.1.6 did** — `.cursor/mcp.json` still pointing
+  at the MCP server, plus ~23 dangling skill symlinks into a store it had just deleted. Measured on
+  a real repo: 26 `.cursor/` files now go to 4, and those four are the backups holding the user's
+  own pre-bearing config, which uninstall restores.
+- Uninstall could not **strip the oldest managed `.gitignore` block**, and aborted entirely on a
+  repo whose `.bearing/` the user had deleted by hand — before the npm scripts, the gitignore, the
+  exclude block and the adapter unwire.
+
+**And the gates themselves, which were firing where the graph has nothing to say.**
+
+- The **most-fired deny prescribed a Cypher that cannot parse**: it projected a property the schema
+  does not have, so every field grep answered with a binder error. Worse, the routing test was
+  camelCase, which is the naming convention for every JS/TS function — measured against bearing's
+  own index, 380 of 398 indexed functions took a `:Property`-only branch and 371 had no such
+  property. That is the "known ACCESSES coverage gap" the fleet logged twelve times; it was a
+  misroute.
+- The gate had **no concept of index scope**. Reading bearing's own hook library — excluded by
+  `.gitnexusignore` — was denied and redirected to a graph with zero rows for it; so were files in
+  another repo and in `node_modules`. A repo with **no index at all** got full enforcement pointed
+  at a graph that does not exist, which covers linked worktrees and every repo between install and
+  its first index.
+- **Nothing on the hook path was bounded**: a wedged git blocked the tool call itself, and the
+  staleness cache was written only on success, so the slow case re-paid on every call.
+- The **north-star anchor's counter was repo-global** while its neighbours are per chat, so
+  concurrent agents multiplied it — one repo logged 391 anchors against 8 impact gates fleet-wide.
+  Its payload is clipped at the sentence now rather than at 200 characters, which cut it from
+  ~1,176 to ~380 tokens a fire while carrying more meaning, and the truncation notice names the
+  graveyard it omits instead of just counting it.
+- The **edit detector counted arrow functions as file writes** — any bare `>` — so all three nudges
+  over-fired, including on read-only sessions.
+- **Six of seven deny branches named no way out**, and `mode: guide` was reachable from none of them
+  in the shipped configuration.
+
+Plus: health and the session message claimed enforcement on runtimes that have no hooks; a fourth
+hand-written copy of the runtime alias table (in all three adapters); `bearing:pack` produced a
+tarball of files that no longer exist; the recorded `--gitnexus-cmd` never reached the command
+table stealth installs read; and the escape the gates print resolved to a command that does not
+exist in any repo without the npm aliases.
 
 ## 1.1.7 — the harness kit learns which backend it is pointed at
 
