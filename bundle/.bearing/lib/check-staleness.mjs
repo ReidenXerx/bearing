@@ -144,8 +144,14 @@ function countDrift(at, sourceExtRe) {
   return n;
 }
 
+// The blocking claim is CONDITIONAL, and this string is shipped into the session brief — the one
+// message a reader cannot check. With `stalenessGate: "off"` (the default) staleness denies
+// nothing, so asserting "hooks block" here made every stale-index report state a consequence that
+// does not happen. NS-20: an unchecked claim is a lie waiting to happen.
 const staleHookNote =
-  'Hooks block Grep/Read/MCP/shell until refresh succeeds or fails.';
+  loadHookConfig(root).stalenessGate === 'block'
+    ? 'Hooks block Grep/Read/MCP/shell until refresh succeeds or fails.'
+    : 'Nothing is blocked (stalenessGate: off) — graph answers may be WRONG rather than refused, so confirm anything load-bearing.';
 // Resolved, not hardcoded: a stealth install has no npm scripts, so naming one made every block
 // point at a command that repo did not have (NS-6 — a block whose exit does not exist is a trap).
 const agentFix =

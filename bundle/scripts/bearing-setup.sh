@@ -33,6 +33,15 @@ fi
 SKIP_INDEX=false
 FULL_INDEX=false
 SKIP_GLOBAL_MCP=false
+# ASK THE MANIFEST. Defaulting straight to `both` manufactured a runtime the repo never chose:
+# `npm run bearing:setup` — which the installer itself tells the user to run, and which passes no
+# --runtime — then demanded Zed's files on a claude-only repo and exited 1, after the kit was
+# already written. Its sibling sync-cursor-bearing-teaching.sh was given this exact fix; this
+# script never got it. `both` survives only as the last resort for a pre-manifest install.
+runtime_from_manifest() {
+  node -p "try{require('./.bearing/manifest.json').runtime||''}catch(e){''}" 2>/dev/null
+}
+GITNEXUS_RUNTIME="${GITNEXUS_RUNTIME:-$(runtime_from_manifest)}"
 GITNEXUS_RUNTIME="${GITNEXUS_RUNTIME:-both}"
 
 usage() {
@@ -67,7 +76,10 @@ export GITNEXUS_RUNTIME
 # Runtime membership — GITNEXUS_RUNTIME may be zed|claude|codex|both|all or a
 # comma-list (e.g. "zed,claude"). both = zed+claude; all = every adapter.
 wants_zed()    { case "$GITNEXUS_RUNTIME" in *zed*|*both*|*all*)    return 0;; esac; return 1; }
-wants_claude() { case "$GITNEXUS_RUNTIME" in *claude*|*all*)        return 0;; esac; return 1; }
+# `*both*` on BOTH arms: `both` is zed+claude now. Without it the Claude source checks were skipped
+# on every `both` install while the script still printed "Teaching sources OK" — a check that could
+# not fail, on the value that is also this script's own default (NS-9, NS-12).
+wants_claude() { case "$GITNEXUS_RUNTIME" in *claude*|*both*|*all*) return 0;; esac; return 1; }
 
 # Stealth installs put bearing in someone else's repo without touching a tracked file. Read the
 # mode from the manifest — the only record of it — rather than guessing from what is on disk.

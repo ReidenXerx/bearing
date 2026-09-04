@@ -76,8 +76,14 @@ const staleLine = !graphEnabled
   ? ""
   : grant
   ? `⚠ CLASSICAL FALLBACK active (${grant.reason || "GitNexus distrusted"}) — classical Grep/Read/shell allowed for ~${Math.max(1, Math.round(grant.remainingMs / 60000))} min. RE-CONFIRM findings with the graph once GitNexus is reliable; end early with \`${howToRun('bearing:fallback:off')}\`.`
-  : ctx.phase !== "fresh"
-    ? `Index is STALE — run \`${howToRun("bearing:agent-refresh")}\` before graph calls (hooks block until refreshed).`
+  : // Read the STALENESS, not the PHASE. With `stalenessGate: "off"` — the shipped default —
+    // stale-policy returns phase:"fresh" for a stale index on purpose: it stops staleness DENYING
+    // anything. It sets `staleNote`/`gateOff` so the truth can still be told, and nothing read
+    // them, so this line announced "Index is fresh" over an index 50 commits behind. That is the
+    // one message loaded before the agent forms any premise, and it cannot be checked by its
+    // reader — the exact inversion NS-8 forbids ("a stale index must never be reported as fresh").
+    ctx.stale && ctx.stale.fresh === false
+    ? `Index is STALE — ${ctx.staleDetail || ctx.stale.reason || "behind HEAD"}`
     : "Index is fresh — hooks redirect symbol Grep / large Read / blind edits to the graph.";
 
 // NORTH-STARS come FIRST on every session type (fresh, compact, resume). They're the project's

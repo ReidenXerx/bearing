@@ -79,9 +79,15 @@ export function cypherFieldAccess(field, repo, reason = "both") {
       : reason === "write"
         ? "{type: 'ACCESSES', reason: 'write'}"
         : "{type: 'ACCESSES'}";
-  const q = `MATCH (f)-[r:CodeRelation ${rel}]->(p:Property {name: $name}) RETURN f.name, f.filePath, f.kind, r.reason ORDER BY f.filePath LIMIT 50`;
+  const q = `MATCH (f)-[r:CodeRelation ${rel}]->(p:Property {name: $name}) RETURN f.name, f.filePath, r.reason ORDER BY f.filePath LIMIT 50`;
   return mcpCypher(q, repo, { name: field });
 }
+
+// `f.kind` was in that projection and is NOT a property in this schema, so the query the gate
+// prescribed answered every field grep with `Binder exception: Cannot find property kind for f.`
+// The agent then fell back and logged "ACCESSES returned []" as a coverage gap — 12 times across
+// the fleet — for a query that never ran at all. Verified: `MATCH (f:Function) RETURN f.kind`
+// fails identically; without it the same query returns rows (NS-6, NS-10).
 
 /** Multi-hop CALLS chain ending at symbol (target untyped — Functions or Methods). */
 export function cypherCallChain(symbol, repo, maxDepth = 3) {

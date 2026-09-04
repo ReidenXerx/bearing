@@ -248,6 +248,10 @@ export function classifyGrep(req, ctx) {
   // answers "which files contain this symbol", which is discovery. Allowing it unconditionally
   // handed every agent a one-flag bypass of the symbol gate. The reported case — counting a field
   // in the file just written — still passes, because it names a path.
+  // A DIRECTORY scope is deliberately NOT allowed, and the deny message must stop promising it.
+  // Allowing `src/hooks` sounds narrow until you notice `src` takes the same branch — and `src` is
+  // the whole codebase, i.e. precisely the discovery sweep this gate exists to catch. The suite
+  // pins that ("still denies the sweep the gate exists for"), and it is right: the exit is a FILE.
   const counting = (ti.output_mode ?? "") === "count" && Boolean(normPath);
   const scoped = scopedToOneFile || inTests || counting;
 
@@ -315,7 +319,16 @@ export function classifyGrep(req, ctx) {
       };
     }
     const seg = symbolOf(token);
-    const fieldLike = !isDeclSearch(token) && helpers.isLikelyFieldName(seg);
+    // EVIDENCE, not capitalization. `isLikelyFieldName` is a camelCase test — `/^[a-z][a-zA-Z0-9]*$/`
+    // — which is also the naming convention for every JS/TS function, method and hook. Measured on
+    // this repo's own index: 380 of 398 indexed Function names took this branch, and 371 of those
+    // have no :Property of that name at all. Only snake_case and PascalCase escaped, so the policy
+    // was accidentally right for Python and wrong for JavaScript. `context` answers the Function
+    // case AND returns the same ACCESSES edges for a real Property, so it is a strict superset.
+    // A dotted access — `accountingHelpers.getJEDocumentCell` — is real evidence of a field read;
+    // a bare `getJEDocumentCell` is not, and both took this branch (NS-5).
+    const fieldLike =
+      !isDeclSearch(token) && isDottedAccess(token) && helpers.isLikelyFieldName(seg);
     if (fieldLike) {
       const schema = helpers.mcpReadSchema(repo);
       const call = helpers.cypherFieldAccess(seg, repo);
@@ -329,8 +342,8 @@ export function classifyGrep(req, ctx) {
           `Field grep blocked → ${schema} → ${call}${tail}\n` +
           `If that returns [] it is a known coverage gap, NOT proof the field is unused: ACCESSES ` +
           `indexes class fields, and plain-object properties (option bags, config objects, ` +
-          `destructured params) often produce no rows. Then re-run this grep scoped to a file or ` +
-          `directory — that is allowed — and report the gap: ` +
+          `destructured params) often produce no rows. Then re-run this grep scoped to a single FILE ` +
+          `— that is allowed; a directory is not — and report the gap: ` +
           `${howToRun("bearing:fallback")} -- "ACCESSES returned [] for <field> but grep finds N".\n` +
           `${helpers.cypherMidSessionNudge()}`,
         userKey: "block.grep.field",
