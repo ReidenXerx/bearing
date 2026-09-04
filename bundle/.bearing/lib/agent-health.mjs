@@ -41,7 +41,7 @@ async function main() {
     } else if (c.id === "embeddings") {
       lines.push(`Embeddings      ${mark(c.ok)} ${c.detail}`);
     } else if (c.id === "hooks") {
-      lines.push(`Cursor hooks    ${mark(c.ok)} ${c.detail}`);
+      lines.push(`Claude hooks    ${mark(c.ok)} ${c.detail}`);
     } else if (c.id === "mcp") {
       lines.push(`MCP server      ${mark(c.ok)} ${c.detail}`);
     } else if (c.id === "kit_manifest" && c.ok) {
@@ -62,7 +62,7 @@ async function main() {
   lines.push("");
   lines.push("What this means for you:");
   lines.push(
-    "• Your Cursor agent uses the GitNexus knowledge graph for code reasoning",
+    "• Your agent uses the GitNexus knowledge graph for code reasoning",
   );
   lines.push(
     "• When the graph is fresh, grep and broad reads are blocked — by design",
@@ -82,13 +82,6 @@ async function main() {
   lines.push(`  ${howToRun('bearing:agent-brief')}   session orientation (agents)`);
   lines.push(`  ${howToRun('bearing:agent-status')}  staleness check (agents)`);
   lines.push("");
-  // Only offer the Cursor guide to a Cursor install. It opens "for anyone using Cursor Agent" and
-  // names Cursor behaviour throughout, so on a zed- or claude-only repo this pointed the reader at
-  // a document written for a tool they are not running.
-  if (installedRuntime(root).some((r) => ['cursor', 'both', 'all'].includes(r))) {
-    lines.push("Team guide: docs/GITNEXUS-CURSOR-GUIDE.md");
-  }
-
   if (!audit.healthy) {
     lines.push("");
     lines.push(

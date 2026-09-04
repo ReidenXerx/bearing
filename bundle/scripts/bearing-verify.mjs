@@ -60,12 +60,14 @@ function readRuntime() {
     if (!fs.existsSync(p)) continue;
     try {
       const m = JSON.parse(fs.readFileSync(p, 'utf8'));
-      return m.runtime || 'cursor';
+      // A manifest predating the `runtime` field is a cursor-era install, and `both` was the
+      // default then — cursor+zed. Cursor is gone; zed is the half of that answer still checkable.
+      return m.runtime || 'zed';
     } catch {
-      return 'cursor';
+      return 'zed';
     }
   }
-  return fs.existsSync(path.join(root, '.cursor/hooks.json')) ? 'cursor' : 'zed';
+  return 'zed';
 }
 
 /**
@@ -89,8 +91,8 @@ function runtimeSet(r) {
     .filter(Boolean);
   const out = new Set();
   for (const t of tokens) {
-    if (t === 'both') { out.add('cursor'); out.add('zed'); }
-    else if (t === 'all') { out.add('cursor'); out.add('zed'); out.add('claude'); out.add('codex'); }
+    if (t === 'both') { out.add('zed'); out.add('claude'); }
+    else if (t === 'all') { out.add('zed'); out.add('claude'); out.add('codex'); }
     else out.add(t);
   }
   return out;
@@ -227,7 +229,7 @@ function checkModuleDelivery() {
       continue;
     }
     // And reachable through the per-runtime farm the host actually reads.
-    for (const [rt, dir] of [['claude', '.claude/skills'], ['cursor', '.cursor/skills'], ['zed', '.agents/skills']]) {
+    for (const [rt, dir] of [['claude', '.claude/skills'], ['zed', '.agents/skills']]) {
       if (!runtimeSet(readRuntime()).has(rt)) continue;
       if (!fs.existsSync(path.join(root, dir, skill, 'SKILL.md'))) {
         broken.push(`${id} (not readable at ${dir}/${skill})`);
@@ -300,28 +302,6 @@ function checkSkillSymlinks(runtime) {
   return { id: 'skills_symlinks', ok, label: 'Skill symlinks', detail };
 }
 
-function checkHooksJson() {
-  const p = path.join(root, '.cursor/hooks.json');
-  if (!fs.existsSync(p)) {
-    return { id: 'hooks_json', ok: false, label: 'hooks.json structure', detail: 'missing' };
-  }
-  try {
-    const h = JSON.parse(fs.readFileSync(p, 'utf8')).hooks ?? {};
-    const ok =
-      (h.sessionStart?.length ?? 0) >= 2 &&
-      (h.beforeSubmitPrompt?.length ?? 0) >= 1 &&
-      (h.preToolUse?.length ?? 0) >= 4;
-    return {
-      id: 'hooks_json',
-      ok,
-      label: 'hooks.json structure',
-      detail: ok ? 'session + prompt + preToolUse guards' : 'incomplete hook chain',
-    };
-  } catch {
-    return { id: 'hooks_json', ok: false, label: 'hooks.json structure', detail: 'invalid JSON' };
-  }
-}
-
 function checkZed() {
   const checks = [];
   checks.push(checkFile('.zed/settings.json'));
@@ -359,22 +339,6 @@ function checkZed() {
   return checks;
 }
 
-
-const HOOK_SCRIPTS = [
-  'bearing-session-primer.sh',
-  'bearing-grep-guard.sh',
-  'bearing-read-guard.sh',
-  'bearing-edit-guard.sh',
-];
-
-function checkHookExecutable(name) {
-  const p = path.join(root, '.cursor/hooks', name);
-  if (!fs.existsSync(p)) {
-    return { id: `hook:${name}`, ok: false, label: name, detail: 'missing' };
-  }
-  const mode = fs.statSync(p).mode & 0o111;
-  return { id: `hook:${name}`, ok: mode !== 0, label: name, detail: mode ? 'executable' : 'not executable' };
-}
 
 /**
  * @param {string} repoRoot

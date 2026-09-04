@@ -14,7 +14,7 @@ Your tests catch code that breaks. Nothing catches an agent that has drifted abo
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/ReidenXerx/bearing?color=3987e5)](https://github.com/ReidenXerx/bearing)
 
-**Claude Code** · **Cursor** · **Zed** · **Codex**
+**Claude Code** · **Zed** · **Codex**
 
 ```bash
 npx bearing
@@ -63,20 +63,21 @@ npx bearing                                    # interactive — explains each m
 npx bearing install . --runtime claude --features northstars,taskcore
 ```
 
-`--runtime` `claude` · `cursor` · `zed` · `codex` · `all`  ·  `--features` `northstars` · `taskcore` · `microscope` · `consult` · `minions` · `gitnexus` · `e2e` · `all`
+`--runtime` `claude` · `zed` · `codex` · `all`  ·  `--features` `northstars` · `taskcore` · `microscope` · `consult` · `minions` · `gitnexus` · `e2e` · `all`
 
-Then restart your IDE. Enforcement needs tool-interception hooks, and only some runtimes expose them:
+Then restart your IDE. Enforcement needs tool-interception hooks, and **only Claude Code** exposes
+them:
 
-| | Claude Code | Cursor | Zed | Codex |
-|---|:---:|:---:|:---:|:---:|
-| North-stars — loaded as authority | ✅ | ✅ | ✅ | ✅ |
-| North-stars — re-anchored mid-session | ✅ | — | — | — |
-| Task-core — survives compaction | ✅ | — | — | — |
-| Microscope — domain-expert review | ✅ | ✅ | ✅ | — |
-| Consult — ask vs decide | ✅ | ✅ | ✅ | — |
-| Minions — anchored fan-out | ✅ | — | — | — |
-| GitNexus — hard gates | ✅ | ✅ | — | — |
-| E2E — browser verification | ✅ | ✅ | ✅ | ✅ |
+| | Claude Code | Zed | Codex |
+|---|:---:|:---:|:---:|
+| North-stars — loaded as authority | ✅ | ✅ | ✅ |
+| North-stars — re-anchored mid-session | ✅ | — | — |
+| Task-core — survives compaction | ✅ | — | — |
+| Microscope — domain-expert review | ✅ | ✅ | — |
+| Consult — ask vs decide | ✅ | ✅ | — |
+| Minions — anchored fan-out | ✅ | — | — |
+| GitNexus — hard gates | ✅ | — | — |
+| E2E — browser verification | ✅ | ✅ | ✅ |
 
 ✅ means it fires without being asked. A `—` is not always absence: the **task-core** skill and its
 contract section install on every runtime, so you can invoke it by name — what Claude Code adds is

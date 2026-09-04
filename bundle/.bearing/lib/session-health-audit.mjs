@@ -42,6 +42,11 @@ export function loadStaleness(root) {
  * broken — "Cursor hooks ✗", "Missing gitnexus MCP entry", "Missing north-star rule" — and
  * `bearing:doctor` signed off with "restart Cursor". Advice the reader cannot follow, about a
  * problem that does not exist (NS-6), on three separate commands at once.
+ *
+ * Gating them on the runtime fixed the symptom and left the cause: this kept its OWN copy of the
+ * alias table, and when Cursor was removed that copy still expanded `all` and `both` to include
+ * cursor — so the gate opened and all three fired again, on every `--runtime all` install. The
+ * checks are now pointed at the runtime that exists; the table is only ever the installer's.
  * @param {string} root
  */
 function installedRuntimes(root) {
@@ -50,8 +55,8 @@ function installedRuntimes(root) {
       const raw = JSON.parse(fs.readFileSync(path.join(root, rel), "utf8")).runtime;
       const out = new Set();
       for (const t of String(raw || "").toLowerCase().split(",").map((x) => x.trim()).filter(Boolean)) {
-        if (t === "both") { out.add("cursor"); out.add("zed"); }
-        else if (t === "all") { out.add("cursor"); out.add("zed"); out.add("claude"); out.add("codex"); }
+        if (t === "both") { out.add("zed"); out.add("claude"); }
+        else if (t === "all") { out.add("zed"); out.add("claude"); out.add("codex"); }
         else out.add(t);
       }
       if (out.size) return out;
@@ -61,7 +66,7 @@ function installedRuntimes(root) {
   }
   // No manifest — an old or hand-made install. Check everything, as it did before: a false alarm
   // beats silently verifying nothing.
-  return new Set(["cursor", "zed", "claude", "codex"]);
+  return new Set(["zed", "claude", "codex"]);
 }
 
 export function auditKitHealth(root) {
@@ -73,28 +78,29 @@ export function auditKitHealth(root) {
   /** @type {{ id: string, ok: boolean, label: string, detail?: string }[]} */
   const checks = [];
 
-  const hooksPath = path.join(root, ".cursor/hooks.json");
-  const hooksOk =
-    fs.existsSync(hooksPath) &&
-    (() => {
+  // A stealth install writes settings.LOCAL.json — not touching the tracked file is the whole
+  // point of the mode — so a check that knows only one of the two reports a correct stealth repo
+  // as ungated.
+  const settings = [".claude/settings.json", ".claude/settings.local.json"]
+    .map((rel) => {
       try {
-        const h = JSON.parse(fs.readFileSync(hooksPath, "utf8"));
-        const hooks = h.hooks ?? {};
-        return Boolean(hooks.sessionStart?.length && hooks.preToolUse?.length);
+        return JSON.parse(fs.readFileSync(path.join(root, rel), "utf8"));
       } catch {
-        return false;
+        return null;
       }
-    })();
-  if (runtimes.has("cursor")) checks.push({
+    })
+    .find((s) => s?.hooks);
+  const hooksOk = Boolean(settings?.hooks?.PreToolUse?.length && settings?.hooks?.SessionStart?.length);
+  if (runtimes.has("claude")) checks.push({
     id: "hooks",
     ok: hooksOk,
-    label: "Cursor hooks",
+    label: "Claude hooks",
     detail: hooksOk
       ? `Enforcement (${config.mode})`
-      : "hooks.json missing or incomplete",
+      : "no PreToolUse/SessionStart hooks in .claude/settings*.json",
   });
 
-  const mcpPath = path.join(root, ".cursor/mcp.json");
+  const mcpPath = path.join(root, ".mcp.json");
   const mcpOk =
     fs.existsSync(mcpPath) &&
     (() => {
@@ -106,22 +112,11 @@ export function auditKitHealth(root) {
         return false;
       }
     })();
-  if (runtimes.has("cursor")) checks.push({
+  if (runtimes.has("claude")) checks.push({
     id: "mcp",
     ok: mcpOk,
     label: "GitNexus MCP",
-    detail: mcpOk
-      ? "gitnexus in .cursor/mcp.json"
-      : "Missing gitnexus MCP entry",
-  });
-
-  const rulePath = path.join(root, ".cursor/rules/00-bearing-enforcement.mdc");
-  const ruleOk = fs.existsSync(rulePath);
-  if (runtimes.has("cursor")) checks.push({
-    id: "rule",
-    ok: ruleOk,
-    label: "Enforcement rule",
-    detail: ruleOk ? "00-bearing-enforcement.mdc" : "Missing north-star rule",
+    detail: mcpOk ? "gitnexus in .mcp.json" : "Missing gitnexus MCP entry",
   });
 
   const helpersOk =
