@@ -5,14 +5,46 @@
  */
 import fs from 'node:fs';
 import { execSync } from 'node:child_process';
+
+/**
+ * Wall-clock bound for every git call on the hook path (NS-7). Generous enough for a big repo's
+ * `status --porcelain -uall`, short enough that a wedged git degrades the gate instead of the
+ * developer's session.
+ */
+const GIT_TIMEOUT_MS = 5000;
 import path from 'node:path';
 import { loadHookConfig } from './hook-helpers.mjs';
 import { howToRun } from './how-to-run.mjs';
 
 const root = process.argv[2] ?? process.cwd();
 
+/**
+ * Once ONE git call has timed out, git is wedged for this process — a concurrent `analyze` holding
+ * the index lock, a network filesystem, a hung credential helper. Trying the next one just pays the
+ * bound again, so the worst case was the timeout times the number of calls. Short-circuit instead:
+ * one bound per hook invocation, not one per command.
+ */
+let gitWedged = false;
+
 function git(cmd) {
-  return execSync(cmd, { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+  if (gitWedged) throw new Error('git timed out earlier in this run');
+  // BOUNDED. Every git call here runs on the hook path, so an unresponsive one blocks the tool
+  // call itself — measured: a PATH-shimmed `git` that never returns left the Grep guard hanging at
+  // 15s with no verdict at all. In the field it showed up as a concurrent `analyze` pegging the
+  // disk and `git status --porcelain -uall` taking longer than the cache TTL, so every single tool
+  // call re-paid it. NS-7 says nothing on this path may block without a bound; a timeout throws,
+  // and every caller here already treats a throw as "unknown" and fails safe.
+  try {
+    return execSync(cmd, {
+      cwd: root,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+      timeout: GIT_TIMEOUT_MS,
+    }).trim();
+  } catch (e) {
+    if (e?.signal === 'SIGTERM' || e?.code === 'ETIMEDOUT') gitWedged = true;
+    throw e;
+  }
 }
 
 /**
@@ -75,6 +107,7 @@ function countBehindSource(from, to, sourceExtRe) {
   let names = '';
   try {
     names = execSync(`git -c core.quotePath=false diff --name-only ${from}..${to}`, {
+      timeout: GIT_TIMEOUT_MS,
       cwd: root,
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'ignore'],
@@ -106,6 +139,7 @@ function countDrift(at, sourceExtRe) {
     // single "?? path/" entry, which carries no source extension and therefore matches nothing —
     // so scaffolding a whole new module in a new folder produced ZERO drift (silent blind spot).
     porcelain = execSync('git -c core.quotePath=false status --porcelain -uall', {
+      timeout: GIT_TIMEOUT_MS,
       cwd: root,
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'ignore'],
@@ -219,7 +253,9 @@ try {
 
   try {
 
-    execSync('git rev-parse --is-inside-work-tree', { cwd: root, stdio: ['ignore', 'pipe', 'ignore'] });
+    // Through the SAME helper, so a wedged git is noticed once rather than re-timed here. This
+    // direct call is why the worst case was still two full timeouts after the first bound landed.
+    git('git rev-parse --is-inside-work-tree');
 
     out.reason = 'no_commits';
 

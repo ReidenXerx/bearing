@@ -50,11 +50,17 @@ function readCache(ttl) {
   return null;
 }
 
-function writeCache(data) {
+/**
+ * @param {object} data @param {number} [shortTtl] cap this entry's life, for a FAILED check
+ */
+function writeCache(data, shortTtl) {
   if (noCache) return;
   try {
     fs.mkdirSync(path.dirname(cachePath), { recursive: true });
-    fs.writeFileSync(cachePath, JSON.stringify({ at: Date.now(), data }));
+    // `at` is backdated for a short-lived entry, so the ordinary TTL read expires it early without
+    // needing a second code path on the read side.
+    const at = shortTtl ? Date.now() - Math.max(0, ttlMs() - shortTtl) : Date.now();
+    fs.writeFileSync(cachePath, JSON.stringify({ at, data }));
   } catch {
     /* best effort */
   }
@@ -69,9 +75,17 @@ if (cached) {
 
 const r = spawnSync(process.execPath, [path.join(here, 'check-staleness.mjs'), root], {
   encoding: 'utf8',
+  // Bounded for the same reason the git calls below it are (NS-7): this runs inside a PreToolUse
+  // hook, so an unbounded child blocks the tool call.
+  timeout: 8000,
 });
 
 if (r.status !== 0 || !r.stdout?.trim()) {
+  // CACHE THE FAILURE TOO. The cache was written only on success, so a repo where the check keeps
+  // timing out re-paid the full cost on EVERY tool call — the slow case, which is the one that
+  // needed the cache most. A short TTL is enough: it stops the stampede without making a transient
+  // failure sticky.
+  writeCache(FAIL, 2000);
   process.stdout.write(JSON.stringify(FAIL));
   process.exit(0);
 }

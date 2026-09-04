@@ -40,6 +40,25 @@ export function evaluateStalePolicy(stale, root) {
     };
   }
 
+  // NO GRAPH AT ALL is not the same as a STALE graph, and mapping it to `fresh` was the worst
+  // possible reading: full enforcement, every symbol grep and large read redirected at a graph that
+  // does not exist, with `repoName()` naming a repo the server has never heard of. It is reachable
+  // three ways and none is exotic — a linked git worktree (its `.git` is a FILE, and the indexer
+  // cannot analyze from one), every repo between install and its first index (`--skip-verify`
+  // skips that build, and bearing's own `dogfood` script uses it), and a corrupt `meta.json`.
+  // `classical_fallback` is exactly the right existing phase: the graph cannot answer, so classical
+  // tools are allowed and every consumer already handles it. NS-5, and NS-8's "fail closed on the
+  // graph" — reporting a MISSING index as fresh is precisely what that forbids.
+  if (['missing', 'invalid_meta', 'not_git'].includes(stale?.reason)) {
+    return {
+      phase: 'classical_fallback',
+      forceRefresh: false,
+      allowClassical: true,
+      allowGraphTools: false,
+      noGraph: stale.reason,
+    };
+  }
+
   // STALENESS GATE OFF (the default). A stale index no longer denies anything: it is reported, the
   // graph still refreshes on commit and on demand, and the agent is not ordered to rebuild mid-task.
   //
@@ -104,6 +123,12 @@ export function evaluateStalePolicy(stale, root) {
  */
 export function staleRefreshAgentMessage(stale, policy) {
   const detail = stale?.detail || stale?.reason || 'index not fresh';
+
+  if (policy.noGraph) {
+    return policy.noGraph === 'not_git'
+      ? 'NO GRAPH HERE — this is not a git worktree the indexer can read (a linked worktree is the usual cause). Classical Grep/Read are allowed; graph answers would be about a different tree.'
+      : `NO GRAPH HERE — this repo has no usable index (${policy.noGraph}). Classical Grep/Read are allowed; build one with ${howToRun('bearing:agent-refresh')} to get the graph tools back.`;
+  }
 
   if (policy.phase === 'must_refresh') {
     const pending = policy.refreshPending ? ' Session auto-refresh did not complete.' : '';
