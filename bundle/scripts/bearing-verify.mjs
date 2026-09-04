@@ -124,11 +124,19 @@ function checkPackageGates() {
   if (readStealth()) {
     // Not a pass with a caveat — genuinely not applicable. `.bearing/commands.json` carries the
     // same commands for a stealth repo, and howToRun() reads them, so nothing is missing.
+    //
+    // But LOOK before saying so. This returned ok:true naming a file it never opened; delete that
+    // file and the check still passed green while the verifier's own remediation degenerated to
+    // naming a command it simultaneously reported as not installed (NS-9, NS-20).
+    const table = path.join(root, '.bearing/commands.json');
+    const present = fs.existsSync(table);
     return {
       id: 'pkg_gates',
-      ok: true,
+      ok: present,
       label: 'package.json gates',
-      detail: 'n/a — stealth install (commands live in .bearing/commands.json)',
+      detail: present
+        ? 'n/a — stealth install (commands live in .bearing/commands.json)'
+        : 'stealth install, but .bearing/commands.json is MISSING — no command resolves here',
     };
   }
   if (!fs.existsSync(p)) {
@@ -405,12 +413,24 @@ async function printHuman(report) {
   }
   ui.summaryTable({ title: `Checks: ${report.passed}/${report.total} passed`, rows });
 
-  const hardFail = report.checks.some(
-    (c) => !c.ok && !['health:graph_fresh', 'health:embeddings'].includes(c.id)
-  );
+  // "The index has not been built yet" is not "the kit is incomplete", and kit update cannot clear
+  // it — I followed the instruction literally and got the identical output back. The persistence
+  // pair is the same state as graph_fresh/embeddings and belongs with them; `doctor` already words
+  // this correctly (NS-6: advice the reader cannot act on is a dead end).
+  const INDEX_NOT_BUILT = [
+    'health:graph_fresh',
+    'health:embeddings',
+    'health:persistence_dir',
+    'health:persistence_meta',
+  ];
+  const hardFail = report.checks.some((c) => !c.ok && !INDEX_NOT_BUILT.includes(c.id));
+  const indexMissing = report.checks.some((c) => !c.ok && INDEX_NOT_BUILT.includes(c.id));
   if (hardFail) {
     ui.fail(`Kit incomplete — run kit update, then ${await run('bearing:verify')}`);
     return 1;
+  }
+  if (indexMissing) {
+    ui.warn(`Kit files OK — the graph index is not built yet. Run ${await run('bearing:agent-refresh')}.`);
   }
   if (!report.health.healthy) {
     ui.warn(`Graph stale or missing embeddings — ${await run('bearing:agent-refresh')}`);
