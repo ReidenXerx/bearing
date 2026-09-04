@@ -1,13 +1,20 @@
 #!/usr/bin/env bash
-# bearing statusline for Claude Code — a two-line cockpit.
+# bearing statusline for Claude Code — a three-row cockpit.
 #
-# Line 1: identity    — model / effort / thinking / branch / repo
-# Line 2: consumption — context, 5h + 7d burn (with pace warning), prompt-cache TTL,
-#                       machine vitals, index freshness
+# Row 1: identity    — model / effort / thinking / branch / repo
+# Row 2: consumption — context, 5h + 7d burn (with pace warning), prompt-cache TTL,
+#                      index freshness
+# Row 3: the machine — dGPU power state, free RAM, IO stall
 #
-# The rule everything here is written to: a field either costs quota or blocks tools,
-# and anything that is merely *fine* stays silent. A status line you have to read
-# carefully is one you stop reading, so it only speaks up when something is off.
+# The rule rows 1 and 2 are written to: a field either costs quota or blocks tools,
+# and anything merely fine stays quiet. A status line you have to read carefully is
+# one you stop reading.
+#
+# Row 3 is the deliberate exception and is always present. A vital you only ever see
+# once it has gone red tells you nothing about what normal looked like, and a lane
+# that appears mid-session shifts everything beside it at the worst moment. So it
+# renders dim and constant, and only a crossed threshold takes colour. It is also
+# kept on its own row: rows 1-2 are the session, row 3 is the box under it.
 #
 # The index field is the bearing-specific one, and the reason this ships with the kit:
 # a stale index DENIES Grep/Read/MCP in this repo, so its state belongs on screen
@@ -212,17 +219,16 @@ mac_avail_mb() { # parse `vm_stat` on stdin → MB of reclaimable memory
     printf '%s' $(( (free + inact + spec + purge) * ps / 1048576 ))
 }
 
-vit=''; memav=''
+vit=''; memav=''; gpu=''; iof=''
 if [ "${SL_VITALS:-1}" = 1 ]; then
 case $OSTYPE in
   linux*)
     # A dGPU that refuses to sleep. Glob the nvidia driver's own bindings instead of a
-    # fixed PCI address, so this works on any host and stays silent where there is no
-    # NVIDIA GPU. D3cold is the healthy state: fully powered off.
+    # fixed PCI address, so this works on any host and reports nothing where there is
+    # no NVIDIA GPU. D3cold is the healthy state: fully powered off.
     for f in /sys/bus/pci/drivers/nvidia/*/power_state; do
         [ -r "$f" ] || continue
-        gpu=''; read -r gpu < "$f"
-        [ -n "$gpu" ] && [ "$gpu" != D3cold ] && vit+=" ${YLW}⚡${gpu}${R}"
+        read -r gpu < "$f"
         break
     done
     while read -r k v _; do
@@ -231,9 +237,9 @@ case $OSTYPE in
     # /proc/pressure/io line 2 is "full avg10=N.NN ..." — the share of time EVERY task
     # was stalled on IO, i.e. the desktop-freeze signature. PSI needs a kernel built
     # with CONFIG_PSI, so treat a missing or non-numeric value as "no opinion".
-    iof=''; { read -r _; read -r _ iof _; } < /proc/pressure/io 2>/dev/null
+    { read -r _; read -r _ iof _; } < /proc/pressure/io 2>/dev/null
     iof=${iof#avg10=}; iof=${iof%%.*}
-    num "$iof" && (( iof > ${SL_IO_WARN:-15} )) && vit+=" ${RED}⚠io${iof}%${R}"
+    num "$iof" || iof=''
     ;;
   darwin*)
     # Apple Silicon: unified memory, no discrete GPU to keep awake, and no PSI —
@@ -241,10 +247,23 @@ case $OSTYPE in
     memav=$(vm_stat 2>/dev/null | mac_avail_mb)
     ;;
 esac
-num "$memav" && (( memav < ${SL_MEM_WARN_MB:-2048} )) && \
-    vit+=" ${RED}⚠ram $(( memav / 1024 )).$(( memav % 1024 * 10 / 1024 ))Gi${R}"
+
+# Every reading that exists is shown, healthy or not. A lane that only appears in
+# trouble shifts everything beside it the moment it does, and a number you first see
+# when it is already red tells you nothing about what normal looked like. So the row
+# is constant and dim, and only a threshold crossing takes colour.
+sep=''
+add() { vit+="${sep}${D}$1 ${R}${2}${3}${R}"; sep="${D}   ${R}"; }
+[ -n "$gpu" ] && { [ "$gpu" = D3cold ] && c=$D || c=$YLW; add gpu "$c" "$gpu"; }
+if num "$memav"; then
+    (( memav < ${SL_MEM_WARN_MB:-2048} )) && c=$RED || c=$D
+    add ram "$c" "$(( memav / 1024 )).$(( memav % 1024 * 10 / 1024 ))Gi"
 fi
-[ -n "$vit" ] && l2+="${D}  ${R}${vit}"
+if num "$iof"; then
+    (( iof > ${SL_IO_WARN:-15} )) && c=$RED || c=$D
+    add io "$c" "${iof}%"
+fi
+fi
 
 # Index freshness. Read from the hooks' own staleness cache rather than recomputed here:
 # a status line must never be the thing that runs a git/graph query on every keystroke.
@@ -270,4 +289,11 @@ if [ -f "$gn" ]; then
     fi
 fi
 
-printf '%s\n%s' "$l1" "$l2"
+# Vitals get their own row so they never read as part of the consumption line — those
+# are quota, these are the machine. A box that reports no vitals at all prints no row
+# rather than a blank one.
+if [ -n "$vit" ]; then
+    printf '%s\n%s\n%s' "$l1" "$l2" "$vit"
+else
+    printf '%s\n%s' "$l1" "$l2"
+fi
