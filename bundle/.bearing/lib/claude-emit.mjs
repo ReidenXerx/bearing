@@ -16,6 +16,7 @@ import { spawnSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import * as helpers from "./hook-helpers.mjs";
+import { howToRun } from "./how-to-run.mjs";
 import { bumpScore } from "./session-primer.mjs";
 import { evaluateStalePolicy, staleRefreshAgentMessage , ESCAPE_HINT } from "./stale-policy.mjs";
 
@@ -78,13 +79,22 @@ export function emitVerdict(verdict, { root, mode, event = "PreToolUse" }) {
     mode,
   );
   if (applied.permission === "deny") {
+    // EVERY block names its exit (NS-6). Six of the seven deny branches named none, and `mode:
+    // guide` was named in none of them by default — `ESCAPE_HINT` is appended only to the
+    // must_refresh message, which cannot fire while `stalenessGate` defaults to "off". So the one
+    // documented way out of a wrong gate was, in the shipped configuration, unreachable from the
+    // gates themselves. Doing it HERE rather than at each branch means a new deny cannot ship
+    // without one; the branches that already say it are left alone.
+    const reason = applied.agent_message || "Blocked by GitNexus enforcement — use the graph.";
+    const namesExit = /bearing:fallback|fallback "|mode: ?guide/.test(reason);
     process.stdout.write(
       JSON.stringify({
         hookSpecificOutput: {
           hookEventName: event,
           permissionDecision: "deny",
-          permissionDecisionReason:
-            applied.agent_message || "Blocked by GitNexus enforcement — use the graph.",
+          permissionDecisionReason: namesExit
+            ? reason
+            : `${reason}\n\nIf the graph is WRONG here rather than you being wrong: ${howToRun(root, "bearing:fallback")} -- "<why>" opens a bounded classical window and files the disagreement. Permanent downgrade: "mode": "guide" in .bearing/hooks.json.`,
         },
       }),
     );
