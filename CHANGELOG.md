@@ -87,6 +87,42 @@ covers every repo, including repos without bearing, where the index field simply
 It reads the hooks' own staleness cache rather than running git on every render, and says so with a
 `~` when that cache is old.
 
+### Fixed — four defects on the path every fleet update takes
+
+Found by running the real update commands against real installs rather than reading them (NS-10).
+Two of the four destroy data.
+
+**`update --features +tsjs` deleted `gold-practices.md`.** The delta resolved against the RAW
+recorded feature set, and every 1.1.x manifest predates the `goldpractices` split, so adding one
+module silently removed another and took the file — with that repo's own `PP-#` rules in it — with
+it (NS-1). A plain `update` inherited correctly, which is why it went unnoticed: only the signed
+form was affected, and the signed form is what a stack-specific update uses. A delta is an EDIT to
+the recorded set, not a replacement of it, so the set it edits now inherits first. A bare list still
+replaces, honoured exactly as written.
+
+**`--features none` reinstated all eleven modules.** It recorded `[]`, and `[].join(",")` is `""`,
+which `parseFeatures` reads as "nobody said" and answers with the whole default set. A repo that
+declined every module had them all written back into it, gates included (NS-13). `applyFeatureDelta`
+guarded this exact trap already and says so in its own comment; the manifest-read path had the
+identical hole in two places.
+
+**`update-all` could not see a committed install whose manifest is gitignored** — the ordinary team
+case, and the state of any fresh clone of a repo with bearing committed. Discovery looked only for
+the one file that is never committed, while `updateKit` already knew to fall back to a tracked
+`.bearing/lib`. Measured on a real machine: ten repos found, an eleventh invisible. Discovery is
+held to a stricter standard than a targeted update, though — naming a path is a decision, a scan
+acts on whatever it matches, and `.claude/hooks` or `.cursor/rules` are tracked in plenty of repos
+that never installed this kit. Only bearing's own namespaces count as proof of an install.
+
+**A healthy install reported two failed checks.** The persona and managed-block postchecks judged
+`AGENTS.md` whenever it merely existed, so a `runtime: claude` repo that also tracks one — committed
+by the team, or left by an earlier `--runtime all` install — ended every update with
+`2 post-install checks FAILED` over a file bearing had correctly declined to touch. That inverts
+this module's purpose: the headline itself became the false claim (NS-20), and a check that fails on
+a correct install is worse than no check (NS-5). Both are now scoped to the docs the runtime writes,
+widening to both when the runtime is unreadable — a missing answer must never narrow verification
+(NS-21).
+
 ### Fixed — a pre-ship audit, and what a fleet of ten installs had been logging
 
 The release was audited before publishing: six review lenses over the changed surface, plus
