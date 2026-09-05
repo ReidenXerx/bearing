@@ -80,9 +80,9 @@ them:
 | Microscope — domain-expert review | ✅ | ✅ | — |
 | Consult — ask vs decide | ✅ | ✅ | — |
 | Minions — anchored fan-out | ✅ | — | — |
-| TS/JS rules — cited in-context | ✅ | ✅ | ✅ |
-| Frontend rules — cited in-context | ✅ | ✅ | ✅ |
-| React rules — cited in-context | ✅ | ✅ | ✅ |
+| TypeScript/JavaScript — traps that compile | ✅ | ✅ | ✅ |
+| Frontend — structure and blast radius | ✅ | ✅ | ✅ |
+| React — what the types do not catch | ✅ | ✅ | ✅ |
 | GitNexus — hard gates | ✅ | — | — |
 | E2E — browser verification | ✅ | ✅ | ✅ |
 
