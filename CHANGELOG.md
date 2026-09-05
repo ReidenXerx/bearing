@@ -72,6 +72,21 @@ The teaching sync's hook smoke test drove Cursor's shell wrapper. It now drives
 denied. With one enforcing runtime left, that test is the last thing between a dead gate and a user
 who believes they are protected, so its coverage goes up rather than away.
 
+### Added — a status line for Claude Code (`bearing statusline`, machine-wide opt-in)
+
+Index freshness, context fill, 5h/7d quota burn with an on-pace projection, and the prompt-cache
+TTL — the things that are expensive to learn late. A stale index denies Grep/Read/MCP, and until
+now the only signal a gate was about to fire was the denial itself, mid-task.
+
+It is **not** wired by an install. A status line is one bar at the bottom of every session in every
+project, so it is a machine-wide setting: `bearing statusline` installs it to `~/.claude/` and wires
+`~/.claude/settings.json`, `--remove` takes it back out, and a status line you configured yourself
+is never overwritten — bearing installs the script and prints the one line to switch. One copy
+covers every repo, including repos without bearing, where the index field simply prints nothing.
+
+It reads the hooks' own staleness cache rather than running git on every render, and says so with a
+`~` when that cache is old.
+
 ### Fixed — a pre-ship audit, and what a fleet of ten installs had been logging
 
 The release was audited before publishing: six review lenses over the changed surface, plus
