@@ -283,3 +283,26 @@ project rather than this one, it belongs upstream — say so and it can be promo
   did not happen — an untrue commit, which is the same class of defect as an installer printing an
   unchecked claim (NS-20). Remove paths one at a time, or check the working tree after. *Scar: a
   packaged Cursor guide survived the commit that says it was deleted; caught only by looking.*
+
+- **PP-5** — **`git clean -fd` does NOT remove gitignored files; `-x` does.** So "I restored the
+  repo" after an experiment is false whenever the artifact you left behind is ignored — and in this
+  project the manifest, the session state and every `*.bearing-backup` are exactly that. The next
+  run then reads YOUR leftover as the repo's real state. Verify a restore by `diff -rq --exclude=.git`
+  against a fresh clone, never by `git status` — a clean status is precisely what an ignored artifact
+  produces. *Scar: a 1.1.6 manifest left in a real repo made the next update look like it dropped a
+  module for no reason; four scratch reproductions all came back clean because a fresh clone has no
+  pre-split manifest to reproduce with, and a genuine data-loss defect was nearly written off as
+  misreading (NS-11).*
+
+- **PP-6** — **Never run this installer against a real repository to observe what it does.** It
+  rewrites tracked files by design, so "let me demonstrate the bug" costs the user a 28-file diff and
+  a restore that PP-5 says you will get wrong. Clone to the scratchpad and run it there; the answer
+  is identical and nothing of theirs is at stake (NS-1). *Scar: ran a 1.1.6 update on the user's own
+  clone to show pre-fix behaviour, twice.*
+
+- **PP-7** — **A bug that reproduces only on a repo built by an OLDER version needs an old-version
+  fixture, and a fresh install is not one.** Feature-set defects live in the gap between what a past
+  release RECORDED and what the current one expects, so a fixture created by today's installer has
+  already been given today's answer and can never show the bug. Construct the old state explicitly —
+  write the pre-split manifest, then run the command. *Scar: four "unreproducible" runs of a delta
+  that was in fact deleting `gold-practices.md` on every 1.1.x repo on disk.*
