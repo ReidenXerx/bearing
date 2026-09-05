@@ -220,9 +220,17 @@ export function readNorthStars(root) {
 export function northStarsDigest(root, max = 0) {
   const out = [];
   for (const raw of readNorthStars(root).split('\n')) {
-    // Tolerant of markdown noise: "- **NS-3** — …", "NS-3. …", "* NS-3: …"
-    if (!/^\s*(?:[-*+]\s*)?\**\s*NS-\d+\b/.test(raw)) continue;
-    const line = raw.replace(/^\s*(?:[-*+]\s*)?/, '').replace(/\*\*/g, '').trim();
+    // Tolerant of markdown noise: "- **NS-3** — …", "NS-3. …", "* NS-3: …", "### NS-3 — …".
+    // The HEADING form was missing and cost a real repo its entire anchor: 15 well-written
+    // north-stars written as `### NS-1 — …` produced a digest of ZERO, so the hook took the
+    // "file exists but has no NS-# lines yet" exit and emitted nothing, silently, on every fire.
+    // Nothing reported it — the feature simply did not happen. A structure the author chose is
+    // not "noise", and this list must cover the ordinary ways a person numbers a doc.
+    if (!/^\s*(?:#{1,6}\s*)?(?:[-*+]\s*)?\**\s*NS-\d+\b/.test(raw)) continue;
+    const line = raw
+      .replace(/^\s*(?:#{1,6}\s*)?(?:[-*+]\s*)?/, '')
+      .replace(/\*\*/g, '')
+      .trim();
     if (line) out.push(line);
     if (max > 0 && out.length >= max) break;
   }

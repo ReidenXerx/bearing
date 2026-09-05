@@ -45,5 +45,6 @@ AGENTS.md
 *.bearing-backup
 .bearing/manifest.json
 .bearing/hooks.local.json
-.claude/skills/
+.claude/skills/*
+!.claude/skills/gitnexus-area-*/
 # --- end bearing ---
