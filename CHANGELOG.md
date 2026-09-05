@@ -2,6 +2,47 @@
 
 All notable changes to `bearing` are documented here.
 
+## 1.2.1 — the north-stars module now has north-stars
+
+### Fixed — a selected module that did nothing on half the fleet
+
+`northstars` installed a skill, a contract section and a re-anchor hook, and then had no file to
+anchor to. bearing never shipped `.bearing/northstars.md` — deliberately, because the user owns it
+and an overwrite would replace a project's own authority with ours — but nothing ever created one
+either, so the file simply did not exist unless someone thought to write it from scratch. Measured
+across ten real installs: **five had no north-stars file at all.** On those five the session primer
+said nothing, the PostToolUse anchor took its "file exists but has no NS-# lines yet" exit on every
+single fire, and the module those repos had explicitly selected did nothing whatsoever. Nothing
+reported it, because every layer failed silently and correctly.
+
+A starter is now seeded, and `.bearing/northstars.md` joins `hooks.json` and `.gitnexusignore` as
+**seed-once**: written on first install, never written again. The starter deliberately contains no
+`NS-<digit>` line — only `NS-#` placeholders — so it cannot be cited, and the re-anchor hook cannot
+re-inject bearing's template as though it were a decision someone made about their project.
+
+Because the file now enters the manifest, two removal paths had to learn about it. **Uninstall
+deletes what the manifest claims, and NS-1 is named after uninstall deleting exactly this file** —
+so an authored north-stars doc is now kept by both uninstall and `--features -northstars`, while an
+untouched starter is still removed, or uninstall would never leave a repo as it found it. The check
+that tells those apart uses the digest's own pattern, and a test asserts the two agree in both
+spellings: if they ever drift, a file the anchor reads happily becomes a file the installer deletes.
+
+### Fixed — the anchor could not read north-stars written as headings
+
+The digest allowed `-`, `*`, `+` and `**` but not `#`, so a repo whose 15 north-stars are written
+as `### NS-1 — …` produced a digest of **zero** and the hook emitted nothing on every fire. Its own
+comment claimed tolerance of markdown noise; a heading is not noise, it is one of the two obvious
+ways to number a document. Measured before and after on the same fleet: that repo 0 → 15, and four
+others unchanged at 24, 97, 17 and 15.
+
+### Changed — the session primer stops claiming a file has content
+
+`northStarsExists` only asks whether the file is non-empty, which stopped meaning "has north-stars"
+the moment a starter was seeded. Announcing "READ THE NORTH-STARS FIRST — they OUTRANK every other
+doc" over a file containing none is the unchecked claim NS-20 is about, and it teaches the agent to
+ignore the line. There are now three states: claims present → the anchor line; a file with none →
+say so, and say what to watch for rather than inviting invention; no file → silence, as before.
+
 ## 1.2.0 — Cursor support is removed
 
 **Breaking.** `--runtime cursor` is no longer accepted, and updating an installed repo REMOVES its

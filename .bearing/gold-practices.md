@@ -306,3 +306,13 @@ project rather than this one, it belongs upstream — say so and it can be promo
   already been given today's answer and can never show the bug. Construct the old state explicitly —
   write the pre-split manifest, then run the command. *Scar: four "unreproducible" runs of a delta
   that was in fact deleting `gold-practices.md` on every 1.1.x repo on disk.*
+
+- **PP-8** — **A new file under `bundle/.bearing/` is INVISIBLE to git here, and `git status` will
+  not tell you.** The stealth block in `.git/info/exclude` contains a bare `.bearing/`, and a
+  pattern without a leading slash matches at every depth — so it silently covers `bundle/.bearing/`,
+  the payload directory that ships to users. Existing files there are fine, because ignore rules do
+  not apply to tracked files; a NEW one is dropped, does not appear in `git status`, commits
+  cleanly, and is simply absent from the npm tarball. Add it with `git add -f`, then confirm with
+  `npm pack --dry-run | grep <file>` — the tarball is the only claim that matters (NS-20). *Scar:
+  the seeded `northstars.md` — the entire point of the 1.2.1 release — was staged as "nothing to
+  commit" and would have shipped a release that fixed nothing.*
