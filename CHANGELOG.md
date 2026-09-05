@@ -2,6 +2,53 @@
 
 All notable changes to `bearing` are documented here.
 
+## 1.2.2 — bearing stops changing files it does not own
+
+Every item here was found the same way: by reading the diff a real `bearing update` left in a real
+repository and asking, line by line, whether bearing had any business writing it.
+
+### Fixed — `chmod 755` on the project's own shell scripts
+
+`chmodScripts` walked `scripts/`, `.cursor/hooks/` and `.githooks/` and made **every** `.sh` it
+found executable, which in a real repository means the project's scripts too. One update flipped
+three of a repo's own files from 644 to 755 and put them in the diff someone then had to explain.
+Changing a file's mode is the same overreach as changing its contents (NS-1), and it is worse for
+being invisible: a mode-only change shows no diff body, so it reads as noise and gets committed
+without thought. The manifest already names exactly what bearing owns, so it is used instead of a
+directory sweep.
+
+### Fixed — a per-machine MCP transport rewriting a team-shared file
+
+`.mcp.json` is committed and shared; the manifest that records a transport choice is gitignored and
+per-machine. Reading the manifest first therefore let one developer's local preference rewrite a
+file everyone shares, on every update, in **both** directions — a repo whose manifest was gitignored
+had a committed `http://127.0.0.1:3737/mcp` reset to stdio on a fresh clone, and a repo whose local
+manifest said http had its committed `gitnexus mcp` rewritten to a port only that one machine
+listens on. Two developers updating in turn would flip it back and forth forever, and neither asked
+for any of it.
+
+The precedence is now: an explicit `--mcp` on **this** run, then whatever the repo's own `.mcp.json`
+already says, and only then the machine's recorded choice. `updateKit` also stopped passing the
+manifest's value down as though it were an operator's flag, which had been quietly defeating the
+whole chain.
+
+### Fixed — JSON we only merge into came back reformatted
+
+bearing re-serialises the files it merges a key into, so a `.mcp.json` whose entry was written on
+one line came back expanded over six: every update dirtied a committed file with a diff that
+changed nothing, and a reviewer had to read it to find that out. `writeJson` now compares **parsed**
+content and skips the write when nothing changed, so the project's own formatting survives.
+
+### Added — a warning when removing hooks strands an open session
+
+Every hook in this kit catches its own errors and exits 0 when its libs are missing (NS-5) — but
+that code never runs if the FILE is gone: node fails to resolve the entry point and prints a raw
+`MODULE_NOT_FOUND` stack trace. Claude Code reads `.claude/settings.json` once at session start, so
+an editor open during an update that deselects the graph module keeps invoking the six hooks that
+were just deleted, on every tool call, with nothing naming the cause. Seen on two machines. Nothing
+on disk is wrong and the only fix is a restart, so the installer now says exactly that instead of
+leaving someone to decode a loader trace (NS-6).
+
 ## 1.2.1 — the north-stars module now has north-stars
 
 ### Fixed — a selected module that did nothing on half the fleet
