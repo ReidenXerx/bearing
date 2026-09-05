@@ -102,8 +102,21 @@ In a real target repo after update:
 - [ ] Commit changes.
 - [ ] Tag release.
 - [ ] Publish release notes from `CHANGELOG.md`.
-- [ ] Update installed repos with:
+- [ ] Update installed repos. You do not need a list — this scans for manifests and finds them,
+      including repos nested a level or two down:
 
   ```bash
   ./bin/update.sh --all /path/to/projects --no-setup --skip-verify
   ```
+
+  Then check the three things a sweep cannot check for you:
+
+  - [ ] **The oldest install first.** The biggest version jump is the one most likely to surprise
+        you, and it is the cheapest to look at while everything else is still untouched.
+  - [ ] **Stealth repos must leave `git status` completely empty.** That is stealth's only promise,
+        and an update is where it breaks — a single new tracked path is the whole failure.
+  - [ ] **Every other repo will show a sizeable uncommitted diff** (~50 changed paths is normal)
+        that someone has to review and commit. An update that removes a retired runtime's files
+        shows up as deletions; that is the migration working, not damage.
+  - [ ] A repo that already had its own `.e2e/` keeps it — bearing records `ownsE2e: false` and
+        declines to install over it. Never force `--features +e2e` on one of those.
