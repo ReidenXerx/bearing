@@ -27,14 +27,27 @@ const argv = process.argv.slice(2);
 const has = (flag) => argv.includes(flag);
 const valueOf = (flag) => (argv.includes(flag) ? argv[argv.indexOf(flag) + 1] : null);
 
-/** Is the process that wrote this ledger still running? */
+/**
+ * Is the process that wrote this ledger still running?
+ *
+ * ⚠ `EPERM` MEANS ALIVE, NOT DEAD. `process.kill(pid, 0)` throws two different things and the first
+ * version of this collapsed them: `ESRCH` is "no such process", but `EPERM` is "the process is
+ * there and you may not signal it" — a ledger written under another uid, which is ordinary on a
+ * shared CI runner or across a container boundary. Treating that as dead made the one destructive
+ * tool in the kit sweep the fixtures of a verifier that was STILL RUNNING, which is precisely the
+ * "next run reports a plausible product defect" failure the ledger exists to end.
+ *
+ * Anything unrecognised is also alive: this module's stated bias is that a missed fixture is
+ * visible litter while an over-eager delete is irreversible, so an unknown errno must not authorise
+ * a DELETE. `--all` remains the way to sweep regardless.
+ */
 const alive = (pid) => {
   if (!pid) return false;
   try {
     process.kill(pid, 0);
     return true;
-  } catch {
-    return false;
+  } catch (err) {
+    return err && err.code === 'ESRCH' ? false : true;
   }
 };
 
