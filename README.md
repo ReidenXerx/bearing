@@ -242,10 +242,9 @@ identical in shape, while the only thing that needed thinking — what the chang
 settled before the first one. Logging coverage, an error envelope, the rest of a settled migration.
 
 **A gathering minion must not decide what is TRUE; an invasive one must not decide what to CHANGE.**
-The delegator still concludes — the conclusion is the transformation, reached before anything is
-spawned. So the four gates hold, plus two that are hard failures rather than judgment calls: the
-transformation is **decided in full** beforehand, and the slices are **disjoint**. Two subagents
-writing one file is a lost update — both report success, and nothing in either report shows it.
+So the four gates hold, plus two: the transformation is **decided in full** beforehand, and the
+slices are **disjoint** — two subagents writing one file is a lost update, both report success, and
+nothing in either report shows it.
 
 ```
 WROTE    src/routes/orders.ts:41 — log.info({ orderId, userId }, "order.created")
@@ -253,9 +252,13 @@ VERIFIED tsc --noEmit src/routes/orders.ts → 0
 SKIPPED  src/routes/legacy.ts:12 — handler returns a stream; brief covers no such shape
 ```
 
-And it decides in advance whether a half-applied change is acceptable, because a fan-out that
-half-fails leaves the codebase in a state that usually still compiles and usually still passes —
-so it ships, with two conventions and no record of which one was intended.
+`SKIPPED` is the reason to reach for it. Three minions skipping the same shape means your
+specification had a hole — where a single agent would have quietly decided nine times and you would
+find out, if ever, in review.
+
+And the brief is worth writing **even when you do not fan out**: it survives compaction, it keeps
+site 30 consistent with site 3, and one you cannot write is a change you have not finished thinking
+about.
 
 **Minions gather. Your agent concludes — they do minimal or zero reasoning.** A subagent that returns a *verdict* puts a cheaper model's summary between the evidence and your decision, which is the drift this whole tool exists to prevent.
 
