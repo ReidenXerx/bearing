@@ -2,6 +2,53 @@
 
 All notable changes to `bearing` are documented here.
 
+## Unreleased — the e2e harness collects its own evidence
+
+Every item here comes from running the harness against a real application for a fortnight and
+noticing what it could not tell you afterwards.
+
+### Added — a frame for every failure, and a video of every run
+
+A verifier only ever photographed moments someone thought, in advance, to photograph. That is
+backwards: the frame is worth most exactly where a check has just said something is wrong and a
+reader has to decide whether to believe it. `core/recording.js` makes that automatic — `check()`
+photographs its own failures, an uncaught throw photographs itself before the process dies, and the
+run is recorded on video. One line of wiring in the verifier (`recording.adopt`), nothing to
+remember per check. `SHOTS=key` keeps the frames without the video; `SHOTS=off` silences both, for
+a check that measures timing and would be distorted by its own shutter.
+
+The first attempt injected frames into the interaction helpers instead, and took a 28-assertion
+verifier to 5 of 6: callers race those helpers against the network — `await submit(page)` then a
+`waitForResponse` armed *after* the click — so a frame before the click spends a window already
+open and a frame after it swallows the response. There is no safe side. An observability mode that
+changes the result is not observability, which is why `all` records rather than screenshots.
+
+### Added — a ledger of what a run created, and a sweeper that reads it
+
+Leftover fixtures do not fail the run that made them; they fail the next one, looking like a bug in
+the app. One abandoned definition left a required field empty on every row, correctly disabled a
+button, and the check that met it reported a plausible product defect. The old defence was a
+filename prefix and a tool that grepped for it, which reported "0 leftovers" with live fixtures on
+the account **twice**. `core/seeds.js` records what was actually created, synchronously — the leak
+that started this was a Ctrl-C, and a ledger that batches its writes is empty in exactly the case
+it exists for. It watches responses rather than the harness's own API helper, because a verifier
+that builds fixtures by driving the UI never touches that helper.
+
+### Added — `tools/audit-checks.js`, which audits the verifiers
+
+The recurring failure in a harness is not a broken app, it is a check that reports something
+untrue — and a lying check looks exactly like a passing one. This reads `verify/` for the shapes
+that have already done it: an assertion that cannot fail, Playwright selector syntax inside
+`page.evaluate` (where it matches nothing, silently), a report that never calls `finish()`,
+fixtures created with no delete.
+
+### Fixed — `shots.take` could photograph a dialog that was not there yet
+
+A check read a modal's icon colour off the DOM, got the right answer and passed, while the
+screenshot beside it showed no modal at all. UI kits animate one in over ~300ms and
+`waitFor({state: 'visible'})` returns at opacity 0. The camera now waits out finite animations
+first; infinite ones are excluded, or a loading page would never settle.
+
 ## 1.2.2 — bearing stops changing files it does not own
 
 Every item here was found the same way: by reading the diff a real `bearing update` left in a real

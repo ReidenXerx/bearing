@@ -20,6 +20,7 @@ const { withBrowser } = require('../core/browser');
 const { createReport } = require('../core/report');
 const { createShots } = require('../core/shots');
 const { until } = require('../core/wait');
+const recording = require('../core/recording');
 const paths = require('../core/paths');
 
 const BASE = (process.env.BASE || 'http://localhost:3000').replace(/\/$/, '');
@@ -28,7 +29,13 @@ withBrowser(async (browser) => {
   const report = createReport(`smoke — ${BASE}`);
   const shots = createShots({ dir: paths.shots });
 
-  const page = await browser.newPage();
+  // ⚠ THE ONE LINE OF WIRING THIS HARNESS ASKS FOR. `contextOptions()` turns on video for the run;
+  // `adopt` points the automatic camera at this page, so a failing check and an uncaught throw each
+  // photograph themselves without any verifier remembering to. `SHOTS=key` drops the video,
+  // `SHOTS=off` silences the lot — see core/recording.js.
+  const context = await browser.newContext({ ...recording.contextOptions() });
+  const page = await context.newPage();
+  recording.adopt(context, page, shots);
   const consoleErrors = [];
   const failedRequests = [];
   page.on('console', (m) => m.type() === 'error' && consoleErrors.push(m.text()));

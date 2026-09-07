@@ -16,6 +16,8 @@
  * proved nothing. The comment was a claim the code did not honour, which is worse than no comment:
  * the next reader trusts it instead of reading the tally.
  */
+const recording = require('./recording');
+
 const createReport = (title) => {
   const results = [];
 
@@ -35,6 +37,10 @@ const createReport = (title) => {
     /** An assertion that ran. Returns the boolean so a caller can branch on it. */
     check(name, ok, detail) {
       record(ok ? 'PASS' : 'FAIL', name, detail);
+      // A failing check photographs the page it failed on. Nobody predicts where a failure lands,
+      // so the alternative is the state this harness's ancestor lived in for months: a red line in
+      // a terminal and no picture of the screen behind it. Fired, not awaited — see recording.js.
+      if (!ok) recording.onFailure(name, detail);
       return Boolean(ok);
     },
 
@@ -53,6 +59,15 @@ const createReport = (title) => {
      * Print the tally. Exits non-zero on any failure, or on a run that proved nothing.
      * `{exit: false}` returns the verdict instead, for a caller that owns its own exit.
      */
+    /**
+     * ⚠ STAYS SYNCHRONOUS, AND RETURNS A BOOLEAN. Making this `async` to await the failure frames
+     * looked harmless and was not: `finish({exit: false})` then returns a **Promise**, which is
+     * always truthy, so every caller that branches on the verdict reads a failing run as green.
+     * bearing's own test caught it — which is the same class of defect this whole module exists to
+     * photograph. The drain is therefore attached to the EXIT, not to the return value: node stays
+     * alive until the frames land, and a caller that owns its own exit awaits
+     * `recording.settle()` itself.
+     */
     finish({ exit = true, label = title || 'run' } = {}) {
       const count = (s) => results.filter((r) => r.state === s).length;
       const [passed, failures, skipped] = [count('PASS'), count('FAIL'), count('SKIP')];
@@ -69,7 +84,10 @@ const createReport = (title) => {
       }
 
       const ok = failures === 0 && !provedNothing;
-      if (exit) process.exit(ok ? 0 : 1);
+      // `process.exit` is immediate — a screenshot it interrupts is left as a 0-byte file, which
+      // reads as evidence and is not. Exiting only once the queue has drained costs nothing when
+      // there is nothing queued, which is every passing run.
+      if (exit) { recording.settle().then(() => process.exit(ok ? 0 : 1)); }
       return ok;
     },
   };
