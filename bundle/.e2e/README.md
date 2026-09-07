@@ -23,6 +23,8 @@ HEADED=1 SLOWMO=250 node .e2e/verify/smoke.js   # watch it happen
 | `core/shots.js` | **works** — screenshots keyed by view, freshest wins, self-cataloguing |
 | `core/paths.js` | **works** — resolved once, so a script can move |
 | `core/recording.js` | **works** — a frame for every failed check and every crash; `SHOTS=all` records video too |
+| `core/seeds.js` | **works** — a ledger of what a run created, so litter is swept by record and not by memory |
+| `tools/sweep-seeds.js` | **works** — shows what a dead run left; deletes only with `--delete`, and never against production |
 | `core/env.js` | **works, needs one function** — which backend am I actually talking to, and refuse production without an opt-in |
 | `tools/export-storage.js` | template — paste it in a browser console to capture a session |
 | `core/session.js` | **stub — throws until you write it.** How your app holds a session is the most app-specific thing about it |
@@ -54,6 +56,25 @@ HEADED=1 SLOWMO=250 node .e2e/verify/smoke.js   # watch it happen
    page says which you got.
 
 ## Scars — each of these produced a GREEN run over a real failure
+
+- **A leftover fixture fails the NEXT run, and looks like a product defect.** One abandoned
+  definition left a required field empty on every row, which correctly disabled a button, and the
+  check that met it reported a plausible bug in the app. The defence used to be a filename prefix
+  and a tool that grepped for it — which reported "0 leftovers" with live fixtures on the account
+  **twice**, because a convention only protects the cases somebody remembered. `core/seeds.js`
+  records what was actually created instead, and watches responses rather than the harness's own API
+  helper, because a verifier that builds fixtures by driving the UI never calls that helper.
+- **A ledger that guesses is a delete that guesses.** The first draft treated any 2xx POST returning
+  an `id` as a creation. That fires on an idempotent create (`200 {id: <existing>}` — deleting a
+  record with a history the run did not make), on a third-party call (a payments app POSTs to
+  Stripe and Sentry on ordinary loads, and `DELETE /v1/customers/{id}` is a real route), and on a
+  response this kit's own `blockWrites` faked — `route.fulfill()` produces a real `response` event,
+  so the ledger recorded a phantom id and the sweeper would later delete a REAL object of it. Every
+  default now errs toward under-tracking: a missed fixture is visible litter, an over-tracked one is
+  an irreversible delete.
+- **"It refused everything" and "it is broken" produce identical output.** The four refusals above
+  were first verified with four passing assertions while `track()` was throwing on every call. An
+  absence assertion needs a positive case beside it or it proves nothing.
 
 - **A green assertion beside a blank picture.** A check read a delete dialog's icon colour off the
   DOM, got the right answer, and passed — while the screenshot filed as its evidence showed no

@@ -4,6 +4,31 @@ All notable changes to `bearing` are documented here.
 
 ## Unreleased — the e2e harness photographs its own failures
 
+### Added — a ledger of what a run created, and a sweeper that is safe to hand someone
+
+Leftover fixtures do not fail the run that made them; they fail the next one, looking like a bug in
+the app. `core/seeds.js` records what was created — synchronously and atomically, because the leak
+that started this was a Ctrl-C and a truncated ledger reads as "nothing outstanding".
+
+The interesting part is what it REFUSES, because this module decides what a destructive tool will
+later delete. Only `201`, because a `200` on a POST is routinely an idempotent create and deleting
+that destroys a record the run did not make. Only the page's own origin, because a payments app
+POSTs to Stripe and Sentry on ordinary loads and `DELETE /v1/customers/{id}` is a real route. And
+nothing that was intercepted — `route.fulfill()` produces a real `response` event, so a verifier
+using this kit's own `blockWrites` would otherwise ledger a phantom id and the sweeper would delete
+a real object of it.
+
+`tools/sweep-seeds.js` lists by default and deletes only with `--delete`; refuses production without
+`ALLOW_PROD=1` via the `guardEnv` every read-only verifier already honours; skips ledgers whose run
+is still alive; refuses any URL outside the app's origin; and treats an unparseable ledger as a
+non-zero exit, because "I cannot account for what is out there" is not "nothing is out there".
+
+`core/session.js` gains an optional `authHeaders(storage)` hook. `credentials: 'include'` sends
+cookies and nothing else, so for the token-in-localStorage app that file describes at length, every
+sweep DELETE would go out anonymous and come back 401 — reported as "could not delete" rather than
+"never authenticated".
+
+
 ### Added — a frame for every failed check, and for every crash
 
 A verifier only ever photographed moments someone thought, in advance, to photograph. That is

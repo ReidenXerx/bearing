@@ -74,6 +74,21 @@ predicts where a failure lands. **Do not add automatic frames inside interaction
 was tried, and it took a 28-assertion verifier to 5 of 6, because callers race those helpers
 against the network and a frame on either side eats the event.
 
+## Fixtures a run creates
+
+`core/seeds.js` ledgers what the page creates, by watching responses rather than your own API
+helper — a verifier that builds fixtures by driving the UI never calls that helper.
+
+```js
+seeds.watchPage(page);            // defaults: 201 only, your own origin, nothing intercepted
+await seeds.settle();             // before teardown, so a late create is still recorded
+```
+
+A clean run releases its own entries, so **what survives on disk is the leak**.
+`node .e2e/tools/sweep-seeds.js` lists it; `--delete` removes it. The defaults are deliberately
+narrow — override `isCreate` the moment your API creates with a `200`, nests the id, or deletes via
+a different shape. Under-tracking leaves visible litter; over-tracking deletes something real.
+
 ## Growing the harness — bounded
 
 When you hit something the harness handled badly, **append it to `README.md`'s scars section and
