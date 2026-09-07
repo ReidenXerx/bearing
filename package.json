@@ -30,7 +30,7 @@
     "test": "node --test lib/kit.test.mjs lib/classify.test.mjs",
     "sync:meta": "node scripts/sync-repo-meta.mjs",
     "gen:diagrams": "node scripts/gen-diagrams.mjs",
-    "dogfood": "node lib/kit.mjs install . --runtime claude --features northstars,goldpractices,taskcore,microscope,minions,tsjs --no-setup --skip-verify",
+    "dogfood": "if [ -f .bearing/manifest.json ]; then node lib/kit.mjs update . --no-setup --skip-verify; else node lib/kit.mjs install . --runtime claude --features northstars,goldpractices,taskcore,microscope,minions,tsjs --no-setup --skip-verify; fi",
     "release:notes": "node scripts/release-notes.mjs",
     "gen:skills": "node scripts/gen-skill-fragments.mjs",
     "gen:social": "node scripts/gen-social.mjs",
