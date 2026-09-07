@@ -39,6 +39,26 @@ one line came back expanded over six: every update dirtied a committed file with
 changed nothing, and a reviewer had to read it to find that out. `writeJson` now compares **parsed**
 content and skips the write when nothing changed, so the project's own formatting survives.
 
+### Fixed — an explicit `--features` list silently narrowed an existing install
+
+`install --features a,b,c` REPLACES the selection, which is right when someone is stating what
+they want and wrong when a script states it on their behalf. This repo's own `npm run dogfood` did
+exactly that: it names an intel-only set, so running it on a machine whose install was deliberately
+wider deleted all five gate hooks, the impact audit, `.mcp.json` and the graph skills. Measured on
+a clone: `gitnexus` true→false, 5 guards→0.
+
+It happened here mid-release. The gates had run 435 times and blocked 22 greps that session; a
+dogfood run removed them, and since Claude Code reads `.claude/settings.json` once at startup it
+kept invoking hooks that no longer existed — the very stranded-session case the warning above was
+added for. The warning fired and still did not help, because it tells you that hooks were removed,
+not that you never meant to remove them.
+
+The script now updates when a manifest exists and installs only when one does not, so the
+intel-only set still applies to a fresh clone — that configuration is the one the author otherwise
+never exercises (NS-21) and it stays deliberate. Note it is NOT written as `update || install`:
+`||` fires on any non-zero exit, and a failed post-install check is designed to produce one
+(NS-20), so on a repo with a failing check the fallback would narrow the install anyway.
+
 ### Added — a warning when removing hooks strands an open session
 
 Every hook in this kit catches its own errors and exits 0 when its libs are missing (NS-5) — but
