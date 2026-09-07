@@ -24,6 +24,7 @@ HEADED=1 SLOWMO=250 node .e2e/verify/smoke.js   # watch it happen
 | `core/paths.js` | **works** — resolved once, so a script can move |
 | `core/recording.js` | **works** — a frame for every failed check and every crash; `SHOTS=all` records video too |
 | `core/seeds.js` | **works** — a ledger of what a run created, so litter is swept by record and not by memory |
+| `tools/audit-checks.js` | **works** — audits your verifiers for shapes that have reported something untrue, with fixtures that prove each rule fires |
 | `tools/sweep-seeds.js` | **works** — shows what a dead run left; deletes only with `--delete`, and never against production |
 | `core/env.js` | **works, needs one function** — which backend am I actually talking to, and refuse production without an opt-in |
 | `tools/export-storage.js` | template — paste it in a browser console to capture a session |

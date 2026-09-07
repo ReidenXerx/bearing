@@ -4,6 +4,23 @@ All notable changes to `bearing` are documented here.
 
 ## Unreleased — the e2e harness photographs its own failures
 
+### Added — `tools/audit-checks.js`, and the fixtures that prove it works
+
+The recurring failure in a harness is not a broken app, it is a check that reports something untrue —
+and a lying check looks exactly like a passing one. This reads `verify/` for the shapes that have
+already done it.
+
+The fixtures matter more than the rules. An earlier draft of this tool carried a docblock claiming a
+negative-control folder that did not exist, so no rule had ever been watched to fire; by its own
+stated standard it was not known to work, and three of its rules turned out to fail a branch on
+CORRECT code — `:has()` is standard CSS, a `finish()` delegated to a shared runner still finishes,
+and `report?.finish?.()` is a call. For a linter, a false positive is the expensive direction: it
+teaches its reader to skim past it. `tools/audit-fixtures/` now holds a file written to trip every
+rule, one showing the correct form of each, one full of code that only LOOKS like a smell, and one
+exercising the suppression comment — and `lib/kit.test.mjs` asserts which rule ids fire on which,
+so a rule that stops working fails the build rather than going quiet.
+
+
 ### Added — a ledger of what a run created, and a sweeper that is safe to hand someone
 
 Leftover fixtures do not fail the run that made them; they fail the next one, looking like a bug in

@@ -89,6 +89,23 @@ A clean run releases its own entries, so **what survives on disk is the leak**.
 narrow — override `isCreate` the moment your API creates with a `200`, nests the id, or deletes via
 a different shape. Under-tracking leaves visible litter; over-tracking deletes something real.
 
+## Auditing the verifiers themselves
+
+`node .e2e/tools/audit-checks.js` reads `verify/` for shapes that have reported something untrue: a
+`check(name, true)` that cannot fail, Playwright selector syntax handed into `page.evaluate` (where
+it matches nothing, silently), a report that never calls `finish()`, fixtures created with neither a
+delete nor a ledger. Run it before trusting a green suite.
+
+It exits 1 only on LIE findings. Suppress a deliberate one in place:
+
+```js
+// audit-checks: ignore vacuous-assertion
+report.check('a documented placeholder', true, 'see above');
+```
+
+`tools/audit-fixtures/` is its negative control — `AUDIT_DIR=.e2e/tools/audit-fixtures` runs the
+rules against files written to trip each one, plus files that only look like they should.
+
 ## Growing the harness — bounded
 
 When you hit something the harness handled badly, **append it to `README.md`'s scars section and
