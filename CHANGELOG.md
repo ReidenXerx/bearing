@@ -39,6 +39,33 @@ one line came back expanded over six: every update dirtied a committed file with
 changed nothing, and a reviewer had to read it to find that out. `writeJson` now compares **parsed**
 content and skips the write when nothing changed, so the project's own formatting survives.
 
+### Fixed — 1.2.0's own Windows fix broke hooks everywhere else
+
+`#18` reported that `node "$CLAUDE_PROJECT_DIR/.claude/hooks/x.mjs"` never launches under
+PowerShell, so 1.2.0 removed the variable and used a bare relative path — reasoning that "Claude
+Code runs hooks with cwd at the project root". **That premise is false.** The hook process is not
+guaranteed that cwd, and when it differs node cannot resolve the entry file and prints a raw
+`MODULE_NOT_FOUND` loader trace on every tool call. Measured on a real repo: the identical command,
+exit 0 from the root and exit 1 from a subdirectory.
+
+It replaced a Windows-only failure with one that can hit anyone, and degraded just as quietly,
+because hook errors are non-blocking — the session looks healthy while the gates are not running.
+
+The command now resolves in **node** rather than in a shell: `node -e` takes one double-quoted
+argument containing only single quotes and no `$`, which is the intersection that survives bash,
+PowerShell and cmd alike, so #18 stays fixed. Node reads `CLAUDE_PROJECT_DIR` from the environment
+itself — a real value rather than a string some shell has to interpolate — and falls back to cwd
+when it is absent. `pathToFileURL` is load-bearing, not decorative: a dynamic `import()` of a bare
+Windows path throws, and a path containing a space fails without it.
+
+The test that was supposed to cover #18 only ever INSPECTED the command string, which is how a
+command with no shell variable, correctly starting with `node`, still shipped unable to find its own
+entry file. It now EXECUTES the emitted command from the project root and from a subdirectory
+(NS-10, NS-12).
+
+**If you installed 1.2.0 or 1.2.1, run `bearing update` to rewrite the hook registrations.** Any
+Claude Code session already open must be restarted afterwards, since it reads them once at start.
+
 ### Fixed — an explicit `--features` list silently narrowed an existing install
 
 `install --features a,b,c` REPLACES the selection, which is right when someone is stating what
