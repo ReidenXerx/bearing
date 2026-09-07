@@ -22,6 +22,7 @@ HEADED=1 SLOWMO=250 node .e2e/verify/smoke.js   # watch it happen
 | `core/http.js` | **works** — watch requests/responses, and test a write without performing it |
 | `core/shots.js` | **works** — screenshots keyed by view, freshest wins, self-cataloguing |
 | `core/paths.js` | **works** — resolved once, so a script can move |
+| `core/recording.js` | **works** — a frame for every failed check and every crash; `SHOTS=all` records video too |
 | `core/env.js` | **works, needs one function** — which backend am I actually talking to, and refuse production without an opt-in |
 | `tools/export-storage.js` | template — paste it in a browser console to capture a session |
 | `core/session.js` | **stub — throws until you write it.** How your app holds a session is the most app-specific thing about it |
@@ -53,6 +54,30 @@ HEADED=1 SLOWMO=250 node .e2e/verify/smoke.js   # watch it happen
    page says which you got.
 
 ## Scars — each of these produced a GREEN run over a real failure
+
+- **A green assertion beside a blank picture.** A check read a delete dialog's icon colour off the
+  DOM, got the right answer, and passed — while the screenshot filed as its evidence showed no
+  dialog at all and a highlight ringing bare page. A UI kit animates a modal in over ~300ms, and
+  `waitFor({state: 'visible'})` resolves the instant the node exists and is not `display:none`:
+  at opacity 0, scaled to a fifth. The DOM was right and the camera was early. Whoever reviews the
+  run looks at the picture, so a frame that contradicts a passing check destroys trust in the
+  check. `shots.take` now passes Playwright's `animations: 'disabled'`, which fast-forwards finite
+  animations to their end state and rewinds infinite ones, so a spinner cannot stall the shutter.
+  (A hand-rolled wait-for-stillness loop did the same job at 312-377ms against the built-in's 43ms,
+  wrote a global into the page under test, and had an unbounded path that could hang.)
+- **The failure nobody photographed.** A verifier only ever captures moments someone thought, in
+  advance, to capture — which is backwards, because the frame is worth most exactly where a check
+  has just said something is wrong. `report.check` now photographs its own failures, and an
+  uncaught throw photographs itself: the loudest failure was the one leaving no evidence at all.
+- **An observability mode that changed the result.** Automatic frames were first injected into the
+  interaction helpers, and took a 28-assertion verifier to 5 of 6. Callers race those helpers
+  against the network — `await submit(page)` then `waitForResponse(...)` armed *after* the click —
+  so a frame before the click spends a window already open and a frame after it swallows the
+  response. There is no safe side. Video is passive and does not have this problem.
+- **`process.exit` and `browser.close` both kill an in-flight screenshot**, and the browser is the
+  earlier deadline. Draining before exit was not enough: a queued frame still vanished because the
+  guard clause closed the browser first. When evidence is written asynchronously, every path that
+  tears something down is a deadline.
 
 - **A skipped check is not a passing one.** A report stored skips as `pass: true`. A verifier whose
   every check sat inside `for (const page of PAGES)` and skipped on "this tab is empty" — the

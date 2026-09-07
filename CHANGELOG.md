@@ -2,6 +2,54 @@
 
 All notable changes to `bearing` are documented here.
 
+## Unreleased — the e2e harness photographs its own failures
+
+### Added — a frame for every failed check, and for every crash
+
+A verifier only ever photographed moments someone thought, in advance, to photograph. That is
+backwards: the frame is worth most exactly where a check has just said something is wrong and a
+reader has to decide whether to believe it, and that is the one moment nobody predicts.
+
+`core/recording.js` makes it automatic. One call wires it — `recording.open(browser, shots)` — and
+from then on a failed `check` photographs the page it failed on, a throw photographs itself while
+the page still exists, and `SHOTS=all` records the run. `SHOTS=off` silences everything including
+deliberate shots, for a check that measures timing and would be disturbed by its own shutter.
+
+`shots` is a required argument rather than an optional one, because it carries the project's `mask`:
+an automatic frame of the screen a run died on is the capture most likely to be pasted into a
+ticket, and the version that built its own shots instance produced the only unmasked images in the
+kit.
+
+The rejected design is worth recording too. Automatic frames first went INSIDE the interaction
+helpers and took a 28-assertion verifier to 5 of 6, because callers race those helpers against the
+network — `await submit(page)` then a `waitForResponse` armed *after* the click — so a frame before
+the click spends a window already open and a frame after it swallows the response. There is no safe
+side. Video is passive; injected stills are not.
+
+### Fixed — `shots.take` could photograph a dialog that was not there yet
+
+A check read a modal's icon colour off the DOM, got the right answer and passed, while the
+screenshot beside it showed no modal at all: UI kits animate one in over ~300ms and
+`waitFor({state: 'visible'})` returns at opacity 0, scaled to a fifth. `take` now passes
+Playwright's `animations: 'disabled'`, which fast-forwards finite animations and rewinds infinite
+ones, so a spinner cannot stall the shutter. (A hand-rolled stillness loop did the same job at
+312-377ms against the built-in's 43ms, wrote a global into the page under test, and could hang.)
+
+### Fixed — `report.failed()` disagreed with `report.finish()` about an all-skip run
+
+`finish()` has always refused to call a run that proved nothing green. `failed()` — which is what a
+caller asks before deciding whether to leave test data behind — answered "no failures" for the same
+run. One rule, now applied in both places.
+
+### A note on `finish()`
+
+`finish()` stays synchronous and still returns a boolean. Making it `async` to await the frames was
+tried and reverted: `finish({exit: false})` then returns a Promise, which is always truthy, so every
+caller that branches on the verdict reads a failing run as green. The drain is attached to the exit
+instead — and it closes the browser context, because Playwright writes a recorded video only on
+context close. Getting that wrong produced a 0-byte `.webm` on every passing run, which is worse
+than no file because it reads as success. Two tests in `lib/kit.test.mjs` now hold that ordering.
+
 ## 1.2.2 — bearing stops changing files it does not own
 
 Every item here was found the same way: by reading the diff a real `bearing update` left in a real

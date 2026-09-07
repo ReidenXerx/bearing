@@ -53,6 +53,27 @@ not regression baselines. Do not add diffing, do not add approval, do not write 
 
 Always pass `note`. A png whose meaning lives only in your head is not a catalogue entry.
 
+## Evidence you do not have to remember to collect
+
+Wire it once, in the verifier, next to the context:
+
+```js
+const { page } = await recording.open(browser, shots);
+```
+
+From then on: **every failed `check` photographs the page it failed on**, an uncaught throw
+photographs itself before the process dies. `SHOTS=all` adds video of the whole run; `SHOTS=off`
+silences everything, including deliberate shots — use it for a check that MEASURES timing, where the
+shutter itself would move the number.
+
+`shots` is a required argument, deliberately: it is where your `mask` lives, and an automatic frame
+of the screen a run died on is the capture most likely to end up in a ticket.
+
+This exists because a verifier otherwise only captures moments someone predicted, and nobody
+predicts where a failure lands. **Do not add automatic frames inside interaction helpers** — that
+was tried, and it took a 28-assertion verifier to 5 of 6, because callers race those helpers
+against the network and a frame on either side eats the event.
+
 ## Growing the harness — bounded
 
 When you hit something the harness handled badly, **append it to `README.md`'s scars section and

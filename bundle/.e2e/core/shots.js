@@ -84,7 +84,11 @@ const createShots = ({ dir, mask = [], env = process.env.E2E_ENV || 'local' }) =
      *   actually sees. Pass it deliberately, for a short page you want whole.
      * @param {string} [opts.note] one line: what a reader is looking at
      */
-    async take(page, key, { of = null, full = false, note = '' } = {}) {
+    async take(page, key, { of = null, full = false, note = '', animations = 'disabled' } = {}) {
+      // ⚠ `SHOTS=off` SILENCES DELIBERATE SHOTS TOO. Its whole purpose is a check that MEASURES
+      // timing, and the deliberate shot is the shutter that moves the number. Required lazily so
+      // this module stays loadable on its own.
+      if (!require('./recording').enabled()) return { path: null, masked: false, warning: '' };
       const slug = slugKey(key);
       if (!slug) throw new Error(`shots.take: key ${JSON.stringify(key)} slugs to nothing`);
 
@@ -93,8 +97,19 @@ const createShots = ({ dir, mask = [], env = process.env.E2E_ENV || 'local' }) =
       fs.mkdirSync(path.dirname(target), { recursive: true });
 
       const masked = mask.length > 0 && !of; // Locator.screenshot() takes no mask
+      // ⚠ `animations: 'disabled'` IS LOAD-BEARING, NOT A DEFAULT SOMEONE LIKED. A check once read a
+      // modal's icon colour off the DOM, got the right answer and passed — while the screenshot
+      // filed as its evidence showed no modal at all. UI kits animate one in over ~300ms and
+      // `waitFor({ state: 'visible' })` resolves the instant the node exists and is not
+      // `display:none`: at opacity 0, scaled to a fifth. The DOM was right and the camera was early.
+      //
+      // Playwright fast-forwards finite animations to their end state and rewinds infinite ones, so
+      // a spinner cannot stall the shutter. Measured against a hand-rolled wait-for-stillness loop:
+      // 43ms versus 312-377ms, writing no page globals and with no way to hang. Pass
+      // `animations: 'allow'` only when the MOTION is the subject.
       await (of || page).screenshot({
         path: target,
+        animations,
         ...(of ? {} : { fullPage: full }),
         ...(masked ? { mask: mask.map((sel) => page.locator(sel)), maskColor: '#111827' } : {}),
       });
