@@ -50,7 +50,7 @@ with `npm run bearing:token-benchmark`; [the numbers, and where the graph LOSES]
 | 💾 **Task-core** | **Survives compaction.** A dense save-state of the current task, written **before** the summary lands and drops the detail. |
 | 🔬 **Microscope** | **Catches code that runs perfectly and is still wrong.** A panel of lens agents reviews as an expert in *your* domain — each finding must survive its own refutation pass. |
 | 🙋 **Consult** | **Asks about the right things, decides the rest.** Asks you only what isn't in the repo — which reading you meant, what a user should see — and decides everything else. Confirms before anything irreversible. |
-| 🐜 **Minions** | **Parallelises wide mechanical work.** Cheap anchored subagents return **citations, not opinions** — they gather; your agent concludes. |
+| 🐜 **Minions** | **Parallelises wide mechanical work.** Cheap anchored subagents return **citations, not opinions** — they gather; your agent concludes. Invasive minions do the same for a *decided* change, applying it across disjoint slices instead of one file at a time. |
 | 🧪 **TS/JS rules** | **Catches code that compiles and is still wrong.** Numbered `TS-#` rules for the traps `tsc` and ESLint both stay silent about — `as` that verifies nothing, a union that falls through on the next variant, `||` overwriting a deliberate `0`. |
 | 🧱 **Frontend** | **Stops the near-duplicate component and the silent shared-component edit.** Search by shape before building a table or a panel; an optional prop with a safe default is yours, anything that changes what existing callers render is an ask. |
 | ⚛️ **React** | **Catches the form bugs that fail silently.** A field owns its `Controller`; spreading `field` keeps the `ref` that focus-on-error needs; a `name` typed `FieldPath<T>` turns a renamed field into a compile error instead of a value missing from the payload. |
@@ -234,6 +234,28 @@ FOUND    src/fees.ts:88 — const fee = gross * RATE
 CHECKED  rg "\* RATE" src/ --type ts
 MISSED   dynamic dispatch in src/plugins/ — could not resolve
 ```
+
+### Invasive minions — the same shape, for a change you already decided
+
+The same blindness costs more when the work is a **write**: forty files edited by hand, every edit
+identical in shape, while the only thing that needed thinking — what the change should be — was
+settled before the first one. Logging coverage, an error envelope, the rest of a settled migration.
+
+**A gathering minion must not decide what is TRUE; an invasive one must not decide what to CHANGE.**
+The delegator still concludes — the conclusion is the transformation, reached before anything is
+spawned. So the four gates hold, plus two that are hard failures rather than judgment calls: the
+transformation is **decided in full** beforehand, and the slices are **disjoint**. Two subagents
+writing one file is a lost update — both report success, and nothing in either report shows it.
+
+```
+WROTE    src/routes/orders.ts:41 — log.info({ orderId, userId }, "order.created")
+VERIFIED tsc --noEmit src/routes/orders.ts → 0
+SKIPPED  src/routes/legacy.ts:12 — handler returns a stream; brief covers no such shape
+```
+
+And it decides in advance whether a half-applied change is acceptable, because a fan-out that
+half-fails leaves the codebase in a state that usually still compiles and usually still passes —
+so it ships, with two conventions and no record of which one was intended.
 
 **Minions gather. Your agent concludes — they do minimal or zero reasoning.** A subagent that returns a *verdict* puts a cheaper model's summary between the evidence and your decision, which is the drift this whole tool exists to prevent.
 

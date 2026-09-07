@@ -25,7 +25,7 @@ const SKILLS_DIR = path.join(HERE, "../bundle/skills");
 
 /** fragment id → the skills that embed it. */
 export const FRAGMENT_TARGETS = {
-  "anchored-spawn": ["bearing-microscope", "bearing-minions"],
+  "anchored-spawn": ["bearing-microscope", "bearing-minions", "bearing-invasive-minions"],
   // The uncertainty rule is identical in every skill that carries it. bearing-pr keeps its
   // PR-specific paragraph OUTSIDE the markers: the RULE is shared, the local reason to care is not.
   "graph-uncertainty": [
