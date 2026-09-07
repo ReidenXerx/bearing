@@ -53,7 +53,12 @@ const createReport = (title) => {
     },
 
     /** True if anything failed — for deciding whether to leave test data behind, etc. */
-    failed: () => results.some((r) => r.state === 'FAIL'),
+    // ⚠ AN ALL-SKIP RUN COUNTS AS FAILED, exactly as `finish()` treats it. This is what a caller
+    // asks before deciding whether to leave test data behind, and a run that proved nothing must
+    // not answer "did this go well?" with yes — the same rule, in the two places that apply it.
+    failed: () =>
+      results.some((r) => r.state === 'FAIL')
+      || (results.length > 0 && results.every((r) => r.state === 'SKIP')),
 
     /**
      * Print the tally. Exits non-zero on any failure, or on a run that proved nothing.
@@ -87,7 +92,12 @@ const createReport = (title) => {
       // `process.exit` is immediate — a screenshot it interrupts is left as a 0-byte file, which
       // reads as evidence and is not. Exiting only once the queue has drained costs nothing when
       // there is nothing queued, which is every passing run.
-      if (exit) { recording.settle().then(() => process.exit(ok ? 0 : 1)); }
+      // ⚠ `drain()`, not a screenshot-only settle — it also CLOSES THE CONTEXT, which is the only
+      // thing that makes Playwright write the video. The first version exited on a microtask that
+      // resolved before `withBrowser`'s teardown had done a single IPC round trip, so every passing
+      // run produced a 0-byte .webm. And `.catch` so a failed capture can never swallow the exit
+      // code: a rejected drain used to leave the process hanging with its tally already printed.
+      if (exit) { recording.drain().catch(() => {}).then(() => process.exit(ok ? 0 : 1)); }
       return ok;
     },
   };

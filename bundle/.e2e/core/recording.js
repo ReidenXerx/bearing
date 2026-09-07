@@ -1,210 +1,240 @@
 /**
  * What a run records, and when — the one place that decides.
  *
- * `shots.js` is the camera: it decides what a good frame looks like. This decides whether a frame
- * is taken at all, points it at the right page, and turns on video. The split matters because the
- * alternative is what it replaced in the repo this came from: tier logic in the camera, video
- * options in the session module, and the shutter reached for directly from the reporter — three
- * files each holding a piece of "should this run be recorded".
+ * `shots.js` is the camera: it decides what a good frame looks like. This decides whether a frame is
+ * taken at all, points it at the right page, and turns on video.
  *
  * ⚠ THE PROBLEM THIS SOLVES. A verifier only ever photographs moments someone thought, in advance,
  * to photograph. That is backwards. The frame is worth most exactly when a check has just said
- * something is wrong and the reader has to decide whether to believe it — and that is the one
- * moment nobody predicts. Every hour lost to this harness's ancestor began with a red line in a
- * terminal and no picture of the screen behind it.
+ * something is wrong and a reader has to decide whether to believe it — and that is the one moment
+ * nobody predicts.
  *
- * So: `report.check()` photographs its own failures, an uncaught throw photographs itself, and a
- * run can be watched end to end on video. None of it needs a verifier to remember anything.
+ *   const { context, page } = await recording.open(browser, shots);
  *
- *   const context = await browser.newContext({ ...recording.contextOptions() });
- *   const page = await context.newPage();
- *   recording.adopt(context, page);        // one line; everything else is automatic
+ * After that a failed `check` photographs the page it failed on, a throw photographs itself, and —
+ * with `SHOTS=all` — the run is on video.
  *
  * TIERS, via the `SHOTS` env var:
- *   off    nothing at all, including deliberate shots — for a timing check, where the shutter
- *          itself distorts what is being measured
- *   key    deliberate shots + a frame for every FAILED check
- *   all    (default) ...plus a video of the whole run
+ *   off    nothing at all, deliberate shots included — for a check that MEASURES timing, where the
+ *          shutter itself moves the number being reported
+ *   key    (default) deliberate shots + a frame for every FAILED check and every throw
+ *   all    ...plus a video of the whole run
  *
  * ⚠ `all` RECORDS RATHER THAN SCREENSHOTTING, AND THAT IS THE WHOLE LESSON. The first version of
- * this put automatic frames inside the interaction helpers — after a form fill, around a submit.
- * It took a 28-assertion verifier to **5 of 6**. A frame costs a few hundred milliseconds, and
- * callers race those helpers against the network:
+ * this put automatic frames inside the interaction helpers — after a form fill, around a submit. It
+ * took a 28-assertion verifier to **5 of 6**. A frame costs a few hundred milliseconds, and callers
+ * race those helpers against the network:
  *
  *     await submitDrawer(page);                              // click
  *     await page.waitForResponse(pred, { timeout: 15000 });  // armed AFTER it
  *
- * A frame before the click spends a window the caller already opened; a frame after it swallows
- * the response the caller is about to wait for. **There is no safe side.** You cannot inject
- * latency into a shared helper without changing the semantics of every caller that races it, and
- * an observability mode that changes the result is not observability. Video is passive: Playwright
- * records at the context level, touches nothing in the page, and is better at the actual job —
- * which was always "let me watch what happened", not "give me four hundred stills".
+ * A frame before the click spends a window the caller already opened; a frame after it swallows the
+ * response the caller is about to wait for. **There is no safe side.** You cannot inject latency
+ * into a shared helper without changing the semantics of every caller that races it, and an
+ * observability mode that changes the result is not observability. Video is passive.
+ *
+ * ⚠ AND THE VIDEO ONLY EXISTS IF THE CONTEXT IS CLOSED. Playwright writes the file on
+ * `context.close()` and nowhere else, so every path that ends a run has to close it first. The
+ * first version of this module got that wrong in three places at once — `finish()`, `exit()` and
+ * the crash handler each drained the SCREENSHOT queue and exited, and none of them closed the
+ * context. The result was a **0-byte .webm on every passing run**: a file that exists, cannot be
+ * played, and reads as success. That is why there is exactly one `drain()` below and why
+ * everything funnels through it.
  */
 const fs = require('fs');
 const path = require('path');
 const paths = require('./paths');
 
+const { runnerName } = paths;
+
 const TIERS = { off: 0, key: 1, all: 2 };
-const TIER = TIERS[String(process.env.SHOTS || 'all').toLowerCase()] ?? TIERS.all;
 
-/** The running verifier's own name — the folder its video lands in. */
-const runnerName = () =>
-  path.basename(process.argv[1] || 'run', '.js').replace(/[^a-z0-9-_]/gi, '-');
-
-let ambientPage = null;
-let ambientShots = null;
-const openContexts = new Set();
-const pending = [];
+/**
+ * ⚠ AN UNKNOWN TIER IS ANNOUNCED, NOT SILENTLY IGNORED. `SHOTS=none`, `SHOTS=false` and a trailing
+ * space from a CI YAML value all used to resolve to the maximum tier — so a typo in the flag set to
+ * PROTECT a timing measurement silently invalidated it instead. `Object.hasOwn` also stops
+ * `SHOTS=constructor` reaching `Object.prototype`.
+ */
+const readTier = () => {
+  const raw = String(process.env.SHOTS ?? '').trim().toLowerCase();
+  if (!raw) return TIERS.key;
+  if (!Object.hasOwn(TIERS, raw)) {
+    console.warn(`  ! SHOTS="${raw}" is not a tier (off | key | all) — using "key"`);
+    return TIERS.key;
+  }
+  return TIERS[raw];
+};
+const TIER = readTier();
 
 /** May a frame be taken at all? Callers ask; they do not interpret the tier. */
 const enabled = () => TIER > TIERS.off;
 
-/**
- * What to merge into `browser.newContext()` so this run is recorded.
- *
- * ⚠ CLEARS THE PREVIOUS RUN'S VIDEO. Playwright holds the file open for the life of the context,
- * so this is the one moment that is both after the last run and before this one starts recording.
- */
+const VIDEO_ROOT = path.join(paths.shots, 'video');
+
+let ambientPage = null;
+let ambientShots = null;
+let contextSeq = 0;
+const openContexts = new Set();
+const pending = [];
+
+// Cleared ONCE per process, not per context. Clearing inside `contextOptions()` deleted the first
+// context's still-open recording the moment a verifier opened a second one — and on Windows,
+// removing a directory holding an open handle throws rather than quietly losing the file.
+if (fs.existsSync(VIDEO_ROOT)) fs.rmSync(VIDEO_ROOT, { recursive: true, force: true });
+
+/** What to merge into `browser.newContext()` so this run is recorded. */
 const contextOptions = () => {
   if (TIER < TIERS.all) return {};
-  const dir = path.join(paths.shots, 'video', runnerName());
-  fs.rmSync(dir, { recursive: true, force: true });
-  return { recordVideo: { dir } };
+  contextSeq += 1;
+  // Per process AND per context: two runs of one verifier in a CI matrix share a name, and a single
+  // verifier can open several contexts.
+  return {
+    recordVideo: { dir: path.join(VIDEO_ROOT, `${runnerName()}-${process.pid}-${contextSeq}`) },
+  };
 };
 
 /**
- * Point the camera at this run, and remember the context so its video can be flushed.
+ * Point the camera at a context and page.
  *
- * ⚠ PLAYWRIGHT WRITES THE VIDEO ON `context.close()` AND NOWHERE ELSE. Measured in the repo this
- * came from: a run that let `withBrowser` close the browser instead left a **0-byte .webm** — a
- * file that exists and will not play, which is worse than no file because it reads as success.
- * `withBrowser` now flushes tracked contexts before closing the browser, so a verifier that never
- * closes its own context still gets a watchable recording.
- *
- * ⚠ LAST PAGE WINS. A verifier that opens a second session re-points the camera, which is right
- * for a failure inside that section and wrong for one after it hands back. Pass `{ page }` to
- * `snap` where the distinction matters — this is a convenience, not a guarantee.
+ * ⚠ `shots` IS REQUIRED, because the alternative is a silent privacy hole. `createShots({ mask })`
+ * is where a project declares its sensitive regions, and a fallback that built its own instance
+ * produced UNMASKED automatic frames — of a logged-in session, on whatever screen the run died on —
+ * while every deliberate shot in the same run was masked. Those frames are the ones most likely to
+ * end up in a ticket.
  */
-const adopt = (context, page, shots = null) => {
-  if (context) {
+const adopt = (context, page, shots) => {
+  if (!shots || typeof shots.take !== 'function') {
+    throw new Error(
+      'recording.adopt(context, page, shots): `shots` is required.\n'
+        + '  Pass the createShots({ dir, mask }) instance this run is using, so automatic failure\n'
+        + '  frames inherit the same mask as your deliberate ones.',
+    );
+  }
+  if (context && !openContexts.has(context)) {
     openContexts.add(context);
     context.on('close', () => openContexts.delete(context));
   }
   if (page) ambientPage = page;
-  if (shots) ambientShots = shots;
+  ambientShots = shots;
   armCrashCamera();
 };
 
-/** Let a verifier's own `createShots(...)` own the catalogue, so automatic frames join it. */
-const useShots = (shots) => { ambientShots = shots; };
-
-/** Close anything still open, so every recording is flushed. Safe when there is nothing. */
-const flush = async () => {
-  for (const context of [...openContexts]) await context.close().catch(() => {});
-  openContexts.clear();
+/**
+ * Open a recorded context and adopt it — the whole wiring, in one call.
+ *
+ * Preferred over calling `contextOptions` and `adopt` separately: forgetting `adopt` fails SILENTLY
+ * (every automatic frame becomes a no-op while the docs promise otherwise), and a wrapper the
+ * verifier already calls cannot be forgotten.
+ */
+const open = async (browser, shots, contextOpts = {}) => {
+  const context = await browser.newContext({ ...contextOptions(), ...contextOpts });
+  const page = await context.newPage();
+  adopt(context, page, shots);
+  return { context, page };
 };
 
-/**
- * Capture without holding a shooter.
- *
- * ⚠ `require`d LAZILY. `shots.js` may adopt this module in turn, and a top-level require would be
- * a cycle. Deferring it also means a verifier that never takes a deliberate shot still gets a
- * catalogue the moment its first check fails.
- */
+/** Capture without holding a shooter. Returns null when there is nothing to photograph. */
 const snap = async (key, { page = ambientPage, note = '' } = {}) => {
-  if (!enabled() || !page || page.isClosed?.()) return null;
-  if (!ambientShots) {
-    const { createShots } = require('./shots');
-    ambientShots = createShots({ dir: paths.shots });
-  }
+  if (!enabled() || !ambientShots || !page || page.isClosed?.()) return null;
   return ambientShots.take(page, key, { note }).catch(() => null);
 };
 
 /**
  * Photograph a failed check. Called by `report.check`.
  *
- * ⚠ FIRED, NOT AWAITED, and the promise is kept so `finish()` can drain it. `check` is synchronous
- * and called from everywhere; making it async to await a screenshot would rewrite every call site.
- * The cost is that the page can move on before the shutter — which is why the frame is worth
- * having anyway: a slightly late picture of the right screen beats no picture at all.
+ * Fired, not awaited — `check` is synchronous and called from everywhere — with the promise kept so
+ * `drain()` can wait for it. A slash in a check name would otherwise become a directory, so
+ * `failures/` stays the one browsable folder its name promises.
  */
 const onFailure = (name, detail = '') => {
-  const shot = snap(`failures/${name}`, { note: detail || 'a check failed here' });
+  const key = `failures/${String(name).replace(/\//g, ' ')}`;
+  const shot = snap(key, { note: detail || 'a check failed here' });
   pending.push(shot);
   return shot;
 };
 
-/**
- * Wait for every queued frame to reach disk.
- *
- * ⚠ CALL THIS BEFORE `process.exit` AND BEFORE `browser.close()` — both kill an in-flight
- * screenshot, and the browser is the earlier deadline. Draining only before exit was measured to
- * still lose the frame, because the guard clause closed the browser first and the shot died with
- * the page. `report.finish()` and `withBrowser` both do this for you.
- */
-const settle = async () => { await Promise.all(pending.splice(0)); };
-
-/** Exit, but drain first. `process.exit` is immediate — nothing runs after it. */
-const exit = async (code) => {
-  await settle();
-  process.exit(code);
+/** Photograph a throw. Awaited, because the caller still has a live page and will not for long. */
+const captureThrow = async (err) => {
+  await snap('crash', { note: String(err?.message || err).split('\n')[0].slice(0, 120) });
 };
 
 /**
- * An array that photographs the page whenever something is pushed onto it.
+ * Wait for every queued frame, then close every context so the videos are written.
  *
- * For the older shape of verifier that collects failure MESSAGES as it goes and prints them at the
- * end: `const failures = recording.failureLog()` is the whole change. It is a real array, so
- * `.length`, `.forEach` and any existing exit code behave exactly as before — only `push` gained a
- * side effect. The point is that the failure moment and the reporting moment are different, and by
- * the time such a verifier prints, the page may have navigated or closed.
+ * ⚠ RE-ENTRANT AND IDEMPOTENT ON PURPOSE. An earlier version was `Promise.all(pending.splice(0))` —
+ * a one-SHOT queue transfer. `finish()` spliced the queue, `withBrowser`'s own drain then found it
+ * empty and returned immediately, and the context was closed out from under a screenshot the first
+ * drain was still waiting on. Two callers, one queue, and only the first of them worked.
+ *
+ * ⚠ `allSettled`, not `all`. This runs inside `finally` blocks; one rejected capture must never
+ * skip the `browser.close()` below it and leak a chromium process.
  */
-const failureLog = () => {
-  const list = [];
-  const push = Array.prototype.push.bind(list);
-  list.push = (...items) => {
-    for (const item of items) onFailure(String(item).replace(/\s+/g, ' ').slice(0, 70));
-    return push(...items);
-  };
-  return list;
+let draining = null;
+const drain = async () => {
+  // ⚠ A SECOND CALLER JOINS THE FIRST DRAIN — it does not start an empty one. Without this, the
+  // exit path took the contexts, cleared the set, and began closing them; `withBrowser`'s own drain
+  // then found nothing to do, returned immediately, and `browser.close()` killed the context in the
+  // middle of writing its video. Intermittently: one run in three produced a real file and the rest
+  // were 0 bytes, which is the worst possible signal because the feature looks like it works.
+  if (draining) return draining;
+  draining = (async () => {
+    while (pending.length) {
+      const batch = pending.slice();
+      await Promise.allSettled(batch);
+      pending.splice(0, batch.length);
+    }
+    const contexts = [...openContexts];
+    openContexts.clear();
+    await Promise.allSettled(
+      // A wedged renderer must not turn a `finally` into a permanent hang.
+      contexts.map((c) => Promise.race([
+        c.close().catch(() => {}),
+        new Promise((r) => { setTimeout(r, 5000); }),
+      ])),
+    );
+  })();
+  try {
+    await draining;
+  } finally {
+    draining = null;
+  }
+};
+
+/** Drain, then exit. `process.exit` is immediate — nothing runs after it. */
+const exit = async (code) => {
+  await drain().catch(() => {});
+  process.exit(code);
 };
 
 /**
  * Photograph the page when a run dies on an uncaught error.
  *
- * ⚠ THE LOUDEST FAILURE WAS THE ONE LEAVING NO EVIDENCE. A verifier that ends on an uncaught
- * timeout never reaches a check, never pushes a message, never calls exit — so every mechanism
- * above is bypassed and the folder stays empty. A crash is precisely the case where a human is
- * least able to guess what the screen looked like, which makes it the case where the frame is
- * worth most. Armed from `adopt`, so nothing has to remember it.
+ * ⚠ THE STACK IS PRINTED, NOT SWALLOWED. Registering an `uncaughtException` listener suppresses
+ * node's default report, so an earlier version replaced a full stack trace with a one-line message
+ * and a screenshot. A picture of the screen does not tell you which line threw; you need both.
+ *
+ * ⚠ RE-ENTRANCY GUARD. This handler is async and also registered for `unhandledRejection`, so a
+ * rejection raised inside it re-entered itself forever and the process never exited at all — a CI
+ * job burning to its timeout having already printed its tally.
  */
 let crashArmed = false;
+let crashing = false;
 const armCrashCamera = () => {
   if (crashArmed) return;
   crashArmed = true;
   const onCrash = async (err) => {
-    const why = String(err?.message || err).split('\n')[0];
-    await snap('crash', { note: why.slice(0, 120) });
-    await settle();
-    console.error(`\n  uncaught: ${why}\n  (a frame was saved — see ${paths.shots})\n`);
-    process.exit(1);
+    if (crashing) return;
+    crashing = true;
+    try {
+      await captureThrow(err);
+      await drain();
+      console.error(`\n${err?.stack || String(err)}\n  (a frame was saved — see ${paths.shots})\n`);
+    } finally {
+      process.exit(1);
+    }
   };
   process.on('uncaughtException', onCrash);
   process.on('unhandledRejection', onCrash);
 };
 
-module.exports = {
-  adopt,
-  useShots,
-  contextOptions,
-  snap,
-  onFailure,
-  settle,
-  exit,
-  failureLog,
-  armCrashCamera,
-  flush,
-  enabled,
-  runnerName,
-};
+module.exports = { open, adopt, contextOptions, snap, onFailure, captureThrow, drain, exit, enabled };

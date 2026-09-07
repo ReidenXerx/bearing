@@ -22,10 +22,7 @@ HEADED=1 SLOWMO=250 node .e2e/verify/smoke.js   # watch it happen
 | `core/http.js` | **works** — watch requests/responses, and test a write without performing it |
 | `core/shots.js` | **works** — screenshots keyed by view, freshest wins, self-cataloguing |
 | `core/paths.js` | **works** — resolved once, so a script can move |
-| `core/recording.js` | **works** — video of every run, and a frame for every failure and crash, with no wiring per verifier |
-| `core/seeds.js` | **works** — a ledger of what a run created, so litter is swept by record rather than by guesswork |
-| `tools/audit-checks.js` | **works** — audits your verifiers for shapes that have reported something untrue |
-| `tools/sweep-seeds.js` | **works once `applySession` is written** — deletes what a killed run left behind |
+| `core/recording.js` | **works** — a frame for every failed check and every crash; `SHOTS=all` records video too |
 | `core/env.js` | **works, needs one function** — which backend am I actually talking to, and refuse production without an opt-in |
 | `tools/export-storage.js` | template — paste it in a browser console to capture a session |
 | `core/session.js` | **stub — throws until you write it.** How your app holds a session is the most app-specific thing about it |
@@ -64,8 +61,10 @@ HEADED=1 SLOWMO=250 node .e2e/verify/smoke.js   # watch it happen
   `waitFor({state: 'visible'})` resolves the instant the node exists and is not `display:none`:
   at opacity 0, scaled to a fifth. The DOM was right and the camera was early. Whoever reviews the
   run looks at the picture, so a frame that contradicts a passing check destroys trust in the
-  check. `shots.take` now waits out finite animations first — infinite ones (spinners) are excluded
-  or you wait forever.
+  check. `shots.take` now passes Playwright's `animations: 'disabled'`, which fast-forwards finite
+  animations to their end state and rewinds infinite ones, so a spinner cannot stall the shutter.
+  (A hand-rolled wait-for-stillness loop did the same job at 312-377ms against the built-in's 43ms,
+  wrote a global into the page under test, and had an unbounded path that could hang.)
 - **The failure nobody photographed.** A verifier only ever captures moments someone thought, in
   advance, to capture — which is backwards, because the frame is worth most exactly where a check
   has just said something is wrong. `report.check` now photographs its own failures, and an
@@ -79,12 +78,6 @@ HEADED=1 SLOWMO=250 node .e2e/verify/smoke.js   # watch it happen
   earlier deadline. Draining before exit was not enough: a queued frame still vanished because the
   guard clause closed the browser first. When evidence is written asynchronously, every path that
   tears something down is a deadline.
-- **A leftover fixture fails the NEXT run, looking like a product defect.** One abandoned
-  definition left a required field empty on every row, which correctly disabled a button, and the
-  check that met it reported a plausible bug in the app. The defence used to be a filename prefix
-  and a tool that grepped for it — which reported "0 leftovers" with live fixtures on the account
-  **twice**. `core/seeds.js` records what was created instead, and watches the network rather than
-  its own helper, because a verifier that builds fixtures by driving the UI never calls the helper.
 
 - **A skipped check is not a passing one.** A report stored skips as `pass: true`. A verifier whose
   every check sat inside `for (const page of PAGES)` and skipped on "this tab is empty" — the

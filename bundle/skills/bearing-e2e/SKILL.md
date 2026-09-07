@@ -58,36 +58,21 @@ Always pass `note`. A png whose meaning lives only in your head is not a catalog
 Wire it once, in the verifier, next to the context:
 
 ```js
-const context = await browser.newContext({ ...recording.contextOptions() });
-const page = await context.newPage();
-recording.adopt(context, page, shots);
+const { page } = await recording.open(browser, shots);
 ```
 
 From then on: **every failed `check` photographs the page it failed on**, an uncaught throw
-photographs itself before the process dies, and the whole run is on video. `SHOTS=key` drops the
-video and keeps the frames; `SHOTS=off` silences both — use it for a check that MEASURES timing,
-where the shutter itself would move the number.
+photographs itself before the process dies. `SHOTS=all` adds video of the whole run; `SHOTS=off`
+silences everything, including deliberate shots — use it for a check that MEASURES timing, where the
+shutter itself would move the number.
+
+`shots` is a required argument, deliberately: it is where your `mask` lives, and an automatic frame
+of the screen a run died on is the capture most likely to end up in a ticket.
 
 This exists because a verifier otherwise only captures moments someone predicted, and nobody
 predicts where a failure lands. **Do not add automatic frames inside interaction helpers** — that
 was tried, and it took a 28-assertion verifier to 5 of 6, because callers race those helpers
 against the network and a frame on either side eats the event.
-
-## Fixtures a run creates
-
-`core/seeds.js` ledgers anything the page creates, by watching responses rather than your own API
-helper — a verifier that builds fixtures by driving the UI never calls the helper. A clean run
-releases its own entries, so **what survives on disk is the leak**, and
-`node .e2e/tools/sweep-seeds.js --dry` says what a killed run left behind.
-
-Leftover fixtures do not fail the run that made them. They fail the next one, looking like a bug in
-the app.
-
-## Auditing the verifiers themselves
-
-`node .e2e/tools/audit-checks.js` reads `verify/` for shapes that have reported something untrue —
-a `check(name, true)` that cannot fail, Playwright selector syntax inside `page.evaluate`, a report
-that never calls `finish()`, fixtures created with no delete. Run it before trusting a green suite.
 
 ## Growing the harness — bounded
 

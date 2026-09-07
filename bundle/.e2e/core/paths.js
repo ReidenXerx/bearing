@@ -19,4 +19,14 @@ const storageFile = (name = 'storage.json') =>
       ? path.resolve(process.cwd(), name)
       : path.join(ROOT, name);
 
-module.exports = { ROOT, REPO, storageFile, shots: path.join(ROOT, 'shots') };
+/**
+ * The running verifier's own name — the folder its artefacts land in.
+ *
+ * ⚠ ONE DEFINITION. `recording.js` and `seeds.js` each grew an identical private copy, differing
+ * only in a fallback string, which means a run's video could land in one folder and its seed ledger
+ * in another. Both already import from here.
+ */
+const runnerName = () =>
+  path.basename(process.argv[1] || 'run', '.js').replace(/[^a-z0-9-_]/gi, '-');
+
+module.exports = { ROOT, REPO, runnerName, storageFile, shots: path.join(ROOT, 'shots') };
