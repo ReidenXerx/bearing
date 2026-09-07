@@ -87,4 +87,19 @@ const applySession = (context, opts = {}) => notImplemented('applySession');
 // eslint-disable-next-line no-unused-vars
 const accountIdOf = (storage) => notImplemented('accountIdOf');
 
-module.exports = { BASE, loadStorage, applySession, accountIdOf };
+/**
+ * Headers that authenticate a request made from INSIDE the page, or `{}` if cookies already do.
+ *
+ * ⚠ NOT A THROWING STUB, because cookies are a complete answer for plenty of apps — but not for the
+ * one this file's own docblock describes at length, which keeps a token in `localStorage`. A
+ * `fetch(..., {credentials: 'include'})` sends cookies and nothing else, so for a token app every
+ * request the harness makes outside the app's own HTTP client goes out anonymous and comes back
+ * 401 — which reads as "the object could not be deleted" rather than "I never authenticated".
+ *
+ * `tools/sweep-seeds.js` is the caller today. Return e.g.
+ * `{ Authorization: `Bearer ${JSON.parse(storage['auth']).accessToken}` }`.
+ */
+// eslint-disable-next-line no-unused-vars
+const authHeaders = (storage) => ({});
+
+module.exports = { BASE, loadStorage, applySession, accountIdOf, authHeaders };
