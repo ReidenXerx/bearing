@@ -94,6 +94,22 @@ than no file because it reads as success. Two tests in `lib/kit.test.mjs` now ho
 
 ## 1.3.0 — invasive minions, and an e2e harness that collects its own evidence
 
+### Changed — `bearing statusline` replaces yours, and can put it back
+
+It used to refuse when you already had a status line, printing the JSON to paste instead. That is
+the safe-LOOKING choice and the wrong one: `bearing statusline` is an explicit request, and
+answering an explicit request with homework means the feature does not happen.
+
+What made refusing tempting is real — overwriting is destructive AND invisible, since you find out
+by noticing the bottom of your screen changed. So the answer is not to refuse, it is to make it
+reversible and say so. The displaced entry is written to `~/.claude/statusline.replaced.json`, the
+warning names that path, and `bearing statusline --remove` restores it rather than leaving you with
+no status line at all.
+
+Your own script is never touched — bearing writes `statusline.sh`, and a `statusline.py` beside it
+stays on disk and keeps working. Options you had set (`refreshInterval`, `hideVimModeIndicator`,
+anything Claude Code adds later) are carried over; only the command changes.
+
 ### Added — invasive minions: fan out to APPLY a decided change
 
 The minions module gains a second contract. Gathering minions exist because the agent does not
