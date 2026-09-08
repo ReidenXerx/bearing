@@ -28,6 +28,31 @@
  *    localStorage while its getter read localStorage only. Write both, so the injected state
  *    matches what the app itself would have produced.
  *
+ * ## "Is this session alive?" is a SEQUENCE, not a response
+ *
+ * Whatever you write to answer that — an `isSignedIn`, a skip guard, anything deciding whether the
+ * run is worth continuing — has to read the whole exchange, because a healthy boot commonly
+ * CONTAINS a failure. An app holding a stale access token and a good refresh token does this:
+ *
+ *     401  GET   <identity probe>     <- looks fatal, is not
+ *     200  POST  <token refresh>      <- the app rescues itself
+ *     200  GET   <identity probe>     <- signed in
+ *
+ * Judge on the first line and you report a working export as expired, skip every check beneath it,
+ * and send someone off to re-export a session that was never broken — the same false diagnosis the
+ * `__env` stamp exists to prevent, reached from the opposite direction. Classify instead: only the
+ * REFRESH being rejected is final, because it is the last credential the export carries. A success
+ * outranks an earlier failure. A timeout with a failure that never got rescued is a real failure.
+ *
+ * Do not expect the token to tell you. Opaque tokens carry no `exp` to read, so behaviour is the
+ * only signal available — which is also why the export stamps `__exportedAt` rather than trying to
+ * compute a lifetime.
+ *
+ * The other workable strategy, when the refresh endpoint can be called directly, is to renew the
+ * token BEFORE opening the browser and never see the 401 at all. Either is fine. Choosing neither
+ * is what produces the false negative, and it is easy to choose neither by accident, because
+ * nothing about the 401 announces that it is routine.
+ *
  * ## Kit metadata must be stripped
  *
  * Stamp your export with `__env` / `__apiHost` / `__exportedAt` so a sandbox session is

@@ -127,6 +127,12 @@ HEADED=1 SLOWMO=250 node .e2e/verify/smoke.js   # watch it happen
 - **A production token in a staging build reads as "session expired".** Same origin, same storage
   keys, only the values differ — so the export looks fine and the diagnosis is wrong. People re-export
   a session that was never broken. Stamp `__env` on the export and let `guardEnv` catch it.
+- **A 401 on the identity probe is part of a HEALTHY boot.** An app carrying a stale access token and
+  a good refresh token goes `401 GET <identity>` → `200 POST <refresh>` → `200 GET <identity>`. A
+  guard that reads the first response calls a working export expired, skips every check below it, and
+  again sends someone to re-export a session that was never broken. Only the refresh being rejected
+  is final — it is the last credential the export holds. Opaque tokens carry no `exp` to inspect, so
+  the sequence is the only evidence there is.
 - **A host classifier that is not scoped to your own hosts will misread a third party.** One app
   calls `api.country.is` for geolocation; a rule keying off a leading `api.` read that as PRODUCTION
   and refused a good staging run. That failed safe — the same looseness reading `staging` off a third
