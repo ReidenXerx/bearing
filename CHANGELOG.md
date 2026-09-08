@@ -92,6 +92,58 @@ instead — and it closes the browser context, because Playwright writes a recor
 context close. Getting that wrong produced a 0-byte `.webm` on every passing run, which is worse
 than no file because it reads as success. Two tests in `lib/kit.test.mjs` now hold that ordering.
 
+## 1.3.0 — invasive minions, and an e2e harness that collects its own evidence
+
+### Added — invasive minions: fan out to APPLY a decided change
+
+The minions module gains a second contract. Gathering minions exist because the agent does not
+notice when to fan out a LOOKUP; this is the same blindness on a WRITE — forty files edited by hand,
+every edit identical in shape, while the only thing that needed thinking was settled before the
+first one. Logging coverage, an error envelope, the rest of a settled migration.
+
+**NS-24 is amended rather than reinterpreted.** It said "delegated work GATHERS", which named the
+proxy instead of the hazard: applying a decided change is not concluding. It now reads *"delegated
+work EXECUTES a decision; it never makes one"*, covering both shapes and folding in the diagnostic
+that had been living only in the skills — wanting a smarter subagent means you delegated a decision,
+and the fix is the brief, not the model.
+
+Two gates on top of the gathering four, and only one is hard: the transformation is **DECIDED** in
+full beforehand, and the slices are **DISJOINT**. Two agents editing one file is a lost update — the
+second clobbers the first, both report success, and nothing in either report shows it.
+
+The brief is the point, and it is worth writing even when you do not fan out: it survives compaction
+where an intention does not, it keeps site 30 consistent with site 3, and one you cannot write is a
+change you have not finished thinking about.
+
+### Added — the e2e harness photographs, ledgers, and audits itself
+
+`core/recording.js` — a failed check photographs the page it failed on, an uncaught throw
+photographs itself, and `SHOTS=all` records the run. `core/seeds.js` + `tools/sweep-seeds.js` — a
+ledger of what a run created on the server, so litter is swept by record rather than by memory, with
+every default erring toward under-tracking because a missed fixture is visible litter and an
+over-tracked one is an irreversible delete. `tools/audit-checks.js` — audits the verifiers
+themselves, because the recurring failure in a harness is not a broken app but a check that reports
+something untrue, and a lying check looks exactly like a passing one.
+
+### Fixed — the screenshot engine photographed failures but not what passes rest on
+
+The asymmetry was backwards. A FAIL already tells you to go and look; a wrong PASS tells you nothing
+and is believed — and a locator that stops matching does not raise its hand, it reports ABSENCE,
+which reads as a clean pass. `check(name, ok, detail, { evidence: true })` photographs the state a
+passing check rests on, and `SHOTS=evidence` turns it on for a whole run.
+
+### Fixed — an implemented session contract stub was destroyed by the next update
+
+`.e2e/core/session.js` ships as a contract stub whose own docblock says "bearing ships the shape and
+the scars; you write the body" — and the next update deleted the body. It is seed-once now, beside
+`.gitnexusignore` and `northstars.md`.
+
+### Fixed — the sweeper read EPERM as "dead" and would sweep a live run
+
+`process.kill(pid, 0)` throws ESRCH for "no such process" and EPERM for "it is there and you may not
+signal it" — ordinary for a ledger written under another uid on a shared CI runner. Collapsing them
+made the one destructive tool sweep the fixtures of a verifier that was still running.
+
 ## 1.2.2 — bearing stops changing files it does not own
 
 Every item here was found the same way: by reading the diff a real `bearing update` left in a real
