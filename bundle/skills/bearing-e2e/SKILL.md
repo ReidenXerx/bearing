@@ -120,3 +120,20 @@ Add a helper only on the THIRD time you write the same thing. Two is a coinciden
 - Reporting "verified" from a run whose checks all skipped — read the tally, not the exit line.
 - Growing `core/` with app-specific selectors. That is what `interact/` is for.
 - Reaching for the browser when reading the code would answer it.
+
+## Photograph what a PASS rests on, not only what a failure looks like
+
+Capturing only failures has the asymmetry backwards. A FAIL already tells you to go and look; a
+**wrong PASS tells you nothing and is believed**. Every locator is a claim about the DOM, and one
+that stops matching does not raise its hand — it reports ABSENCE, which reads as a clean pass.
+
+So on the check whose verdict rests on something visible, ask for the frame:
+
+```js
+report.check('the drawer shows the masked SSN', masked, seen, { evidence: true });
+```
+
+`SHOTS=evidence` turns it on for every check in a run you are investigating; `SHOTS=off` still
+means off, for a check that MEASURES timing and would be distorted by its own shutter. Default
+stays failures-only — a frame per passing assertion is thousands of files, and noise that large is
+indistinguishable from no evidence at all.

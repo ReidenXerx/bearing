@@ -144,3 +144,12 @@ while it is running means your results came from a harness that no longer exists
 
 The list is the point. A harness that only grows helpers gets bigger; one that grows scars gets
 harder to fool.
+
+## Evidence for passes
+
+`report.check(name, ok, detail, { evidence: true })` photographs the state a PASSING check rests on.
+Failures are captured automatically; passes are not, because a frame per assertion is thousands of
+files. Reach for it on the check whose verdict rests on something visible — a locator that stops
+matching reports absence, which reads as a clean pass, and that is the failure with no picture.
+
+`SHOTS=evidence` turns it on for every check; `SHOTS=off` disables all capture, including this.

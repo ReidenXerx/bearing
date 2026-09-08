@@ -34,13 +34,23 @@ const createReport = (title) => {
   return {
     results,
 
-    /** An assertion that ran. Returns the boolean so a caller can branch on it. */
-    check(name, ok, detail) {
+    /**
+     * An assertion that ran. Returns the boolean so a caller can branch on it.
+     *
+     * `opts.evidence` photographs the state a PASS rests on, and is the option worth reaching for.
+     * Photographing only failures has the asymmetry backwards: a FAIL already tells you to go and
+     * look, while a wrong PASS tells you nothing and is believed. Every locator is a claim about the
+     * DOM, and one that stops matching does not raise its hand — it reports ABSENCE, which reads as a
+     * clean pass. So the check whose verdict rests on something visible is exactly the one that
+     * needs a frame; `SHOTS=evidence` turns it on for every check in a run you are investigating.
+     */
+    check(name, ok, detail, opts = {}) {
       record(ok ? 'PASS' : 'FAIL', name, detail);
-      // A failing check photographs the page it failed on. Nobody predicts where a failure lands,
-      // so the alternative is the state this harness's ancestor lived in for months: a red line in
-      // a terminal and no picture of the screen behind it. Fired, not awaited — see recording.js.
+      // Fired, not awaited — see recording.js. Nobody predicts where a failure lands, so the
+      // alternative is the state this harness's ancestor lived in for months: a red line in a
+      // terminal and no picture of the screen behind it.
       if (!ok) recording.onFailure(name, detail);
+      else recording.onPass(name, detail, opts.evidence === true);
       return Boolean(ok);
     },
 

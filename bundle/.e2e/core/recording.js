@@ -15,10 +15,22 @@
  * with `SHOTS=all` — the run is on video.
  *
  * TIERS, via the `SHOTS` env var:
- *   off    nothing at all, deliberate shots included — for a check that MEASURES timing, where the
- *          shutter itself moves the number being reported
- *   key    (default) deliberate shots + a frame for every FAILED check and every throw
- *   all    ...plus a video of the whole run
+ *   off       nothing at all, deliberate shots included — for a check that MEASURES timing, where
+ *             the shutter itself moves the number being reported
+ *   key       (default) deliberate shots + a frame for every FAILED check and every throw
+ *   evidence  ...plus a frame for every PASSING check — the evidence a green verdict rests on
+ *   all       ...plus a video of the whole run
+ *
+ * ⚠ WHY PASSES ARE PHOTOGRAPHABLE AT ALL. The first version captured only failures, which has the
+ * asymmetry backwards: a FAIL already tells you to go and look, while a PASS that is wrong tells you
+ * nothing and is believed. Every locator is a claim about the DOM, and one that stops matching does
+ * not raise its hand — it reports ABSENCE, which reads as a clean pass. That is the expensive
+ * direction, and it was the unphotographed one.
+ *
+ * A frame here is as safe as the failure frame beside it: `check()` is called after the caller has
+ * already awaited whatever it asserts on, so nothing is racing. The hazard recorded below was about
+ * frames inside INTERACTION HELPERS, which sit between a click and a `waitForResponse` — that
+ * argument never applied to the moment a verdict is recorded.
  *
  * ⚠ `all` RECORDS RATHER THAN SCREENSHOTTING, AND THAT IS THE WHOLE LESSON. The first version of
  * this put automatic frames inside the interaction helpers — after a form fill, around a submit. It
@@ -47,7 +59,7 @@ const paths = require('./paths');
 
 const { runnerName } = paths;
 
-const TIERS = { off: 0, key: 1, all: 2 };
+const TIERS = { off: 0, key: 1, evidence: 2, all: 3 };
 
 /**
  * ⚠ AN UNKNOWN TIER IS ANNOUNCED, NOT SILENTLY IGNORED. `SHOTS=none`, `SHOTS=false` and a trailing
@@ -153,6 +165,23 @@ const onFailure = (name, detail = '') => {
   return shot;
 };
 
+/**
+ * Photograph the state a PASSING check rests on.
+ *
+ * Off by default: a frame per passing assertion is thousands of files on a real suite, and noise
+ * that large is indistinguishable from no evidence at all. Two ways to turn it on, and they answer
+ * different questions — `SHOTS=evidence` for a run you are investigating, and `{ evidence: true }`
+ * on the individual check whose verdict rests on something visual, which is the one the check's
+ * author knows and the tier cannot.
+ */
+const onPass = (name, detail = '', force = false) => {
+  if (!force && TIER < TIERS.evidence) return null;
+  const key = `passes/${String(name).replace(/\//g, ' ')}`;
+  const shot = snap(key, { note: detail || 'the state this check passed on' });
+  pending.push(shot);
+  return shot;
+};
+
 /** Photograph a throw. Awaited, because the caller still has a live page and will not for long. */
 const captureThrow = async (err) => {
   await snap('crash', { note: String(err?.message || err).split('\n')[0].slice(0, 120) });
@@ -237,4 +266,4 @@ const armCrashCamera = () => {
   process.on('unhandledRejection', onCrash);
 };
 
-module.exports = { open, adopt, contextOptions, snap, onFailure, captureThrow, drain, exit, enabled };
+module.exports = { open, adopt, contextOptions, snap, onFailure, onPass, captureThrow, drain, exit, enabled };
