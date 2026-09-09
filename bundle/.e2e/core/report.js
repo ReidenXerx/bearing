@@ -5,6 +5,15 @@
  *   r.check('drawer is 480px wide', width === 480, `${width}px`);
  *   r.skip('control-company check', 'no control session available');
  *   r.finish();          // prints the tally, exits non-zero if anything failed
+ *   return;              // ← REQUIRED after an early finish(). See below.
+ *
+ * `finish()` DOES NOT STOP THE CALLER. The exit is scheduled behind `recording.drain()`, so the
+ * call returns and every line after it still runs — and prints AFTER the tally, which reads as
+ * though those checks were part of the run. That async exit is deliberate and load-bearing (an
+ * immediate `process.exit` truncates the screenshot or video the run is being judged on, see the
+ * comment on `finish` itself), so the fix is at the call site: `return` after any `finish()` that
+ * is not the last statement. Every call site in this kit already does; the contract just was not
+ * written down where a caller reads it first.
  *
  * A SKIP IS NOT A PASS, and it is not merely excluded from the numerator — a run in which
  * NOTHING passed exits non-zero even with zero failures. Both halves are load-bearing.
