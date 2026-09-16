@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/bearing-mark.svg" alt="bearing — compass mark" width="72">
+<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/bearing-mark.svg" alt="bearing" width="72">
 
 # bearing
 
@@ -24,7 +24,7 @@ npx bearing
 
 </div>
 
-<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/drift.svg" alt="Without bearing a stale premise is found three days later; with it the north-star outranks the doc and it is caught in one line." width="100%">
+<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/drift.svg" alt="Without bearing: a doc abandoned in March is re-proposed today and found out three days later. With bearing: the north-star outranks the abandoned doc and it is caught in one line." width="100%">
 
 A drifted agent doesn't crash. It reads a doc you abandoned in March, re-proposes the feature you already measured and killed, and writes a convincing paragraph about it. You nod. You find out three days later.
 
@@ -32,11 +32,11 @@ That failure has a name — **losing your bearings**.
 
 <img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/social/bearing.gif" alt="Terminal recording: without bearing an agent ships a feature that was measured and killed, found out three days later; with bearing the same intent is caught against NS-9 in one line." width="100%">
 
-<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/social/receipts.png" alt="The receipts: 81 docs contradicting each other on live production parameters; 93 bug reports against its own tooling across 47 commits in three weeks; 30 empty results for things that demonstrably existed." width="100%">
+<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/receipts.svg" alt="93 bug reports the agent filed against its own tooling across 47 commits in three weeks, 30 of them empty results for things that demonstrably existed, and the scorecard line that reports whether enforcement is earning its keep." width="100%">
 
 **Contributing to a repo that isn't yours?** `npx bearing install . --stealth` keeps `git status` clean — no tracked file is touched. Details under [Install](#install).
 
-<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/token-cost.svg" alt="bearing costs about 25,200 tokens per session — 13 percent of a 200k context window, 2.5 percent of 1M — split between bearing's own contract (10,300) and the GitNexus tool schemas (14,900). One 'what breaks if I change this' question costs 13.2 times less through the graph than through grep on an 894-file repo, and 3 times less on a 374-file repo." width="100%">
+<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/token-cost.svg" alt="bearing costs about 25,200 tokens a session — 13 percent of a 200k context window, 2.5 percent of 1M — split between its own contract block and the GitNexus tool schemas; one impact question costs 3 to 13 times less than grepping and reading the hits." width="100%">
 
 **It will not blow up your context.** ~25,200 tokens a session — and one *what breaks if I change this?*
 costs 3–13× less through the graph than grepping and reading the hits. Measure it on your own repo
@@ -148,7 +148,7 @@ it again. And uninstall empties only the block it wrote.
 
 **Docs rot. Comments lie. The agent's own inference fills the gaps.**
 
-<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/northstars.svg" alt="Docs, README, comments and the agent's own guess conflict; the numbered north-star wins and the others are declared stale." width="100%">
+<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/northstars.svg" alt="A README written before the rewrite, a doc abandoned in March, a stale comment and the agent's own guess — all outranked by the numbered north-star." width="100%">
 
 Write them as claims a conclusion could actually **violate**:
 
@@ -189,7 +189,7 @@ being written.
 
 **Long sessions get compacted. The transcript is summarized and thrown away.**
 
-<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/taskcore.svg" alt="Once enough edits have accumulated the task-core is written, so when compaction drops the transcript the goal is read back intact." width="100%">
+<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/taskcore.svg" alt="Once enough edits have accumulated the task-core is written; when compaction summarises the transcript away, the goal, the decisions and the gotchas are read back intact." width="100%">
 
 Written *before* the summary lands — by then the detail is already gone. The trigger is **how much work is unsaved** (edits since the last write), not a context percentage: the window isn't knowable at runtime, and what makes a compaction expensive is unwritten decisions, not fullness.
 
@@ -199,7 +199,7 @@ It stores what a summary reliably loses: `GOAL · CONSTRAINTS · DECISIONS(+why)
 
 **Most review asks "is this code correct?" — a question a linter can ask.**
 
-<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/microscope.svg" alt="A change is split into slices and one lens agent is spawned per slice, all carrying the same pinned domain persona, asking correctness and judgment questions in parallel; every finding must survive an adversarial refutation attempt before it reaches you." width="100%">
+<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/microscope.svg" alt="A change split into slices, one lens agent per slice carrying the same pinned domain persona, and a refutation pass every finding must survive before it reaches you." width="100%">
 
 It maps your change into slices and spawns **one lens agent per slice** — in parallel where your runtime supports it — each carrying the **same pinned persona**, resolved from your repo at install and stored in `.bearing/domain.json`. A trading repo is reviewed by a quant trader; a payments repo by a ledger engineer. Pinned, so wave 2 can't quietly become a different expert than wave 1.
 
@@ -225,7 +225,7 @@ Then the part that compounds: **an answer that is a RULE gets proposed as a nort
 
 **Your agent can already spawn subagents. It doesn't know when it should.**
 
-<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/minions.svg" alt="Forty files checked serially by one agent, versus forty cheap subagents each carrying the project's north-stars and persona; they return citations — FOUND file:line, CHECKED, MISSED — and the main agent draws the conclusion itself." width="100%">
+<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/minions.svg" alt="Forty files ground through serially by one agent, versus eight anchored subagents returning citations — FOUND file:line, CHECKED, MISSED — for the main agent to conclude from." width="100%">
 
 So it grinds through forty files serially — or samples five and generalises. Minions is that missing judgment: fan out when the work is **bounded, verifiable, independent and wide** (3+ units), and *don't* when the judgment itself is the work.
 
@@ -270,7 +270,7 @@ That `CHECKED`/`FOUND` split is load-bearing: `CHECKED` filled and `FOUND` empty
 
 **Grepping a symbol gives 40 text matches and no structure.**
 
-<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/gitnexus.svg" alt="A grep returns 40 unstructured text matches; the graph returns the actual callers and flows — and a zero result is treated as unknown, not as absence." width="100%">
+<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/gitnexus.svg" alt="A grep returns 40 unstructured matches; the graph returns the actual callers and flows, and a zero result is treated as unknown rather than as absence." width="100%">
 
 Two gates: a **stale index** blocks until refreshed, and so does **working-tree drift** — edit files and queries hold until you re-index, because the graph would otherwise answer about code you already changed.
 

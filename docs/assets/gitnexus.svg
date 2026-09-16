@@ -1,44 +1,79 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 280" width="900" height="280" role="img" aria-label="A grep returns 40 unstructured text matches; the graph returns the actual callers and flows — and a zero result is treated as unknown, not as absence.">
-<defs>
-  <marker id="ar" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse">
-    <path d="M0 0 L10 5 L0 10 z" fill="#3a465c"/>
-  </marker>
-  <radialGradient id="surfaceGrad" cx="100%" cy="0%" r="120%">
-    <stop offset="0%" stop-color="#161c27"/>
-    <stop offset="55%" stop-color="#11161f"/>
-  </radialGradient>
-  <linearGradient id="panelGrad" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0%" stop-color="#1d2533"/>
-    <stop offset="100%" stop-color="#1a2130"/>
-  </linearGradient>
-</defs>
-<rect width="900" height="280" rx="14" fill="url(#surfaceGrad)" stroke="#232c3b"/>
-<text x="28" y="34" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="11.5" font-weight="600" letter-spacing="1.6" fill="#61708a">YOU ASK: WHO USES ORDERSERVICE?</text>
-<text x="28" y="62" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="21" font-weight="700" fill="#e8edf5">40 text matches, or the actual callers.</text>
-<text x="28" y="96" text-anchor="start" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="13" fill="#d95926">GREP · 40 matches, no structure</text>
-<rect x="28" y="104" width="396" height="120" rx="10" fill="#1a2130" stroke="#2c3648" opacity="0.6"/>
-<text x="44" y="124" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#61708a" opacity="0.5">import { </text><text x="99" y="124" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" font-weight="700" fill="#d95926" opacity="0.9">OrderService</text><text x="178" y="124" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#61708a" opacity="0.5"> }</text>
-<text x="220" y="124" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#61708a" opacity="0.5">import { </text><text x="275" y="124" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" font-weight="700" fill="#d95926" opacity="0.9">OrderService</text><text x="354" y="124" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#61708a" opacity="0.5"> }</text>
-<text x="44" y="148" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#61708a" opacity="0.5">private </text><text x="93" y="148" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" font-weight="700" fill="#d95926" opacity="0.9">orderService</text><text x="171" y="148" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#61708a" opacity="0.5">;</text>
-<text x="220" y="148" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#61708a" opacity="0.5">private </text><text x="269" y="148" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" font-weight="700" fill="#d95926" opacity="0.9">orderService</text><text x="347" y="148" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#61708a" opacity="0.5">;</text>
-<text x="44" y="172" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#61708a" opacity="0.5">this.</text><text x="74" y="172" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" font-weight="700" fill="#d95926" opacity="0.9">orderService</text><text x="153" y="172" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#61708a" opacity="0.5">.create()</text>
-<text x="220" y="172" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#61708a" opacity="0.5">this.</text><text x="250" y="172" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" font-weight="700" fill="#d95926" opacity="0.9">orderService</text><text x="329" y="172" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#61708a" opacity="0.5">.create()</text>
-<text x="44" y="196" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#61708a" opacity="0.5">mock('</text><text x="81" y="196" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" font-weight="700" fill="#d95926" opacity="0.9">OrderService</text><text x="159" y="196" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#61708a" opacity="0.5">')</text>
-<text x="220" y="196" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#61708a" opacity="0.5">mock('</text><text x="257" y="196" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" font-weight="700" fill="#d95926" opacity="0.9">OrderService</text><text x="335" y="196" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#61708a" opacity="0.5">')</text>
-<text x="44" y="220" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#61708a" opacity="0.5">class </text><text x="81" y="220" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" font-weight="700" fill="#d95926" opacity="0.9">OrderService</text><text x="159" y="220" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#61708a" opacity="0.5"> {</text>
-<text x="220" y="220" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#61708a" opacity="0.5">class </text><text x="257" y="220" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" font-weight="700" fill="#d95926" opacity="0.9">OrderService</text><text x="335" y="220" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#61708a" opacity="0.5"> {</text>
-<text x="492" y="96" text-anchor="start" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="13" fill="#3987e5">GRAPH · 3 callers, 2 flows</text>
-<rect x="492" y="104" width="380" height="120" rx="10" fill="url(#panelGrad)" stroke="#3987e5" stroke-width="1.2" opacity="0.9"/>
-<circle cx="540" cy="134" r="8" fill="#3987e5" opacity="1"/>
-<text x="556" y="138" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" font-weight="600" fill="#e8edf5">Checkout</text>
-<circle cx="540" cy="166" r="8" fill="#3987e5" opacity="1"/>
-<text x="556" y="170" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" font-weight="600" fill="#e8edf5">Refund</text>
-<circle cx="540" cy="198" r="8" fill="#3987e5" opacity="1"/>
-<text x="556" y="202" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" font-weight="600" fill="#e8edf5">Webhook</text>
-<line x1="640" y1="134" x2="760" y2="166" stroke="#3987e5" stroke-width="1.75" marker-end="url(#ar)"/>
-<line x1="640" y1="166" x2="760" y2="166" stroke="#3987e5" stroke-width="1.75" marker-end="url(#ar)"/>
-<line x1="640" y1="198" x2="760" y2="166" stroke="#3987e5" stroke-width="1.75" marker-end="url(#ar)"/>
-<circle cx="772" cy="166" r="10" fill="#e8edf5" opacity="1"/>
-<text x="772" y="194" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" font-weight="700" fill="#e8edf5">OrderService</text>
-<text x="28" y="256" text-anchor="start" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="13" fill="#9aa8bd">A zero is not a finding — the graph is authoritative about what it FINDS, never about what it misses.</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 380" width="1200" height="380" role="img" aria-label="A grep returns 40 unstructured text matches; the graph returns the actual callers and flows, and a zero result is treated as unknown rather than as absence.">
+  <style>
+    .s { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
+    .m { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; }
+    .lab { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 12px; letter-spacing: 1.4px; fill: #8DA0A7; }
+    .h { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 21px; font-weight: 700; fill: #E3EAE7; }
+    .t { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; fill: #E3EAE7; }
+    .d { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; fill: #8DA0A7; }
+    .mono { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 13px; fill: #E3EAE7; }
+    .monod { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 13px; fill: #8DA0A7; }
+    .small { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 11.5px; fill: #8DA0A7; }
+  </style>
+  <rect width="1200" height="380" rx="14" fill="#0A1013"/>
+  <rect x="0.75" y="0.75" width="1198.5" height="378.5" rx="13.5" fill="none" stroke="#21303A" stroke-width="1.5"/>
+<text x="36" y="44" class="lab" text-anchor="start">GITNEXUS</text>
+<text x="36" y="76" class="h" text-anchor="start">Forty text matches, or the actual callers</text>
+<rect x="36" y="116" width="500" height="210" rx="10" fill="#111A1F" stroke="#21303A" stroke-width="1.5"/>
+<text x="60" y="146" class="lab" text-anchor="start">GREP</text>
+<rect x="62" y="170" width="38" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="118" y="170" width="46" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="174" y="170" width="38" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="230" y="170" width="38" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="286" y="170" width="46" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="342" y="170" width="46" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="398" y="170" width="26" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="454" y="170" width="26" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="62" y="196" width="46" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="118" y="196" width="38" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="174" y="196" width="46" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="230" y="196" width="46" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="286" y="196" width="26" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="342" y="196" width="26" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="398" y="196" width="38" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="454" y="196" width="38" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="62" y="222" width="26" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="118" y="222" width="26" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="174" y="222" width="46" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="230" y="222" width="46" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="286" y="222" width="46" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="342" y="222" width="26" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="398" y="222" width="46" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="454" y="222" width="38" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="62" y="248" width="38" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="118" y="248" width="46" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="174" y="248" width="46" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="230" y="248" width="46" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="286" y="248" width="46" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="342" y="248" width="26" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="398" y="248" width="46" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="454" y="248" width="26" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="62" y="274" width="46" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="118" y="274" width="26" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="174" y="274" width="26" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="230" y="274" width="26" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="286" y="274" width="26" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="342" y="274" width="26" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="398" y="274" width="46" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<rect x="454" y="274" width="26" height="10" rx="5" fill="#8DA0A7" opacity=".35"/>
+<text x="60" y="306" class="d" text-anchor="start">40 matches, no structure — you still have to read them</text>
+<rect x="564" y="116" width="600" height="210" rx="10" fill="#111A1F" stroke="#E0A458" stroke-width="1.5"/>
+<text x="588" y="146" class="lab" text-anchor="start" style="fill:#E0A458">THE GRAPH</text>
+<line x1="700" y1="200" x2="620" y2="262" stroke="#21303A" stroke-width="1.4"/>
+<line x1="700" y1="200" x2="780" y2="262" stroke="#21303A" stroke-width="1.4"/>
+<line x1="880" y1="200" x2="700" y2="200" stroke="#21303A" stroke-width="1.4"/>
+<line x1="960" y1="286" x2="780" y2="262" stroke="#21303A" stroke-width="1.4"/>
+<circle cx="700" cy="200" r="9" fill="#E0A458" stroke="#E0A458" stroke-width="1.4"/>
+<text x="714" y="204" class="small" text-anchor="start" style="fill:#E3EAE7">OrderService</text>
+<circle cx="620" cy="262" r="6.5" fill="#0D161A" stroke="#E0A458" stroke-width="1.4"/>
+<text x="634" y="266" class="small" text-anchor="start">checkout()</text>
+<circle cx="780" cy="262" r="6.5" fill="#0D161A" stroke="#E0A458" stroke-width="1.4"/>
+<text x="794" y="266" class="small" text-anchor="start">refund()</text>
+<circle cx="880" cy="200" r="6.5" fill="#0D161A" stroke="#E0A458" stroke-width="1.4"/>
+<text x="894" y="204" class="small" text-anchor="start">POST /orders</text>
+<circle cx="960" cy="286" r="6.5" fill="#0D161A" stroke="#E0A458" stroke-width="1.4"/>
+<text x="974" y="290" class="small" text-anchor="start">worker</text>
+<rect x="588" y="286" width="552" height="28" rx="6" fill="#0D161A" stroke="#21303A" stroke-width="1.2"/>
+<text x="602" y="305" class="small" text-anchor="start" style="fill:#E0A458">A positive result is strong evidence. A zero is not a finding.</text>
+<text x="36" y="362" class="d" text-anchor="start">Two gates: a stale index blocks until it is refreshed, and so does working-tree drift — the graph would otherwise answer about code you already changed.</text>
 </svg>

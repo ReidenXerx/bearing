@@ -1,126 +1,86 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" width="900" height="340" role="img" aria-label="Forty files checked serially by one agent, versus forty cheap anchored subagents each carrying the project's north-stars and persona; they return citations — FOUND file:line, CHECKED, MISSED — and the main agent draws the conclusion itself.">
-<defs>
-  <marker id="ar" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse">
-    <path d="M0 0 L10 5 L0 10 z" fill="#3a465c"/>
-  </marker>
-  <radialGradient id="surfaceGrad" cx="100%" cy="0%" r="120%">
-    <stop offset="0%" stop-color="#161c27"/>
-    <stop offset="55%" stop-color="#11161f"/>
-  </radialGradient>
-  <linearGradient id="panelGrad" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0%" stop-color="#1d2533"/>
-    <stop offset="100%" stop-color="#1a2130"/>
-  </linearGradient>
-</defs>
-<rect width="900" height="340" rx="14" fill="url(#surfaceGrad)" stroke="#232c3b"/>
-<text x="28" y="34" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="11.5" font-weight="600" letter-spacing="1.6" fill="#61708a">FORTY FILES, ONE RULE TO CHECK</text>
-<text x="28" y="62" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="21" font-weight="700" fill="#e8edf5">Send forty gatherers, not one thread.</text>
-<circle cx="70" cy="120" r="15" fill="#3987e5"/>
-<text x="70" y="154" text-anchor="middle" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="14" font-weight="700" fill="#3987e5">agent</text>
-<line x1="84" y1="120" x2="180" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
-<circle cx="180" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
-<line x1="84" y1="120" x2="208" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
-<circle cx="208" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
-<line x1="84" y1="120" x2="236" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
-<circle cx="236" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
-<line x1="84" y1="120" x2="264" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
-<circle cx="264" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
-<line x1="84" y1="120" x2="292" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
-<circle cx="292" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
-<line x1="84" y1="120" x2="320" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
-<circle cx="320" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
-<line x1="84" y1="120" x2="348" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
-<circle cx="348" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
-<line x1="84" y1="120" x2="376" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
-<circle cx="376" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
-<line x1="84" y1="120" x2="404" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
-<circle cx="404" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
-<line x1="84" y1="120" x2="432" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
-<circle cx="432" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
-<line x1="84" y1="120" x2="460" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
-<circle cx="460" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
-<line x1="84" y1="120" x2="488" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
-<circle cx="488" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
-<line x1="84" y1="120" x2="516" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
-<circle cx="516" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
-<line x1="84" y1="120" x2="544" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
-<circle cx="544" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
-<line x1="84" y1="120" x2="572" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
-<circle cx="572" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
-<line x1="84" y1="120" x2="600" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
-<circle cx="600" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
-<line x1="84" y1="120" x2="628" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
-<circle cx="628" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
-<line x1="84" y1="120" x2="656" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
-<circle cx="656" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
-<line x1="84" y1="120" x2="684" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
-<circle cx="684" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
-<line x1="84" y1="120" x2="712" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
-<circle cx="712" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
-<line x1="84" y1="120" x2="740" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
-<circle cx="740" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
-<line x1="84" y1="120" x2="768" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
-<circle cx="768" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
-<line x1="84" y1="120" x2="796" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
-<circle cx="796" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
-<line x1="84" y1="120" x2="824" y2="170" stroke="#3a465c" stroke-width="1" opacity="0.45"/>
-<circle cx="824" cy="170" r="5" fill="#3987e5" opacity="0.8"/>
-<line x1="180" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
-<line x1="208" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
-<line x1="236" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
-<line x1="264" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
-<line x1="292" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
-<line x1="320" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
-<line x1="348" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
-<line x1="376" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
-<line x1="404" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
-<line x1="432" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
-<line x1="460" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
-<line x1="488" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
-<line x1="516" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
-<line x1="544" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
-<line x1="572" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
-<line x1="600" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
-<line x1="628" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
-<line x1="656" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
-<line x1="684" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
-<line x1="712" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
-<line x1="740" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
-<line x1="768" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
-<line x1="796" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
-<line x1="824" y1="170" x2="820" y2="250" stroke="#3987e5" stroke-width="1" opacity="0.35"/>
-<path d="M180 210 Q500 240 820 250" fill="none" stroke="#3987e5" stroke-width="1.5" opacity="0.5"/>
-<rect x="300" y="211" width="164" height="26" rx="13" fill="#000" opacity="0.3"/>
-<rect x="300" y="208" width="164" height="26" rx="13" fill="#199e70"/>
-<text x="382" y="225.5" text-anchor="middle" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" font-weight="600" fill="#ffffff">FOUND src/fees.ts:88</text>
-<rect x="520" y="211" width="67.80000000000001" height="26" rx="13" fill="#000" opacity="0.3"/>
-<rect x="520" y="208" width="67.80000000000001" height="26" rx="13" fill="#61708a"/>
-<text x="553.9" y="225.5" text-anchor="middle" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" font-weight="600" fill="#ffffff">CHECKED</text>
-<rect x="640" y="211" width="60.400000000000006" height="26" rx="13" fill="#000" opacity="0.3"/>
-<rect x="640" y="208" width="60.400000000000006" height="26" rx="13" fill="#d95926"/>
-<text x="670.2" y="225.5" text-anchor="middle" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="12.5" font-weight="600" fill="#ffffff">MISSED</text>
-<circle cx="820" cy="268" r="15" fill="#199e70"/>
-<text x="820" y="302" text-anchor="middle" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="14" font-weight="700" fill="#199e70">you conclude</text>
-<text x="700" y="96" text-anchor="start" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="13" fill="#61708a">SERIAL (the alternative)</text>
-
-<circle cx="700" cy="116" r="3" fill="#d95926" opacity="0.6"/>
-<line x1="700" y1="116" x2="716" y2="116" stroke="#d95926" stroke-width="1.25" opacity="0.5"/>
-<circle cx="716" cy="116" r="3" fill="#d95926" opacity="0.6"/>
-<line x1="716" y1="116" x2="732" y2="116" stroke="#d95926" stroke-width="1.25" opacity="0.5"/>
-<circle cx="732" cy="116" r="3" fill="#d95926" opacity="0.6"/>
-<line x1="732" y1="116" x2="748" y2="116" stroke="#d95926" stroke-width="1.25" opacity="0.5"/>
-<circle cx="748" cy="116" r="3" fill="#d95926" opacity="0.6"/>
-<line x1="748" y1="116" x2="764" y2="116" stroke="#d95926" stroke-width="1.25" opacity="0.5"/>
-<circle cx="764" cy="116" r="3" fill="#d95926" opacity="0.6"/>
-<line x1="764" y1="116" x2="780" y2="116" stroke="#d95926" stroke-width="1.25" opacity="0.5"/>
-<circle cx="780" cy="116" r="3" fill="#d95926" opacity="0.6"/>
-<line x1="780" y1="116" x2="796" y2="116" stroke="#d95926" stroke-width="1.25" opacity="0.5"/>
-<circle cx="796" cy="116" r="3" fill="#d95926" opacity="0.6"/>
-<line x1="796" y1="116" x2="812" y2="116" stroke="#d95926" stroke-width="1.25" opacity="0.5"/>
-<circle cx="812" cy="116" r="3" fill="#d95926" opacity="0.6"/>
-<line x1="812" y1="116" x2="828" y2="116" stroke="#d95926" stroke-width="1.25" opacity="0.5"/>
-<circle cx="828" cy="116" r="3" fill="#d95926" opacity="0.6"/>
-<line x1="828" y1="116" x2="844" y2="116" stroke="#d95926" stroke-width="1.25" opacity="0.5"/>
-<circle cx="844" cy="116" r="3" fill="#d95926" opacity="0.6"/>
-<text x="700" y="134" text-anchor="start" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="13" fill="#61708a">one agent, forty reads</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 380" width="1200" height="380" role="img" aria-label="Forty files checked serially by one agent, versus eight anchored subagents that return citations — FOUND, CHECKED, MISSED — for the main agent to conclude from.">
+  <style>
+    .s { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
+    .m { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; }
+    .lab { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 12px; letter-spacing: 1.4px; fill: #8DA0A7; }
+    .h { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 21px; font-weight: 700; fill: #E3EAE7; }
+    .t { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; fill: #E3EAE7; }
+    .d { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; fill: #8DA0A7; }
+    .mono { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 13px; fill: #E3EAE7; }
+    .monod { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 13px; fill: #8DA0A7; }
+    .small { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 11.5px; fill: #8DA0A7; }
+  </style>
+  <rect width="1200" height="380" rx="14" fill="#0A1013"/>
+  <rect x="0.75" y="0.75" width="1198.5" height="378.5" rx="13.5" fill="none" stroke="#21303A" stroke-width="1.5"/>
+<text x="36" y="44" class="lab" text-anchor="start">MINIONS</text>
+<text x="36" y="76" class="h" text-anchor="start">They gather. Your agent concludes.</text>
+<rect x="36" y="116" width="500" height="228" rx="10" fill="#111A1F" stroke="#21303A" stroke-width="1.5"/>
+<text x="60" y="146" class="lab" text-anchor="start">ONE AGENT, FORTY FILES</text>
+<rect x="62" y="172" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="106" y="172" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="150" y="172" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="194" y="172" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="238" y="172" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="282" y="172" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="326" y="172" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="370" y="172" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="414" y="172" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="458" y="172" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="62" y="202" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="106" y="202" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="150" y="202" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="194" y="202" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="238" y="202" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="282" y="202" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="326" y="202" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="370" y="202" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="414" y="202" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="458" y="202" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="62" y="232" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="106" y="232" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="150" y="232" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="194" y="232" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="238" y="232" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="282" y="232" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="326" y="232" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="370" y="232" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="414" y="232" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="458" y="232" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="62" y="262" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="106" y="262" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="150" y="262" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="194" y="262" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="238" y="262" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="282" y="262" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="326" y="262" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="370" y="262" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="414" y="262" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="458" y="262" width="34" height="20" rx="4" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<text x="60" y="302" class="d" text-anchor="start">grinds through them serially — or samples five and generalises</text>
+<rect x="564" y="116" width="600" height="228" rx="10" fill="#111A1F" stroke="#E0A458" stroke-width="1.5"/>
+<text x="588" y="146" class="lab" text-anchor="start" style="fill:#E0A458">EIGHT MINIONS, ANCHORED, IN PARALLEL</text>
+<circle cx="604" cy="184" r="12" fill="#0D161A" stroke="#E0A458" stroke-width="1.4"/>
+<path d="M604 196 L604 212" stroke="#21303A" stroke-width="1.2"/>
+<circle cx="674" cy="184" r="12" fill="#0D161A" stroke="#E0A458" stroke-width="1.4"/>
+<path d="M674 196 L674 212" stroke="#21303A" stroke-width="1.2"/>
+<circle cx="744" cy="184" r="12" fill="#0D161A" stroke="#E0A458" stroke-width="1.4"/>
+<path d="M744 196 L744 212" stroke="#21303A" stroke-width="1.2"/>
+<circle cx="814" cy="184" r="12" fill="#0D161A" stroke="#E0A458" stroke-width="1.4"/>
+<path d="M814 196 L814 212" stroke="#21303A" stroke-width="1.2"/>
+<circle cx="884" cy="184" r="12" fill="#0D161A" stroke="#E0A458" stroke-width="1.4"/>
+<path d="M884 196 L884 212" stroke="#21303A" stroke-width="1.2"/>
+<circle cx="954" cy="184" r="12" fill="#0D161A" stroke="#E0A458" stroke-width="1.4"/>
+<path d="M954 196 L954 212" stroke="#21303A" stroke-width="1.2"/>
+<circle cx="1024" cy="184" r="12" fill="#0D161A" stroke="#E0A458" stroke-width="1.4"/>
+<path d="M1024 196 L1024 212" stroke="#21303A" stroke-width="1.2"/>
+<circle cx="1094" cy="184" r="12" fill="#0D161A" stroke="#E0A458" stroke-width="1.4"/>
+<path d="M1094 196 L1094 212" stroke="#21303A" stroke-width="1.2"/>
+<rect x="588" y="216" width="552" height="96" rx="8" fill="#0D161A" stroke="#21303A" stroke-width="1.2"/>
+<text x="606" y="242" class="mono" text-anchor="start" style="fill:#4FC2AE">FOUND</text>
+<text x="692" y="242" class="monod" text-anchor="start">src/fees.ts:88 — const fee = gross * RATE</text>
+<text x="606" y="266" class="mono" text-anchor="start" style="fill:#8DA0A7">CHECKED</text>
+<text x="692" y="266" class="monod" text-anchor="start">rg "\* RATE" src/ --type ts</text>
+<text x="606" y="290" class="mono" text-anchor="start" style="fill:#E8877A">MISSED</text>
+<text x="692" y="290" class="monod" text-anchor="start">dynamic dispatch in src/plugins/ — unresolved</text>
+<text x="36" y="366" class="d" text-anchor="start">A subagent that returns a verdict puts a cheaper model's summary between the evidence and your decision — which is the drift this whole tool exists to prevent.</text>
 </svg>

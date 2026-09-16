@@ -1,57 +1,61 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" width="900" height="300" role="img" aria-label="Without bearing a stale premise spreads silently to every later conclusion; with it a north-star gate stops the spread at the source.">
-<defs>
-  <marker id="ar" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse">
-    <path d="M0 0 L10 5 L0 10 z" fill="#3a465c"/>
-  </marker>
-  <radialGradient id="surfaceGrad" cx="100%" cy="0%" r="120%">
-    <stop offset="0%" stop-color="#161c27"/>
-    <stop offset="55%" stop-color="#11161f"/>
-  </radialGradient>
-  <linearGradient id="panelGrad" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0%" stop-color="#1d2533"/>
-    <stop offset="100%" stop-color="#1a2130"/>
-  </linearGradient>
-</defs>
-<rect width="900" height="300" rx="14" fill="url(#surfaceGrad)" stroke="#232c3b"/>
-<text x="28" y="34" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="11.5" font-weight="600" letter-spacing="1.6" fill="#61708a">A STALE PREMISE SPREADS TO EVERY LATER CONCLUSION</text>
-<text x="28" y="62" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="21" font-weight="700" fill="#e8edf5">It spreads — until a north-star stops it.</text>
-<text x="28" y="104" text-anchor="start" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="13" fill="#d95926">WITHOUT</text>
-<circle cx="70" cy="150" r="26.400000000000002" fill="#d95926" opacity="0.22"/><circle cx="70" cy="150" r="12" fill="#d95926" opacity="1"/>
-<text x="70" y="182" text-anchor="start" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="13" fill="#d95926">stale doc</text>
-<line x1="82" y1="150" x2="376" y2="116" stroke="#d95926" stroke-width="1.5" opacity="0.55"/>
-<line x1="82" y1="150" x2="376" y2="150" stroke="#d95926" stroke-width="1.5" opacity="0.55"/>
-<line x1="82" y1="150" x2="376" y2="184" stroke="#d95926" stroke-width="1.5" opacity="0.55"/>
-<line x1="82" y1="150" x2="376" y2="218" stroke="#d95926" stroke-width="1.5" opacity="0.55"/>
-<line x1="82" y1="150" x2="376" y2="252" stroke="#d95926" stroke-width="1.5" opacity="0.55"/>
-<circle cx="384" cy="116" r="7" fill="#d95926" opacity="0.7"/>
-<circle cx="384" cy="150" r="7" fill="#d95926" opacity="0.7"/>
-<circle cx="384" cy="184" r="7" fill="#d95926" opacity="0.7"/>
-<circle cx="384" cy="218" r="7" fill="#d95926" opacity="0.7"/>
-<circle cx="384" cy="252" r="7" fill="#d95926" opacity="0.7"/>
-<text x="392" y="100" text-anchor="end" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="13" fill="#9aa8bd">every later conclusion inherits it</text>
-<line x1="450" y1="100" x2="450" y2="200" stroke="#232c3b" stroke-width="1.5" stroke-dasharray="2 5"/>
-<text x="478" y="104" text-anchor="start" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="13" fill="#3987e5">WITH BEARING</text>
-<circle cx="520" cy="150" r="26.400000000000002" fill="#d95926" opacity="0.22"/><circle cx="520" cy="150" r="12" fill="#d95926" opacity="1"/>
-<text x="520" y="182" text-anchor="start" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="13" fill="#61708a">stale doc</text>
-<rect x="618" y="106" width="12" height="156" rx="6" fill="#3987e5" opacity="0.22"/>
-<rect x="620" y="106" width="8" height="156" rx="4" fill="#3987e5"/>
-<text x="624" y="98" text-anchor="middle" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="13" font-weight="700" letter-spacing="1.5" fill="#3987e5">NS</text>
-<line x1="532" y1="150" x2="616" y2="116" stroke="#d95926" stroke-width="1.5" opacity="0.5" stroke-dasharray="4 4"/>
-<line x1="532" y1="150" x2="616" y2="150" stroke="#d95926" stroke-width="1.5" opacity="0.5" stroke-dasharray="4 4"/>
-<line x1="532" y1="150" x2="616" y2="184" stroke="#d95926" stroke-width="1.5" opacity="0.5" stroke-dasharray="4 4"/>
-<line x1="532" y1="150" x2="616" y2="218" stroke="#d95926" stroke-width="1.5" opacity="0.5" stroke-dasharray="4 4"/>
-<line x1="532" y1="150" x2="616" y2="252" stroke="#d95926" stroke-width="1.5" opacity="0.5" stroke-dasharray="4 4"/>
-
-<line x1="632" y1="116" x2="793" y2="116" stroke="#199e70" stroke-width="1.5" opacity="0.45"/>
-<line x1="632" y1="150" x2="793" y2="150" stroke="#199e70" stroke-width="1.5" opacity="0.45"/>
-<line x1="632" y1="184" x2="793" y2="184" stroke="#199e70" stroke-width="1.5" opacity="0.45"/>
-<line x1="632" y1="218" x2="793" y2="218" stroke="#199e70" stroke-width="1.5" opacity="0.45"/>
-<line x1="632" y1="252" x2="793" y2="252" stroke="#199e70" stroke-width="1.5" opacity="0.45"/>
-<circle cx="800" cy="116" r="7" fill="#199e70" opacity="0.35"/>
-<circle cx="800" cy="150" r="7" fill="#199e70" opacity="0.35"/>
-<circle cx="800" cy="184" r="7" fill="#199e70" opacity="0.35"/>
-<circle cx="800" cy="218" r="7" fill="#199e70" opacity="0.35"/>
-<circle cx="800" cy="252" r="7" fill="#199e70" opacity="0.35"/>
-<text x="872" y="100" text-anchor="end" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="13" fill="#3987e5">the gate outranks it</text>
-<text x="28" y="276" text-anchor="start" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif" font-size="13" fill="#61708a">A drifted agent doesn't crash. You find out three days later — unless a north-star caught it first.</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 430" width="1200" height="430" role="img" aria-label="Without bearing a killed idea comes back and is found three days later; with it the north-star outranks the abandoned doc and it is caught in one line.">
+  <style>
+    .s { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
+    .m { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; }
+    .lab { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 12px; letter-spacing: 1.4px; fill: #8DA0A7; }
+    .h { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 21px; font-weight: 700; fill: #E3EAE7; }
+    .t { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; fill: #E3EAE7; }
+    .d { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; fill: #8DA0A7; }
+    .mono { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 13px; fill: #E3EAE7; }
+    .monod { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 13px; fill: #8DA0A7; }
+    .small { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 11.5px; fill: #8DA0A7; }
+  </style>
+  <rect width="1200" height="430" rx="14" fill="#0A1013"/>
+  <rect x="0.75" y="0.75" width="1198.5" height="428.5" rx="13.5" fill="none" stroke="#21303A" stroke-width="1.5"/>
+<text x="36" y="44" class="lab" text-anchor="start">THE FAILURE THIS EXISTS FOR</text>
+<text x="36" y="76" class="h" text-anchor="start">A drifted agent doesn't crash</text>
+<circle cx="1128" cy="56" r="34" fill="#0D161A" stroke="#21303A" stroke-width="1.5"/><line x1="1128.0" y1="26.0" x2="1128.0" y2="34.0" stroke="#8DA0A7" stroke-width="2" opacity="1"/><line x1="1135.8" y1="27.0" x2="1134.7" y2="30.9" stroke="#8DA0A7" stroke-width="1" opacity="0.5"/><line x1="1143.0" y1="30.0" x2="1141.0" y2="33.5" stroke="#8DA0A7" stroke-width="1" opacity="0.5"/><line x1="1149.2" y1="34.8" x2="1146.4" y2="37.6" stroke="#8DA0A7" stroke-width="1" opacity="0.5"/><line x1="1154.0" y1="41.0" x2="1150.5" y2="43.0" stroke="#8DA0A7" stroke-width="1" opacity="0.5"/><line x1="1157.0" y1="48.2" x2="1153.1" y2="49.3" stroke="#8DA0A7" stroke-width="1" opacity="0.5"/><line x1="1158.0" y1="56.0" x2="1150.0" y2="56.0" stroke="#8DA0A7" stroke-width="2" opacity="1"/><line x1="1157.0" y1="63.8" x2="1153.1" y2="62.7" stroke="#8DA0A7" stroke-width="1" opacity="0.5"/><line x1="1154.0" y1="71.0" x2="1150.5" y2="69.0" stroke="#8DA0A7" stroke-width="1" opacity="0.5"/><line x1="1149.2" y1="77.2" x2="1146.4" y2="74.4" stroke="#8DA0A7" stroke-width="1" opacity="0.5"/><line x1="1143.0" y1="82.0" x2="1141.0" y2="78.5" stroke="#8DA0A7" stroke-width="1" opacity="0.5"/><line x1="1135.8" y1="85.0" x2="1134.7" y2="81.1" stroke="#8DA0A7" stroke-width="1" opacity="0.5"/><line x1="1128.0" y1="86.0" x2="1128.0" y2="78.0" stroke="#8DA0A7" stroke-width="2" opacity="1"/><line x1="1120.2" y1="85.0" x2="1121.3" y2="81.1" stroke="#8DA0A7" stroke-width="1" opacity="0.5"/><line x1="1113.0" y1="82.0" x2="1115.0" y2="78.5" stroke="#8DA0A7" stroke-width="1" opacity="0.5"/><line x1="1106.8" y1="77.2" x2="1109.6" y2="74.4" stroke="#8DA0A7" stroke-width="1" opacity="0.5"/><line x1="1102.0" y1="71.0" x2="1105.5" y2="69.0" stroke="#8DA0A7" stroke-width="1" opacity="0.5"/><line x1="1099.0" y1="63.8" x2="1102.9" y2="62.7" stroke="#8DA0A7" stroke-width="1" opacity="0.5"/><line x1="1098.0" y1="56.0" x2="1106.0" y2="56.0" stroke="#8DA0A7" stroke-width="2" opacity="1"/><line x1="1099.0" y1="48.2" x2="1102.9" y2="49.3" stroke="#8DA0A7" stroke-width="1" opacity="0.5"/><line x1="1102.0" y1="41.0" x2="1105.5" y2="43.0" stroke="#8DA0A7" stroke-width="1" opacity="0.5"/><line x1="1106.8" y1="34.8" x2="1109.6" y2="37.6" stroke="#8DA0A7" stroke-width="1" opacity="0.5"/><line x1="1113.0" y1="30.0" x2="1115.0" y2="33.5" stroke="#8DA0A7" stroke-width="1" opacity="0.5"/><line x1="1120.2" y1="27.0" x2="1121.3" y2="30.9" stroke="#8DA0A7" stroke-width="1" opacity="0.5"/><g transform="rotate(18 1128 56)"><path d="M1128 38 L1133 56 L1128 60 L1123 56 Z" fill="#E0A458"/><path d="M1128 74 L1123 56 L1128 52 L1133 56 Z" fill="#8DA0A7" opacity=".55"/></g><circle cx="1128" cy="56" r="3.4" fill="#0A1013" stroke="#E3EAE7" stroke-width="1.4"/>
+<rect x="36" y="112" width="546" height="286" rx="10" fill="#111A1F" stroke="#21303A" stroke-width="1.5"/>
+<text x="60" y="142" class="lab" text-anchor="start" style="fill:#E8877A">WITHOUT</text>
+<circle cx="68" cy="171" r="10" fill="#0D161A" stroke="#8DA0A7" stroke-width="1.4"/>
+<text x="68" y="175" class="small" text-anchor="middle" style="fill:#8DA0A7">1</text>
+<line x1="68" y1="183" x2="68" y2="220" stroke="#21303A" stroke-width="1.2"/>
+<text x="90" y="168" class="small" text-anchor="start" style="fill:#8DA0A7">MARCH</text>
+<text x="90" y="187" class="d" text-anchor="start">A design doc is written, then abandoned.</text>
+<circle cx="68" cy="227" r="10" fill="#0D161A" stroke="#8DA0A7" stroke-width="1.4"/>
+<text x="68" y="231" class="small" text-anchor="middle" style="fill:#8DA0A7">2</text>
+<line x1="68" y1="239" x2="68" y2="276" stroke="#21303A" stroke-width="1.2"/>
+<text x="90" y="224" class="small" text-anchor="start" style="fill:#8DA0A7">TODAY, 14:02</text>
+<text x="90" y="243" class="d" text-anchor="start">The agent reads it and re-proposes the feature you measured and killed.</text>
+<circle cx="68" cy="283" r="10" fill="#0D161A" stroke="#8DA0A7" stroke-width="1.4"/>
+<text x="68" y="287" class="small" text-anchor="middle" style="fill:#8DA0A7">3</text>
+<line x1="68" y1="295" x2="68" y2="332" stroke="#21303A" stroke-width="1.2"/>
+<text x="90" y="280" class="small" text-anchor="start" style="fill:#8DA0A7">TODAY, 14:03</text>
+<text x="90" y="299" class="d" text-anchor="start">It writes a convincing paragraph. You nod.</text>
+<circle cx="68" cy="339" r="10" fill="#0D161A" stroke="#E8877A" stroke-width="1.4"/>
+<text x="68" y="343" class="small" text-anchor="middle" style="fill:#E8877A">4</text>
+<text x="90" y="336" class="small" text-anchor="start" style="fill:#E8877A">THREE DAYS LATER</text>
+<text x="90" y="355" class="t" text-anchor="start" style="fill:#E8877A">You find out.</text>
+<rect x="618" y="112" width="546" height="286" rx="10" fill="#111A1F" stroke="#21303A" stroke-width="1.5"/>
+<text x="642" y="142" class="lab" text-anchor="start" style="fill:#4FC2AE">WITH BEARING</text>
+<circle cx="650" cy="171" r="10" fill="#0D161A" stroke="#8DA0A7" stroke-width="1.4"/>
+<text x="650" y="175" class="small" text-anchor="middle" style="fill:#8DA0A7">1</text>
+<line x1="650" y1="183" x2="650" y2="220" stroke="#21303A" stroke-width="1.2"/>
+<text x="672" y="168" class="small" text-anchor="start" style="fill:#8DA0A7">ONCE</text>
+<text x="672" y="187" class="d" text-anchor="start">You write NS-9: the claim that the idea was measured and rejected.</text>
+<circle cx="650" cy="227" r="10" fill="#0D161A" stroke="#8DA0A7" stroke-width="1.4"/>
+<text x="650" y="231" class="small" text-anchor="middle" style="fill:#8DA0A7">2</text>
+<line x1="650" y1="239" x2="650" y2="276" stroke="#21303A" stroke-width="1.2"/>
+<text x="672" y="224" class="small" text-anchor="start" style="fill:#8DA0A7">TODAY, 14:02</text>
+<text x="672" y="243" class="d" text-anchor="start">The agent forms the same intent.</text>
+<circle cx="650" cy="283" r="10" fill="#0D161A" stroke="#8DA0A7" stroke-width="1.4"/>
+<text x="650" y="287" class="small" text-anchor="middle" style="fill:#8DA0A7">3</text>
+<line x1="650" y1="295" x2="650" y2="332" stroke="#21303A" stroke-width="1.2"/>
+<text x="672" y="280" class="small" text-anchor="start" style="fill:#8DA0A7">TODAY, 14:02</text>
+<text x="672" y="299" class="d" text-anchor="start">The north-star outranks the abandoned doc.</text>
+<circle cx="650" cy="339" r="10" fill="#0D161A" stroke="#4FC2AE" stroke-width="1.4"/>
+<text x="650" y="343" class="small" text-anchor="middle" style="fill:#4FC2AE">4</text>
+<text x="672" y="336" class="small" text-anchor="start" style="fill:#4FC2AE">ONE LINE LATER</text>
+<text x="672" y="355" class="t" text-anchor="start" style="fill:#4FC2AE">Caught, cited, and not re-proposed.</text>
+<text x="36" y="414" class="d" text-anchor="start">Nothing is red. The build passes, the tests pass, the paragraph is convincing — what changed is what the agent believes the code means.</text>
 </svg>

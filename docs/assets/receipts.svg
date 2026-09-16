@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 330" width="1200" height="330" role="img" aria-label="93 bug reports against its own tooling across 47 commits in three weeks, 30 of them empty results for things that demonstrably existed, and a scorecard that reports whether enforcement is earning its keep.">
+  <style>
+    .s { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
+    .m { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; }
+    .lab { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 12px; letter-spacing: 1.4px; fill: #8DA0A7; }
+    .h { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 21px; font-weight: 700; fill: #E3EAE7; }
+    .t { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; fill: #E3EAE7; }
+    .d { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; fill: #8DA0A7; }
+    .mono { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 13px; fill: #E3EAE7; }
+    .monod { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 13px; fill: #8DA0A7; }
+    .small { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 11.5px; fill: #8DA0A7; }
+  </style>
+  <rect width="1200" height="330" rx="14" fill="#0A1013"/>
+  <rect x="0.75" y="0.75" width="1198.5" height="328.5" rx="13.5" fill="none" stroke="#21303A" stroke-width="1.5"/>
+<text x="36" y="44" class="lab" text-anchor="start">IT TELLS YOU WHEN IT'S THE PROBLEM</text>
+<text x="36" y="76" class="h" text-anchor="start">The agent files bug reports against its own tooling</text>
+<rect x="36" y="116" width="268" height="96" rx="10" fill="#111A1F" stroke="#21303A" stroke-width="1.5"/>
+<text x="60" y="168" class="h" text-anchor="start" style="font-size:40px;fill:#E0A458">93</text>
+<text x="60" y="194" class="d" text-anchor="start">reports filed</text>
+<rect x="318" y="116" width="268" height="96" rx="10" fill="#111A1F" stroke="#21303A" stroke-width="1.5"/>
+<text x="342" y="168" class="h" text-anchor="start" style="font-size:40px;fill:#E0A458">47</text>
+<text x="342" y="194" class="d" text-anchor="start">commits they span</text>
+<rect x="600" y="116" width="268" height="96" rx="10" fill="#111A1F" stroke="#21303A" stroke-width="1.5"/>
+<text x="624" y="168" class="h" text-anchor="start" style="font-size:40px;fill:#E0A458">3</text>
+<text x="624" y="194" class="d" text-anchor="start">weeks, one project</text>
+<rect x="882" y="116" width="268" height="96" rx="10" fill="#111A1F" stroke="#21303A" stroke-width="1.5"/>
+<text x="906" y="168" class="h" text-anchor="start" style="font-size:40px;fill:#E0A458">30</text>
+<text x="906" y="194" class="d" text-anchor="start">empty results for things that existed</text>
+<rect x="36" y="228" width="1128" height="74" rx="10" fill="#0D161A" stroke="#21303A" stroke-width="1.5"/>
+<text x="60" y="256" class="monod" text-anchor="start">$ npm run bearing:scorecard</text>
+<text x="60" y="284" class="mono" text-anchor="start" style="fill:#E8877A">⚠ Enforcement is 49% of graph interaction: 57 redirects vs 60 graph calls.</text>
+</svg>
