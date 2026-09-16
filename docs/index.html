@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>bearing · an intel layer for AI coding agents</title>
+<meta name="description" content="Your tests catch code that breaks. Nothing catches an agent that has drifted about what the code means. bearing gives coding agents north-stars that outrank docs, a task-core that survives compaction, and review by an expert in your domain — and keeps the evidence when its own rules are wrong.">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="bearing · an intel layer for AI coding agents">
+<meta property="og:description" content="Nothing catches an agent that has drifted about what the code means. North-stars that outrank docs, a task-core that survives compaction, and a tool that tells you when it is the problem.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://duduphudu.app/bearing/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Ccircle cx='24' cy='24' r='20' fill='none' stroke='%23C8873A' stroke-width='3'/%3E%3Cpath d='M24 7 L29 22 L24 41 L19 22 Z' fill='%23C8873A'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Sans:ital,wght@0,400..700;1,400&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+  :root {
+    --ground: #E7ECEA;
+    --surface: #F6F8F6;
+    --sunk: #DDE4E1;
+    --ink: #101619;
+    --muted: #57666D;
+    --rule: #C6D0CC;
+    --chip: #DAE2DE;
+    --brass: #8A5510;
+    --true: #10635A;
+    --warn: #A33322;
+    --display: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+    --body: "Instrument Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0A1013;
+      --surface: #111A1F;
+      --sunk: #0D161A;
+      --ink: #E3EAE7;
+      --muted: #8DA0A7;
+      --rule: #21303A;
+      --chip: #16222A;
+      --brass: #E0A458;
+      --true: #4FC2AE;
+      --warn: #E8877A;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #0A1013;
+    --surface: #111A1F;
+    --sunk: #0D161A;
+    --ink: #E3EAE7;
+    --muted: #8DA0A7;
+    --rule: #21303A;
+    --chip: #16222A;
+    --brass: #E0A458;
+    --true: #4FC2AE;
+    --warn: #E8877A;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font: 16px/1.62 var(--body);
+    padding-inline: 20px;
+    padding-block: 0 72px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 1080px; margin: 0 auto; }
+  p { margin: 0 0 14px; max-width: 66ch; }
+  a { color: var(--brass); text-underline-offset: .18em; text-decoration-thickness: 1px; }
+  a:focus-visible { outline: 2px solid var(--brass); outline-offset: 3px; border-radius: 3px; }
+  code { font-family: var(--mono); font-size: .86em; background: var(--chip); padding: .08em .36em; border-radius: 4px; overflow-wrap: anywhere; }
+  b, strong { font-weight: 600; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+
+  .label {
+    font: 500 11.5px/1.4 var(--mono);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 10px;
+  }
+
+  /* ---------------------------------------------------------------- nav */
+  .nav { display: flex; align-items: center; justify-content: space-between; gap: 12px 24px; flex-wrap: wrap; padding-block: 18px; border-bottom: 1px solid var(--rule); }
+  .brand { display: inline-flex; align-items: center; gap: 11px; text-decoration: none; color: var(--ink); font: 400 1.5rem/1 var(--display); letter-spacing: .01em; }
+  .brand svg { width: 28px; height: 28px; color: var(--brass); }
+  .nav-links { display: flex; flex-wrap: wrap; gap: 6px 20px; font: 400 13px/1.5 var(--mono); }
+  .nav-links a { color: var(--muted); text-decoration: none; border-bottom: 1px solid transparent; }
+  .nav-links a:hover { color: var(--brass); border-color: currentColor; }
+
+  /* ---------------------------------------------------------------- hero */
+  .hero { display: grid; gap: 40px; padding-block: 60px 44px; align-items: center; }
+  @media (min-width: 900px) { .hero { grid-template-columns: minmax(0, 1fr) 300px; } }
+  h1 {
+    font: 400 clamp(2.7rem, 6.4vw, 4.6rem)/1.02 var(--display);
+    letter-spacing: -.012em;
+    margin: 0 0 20px;
+    max-width: 18ch;
+    text-wrap: balance;
+  }
+  h1 em { font-style: italic; color: var(--brass); }
+  .lede { font-size: clamp(1.02rem, 1.5vw, 1.16rem); line-height: 1.6; max-width: 54ch; color: var(--muted); }
+  .lede b { color: var(--ink); font-weight: 600; }
+  .cta { display: flex; flex-wrap: wrap; gap: 10px; margin: 26px 0 0; }
+  .button { display: inline-flex; align-items: center; gap: 8px; padding: 11px 17px; border-radius: 4px; border: 1px solid var(--ink); color: var(--ink); text-decoration: none; font: 500 .94rem/1 var(--body); }
+  .button.primary { background: var(--ink); color: var(--ground); font-family: var(--mono); }
+  .button:hover { border-color: var(--brass); color: var(--brass); }
+  .button.primary:hover { background: var(--brass); border-color: var(--brass); color: var(--ground); }
+  .button:focus-visible { outline: 2px solid var(--brass); outline-offset: 3px; }
+  .button.primary { position: relative; cursor: pointer; font-size: .94rem; }
+  .button.primary .copied { position: absolute; inset: 0; display: grid; place-items: center; border-radius: 4px; background: var(--brass); color: var(--ground); opacity: 0; transition: opacity .16s ease; font-family: var(--mono); }
+  .button.primary.done .copied { opacity: 1; }
+  .facts { display: flex; flex-wrap: wrap; gap: 8px; margin: 26px 0 0; padding: 0; list-style: none; }
+  .facts li { font: 500 11.5px/1 var(--mono); letter-spacing: .04em; padding: 8px 11px; border-radius: 3px; background: var(--chip); color: var(--muted); }
+
+  .dial { margin: 0; display: grid; justify-items: center; gap: 14px; }
+  .dial svg { width: min(300px, 76vw); height: auto; aspect-ratio: 1; color: var(--muted); }
+  .dial-face { fill: var(--surface); }
+  .dial figcaption { font: 400 12px/1.5 var(--mono); color: var(--muted); text-align: center; max-width: 30ch; }
+  .dial-letter { font: 500 13px var(--mono); fill: var(--ink); opacity: .75; }
+  .dial-ring { fill: none; stroke: currentColor; opacity: .35; }
+  .needle { transform-origin: 120px 120px; animation: drift 9s cubic-bezier(.3, 0, .2, 1) infinite; }
+  .needle-north { fill: var(--brass); }
+  .needle-south { fill: currentColor; opacity: .5; }
+  .lock { transform-origin: 120px 120px; animation: lock-pulse 9s ease-in-out infinite; }
+  @keyframes drift {
+    0%, 6% { transform: rotate(0deg); }
+    46% { transform: rotate(23deg); }
+    58% { transform: rotate(26deg); }
+    66% { transform: rotate(-2deg); }
+    72%, 100% { transform: rotate(0deg); }
+  }
+  @keyframes lock-pulse {
+    0%, 58% { opacity: 0; }
+    62% { opacity: 1; }
+    80% { opacity: .9; }
+    100% { opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .needle, .lock { animation: none; }
+    .lock { opacity: .9; }
+  }
+
+  /* ---------------------------------------------------------------- sections */
+  section { padding-block: 46px; border-top: 1px solid var(--rule); }
+  h2 { font: 400 clamp(1.7rem, 3.4vw, 2.5rem)/1.12 var(--display); letter-spacing: -.01em; margin: 0 0 16px; max-width: 24ch; text-wrap: balance; }
+  h3 { font: 600 1.02rem/1.35 var(--body); margin: 0 0 6px; letter-spacing: -.005em; }
+  .section-lede { max-width: 62ch; color: var(--muted); }
+  .section-lede b { color: var(--ink); }
+
+  /* drift: two panels */
+  .drift { display: grid; gap: 18px; margin-top: 26px; }
+  @media (min-width: 820px) { .drift { grid-template-columns: 1fr 1fr; } }
+  .panel { border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); padding: 22px; }
+  .panel.bad { border-color: color-mix(in oklab, var(--warn) 45%, var(--rule)); }
+  .panel.good { border-color: color-mix(in oklab, var(--true) 45%, var(--rule)); }
+  .panel h3 { font: 500 12px/1.4 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+  .track { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+  .track li { display: grid; grid-template-columns: 22px 1fr; gap: 12px; align-items: start; padding-bottom: 16px; position: relative; }
+  .track li::before { content: ""; position: absolute; left: 10px; top: 16px; bottom: 0; width: 1px; background: var(--rule); }
+  .track li:last-child { padding-bottom: 0; }
+  .track li:last-child::before { display: none; }
+  .track .pip { width: 21px; height: 21px; border-radius: 50%; border: 1px solid var(--rule); background: var(--ground); display: grid; place-items: center; font: 500 10px var(--mono); color: var(--muted); }
+  .track .when { display: block; font: 500 11px/1.5 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  .track .what { display: block; font-size: .96rem; }
+  .track li.end .pip { border-color: currentColor; }
+  .panel.bad .track li.end { color: var(--warn); }
+  .panel.good .track li.end { color: var(--true); }
+  .panel.bad .track li.end .pip { background: color-mix(in oklab, var(--warn) 14%, var(--surface)); }
+  .panel.good .track li.end .pip { background: color-mix(in oklab, var(--true) 14%, var(--surface)); }
+
+  /* instruments grid */
+  .instruments { display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; margin-top: 30px; }
+  @media (min-width: 700px) { .instruments { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 1000px) { .instruments { grid-template-columns: repeat(3, 1fr); } }
+  .instrument { background: var(--surface); padding: 24px 22px 26px; }
+  .instrument .glyph { width: 44px; height: 44px; color: var(--muted); margin-bottom: 14px; display: block; }
+  .glyph .hair { fill: none; stroke: currentColor; stroke-width: 1.6; opacity: .8; }
+  .glyph .ink-stroke { fill: none; stroke: currentColor; stroke-width: 1.8; }
+  .glyph .brass-fill { fill: var(--brass); }
+  .glyph .ink-fill { fill: currentColor; }
+  .instrument .claim { font-weight: 600; margin: 0 0 8px; }
+  a.instrument { text-decoration: none; color: inherit; display: block; }
+  a.instrument:hover { background: color-mix(in oklab, var(--brass) 8%, var(--surface)); }
+  a.instrument h3 { color: var(--brass); }
+  .instrument .detail { color: var(--muted); font-size: .94rem; margin: 0; }
+
+  /* code + quotes */
+  pre { margin: 20px 0 0; padding: 18px 20px; background: var(--sunk); border: 1px solid var(--rule); border-radius: 6px; overflow-x: auto; font: 400 13.2px/1.7 var(--mono); }
+  pre b { color: var(--brass); font-weight: 500; }
+  pre .ok { color: var(--true); }
+  pre .no { color: var(--warn); }
+  pre .dim { color: var(--muted); }
+  blockquote { margin: 22px 0 0; padding: 16px 20px; border-left: 2px solid var(--brass); background: var(--surface); border-radius: 0 6px 6px 0; color: var(--muted); }
+  blockquote b { color: var(--ink); }
+  .two { display: grid; gap: 26px; margin-top: 8px; }
+  @media (min-width: 880px) { .two { grid-template-columns: 1fr 1fr; gap: 34px; } }
+
+  /* gauges + tables */
+  .gauge { margin: 22px 0 0; }
+  .gauge figcaption { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; font: 500 12px/1.5 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .gauge figcaption b { color: var(--ink); font-weight: 600; letter-spacing: 0; text-transform: none; font-size: 13px; }
+  .gauge svg { width: 100%; height: auto; display: block; }
+  .gauge .fill { fill: var(--brass); }
+  .gauge .empty { fill: var(--chip); }
+
+  .scroll { overflow-x: auto; margin-top: 24px; }
+  table { border-collapse: collapse; width: 100%; min-width: 520px; font-size: .94rem; }
+  caption { text-align: left; font: 500 11.5px/1.4 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding-bottom: 10px; }
+  th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--rule); }
+  thead th { font: 500 11.5px/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+  tbody th { font-weight: 500; }
+  td.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  tfoot td { font-weight: 600; }
+  .matrix td { text-align: center; font-size: 1.05rem; }
+  .matrix td.yes { color: var(--true); }
+  .matrix td.no { color: var(--muted); opacity: .55; }
+  .matrix thead th:not(:first-child) { text-align: center; }
+
+  /* receipts stats */
+  .stats { display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; margin-top: 26px; }
+  @media (min-width: 640px) { .stats { grid-template-columns: repeat(4, 1fr); } }
+  .stat { background: var(--surface); padding: 20px; }
+  .stat b { display: block; font: 400 2.1rem/1 var(--display); color: var(--brass); }
+  .stat span { display: block; margin-top: 8px; font-size: .9rem; color: var(--muted); }
+
+  .note { font-size: .88rem; color: var(--muted); }
+  .footer { border-top: 1px solid var(--rule); padding-top: 26px; margin-top: 46px; display: flex; flex-wrap: wrap; gap: 14px 26px; justify-content: space-between; align-items: baseline; font-size: .9rem; color: var(--muted); }
+  .footer a { color: var(--muted); }
+  .footer a:hover { color: var(--brass); }
+  .footer-links { display: flex; flex-wrap: wrap; gap: 6px 18px; font-family: var(--mono); font-size: 12.5px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="nav">
+  <a class="brand" href="#top">
+    <svg viewBox="0 0 48 48" aria-hidden="true">
+      <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" stroke-width="2.4" opacity=".55"/>
+      <path d="M24 6 L29 22 L24 42 L19 22 Z" fill="currentColor"/>
+      <circle cx="24" cy="24" r="2.6" fill="var(--ink)"/>
+    </svg>
+    bearing
+  </a>
+  <nav class="nav-links" aria-label="Sections">
+    <a href="#drift">The drift</a>
+    <a href="#instruments">Instruments</a>
+    <a href="#northstars">North-stars</a>
+    <a href="#cost">What it costs</a>
+    <a href="#receipts">Receipts</a>
+    <a href="#install">Install</a>
+    <a href="https://github.com/ReidenXerx/bearing">GitHub</a>
+  </nav>
+</header>
+
+<main id="top">
+
+<section class="hero" style="border-top: 0;">
+  <div>
+    <p class="label">npx bearing · an intel layer for AI coding agents</p>
+    <h1>Your tests catch code that breaks. Nothing catches an agent that has <em>drifted</em>.</h1>
+    <p class="lede">A drifted agent doesn't crash. It reads a doc you abandoned in March, re-proposes the feature you already measured and killed, and writes a convincing paragraph about it. <b>You nod. You find out three days later.</b></p>
+    <div class="cta">
+      <button class="button primary" type="button" data-copy="npx bearing">
+        <span class="cmd">npx bearing</span><span class="copied" aria-hidden="true">copied</span>
+      </button>
+      <a class="button" href="https://github.com/ReidenXerx/bearing">Read the source</a>
+      <a class="button" href="https://www.npmjs.com/package/bearing">npm</a>
+    </div>
+    <ul class="facts">
+      <li>11 modules · each works alone</li>
+      <li>~25,200 tokens a session</li>
+      <li>Claude Code · Zed · Codex</li>
+    </ul>
+  </div>
+  <figure class="dial">
+    <svg viewBox="0 0 240 240" role="img" aria-label="A bearing dial: the needle drifts off course, then a north-star pulls it back to true.">
+      <circle class="dial-face" cx="120" cy="120" r="112"/>
+      <circle class="dial-ring" cx="120" cy="120" r="112" stroke-width="1"/>
+      <circle class="dial-ring" cx="120" cy="120" r="86" stroke-width="1"/>
+      <line x1="120.0" y1="16.0" x2="120.0" y2="30.0" stroke="currentColor" stroke-width="2.2" opacity="1"/>
+      <line x1="129.1" y1="16.4" x2="128.6" y2="21.4" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="138.1" y1="17.6" x2="137.2" y2="22.5" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="146.9" y1="19.5" x2="144.6" y2="28.2" stroke="currentColor" stroke-width="1.4" opacity="0.75"/>
+      <line x1="155.6" y1="22.3" x2="153.9" y2="27.0" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="164.0" y1="25.7" x2="161.8" y2="30.3" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="172.0" y1="29.9" x2="167.5" y2="37.7" stroke="currentColor" stroke-width="1.4" opacity="0.75"/>
+      <line x1="179.7" y1="34.8" x2="176.8" y2="38.9" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="186.8" y1="40.3" x2="183.6" y2="44.2" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="193.5" y1="46.5" x2="183.6" y2="56.4" stroke="currentColor" stroke-width="2.2" opacity="1"/>
+      <line x1="199.7" y1="53.2" x2="195.8" y2="56.4" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="205.2" y1="60.3" x2="201.1" y2="63.2" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="210.1" y1="68.0" x2="202.3" y2="72.5" stroke="currentColor" stroke-width="1.4" opacity="0.75"/>
+      <line x1="214.3" y1="76.0" x2="209.7" y2="78.2" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="217.7" y1="84.4" x2="213.0" y2="86.1" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="220.5" y1="93.1" x2="211.8" y2="95.4" stroke="currentColor" stroke-width="1.4" opacity="0.75"/>
+      <line x1="222.4" y1="101.9" x2="217.5" y2="102.8" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="223.6" y1="110.9" x2="218.6" y2="111.4" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="224.0" y1="120.0" x2="210.0" y2="120.0" stroke="currentColor" stroke-width="2.2" opacity="1"/>
+      <line x1="223.6" y1="129.1" x2="218.6" y2="128.6" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="222.4" y1="138.1" x2="217.5" y2="137.2" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="220.5" y1="146.9" x2="211.8" y2="144.6" stroke="currentColor" stroke-width="1.4" opacity="0.75"/>
+      <line x1="217.7" y1="155.6" x2="213.0" y2="153.9" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="214.3" y1="164.0" x2="209.7" y2="161.8" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="210.1" y1="172.0" x2="202.3" y2="167.5" stroke="currentColor" stroke-width="1.4" opacity="0.75"/>
+      <line x1="205.2" y1="179.7" x2="201.1" y2="176.8" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="199.7" y1="186.8" x2="195.8" y2="183.6" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="193.5" y1="193.5" x2="183.6" y2="183.6" stroke="currentColor" stroke-width="2.2" opacity="1"/>
+      <line x1="186.8" y1="199.7" x2="183.6" y2="195.8" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="179.7" y1="205.2" x2="176.8" y2="201.1" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="172.0" y1="210.1" x2="167.5" y2="202.3" stroke="currentColor" stroke-width="1.4" opacity="0.75"/>
+      <line x1="164.0" y1="214.3" x2="161.8" y2="209.7" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="155.6" y1="217.7" x2="153.9" y2="213.0" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="146.9" y1="220.5" x2="144.6" y2="211.8" stroke="currentColor" stroke-width="1.4" opacity="0.75"/>
+      <line x1="138.1" y1="222.4" x2="137.2" y2="217.5" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="129.1" y1="223.6" x2="128.6" y2="218.6" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="120.0" y1="224.0" x2="120.0" y2="210.0" stroke="currentColor" stroke-width="2.2" opacity="1"/>
+      <line x1="110.9" y1="223.6" x2="111.4" y2="218.6" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="101.9" y1="222.4" x2="102.8" y2="217.5" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="93.1" y1="220.5" x2="95.4" y2="211.8" stroke="currentColor" stroke-width="1.4" opacity="0.75"/>
+      <line x1="84.4" y1="217.7" x2="86.1" y2="213.0" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="76.0" y1="214.3" x2="78.2" y2="209.7" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="68.0" y1="210.1" x2="72.5" y2="202.3" stroke="currentColor" stroke-width="1.4" opacity="0.75"/>
+      <line x1="60.3" y1="205.2" x2="63.2" y2="201.1" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="53.2" y1="199.7" x2="56.4" y2="195.8" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="46.5" y1="193.5" x2="56.4" y2="183.6" stroke="currentColor" stroke-width="2.2" opacity="1"/>
+      <line x1="40.3" y1="186.8" x2="44.2" y2="183.6" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="34.8" y1="179.7" x2="38.9" y2="176.8" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="29.9" y1="172.0" x2="37.7" y2="167.5" stroke="currentColor" stroke-width="1.4" opacity="0.75"/>
+      <line x1="25.7" y1="164.0" x2="30.3" y2="161.8" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="22.3" y1="155.6" x2="27.0" y2="153.9" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="19.5" y1="146.9" x2="28.2" y2="144.6" stroke="currentColor" stroke-width="1.4" opacity="0.75"/>
+      <line x1="17.6" y1="138.1" x2="22.5" y2="137.2" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="16.4" y1="129.1" x2="21.4" y2="128.6" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="16.0" y1="120.0" x2="30.0" y2="120.0" stroke="currentColor" stroke-width="2.2" opacity="1"/>
+      <line x1="16.4" y1="110.9" x2="21.4" y2="111.4" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="17.6" y1="101.9" x2="22.5" y2="102.8" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="19.5" y1="93.1" x2="28.2" y2="95.4" stroke="currentColor" stroke-width="1.4" opacity="0.75"/>
+      <line x1="22.3" y1="84.4" x2="27.0" y2="86.1" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="25.7" y1="76.0" x2="30.3" y2="78.2" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="29.9" y1="68.0" x2="37.7" y2="72.5" stroke="currentColor" stroke-width="1.4" opacity="0.75"/>
+      <line x1="34.8" y1="60.3" x2="38.9" y2="63.2" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="40.3" y1="53.2" x2="44.2" y2="56.4" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="46.5" y1="46.5" x2="56.4" y2="56.4" stroke="currentColor" stroke-width="2.2" opacity="1"/>
+      <line x1="53.2" y1="40.3" x2="56.4" y2="44.2" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="60.3" y1="34.8" x2="63.2" y2="38.9" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="68.0" y1="29.9" x2="72.5" y2="37.7" stroke="currentColor" stroke-width="1.4" opacity="0.75"/>
+      <line x1="76.0" y1="25.7" x2="78.2" y2="30.3" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="84.4" y1="22.3" x2="86.1" y2="27.0" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="93.1" y1="19.5" x2="95.4" y2="28.2" stroke="currentColor" stroke-width="1.4" opacity="0.75"/>
+      <line x1="101.9" y1="17.6" x2="102.8" y2="22.5" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="110.9" y1="16.4" x2="111.4" y2="21.4" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <text x="120.0" y="46.0" text-anchor="middle" dominant-baseline="central" class="dial-letter">N</text>
+      <text x="194.0" y="120.0" text-anchor="middle" dominant-baseline="central" class="dial-letter">E</text>
+      <text x="120.0" y="194.0" text-anchor="middle" dominant-baseline="central" class="dial-letter">S</text>
+      <text x="46.0" y="120.0" text-anchor="middle" dominant-baseline="central" class="dial-letter">W</text>
+      <g class="lock">
+        <path d="M120 22 L123.4 33.2 L134.6 36.6 L123.4 40 L120 51.2 L116.6 40 L105.4 36.6 L116.6 33.2 Z" fill="var(--true)"/>
+      </g>
+      <g class="needle">
+        <path d="M120 40 L127 120 L120 128 L113 120 Z" class="needle-north"/>
+        <path d="M120 200 L113 120 L120 112 L127 120 Z" class="needle-south"/>
+      </g>
+      <circle cx="120" cy="120" r="5.5" fill="var(--ground)" stroke="var(--ink)" stroke-width="1.6"/>
+    </svg>
+    <figcaption>The needle wanders. The north-star is what pulls it back.</figcaption>
+  </figure>
+</section>
+
+<section id="drift">
+  <p class="label">The failure this exists for</p>
+  <h2>Losing your bearings is a failure with no stack trace</h2>
+  <p class="section-lede">Nothing is red. The build passes, the tests pass, the paragraph is convincing. What changed is what the agent <b>believes the code means</b> — and belief has no assertion.</p>
+
+  <div class="drift">
+    <div class="panel bad">
+      <h3>Without</h3>
+      <ol class="track">
+        <li><span class="pip">1</span><span><span class="when">March</span><span class="what">A design doc is written, then abandoned.</span></span></li>
+        <li><span class="pip">2</span><span><span class="when">Today, 14:02</span><span class="what">The agent reads it and re-proposes the feature you measured and killed.</span></span></li>
+        <li><span class="pip">3</span><span><span class="when">Today, 14:03</span><span class="what">It writes a convincing paragraph. You nod.</span></span></li>
+        <li class="end"><span class="pip">4</span><span><span class="when">Three days later</span><span class="what">You find out.</span></span></li>
+      </ol>
+    </div>
+    <div class="panel good">
+      <h3>With bearing</h3>
+      <ol class="track">
+        <li><span class="pip">1</span><span><span class="when">Once</span><span class="what">You write NS-9 — the claim that the idea was measured and rejected.</span></span></li>
+        <li><span class="pip">2</span><span><span class="when">Today, 14:02</span><span class="what">The agent forms the same intent.</span></span></li>
+        <li><span class="pip">3</span><span><span class="when">Today, 14:02</span><span class="what">The north-star outranks the abandoned doc.</span></span></li>
+        <li class="end"><span class="pip">4</span><span><span class="when">One line later</span><span class="what">Caught, cited, and not re-proposed.</span></span></li>
+      </ol>
+    </div>
+  </div>
+
+  <blockquote>Built for a codebase where <b>81 documents</b> had come to contradict each other on live production parameters.</blockquote>
+</section>
+
+<section id="instruments">
+  <p class="label">What you get</p>
+  <h2>Eleven instruments. Pick any combination.</h2>
+  <p class="section-lede">Each works alone and none depends on another. Install one, install all eleven — <code>--features northstars,taskcore</code> is a complete install, and so is <code>--features all</code>.</p>
+  <div class="instruments">
+      <article class="instrument" id="m-northstars">
+        <svg class="glyph" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="15" class="hair"/><path d="M24 7 L27.6 19.6 L40 24 L27.6 28.4 L24 41 L20.4 28.4 L8 24 L20.4 19.6 Z" class="brass-fill"/></svg>
+        <h3>North-stars</h3>
+        <p class="claim">Stops killed ideas respawning six months later.</p>
+        <p class="detail">Numbered, authoritative claims about what your project is — they outrank every other doc, and they are re-injected as the session runs.</p>
+      </article>
+      <article class="instrument" id="m-goldpractices">
+        <svg class="glyph" viewBox="0 0 48 48" aria-hidden="true"><rect x="9" y="11" width="30" height="26" rx="3" class="hair"/><path d="M15 19h14M15 25h18M15 31h10" class="hair" stroke-linecap="round"/><path d="M13 36 L35 12" stroke="var(--brass)" stroke-width="2.6" stroke-linecap="round" fill="none"/></svg>
+        <h3>Gold practices</h3>
+        <p class="claim">The mistakes that get made anyway.</p>
+        <p class="detail">Numbered GP-# rules earned from real defects, shipped with bearing and outranked by your north-stars. Every rule carries a scar, or it is not in the file.</p>
+      </article>
+      <article class="instrument" id="m-taskcore">
+        <svg class="glyph" viewBox="0 0 48 48" aria-hidden="true"><rect x="9" y="9" width="30" height="30" rx="4" class="hair"/><rect x="15" y="9" width="18" height="11" rx="2" class="brass-fill"/><rect x="15" y="26" width="18" height="13" rx="2" class="ink-stroke"/></svg>
+        <h3>Task-core</h3>
+        <p class="claim">Survives compaction.</p>
+        <p class="detail">A dense save-state of the current task, written before the summary lands and drops the detail. It keeps the gotchas — what you already tried that failed.</p>
+      </article>
+      <article class="instrument" id="m-microscope">
+        <svg class="glyph" viewBox="0 0 48 48" aria-hidden="true"><circle cx="21" cy="20" r="11" class="hair"/><circle cx="21" cy="20" r="5" class="brass-fill"/><path d="M29 28 L40 39" class="ink-stroke" stroke-width="3.4" stroke-linecap="round"/></svg>
+        <h3>Microscope</h3>
+        <p class="claim">Catches code that runs perfectly and is still wrong.</p>
+        <p class="detail">One lens agent per slice of the change, each reviewing as an expert in your domain. Every finding must survive a pass that tries to refute it.</p>
+      </article>
+      <article class="instrument" id="m-consult">
+        <svg class="glyph" viewBox="0 0 48 48" aria-hidden="true"><path d="M10 14h28v18H24l-8 7v-7h-6z" class="hair"/><circle cx="24" cy="23" r="2.6" class="brass-fill"/><circle cx="16" cy="23" r="2.6" class="brass-fill" opacity=".45"/><circle cx="32" cy="23" r="2.6" class="brass-fill" opacity=".45"/></svg>
+        <h3>Consult</h3>
+        <p class="claim">Asks about the right things, decides the rest.</p>
+        <p class="detail">If the answer is in the repo it goes and finds it. If it exists only in your head, that is the question — with options, a tradeoff and a recommendation.</p>
+      </article>
+      <article class="instrument" id="m-minions">
+        <svg class="glyph" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 8v10" class="ink-stroke"/><path d="M24 18 L12 30 M24 18 L24 30 M24 18 L36 30" class="hair"/><circle cx="12" cy="34" r="4" class="brass-fill"/><circle cx="24" cy="34" r="4" class="brass-fill"/><circle cx="36" cy="34" r="4" class="brass-fill"/></svg>
+        <h3>Minions</h3>
+        <p class="claim">Parallelises wide mechanical work.</p>
+        <p class="detail">Cheap anchored subagents return citations — FOUND, CHECKED, MISSED — never verdicts. Invasive minions apply a decided change across disjoint slices.</p>
+      </article>
+      <article class="instrument" id="m-tsjs">
+        <svg class="glyph" viewBox="0 0 48 48" aria-hidden="true"><path d="M17 12 L9 24 L17 36" class="hair" stroke-linecap="round"/><path d="M31 12 L39 24 L31 36" class="hair" stroke-linecap="round"/><circle cx="24" cy="24" r="3.4" class="brass-fill"/></svg>
+        <h3>TypeScript / JavaScript</h3>
+        <p class="claim">Catches code that compiles and is still wrong.</p>
+        <p class="detail">Numbered TS-# rules for the traps tsc and ESLint stay silent about: an as that verifies nothing, a union that falls through, || overwriting a deliberate 0.</p>
+      </article>
+      <article class="instrument" id="m-frontend">
+        <svg class="glyph" viewBox="0 0 48 48" aria-hidden="true"><rect x="8" y="12" width="22" height="18" rx="3" class="hair"/><rect x="18" y="20" width="22" height="18" rx="3" class="ink-stroke"/><path d="M22 27h14" stroke="var(--brass)" stroke-width="2.4" stroke-linecap="round" fill="none"/></svg>
+        <h3>Frontend</h3>
+        <p class="claim">Stops the near-duplicate component.</p>
+        <p class="detail">Search by shape before building another table or panel. An optional prop with a safe default is yours; anything that changes what existing callers render is an ask.</p>
+      </article>
+      <article class="instrument" id="m-react">
+        <svg class="glyph" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="4" class="brass-fill"/><ellipse cx="24" cy="24" rx="17" ry="7" class="hair"/><ellipse cx="24" cy="24" rx="17" ry="7" class="hair" transform="rotate(60 24 24)"/><ellipse cx="24" cy="24" rx="17" ry="7" class="hair" transform="rotate(120 24 24)"/></svg>
+        <h3>React</h3>
+        <p class="claim">Catches the form bugs that fail silently.</p>
+        <p class="detail">A field owns its Controller; spreading field keeps the ref that focus-on-error needs; a name typed FieldPath<T> turns a renamed field into a compile error.</p>
+      </article>
+      <article class="instrument" id="m-gitnexus">
+        <svg class="glyph" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="12" r="4" class="brass-fill"/><circle cx="12" cy="32" r="4" class="brass-fill"/><circle cx="36" cy="32" r="4" class="brass-fill"/><circle cx="24" cy="24" r="4" class="ink-fill"/><path d="M24 16v4M21 26 L15 30M27 26 L33 30M15 32h18" class="hair"/></svg>
+        <h3>GitNexus</h3>
+        <p class="claim">Turns 40 text matches into a real code graph.</p>
+        <p class="detail">Hard gates redirect symbol greps to callers and flows, and a stale index blocks until it is refreshed. Needs the GitNexus MCP server.</p>
+      </article>
+      <article class="instrument" id="m-e2e">
+        <svg class="glyph" viewBox="0 0 48 48" aria-hidden="true"><rect x="8" y="11" width="32" height="26" rx="3" class="hair"/><path d="M8 18h32" class="hair"/><circle cx="13" cy="14.5" r="1.4" class="ink-fill"/><path d="M18 27 L22 31 L31 22" stroke="var(--brass)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <h3>E2E harness</h3>
+        <p class="claim">Turns "I checked it in the browser" into an exit code.</p>
+        <p class="detail">The shape and the scars, not another test framework: polling waits, assertions on the body, and blockWrites — test a destructive write without performing it. Opt-in.</p>
+      </article>
+      <a class="instrument not-a-module" href="#receipts">
+        <svg class="glyph" viewBox="0 0 48 48" aria-hidden="true"><path d="M12 9h24v30l-6-4-6 4-6-4-6 4z" class="hair"/><path d="M18 19h12M18 26h9" class="hair" stroke-linecap="round"/><circle cx="31" cy="26" r="2.2" class="brass-fill"/></svg>
+        <h3>Not a module</h3>
+        <p class="claim">The agent files bug reports against its own tooling.</p>
+        <p class="detail">And the kit tells you when its own gates are the problem — 93 of those reports are what the rules are calibrated against. See the receipts.</p>
+      </a>
+  </div>
+</section>
+
+<section id="northstars">
+  <p class="label">North-stars</p>
+  <h2>Falsifiable, or it's decoration</h2>
+  <div class="two">
+    <div>
+      <p class="section-lede">Docs rot. Comments lie. The agent's own inference fills the gaps — confidently. A north-star is a numbered claim about what your project <b>is</b>, written so that a conclusion could actually violate it.</p>
+      <p class="section-lede"><b>"Be careful with risk" can't be violated, so it can't catch anything.</b> The graveyard is the half people skip: an idea that was measured and killed stays killed until new evidence shows up.</p>
+      <p class="section-lede">If the agent can't cite a north-star for a load-bearing claim, it says so. That sentence is your drift alarm.</p>
+    </div>
+    <div>
+<pre><span class="dim">.bearing/north-stars.md</span>
+
+- <b>NS-4</b> — Win-rate is <span class="no">NEVER</span> a ranker. Only net
+         expectancy is a profitability claim.
+
+- <b>NS-9</b> — <span class="no">REJECTED</span>: averaging into a losing
+         position. Measured: adds fill only on
+         the weaker cases. Don't re-propose
+         without new evidence.</pre>
+    </div>
+  </div>
+
+  <h3 style="margin-top: 34px;">Gold practices — the half that isn't yours</h3>
+  <p class="section-lede">North-stars say what your project is. <code>gold-practices.md</code> ships with bearing and says how the work is done anywhere — numbered <code>GP-#</code>, cited the same way, and outranked by your <code>NS-#</code> whenever they disagree. <b>Every rule carries a scar, and a rule without one is not in the file.</b></p>
+  <blockquote><b>GP-3 — Test at the seam the bug lives at.</b> A unit test that passes an argument the real pipeline never produces is green and dead. <i>Scar: a context-window fix tested as <code>resolve(300_000, undefined)</code> while the shipped config always passed a number — so the fix could not run, and did not, for two releases.</i></blockquote>
+</section>
+
+<section id="cost">
+  <p class="label">The honest number</p>
+  <h2>What it costs your context — measured, not guessed</h2>
+  <p class="section-lede">Every intel layer costs tokens. Most don't tell you how many. bearing's share is fixed per session, and half of it isn't even bearing: the graph tool schemas are there whenever the MCP server is connected, with or without this package.</p>
+
+  <figure class="gauge">
+  <figcaption><span>200k context window</span><b>~25,200 tokens · 13%</b></figcaption>
+  <svg viewBox="0 0 600 26" role="img" aria-label="~25,200 tokens · 13% of 200k context window">
+    <rect class="fill" x="0" y="0" width="13" height="26" rx="2"/><rect class="fill" x="15" y="0" width="13" height="26" rx="2"/><rect class="fill" x="30" y="0" width="13" height="26" rx="2"/><rect class="fill" x="45" y="0" width="13" height="26" rx="2"/><rect class="fill" x="60" y="0" width="13" height="26" rx="2"/><rect class="empty" x="75" y="0" width="13" height="26" rx="2"/><rect class="empty" x="90" y="0" width="13" height="26" rx="2"/><rect class="empty" x="105" y="0" width="13" height="26" rx="2"/><rect class="empty" x="120" y="0" width="13" height="26" rx="2"/><rect class="empty" x="135" y="0" width="13" height="26" rx="2"/><rect class="empty" x="150" y="0" width="13" height="26" rx="2"/><rect class="empty" x="165" y="0" width="13" height="26" rx="2"/><rect class="empty" x="180" y="0" width="13" height="26" rx="2"/><rect class="empty" x="195" y="0" width="13" height="26" rx="2"/><rect class="empty" x="210" y="0" width="13" height="26" rx="2"/><rect class="empty" x="225" y="0" width="13" height="26" rx="2"/><rect class="empty" x="240" y="0" width="13" height="26" rx="2"/><rect class="empty" x="255" y="0" width="13" height="26" rx="2"/><rect class="empty" x="270" y="0" width="13" height="26" rx="2"/><rect class="empty" x="285" y="0" width="13" height="26" rx="2"/><rect class="empty" x="300" y="0" width="13" height="26" rx="2"/><rect class="empty" x="315" y="0" width="13" height="26" rx="2"/><rect class="empty" x="330" y="0" width="13" height="26" rx="2"/><rect class="empty" x="345" y="0" width="13" height="26" rx="2"/><rect class="empty" x="360" y="0" width="13" height="26" rx="2"/><rect class="empty" x="375" y="0" width="13" height="26" rx="2"/><rect class="empty" x="390" y="0" width="13" height="26" rx="2"/><rect class="empty" x="405" y="0" width="13" height="26" rx="2"/><rect class="empty" x="420" y="0" width="13" height="26" rx="2"/><rect class="empty" x="435" y="0" width="13" height="26" rx="2"/><rect class="empty" x="450" y="0" width="13" height="26" rx="2"/><rect class="empty" x="465" y="0" width="13" height="26" rx="2"/><rect class="empty" x="480" y="0" width="13" height="26" rx="2"/><rect class="empty" x="495" y="0" width="13" height="26" rx="2"/><rect class="empty" x="510" y="0" width="13" height="26" rx="2"/><rect class="empty" x="525" y="0" width="13" height="26" rx="2"/><rect class="empty" x="540" y="0" width="13" height="26" rx="2"/><rect class="empty" x="555" y="0" width="13" height="26" rx="2"/><rect class="empty" x="570" y="0" width="13" height="26" rx="2"/><rect class="empty" x="585" y="0" width="13" height="26" rx="2"/>
+  </svg>
+</figure>
+  <figure class="gauge">
+  <figcaption><span>1M context window</span><b>~25,200 tokens · 2.5%</b></figcaption>
+  <svg viewBox="0 0 600 26" role="img" aria-label="~25,200 tokens · 2.5% of 1M context window">
+    <rect class="fill" x="0" y="0" width="13" height="26" rx="2"/><rect class="empty" x="15" y="0" width="13" height="26" rx="2"/><rect class="empty" x="30" y="0" width="13" height="26" rx="2"/><rect class="empty" x="45" y="0" width="13" height="26" rx="2"/><rect class="empty" x="60" y="0" width="13" height="26" rx="2"/><rect class="empty" x="75" y="0" width="13" height="26" rx="2"/><rect class="empty" x="90" y="0" width="13" height="26" rx="2"/><rect class="empty" x="105" y="0" width="13" height="26" rx="2"/><rect class="empty" x="120" y="0" width="13" height="26" rx="2"/><rect class="empty" x="135" y="0" width="13" height="26" rx="2"/><rect class="empty" x="150" y="0" width="13" height="26" rx="2"/><rect class="empty" x="165" y="0" width="13" height="26" rx="2"/><rect class="empty" x="180" y="0" width="13" height="26" rx="2"/><rect class="empty" x="195" y="0" width="13" height="26" rx="2"/><rect class="empty" x="210" y="0" width="13" height="26" rx="2"/><rect class="empty" x="225" y="0" width="13" height="26" rx="2"/><rect class="empty" x="240" y="0" width="13" height="26" rx="2"/><rect class="empty" x="255" y="0" width="13" height="26" rx="2"/><rect class="empty" x="270" y="0" width="13" height="26" rx="2"/><rect class="empty" x="285" y="0" width="13" height="26" rx="2"/><rect class="empty" x="300" y="0" width="13" height="26" rx="2"/><rect class="empty" x="315" y="0" width="13" height="26" rx="2"/><rect class="empty" x="330" y="0" width="13" height="26" rx="2"/><rect class="empty" x="345" y="0" width="13" height="26" rx="2"/><rect class="empty" x="360" y="0" width="13" height="26" rx="2"/><rect class="empty" x="375" y="0" width="13" height="26" rx="2"/><rect class="empty" x="390" y="0" width="13" height="26" rx="2"/><rect class="empty" x="405" y="0" width="13" height="26" rx="2"/><rect class="empty" x="420" y="0" width="13" height="26" rx="2"/><rect class="empty" x="435" y="0" width="13" height="26" rx="2"/><rect class="empty" x="450" y="0" width="13" height="26" rx="2"/><rect class="empty" x="465" y="0" width="13" height="26" rx="2"/><rect class="empty" x="480" y="0" width="13" height="26" rx="2"/><rect class="empty" x="495" y="0" width="13" height="26" rx="2"/><rect class="empty" x="510" y="0" width="13" height="26" rx="2"/><rect class="empty" x="525" y="0" width="13" height="26" rx="2"/><rect class="empty" x="540" y="0" width="13" height="26" rx="2"/><rect class="empty" x="555" y="0" width="13" height="26" rx="2"/><rect class="empty" x="570" y="0" width="13" height="26" rx="2"/><rect class="empty" x="585" y="0" width="13" height="26" rx="2"/>
+  </svg>
+</figure>
+
+  <div class="two" style="margin-top: 30px;">
+    <div class="scroll">
+      <table>
+        <caption>Fixed, every session</caption>
+        <tbody>
+          <tr><th scope="row">bearing's contract block</th><td class="num">~10,300</td></tr>
+          <tr><th scope="row">GitNexus MCP tool schemas (17 tools)</th><td class="num">~14,900</td></tr>
+        </tbody>
+        <tfoot><tr><td>total</td><td class="num">~25,200</td></tr></tfoot>
+      </table>
+      <p class="note" style="margin-top: 12px;">Skills load on demand, not up front — a session typically pulls one or two, at about 1,500 tokens each. Install less and bearing's own share falls to ~2,400 (intel only) or ~1,600 (north-stars and task-core).</p>
+    </div>
+    <div class="scroll">
+      <table>
+        <caption>What one "what breaks if I change this?" costs</caption>
+        <thead><tr><th>repo</th><th class="num">graph</th><th class="num">grep + read</th><th class="num">saved</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">lead-sniffer <span class="note">(234 files)</span></th><td class="num">65,645</td><td class="num">199,737</td><td class="num">3.0×</td></tr>
+          <tr><th scope="row">Sourcerer-Be <span class="note">(709 files)</span></th><td class="num">71,446</td><td class="num">945,338</td><td class="num">13.2×</td></tr>
+        </tbody>
+      </table>
+      <p class="note" style="margin-top: 12px;">Like for like: every call site, against grep's hits plus the 40 lines around each one. Asking only for counts and risk is cheaper again — 19× and 125× — but that is a different question, so it is a different row.</p>
+    </div>
+  </div>
+
+  <p class="section-lede" style="margin-top: 26px;"><b>Don't take my repos for it.</b> <code>npm run bearing:token-benchmark</code> runs the same comparison on yours — and reports the losses too. On lead-sniffer the graph loses one symbol in eight, and the table says so. A benchmark that never admits that is advertising.</p>
+</section>
+
+<section id="receipts">
+  <p class="label">It tells you when it's the problem</p>
+  <h2>A tool that can block your work should show you when it was wrong to</h2>
+  <p class="section-lede">Every enforcement tool believes its own rules are correct. This one assumes they might not be — and keeps the evidence, with the graph state that produced it: version, node and edge counts, the indexed commit. Not "the graph was wrong once", but <b>this query, on this index, at this commit</b>.</p>
+
+  <div class="stats">
+    <div class="stat"><b>93</b><span>fallback reports filed by the agent against its own tooling</span></div>
+    <div class="stat"><b>47</b><span>commits they span</span></div>
+    <div class="stat"><b>3</b><span>weeks on one real project</span></div>
+    <div class="stat"><b>30</b><span>of them empty results for things that demonstrably existed</span></div>
+  </div>
+
+  <p class="section-lede" style="margin-top: 24px;">Read together they stopped being complaints and became a diagnosis. That corpus is what the rules are calibrated against — and the gates are measured too:</p>
+<pre>$ npm run bearing:scorecard
+
+<span class="no">⚠</span> Enforcement is 49% of graph interaction:
+  57 redirects vs 60 graph calls.</pre>
+  <p class="note" style="margin-top: 14px;">It refuses to draw the conclusion for you. <b>Nothing leaves your repo. There is no telemetry endpoint.</b></p>
+</section>
+
+<section id="runtimes">
+  <p class="label">Where it fires by itself</p>
+  <h2>Enforcement needs hooks, and not every runtime has them</h2>
+  <p class="section-lede">Only Claude Code exposes tool-interception hooks, and a dash is not always absence: the task-core skill and its contract section install everywhere, so you can invoke it by name — what Claude Code adds is the nudge that fires it unprompted. Minions and the GitNexus gates genuinely need the hooks and are not there at all.</p>
+  <div class="scroll">
+    <table class="matrix">
+      <thead><tr><th>Fires without being asked</th><th>Claude Code</th><th>Zed</th><th>Codex</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">North-stars — loaded as authority</th><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td></tr>
+        <tr><th scope="row">North-stars — re-anchored mid-session</th><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td><td class="no"><span aria-hidden="true">·</span><span class="sr">not on this runtime</span></td><td class="no"><span aria-hidden="true">·</span><span class="sr">not on this runtime</span></td></tr>
+        <tr><th scope="row">Gold practices — cited as authority</th><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td></tr>
+        <tr><th scope="row">Task-core — survives compaction</th><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td><td class="no"><span aria-hidden="true">·</span><span class="sr">not on this runtime</span></td><td class="no"><span aria-hidden="true">·</span><span class="sr">not on this runtime</span></td></tr>
+        <tr><th scope="row">Microscope — domain-expert review</th><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td><td class="no"><span aria-hidden="true">·</span><span class="sr">not on this runtime</span></td></tr>
+        <tr><th scope="row">Consult — ask vs decide</th><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td><td class="no"><span aria-hidden="true">·</span><span class="sr">not on this runtime</span></td></tr>
+        <tr><th scope="row">Minions — anchored fan-out</th><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td><td class="no"><span aria-hidden="true">·</span><span class="sr">not on this runtime</span></td><td class="no"><span aria-hidden="true">·</span><span class="sr">not on this runtime</span></td></tr>
+        <tr><th scope="row">TypeScript / JavaScript — traps that compile</th><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td></tr>
+        <tr><th scope="row">Frontend — structure and blast radius</th><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td></tr>
+        <tr><th scope="row">React — what the types do not catch</th><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td></tr>
+        <tr><th scope="row">GitNexus — hard gates</th><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td><td class="no"><span aria-hidden="true">·</span><span class="sr">not on this runtime</span></td><td class="no"><span aria-hidden="true">·</span><span class="sr">not on this runtime</span></td></tr>
+        <tr><th scope="row">E2E — browser verification</th><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="install">
+  <p class="label">Install</p>
+  <h2>One command, and it explains each module before it writes anything</h2>
+  <div class="two">
+    <div>
+<pre>$ <b>npx bearing</b>
+<span class="dim"># interactive — explains each module</span>
+
+$ npx bearing install . \
+    --runtime claude \
+    --features northstars,taskcore
+
+<span class="dim"># or take the lot</span>
+$ npx bearing install . --features all
+
+<span class="dim"># later</span>
+$ npx bearing update .      <span class="dim"># keeps your choices</span>
+$ npx bearing uninstall .   <span class="dim"># restores what it overwrote</span></pre>
+      <p class="note" style="margin-top: 14px;">Node ≥ 22.9.0 · a git repo · macOS, Linux, Windows or WSL. The GitNexus module additionally needs the <a href="https://github.com/abhigyanpatwari/GitNexus">GitNexus</a> MCP server. Then restart your IDE.</p>
+    </div>
+    <div>
+      <h3>Contributing to a repo that isn't yours?</h3>
+      <p class="section-lede">A normal install is a team decision: hooks, skills and a contract, committed, and everyone who pulls gets them. That is right for a repo you own and wrong for one you contribute to.</p>
+<pre>$ npx bearing install . <b>--stealth</b></pre>
+      <p class="section-lede" style="margin-top: 14px;">Stealth makes one promise, and it is testable: <b><code>git status</code> is exactly as clean after the install as it was before.</b> Ignores go in <code>.git/info/exclude</code>, which is per-clone and untracked, so the rules can't travel. It refuses to convert a repo where bearing is already committed — un-tracking it for your whole team is a deliberate, visible act.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <div>
+    <div class="footer-links">
+      <a href="https://github.com/ReidenXerx/bearing">GitHub</a>
+      <a href="https://www.npmjs.com/package/bearing">npm</a>
+      <a href="https://github.com/ReidenXerx/bearing/blob/main/docs/QUICKSTART.md">Quickstart</a>
+      <a href="https://github.com/ReidenXerx/bearing/blob/main/docs/ARCHITECTURE.md">Architecture</a>
+      <a href="https://github.com/ReidenXerx/bearing/blob/main/docs/ZED.md">Zed + local models</a>
+      <a href="https://github.com/ReidenXerx/bearing/blob/main/CHANGELOG.md">Changelog</a>
+    </div>
+    <p class="note" style="margin-top: 12px;">ISC · built by <a href="https://duduphudu.app/">DuduPhudu</a> · v1.3.0</p>
+  </div>
+  <p class="note" style="max-width: 34ch;">Nothing here phones home. The receipts, the scorecard and the benchmark all stay in your repo.</p>
+</footer>
+
+</div>
+<script>
+  // The install line is the one thing anyone came here to take away.
+  document.querySelectorAll("[data-copy]").forEach(function (button) {
+    button.addEventListener("click", function () {
+      var done = function () {
+        button.classList.add("done");
+        setTimeout(function () { button.classList.remove("done"); }, 1100);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(button.dataset.copy).then(done, function () {});
+      }
+    });
+  });
+</script>
+</body>
+</html>

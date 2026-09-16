@@ -20,6 +20,8 @@ Your tests catch code that breaks. Nothing catches an agent that has drifted abo
 npx bearing
 ```
 
+**[duduphudu.app/bearing](https://duduphudu.app/bearing/)** — what it does, what it costs, and where it fails
+
 </div>
 
 <img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/drift.svg" alt="Without bearing a stale premise is found three days later; with it the north-star outranks the doc and it is caught in one line." width="100%">
