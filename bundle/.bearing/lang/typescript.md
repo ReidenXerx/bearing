@@ -163,37 +163,52 @@ agent reasoned its way to the right answer, said nothing, and was read as having
   carries a `default`, or a `never` exhaustiveness check** — the table replaces both, and finding one
   of those in place is not evidence the switch has earned its keep.
 
-  ```ts
-  // Key is a closed union → the table IS the exhaustiveness check, and no default is reachable.
-  const RATE = { standard: 1, express: 1.8 } as const satisfies Record<Tier, number>;
-  export const rateFor = (tier: Tier) => RATE[tier];
+  **Every read goes through the guard — never `TABLE[key]`, whatever the key's type says.** Write
+  the guard once, in a function that closes over the table, and pass the table in as a literal so
+  the function holds the only reference to it. Nothing else can index it, so nothing else can
+  forget to guard it. Search the repo for one before writing it — it is five lines, and two copies
+  drift.
 
-  // Key arrives from outside → guard the lookup, then fall back. This is the `default` branch.
-  const RATE: Record<string, number> = { standard: 1, express: 1.8 };
-  export function rateFor(tier: string): number {
-    return Object.hasOwn(RATE, tier) ? RATE[tier] : 1;
+  ```ts
+  export function lookup<K extends PropertyKey, V>(table: Record<K, V>) {
+    const has = (key: PropertyKey): key is K => Object.hasOwn(table, key);
+    return {
+      has,
+      get: (key: PropertyKey): V | undefined => (has(key) ? table[key] : undefined),
+    };
   }
+
+  // `satisfies` keeps the exhaustiveness check: drop a Tier and this line stops compiling.
+  const RATE = lookup({ standard: 1, express: 1.8 } satisfies Record<Tier, number>);
+  // `?? 1` is the old `default` branch — reachable now, because a key typed `Tier` can still lie.
+  export const rateFor = (tier: Tier): number => RATE.get(tier) ?? 1;
   ```
 
-  Three things bite in exactly this pattern, and all three compile:
+  **A union type on the key is a claim, not a check.** A generated API client, `JSON.parse`, a
+  query-string parser or an `as` hands you a value *typed* as the union without looking at it —
+  most generated clients only cast. A table read directly with that key returns
+  `Object.prototype.toString` for `"toString"`, which is truthy, so an `if (!TABLE[key])` validity
+  check passes it and a `?? fallback` never fires. Observed: a validator accepted `toString` and
+  `constructor` as members of a generated enum — the field was typed as that enum, so the rule's
+  closed-union branch was taken unguarded — and displayed a function's source text as a code.
+
+  Three more things bite in exactly this pattern, and all three compile:
 
   - **Fall back with `??`, never `||`** (`TS-8`). A table holding `0`, `""` or `false` is a table
     whose real entries the `||` replaces with the default — the one case the caller meant.
-  - **Guard the lookup when the key comes from outside.** `RATE["constructor"]` returns a function
-    rather than `undefined`, so `?? fallback` never fires and the function returns something absurd
-    instead of the default. `Object.hasOwn`, a `Map`, or `Object.create(null)` as the table.
-
-    **`in` is not a guard**: `"constructor" in RATES` is `true`, because `in` walks the prototype
-    chain exactly like the lookup does. It is the natural-looking fix and it changes nothing.
+  - **`in` is not a guard**: `"constructor" in RATES` is `true`, because `in` walks the prototype
+    chain exactly like the lookup does. It is the natural-looking fix and it changes nothing. Nor is
+    `Object.create(null)` on its own: the first `{ ...table }` puts the prototype back.
   - **The compiler will not remind you the fallback is needed**: `RATE[key]` is typed as the value
     type even for a key that was never set, unless `noUncheckedIndexedAccess` is on (`TS-5`).
+    `get` is typed `V | undefined` whatever that flag says.
 
-  **Not when — the key is not a closed union.** The table pays for itself by making a missing
-  member a compile error, and an untrusted `string` key buys none of that: nothing constrains it, so
-  there is nothing for the compiler to check. What the conversion *does* buy you is a prototype
-  chain the `switch` never had — `switch` compares values and cannot resolve `"constructor"` to
-  anything. Measured: the table form shipped `rateFor("constructor") === Object`; the switch form
-  returned the fallback for every hostile key. Keep the `switch`, or use a `Map`.
+  **An untrusted `string` key is fine through `lookup`** — `has` narrows it to the union in the
+  same step. What it does not get is the exhaustiveness check: nothing constrains a `string`, so
+  the table buys readability there, not a compile error. Measured: the unguarded table shipped
+  `rateFor("constructor") === Object`; the switch it replaced returned the fallback for every
+  hostile key, because `switch` compares values and has no prototype chain. Converting a switch to
+  an *unguarded* table is a regression; to `lookup`, it is not. A `Map` is equally safe.
 
   **Not when:** the branches **narrow a discriminated union** — and narrowing is the whole test,
   not whether a `default` is present. `switch (e.kind)` gives each branch
@@ -206,7 +221,8 @@ agent reasoned its way to the right answer, said nothing, and was read as having
   **Cashes out as:** with a closed-union key, adding a variant becomes **one compile error at the
   table** instead of a silent fallthrough at every site that should have handled it — the guarantee
   `TS-3` buys with a `never` branch, without needing the branch. And the `default` stops being
-  control flow and becomes a value, which can be read, tested and overridden.
+  control flow and becomes a value, which can be read, tested and overridden. At run time, a key
+  whose type lied gets the fallback instead of a method off `Object.prototype`.
 
 - **TS-19** — **A second hand-written type for one contract is a second source of truth, and only
   one of them will be updated.**
