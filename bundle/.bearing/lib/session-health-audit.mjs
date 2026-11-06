@@ -90,14 +90,17 @@ export function auditKitHealth(root) {
       }
     })
     .find((s) => s?.hooks);
-  const hooksOk = Boolean(settings?.hooks?.PreToolUse?.length && settings?.hooks?.SessionStart?.length);
+  // SessionStart only. This required a PreToolUse hook too, which bearing no longer installs (the
+  // GitNexus gates are retired, NS-25) — left as it was, it would report every correct install as
+  // broken, the false alarm NS-20 warns about in the other direction.
+  const hooksOk = Boolean(settings?.hooks?.SessionStart?.length);
   if (runtimes.has("claude")) checks.push({
     id: "hooks",
     ok: hooksOk,
     label: "Claude hooks",
     detail: hooksOk
-      ? `Enforcement (${config.mode})`
-      : "no PreToolUse/SessionStart hooks in .claude/settings*.json",
+      ? "SessionStart brief wired"
+      : "no SessionStart hook in .claude/settings*.json",
   });
 
   const mcpPath = path.join(root, ".mcp.json");

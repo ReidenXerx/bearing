@@ -26,13 +26,12 @@ const lib = (rel) =>
 // here. A non-zero PreToolUse exit DENIES the call, so all five guards failing at once blocked Grep,
 // Read, Edit, Bash and MCP simultaneously, explained by a raw Node stack trace. A false deny is
 // worse than a missed gate (NS-5); with no libs there is no verdict to give, so give none.
-let gnContext;
+let bumpScore;
 try {
-  ({ gnContext } = await lib("claude-emit.mjs"));
+  ({ bumpScore } = await lib("session-primer.mjs"));
 } catch {
   process.exit(0);
 }
-const { bumpScore } = await lib("session-primer.mjs");
 
 // COUNT ONLY. This used to append a breadcrumb to `~/.claude/projects/<slug>/memory/MEMORY.md`,
 // which is Claude Code's memory INDEX — loaded into every session, one pointer line per memory.

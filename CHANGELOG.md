@@ -2,7 +2,67 @@
 
 All notable changes to `bearing` are documented here.
 
-## Unreleased — the e2e harness photographs its own failures
+## Unreleased — GitNexus becomes opt-in, and nothing blocks your tools any more
+
+### Changed — GitNexus is opt-in and user-invoked; the gates are retired
+
+bearing used to force the graph: five PreToolUse guards denied symbol greps, large reads, edits before
+`impact` and commits before `detect_changes`, and the always-on contract told the agent GitNexus was
+"the default reasoning layer for every task". That was measured and it did not pay:
+
+- **Across the fleet** (36 sessions, 8 repos) the gates produced one redirect for every graph call, and
+  of 169 written fallback reasons, half were questions the graph had never indexed (linked worktrees,
+  other branches, other repos) and a quarter were the graph confidently wrong (JSX components,
+  object-literal properties, injected receivers).
+- **In a 180-run eval** on a fixture with hand-verified answer keys (`eval/teaching/`), the gates cost
+  4–5× per solved task, on Sonnet and Opus alike, and changed correctness on one task out of ten.
+- **A teaching-moments replacement** (nudges at the moment the graph should win) cut cost 36–43%
+  against the gates, but its moments almost never fired: they were tied to actions while the graph
+  wins on questions, and real searches never matched. Rejected too (NS-29).
+
+So, now:
+
+- **GitNexus is not in the default install.** The interactive installer explains what it is, what it
+  costs and when it helps, then asks — default No. `--features +gitnexus` installs it directly.
+- **Installed, it pushes nothing.** No PreToolUse hook at all, no nudges, no graph text in CLAUDE.md
+  (the contract went from ~10,300 tokens to ~2,600 by default). The MCP server and the index stay.
+- **One skill replaces nineteen.** `bearing-gitnexus` loads when you ask for the graph ("use
+  gitnexus…", `/bearing-gitnexus`) and carries what the contract used to: check scope first
+  (`node .bearing/lib/index-scope.mjs`), where the graph wins, where its counts are only a floor, and
+  how to read every tool's own uncertainty.
+- **`bearing update` strips the gates from existing installs**: the guard registrations leave
+  `settings.json` (your own hooks stay), the guard files and gate libs are removed, the retired skills
+  and their links go, and a second update changes nothing. Verified against a real 1.3.0 install.
+- **`bearing:fallback`** stays (NS-15) but only files a GitNexus failure report — there is no window
+  to open. `mode` in `.bearing/hooks.json` is now ignored.
+- **The Zed profile no longer disables grep.**
+- **Refreshes no longer generate GitNexus skills.** `analyze` ran with `--skills` (a `gitnexus-area-*`
+  skill per cluster) and without `--skip-skills` (GitNexus's own standard skills) — 26 model-visible
+  skills in one repo, every session. Existing generated ones are not bearing's and are left in place;
+  delete `.claude/skills/gitnexus-*` yourself if you want them gone.
+
+North-stars: NS-25 rewritten ("GitNexus is opt-in and user-invoked"), NS-28 and NS-29 in the
+graveyard, NS-5/6 merged, NS-26 ("the index is one tree") and NS-27 ("count what changed, against an
+answer key the graph did not write") added.
+
+### Fixed — found while removing the gates
+
+- **Retired skills left dangling symlinks** in `.claude/skills/` on every update: linking only ever
+  added. Links into bearing's own store whose skill is gone are now pruned; anything else is the
+  user's and is not touched.
+- **A frontend-only install lost its UI rules**: the "Writing UI" contract section was tagged
+  `gitnexus` as well as `frontend`, though it never mentions the graph.
+- **The feature picker told users the TypeScript and React rule packs need Playwright**: every
+  non-recommended module was tagged with the e2e module's cost.
+- **The health audit required a PreToolUse hook**, so it would have reported every correct install as
+  broken once the guards were gone.
+- **An update rewrote a team's committed `.mcp.json` command** on any machine without `gitnexus` on
+  PATH (`"gitnexus"` became `npx -y gitnexus@latest`): the transport already followed the committed
+  file, the command did not, and `update` passed this machine's recorded command as if it were a flag.
+  Now a flag on this run, then the committed file, then this machine. Caught by CI, which has no
+  `gitnexus` installed; the test now uses a command no PATH probe returns, so it fails everywhere.
+- **Core shipped graph code to every install**: `claude-emit.mjs`, which every hook loads, imported
+  the classifier and the stale policy (NS-2).
 
 ### Fixed — the GitNexus stats block still reached commits
 

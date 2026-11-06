@@ -72,7 +72,7 @@ In a real target repo after update:
 - [ ] Claude files exist when runtime includes Claude:
   - `.claude/settings.json` (or `settings.local.json` under stealth)
   - `.mcp.json`
-  - `.claude/skills/bearing-workspace`
+  - `.claude/skills/bearing-gitnexus` (when the gitnexus module is installed)
 - [ ] Zed files exist when runtime includes Zed:
   - `.zed/settings.json`
   - `.agents/skills/gitnexus-workspace`

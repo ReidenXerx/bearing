@@ -105,9 +105,7 @@ async function main() {
     }
   }
 
-  lines.push(
-    `Hook mode: ${config.mode} (set GITNEXUS_MODE=guide to nudge-only)`,
-  );
+  lines.push("GitNexus is opt-in: use it when the user asks — the bearing-gitnexus skill says how.");
   lines.push("");
   lines.push(
     "Reasoning stack: query → context → trace/pdg_query/cypher → impact → detect_changes",
@@ -119,24 +117,7 @@ async function main() {
     "Known A→B paths → trace; control/data flow → pdg_query; field/override/process graph questions → cypher.",
   );
   lines.push("");
-  lines.push("Skill routing:");
-  lines.push(
-    "  Security/input/auth/db/file/exec/rendering → bearing-security-review",
-  );
-  lines.push("  API route or response payload → bearing-api-routes");
-  lines.push("  PR / branch review → bearing-pr-review");
-  lines.push("  Rename/refactor → bearing-refactoring");
-  lines.push("  Bug/failure path → bearing-debugging");
-  lines.push("  Add a feature / new code → bearing-feature-dev");
-  lines.push("  What to test / coverage → bearing-testing");
-  lines.push("  Slow / hot path → bearing-performance");
-  lines.push("  Judge structure (coupling/cycles) → bearing-architecture-review");
-  lines.push("  Work across layers → bearing-layered-systems");
-  lines.push("  Milestone deep audit (feature done / pre-ship / big refactor) → bearing-microscope");
-  lines.push(
-    "  Unknown feature/codebase map → bearing-exploring or bearing-imaging",
-  );
-  lines.push("  Hook block explanation → bearing-enforcement");
+  lines.push("Skill: bearing-gitnexus — scope check, where the graph wins, where its count is a floor.");
   lines.push("");
   lines.push("Session start (copy-paste):");
   lines.push(`  ${mcpReadContext(repo)}`);
