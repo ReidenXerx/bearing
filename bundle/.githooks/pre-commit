@@ -64,10 +64,13 @@ if [[ "$REFRESH_RC" != "0" ]]; then
   mark_failed "pre-commit: index refresh failed"
 fi
 
-# Keep AGENTS.md/CLAUDE.md free of the volatile GitNexus stats block that
-# full-pdg's analyze re-injects, so commits don't carry machine-specific churn.
+# Keep AGENTS.md/CLAUDE.md free of the volatile GitNexus stats block that `analyze` writes, so commits
+# don't carry machine-specific churn. Stripping the files on disk was not enough: git commits the
+# INDEX, so a block staged before this hook ran went into the commit anyway, and the stripped files
+# then showed up as changes for the next `git add -A` to sweep into an unrelated commit. `--staged`
+# strips the staged copies too; git re-reads the index after this hook returns.
 if [[ -f ".bearing/lib/stabilize-agent-docs.mjs" ]]; then
-  node .bearing/lib/stabilize-agent-docs.mjs . || true
+  node .bearing/lib/stabilize-agent-docs.mjs . --staged || true
 fi
 
 # Only worth running if there is an index to smoke-test; after a failed build it would just report

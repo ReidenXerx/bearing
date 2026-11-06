@@ -4,6 +4,24 @@ All notable changes to `bearing` are documented here.
 
 ## Unreleased — the e2e harness photographs its own failures
 
+### Fixed — the GitNexus stats block still reached commits
+
+The pre-commit hook stripped the volatile stats block from `AGENTS.md` / `CLAUDE.md` on DISK, on
+the belief that this kept commits clean. It never did: git commits the INDEX. A block staged before
+the hook ran — an `analyze` bearing did not launch, then `git add -A` — went into the commit anyway,
+and the stripped files then showed up as ` D AGENTS.md` / ` M CLAUDE.md` for the next `git add -A`
+to sweep into an unrelated commit. One real repository's history alternated add / remove / add
+across four feature commits.
+
+The hook now runs the stabilizer with `--staged`, which also strips the staged copies, using git
+plumbing (`cat-file` → strip → `hash-object -w` → `update-index --cacheinfo`) rather than `git add`.
+That way a partially staged `CLAUDE.md` does not pick up its unstaged rest. Because the calls inherit
+`GIT_INDEX_FILE`, this works for `git commit`, `commit -a` and `commit -- <paths>`. It only touches
+docs the commit already changes. A block that is already in HEAD is left for one deliberate cleanup
+commit rather than written into an unrelated one. Until now, nothing had ever made a commit through
+this hook: the earlier tests only checked the text transform. The new test drives real commits in
+every mode, and it fails against the old hook.
+
 ### Changed — TS-18 guards every table read, not only the ones whose key looks untrusted
 
 `TS-18` used to split on the key's type: a closed union read the table directly, an untrusted
