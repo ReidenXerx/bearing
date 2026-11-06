@@ -56,6 +56,11 @@ answer key the graph did not write") added.
   non-recommended module was tagged with the e2e module's cost.
 - **The health audit required a PreToolUse hook**, so it would have reported every correct install as
   broken once the guards were gone.
+- **An update rewrote a team's committed `.mcp.json` command** on any machine without `gitnexus` on
+  PATH (`"gitnexus"` became `npx -y gitnexus@latest`): the transport already followed the committed
+  file, the command did not, and `update` passed this machine's recorded command as if it were a flag.
+  Now a flag on this run, then the committed file, then this machine. Caught by CI, which has no
+  `gitnexus` installed; the test now uses a command no PATH probe returns, so it fails everywhere.
 - **Core shipped graph code to every install**: `claude-emit.mjs`, which every hook loads, imported
   the classifier and the stale policy (NS-2).
 
