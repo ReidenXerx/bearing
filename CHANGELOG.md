@@ -64,6 +64,19 @@ answer key the graph did not write") added.
 - **Core shipped graph code to every install**: `claude-emit.mjs`, which every hook loads, imported
   the classifier and the stale policy (NS-2).
 
+### Fixed — stealth hid the user's own nested files from `git status`
+
+A stealth install writes its excludes to `.git/info/exclude`, and most of them were unanchored:
+`.vscode/`, `.mcp.json`, `.agents/`, `.zed/`, `.githooks/`, `.gitnexus/`, `.bearing/`. In gitignore
+syntax, a pattern whose only slash is a trailing one matches at ANY depth. So a monorepo package's
+own `.vscode/settings.json` or `.mcp.json` disappeared from `git status`, and a new file there would
+never be committed, with nothing to say so. Every line is now anchored to the repo root. Root paths
+are hidden exactly as before. The block is rewritten on every update, so existing stealth installs
+are corrected by their next `bearing update`, which leaves exactly one block (NS-3).
+
+It was found on bearing's own repo, where a leftover stealth block swallowed `bundle/.bearing/`: a
+newly written library was invisible to git while the hook that loads it was not.
+
 ### Fixed — the GitNexus stats block still reached commits
 
 The pre-commit hook stripped the volatile stats block from `AGENTS.md` / `CLAUDE.md` on DISK, on
