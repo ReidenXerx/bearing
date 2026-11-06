@@ -4,6 +4,19 @@ All notable changes to `bearing` are documented here.
 
 ## Unreleased — the e2e harness photographs its own failures
 
+### Changed — TS-18 guards every table read, not only the ones whose key looks untrusted
+
+`TS-18` used to split on the key's type: a closed union read the table directly, an untrusted
+`string` went through `Object.hasOwn`. But a key's type says nothing about whether anything checked
+it. A generated API client that only casts JSON to an enum hands over a union-typed `"toString"`,
+`TABLE["toString"]` is a truthy function, and an `if (!TABLE[key])` validity check waves it
+through. That is how a real review found `toString` and `constructor` accepted as enum members.
+So the rule now has one form: a small `lookup(table)` closure that holds the only reference to the
+table and guards every read. `satisfies Record<Union, V>` keeps the compile-time exhaustiveness
+check, and `get` returns `V | undefined` whether or not `noUncheckedIndexedAccess` is on. The
+contract line and the skill's review table say the same thing, and the review table now also flags
+`!table[key]` used as a validity check.
+
 ### Added — `tools/audit-checks.js`, and the fixtures that prove it works
 
 The recurring failure in a harness is not a broken app, it is a check that reports something untrue —
