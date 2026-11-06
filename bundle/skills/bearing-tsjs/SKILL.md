@@ -58,7 +58,8 @@ Before you write, decide the boundary (above). Then, in order of how often it co
   establish the shape from a schema, a sample or the producer's source, do not invent fields. Keep
   it `unknown`, narrow what you use, and say what you could not establish.
 - **About to write a `switch`?** If every branch just *returns a value*, it is a lookup function —
-  an object plus a fallback, where the `default` becomes the returned value (`TS-18`). If the
+  a guarded lookup over an object plus a fallback, where the `default` becomes the returned value
+  (`TS-18`). Read it through `Object.hasOwn` every time, even when the key is typed as a union. If the
   branches narrow a discriminated union, keep the `switch`: that is the case where it beats a map.
 
 ## Reviewing
@@ -80,7 +81,7 @@ these specifically, in this order:
 | A type whose fields nobody could have observed | `TS-19` | What evidence names these fields? If none, it should be `unknown`. |
 | A `switch`/`else if` whose branches only return values | `TS-18` | Does any branch narrow a union or do work? If not, it is a table. |
 | A table lookup falling back with `\|\|` | `TS-18`, `TS-8` | Can a real entry be `0`, `""` or `false`? |
-| `table[key]` where `key` came from outside | `TS-18` | What does `table["constructor"]` return? |
+| `table[key]`, or `!table[key]` as a validity check | `TS-18` | What does `table["constructor"]` return? Was the key's union type checked at run time, or only cast? |
 
 A finding here is worth stating even when the code "works today" — every one of these is a bug that
 is already written and simply has not been reached yet.
