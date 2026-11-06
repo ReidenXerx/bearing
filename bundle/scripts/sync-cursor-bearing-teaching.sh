@@ -170,25 +170,11 @@ if [[ -f ".bearing/lib/stabilize-agent-docs.mjs" ]]; then
   node .bearing/lib/stabilize-agent-docs.mjs . || true
 fi
 
-# Claude is the only runtime that enforces (NS-14), so this smoke test is the last thing standing
-# between a dead gate and a user who believes they are protected. It drove Cursor's shell wrapper;
-# it drives the Claude hook the way Claude Code does — node, JSON on stdin, CLAUDE_PROJECT_DIR set.
-if wants_claude && [[ -f .claude/hooks/bearing-grep-guard.mjs ]]; then
-  info "  [2/2] Quick hook smoke test"
-  if printf '%s' '{"tool_name":"Grep","tool_input":{"pattern":"handlePayment"}}' \
-    | CLAUDE_PROJECT_DIR="$ROOT" node .claude/hooks/bearing-grep-guard.mjs 2>/dev/null \
-    | grep -q 'deny'; then
-    ok "Symbol-grep block verified"
-  else
-    warn "Hook smoke test inconclusive — restart Claude Code and re-run bearing:verify"
-  fi
-fi
+# No hook smoke test: bearing ships no GitNexus gate to test (NS-25, NS-28). The graph is opt-in and
+# used when the user asks for it, through the bearing-gitnexus skill.
 
 echo ""
-ok "Teaching bundle v2 installed (enforcement hooks active)"
+ok "GitNexus skills and index helpers installed (opt-in: ask for the graph to use it)"
 if wants_claude; then
-echo "    Enforcement:   grep/read/edit/bash guards in .claude/hooks (staleness block)"
+echo "    Graph skill:   bearing-gitnexus (loads when you mention GitNexus or the code graph)"
 fi
-echo "    Graph imaging: bearing-imaging skill"
-echo "    Master skill:  bearing-workspace"
-echo "    If blocked:    bearing-enforcement skill"

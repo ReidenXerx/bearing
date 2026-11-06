@@ -1,52 +1,32 @@
 # bearing — agent skills
 
-Use this index to route agent work to the right reusable playbook. Skills marked **core** need no GitNexus; the rest teach the graph tool surface and install with the `gitnexus` module. The canonical skill store is installed into target repos at `.bearing/skills/` and symlinked into Cursor (`.cursor/skills/`) and Zed (`.agents/skills/`) based on runtime.
+Each skill is a playbook that loads when its moment comes. The canonical store is installed into target
+repos at `.bearing/skills/` and linked into `.claude/skills/` (Claude Code) and `.agents/skills/` (Zed),
+depending on the runtime. A skill ships only with the module that owns it.
 
-| Skill | Use when | Minimum graph path |
+| Skill | Module | Loads when |
 | --- | --- | --- |
-| `bearing-workspace` | General session orientation, “what should I use?” questions | READ context → query/context as needed |
-| `bearing-enforcement` | Understanding hook blocks and graph-first rules | Follow hook replacement call exactly |
-| `bearing-impact-analysis` | Any pre-edit blast-radius question | `impact({ target, direction: "upstream" })` before edit; `detect_changes` before done |
-| `bearing-security-review` | Auth/session/input/file/db/exec/rendering/webhook changes | `query` → `context` → `explain` → `pdg_query` → `trace`/PDG impact |
-| `bearing-pr-review` | PR or branch review | `npm run bearing:branch-status -- <base>` → `detect_changes({ scope: "compare", branch })` |
-| `bearing-api-routes` | API handler or payload shape changes | `api_impact` before route edits; `shape_check` for payload drift |
-| `bearing-debugging` | Bugs, failing flows, “how did we reach this?” | `query` symptom → `context` suspect → `trace`/process/PDG as needed |
-| `bearing-refactoring` | Rename/extract/split/move work | `impact` → `context` → `rename({ dry_run: true })` or manual plan |
-| `bearing-feature-dev` | Adding a feature / new code — reuse + wire in | `query` existing pattern → `context` integration point → `impact` before wiring |
-| `bearing-testing` | What to test / coverage gaps | `impact` → affected processes = test surface; `cypher` for untested symbols |
-| `bearing-performance` | Slow / hot path / cost | `query`/process → `trace` depth → `cypher` fan-in → `pdg_query flows` |
-| `bearing-architecture-review` | Judge coupling/cohesion/cycles/god objects | `clusters` → `check(cycles)` → `cypher` cross-area `CALLS` → `impact` hubs |
-| `bearing-layered-systems` | Working across layers (controller→service→repo→model) | `process`/`trace` through layers → `impact` widened across boundaries |
-| `bearing-northstars` **core** | Reading, citing and maintaining the project's authoritative fixed points | read `.bearing/northstars.md` → cite `NS-#` on consequential claims → propose (never silently edit) |
-| `bearing-taskcore` **core** | Context filling, or recovering after compaction | write `.bearing/.task-core.md` before compaction → read it back first on recovery |
-| `bearing-microscope` **core** | Milestone deep audit — adopts your project's expert ROLE, then multi-lens, verified, in waves | map (`clusters`/`processes`) → spawn per-slice lenses (2 kinds) → adversarial verify → synthesize |
-| `bearing-exploring` | Learning an unfamiliar codebase or feature | READ context → `query({ search_query })` → process/resource reads |
-| `bearing-imaging` | Producing architectural maps or mental models | clusters/processes → query → context on hubs |
-| `bearing-scenarios` | Checklist-style common workflows | Use the scenario checklist matching the task |
-| `bearing-cli` | GitNexus CLI setup/troubleshooting | Prefer kit commands first, then raw `gitnexus` CLI |
-| `bearing-local` | Local model / Ollama / lower-tier agent usage | Use small, explicit MCP calls; avoid broad file reads |
-| `bearing-guide` | Human/team explanation of the workflow | Reference when onboarding contributors |
+| `bearing-northstars` | northstars | reading, citing or maintaining the project's authoritative fixed points (`NS-#`) |
+| `bearing-taskcore` | taskcore | edits pile up since the save-state was written, at a milestone, or on recovery after compaction |
+| `bearing-microscope` | microscope | a milestone — feature done, pre-ship, a shared-code refactor — or "audit / is this solid?" |
+| `bearing-pr` | microscope | opening a pull request or writing its description |
+| `bearing-consult` | consult | deciding whether to ask the human or just decide |
+| `bearing-minions` | minions | wide mechanical GATHERING — every call site, every file on the old API |
+| `bearing-invasive-minions` | minions | applying a DECIDED, mechanical change across many independent sites |
+| `bearing-tsjs` | tsjs | writing or reviewing non-trivial TypeScript/JavaScript |
+| `bearing-frontend` | frontend | building UI structure, or editing a shared component |
+| `bearing-react` | react | react-hook-form and other React traps that compile and are still wrong |
+| `bearing-e2e` | e2e | verifying behaviour in a real browser, or taking a screenshot of a view |
+| `bearing-gitnexus` | gitnexus (opt-in) | **only when you ask for it** — "use gitnexus", "use the graph", `/bearing-gitnexus` |
 
-## Routing shortcuts
+## GitNexus is opt-in, and you invoke it
 
-- Security-sensitive task → `bearing-security-review`
-- API route or response payload → `bearing-api-routes`
-- PR/branch review → `bearing-pr-review`
-- Rename/refactor → `bearing-refactoring`
-- Add a feature / new code → `bearing-feature-dev`
-- What to test / coverage → `bearing-testing`
-- Slow / hot path → `bearing-performance`
-- Judge structure (coupling/cycles/god objects) → `bearing-architecture-review`
-- Work across layers (controller→service→repo→model) → `bearing-layered-systems`
-- Milestone deep audit (feature done / pre-ship / big refactor) → `bearing-microscope`
-- Bug trace/failure path → `bearing-debugging`
-- Unknown codebase/feature → `bearing-exploring` or `bearing-imaging`
-- Hook blocked an action → `bearing-enforcement`
+GitNexus is not installed by default (`--features +gitnexus`, or say yes when the installer asks). When
+it is installed, nothing pushes the agent towards it: there are no gates, no nudges, and no always-on
+instructions. Mention it in your prompt when you think the graph will help — a cross-module blast
+radius, the indirect dependents of a diff, a structural question with no text form — and the
+`bearing-gitnexus` skill loads with the scope check, where the graph wins, and where its counts are
+only a floor.
 
-## Non-negotiables
-
-- If the index is stale, refresh first: `npm run bearing:agent-refresh`.
-- Before editing runtime code, run impact analysis.
-- Before commit or “done”, run `detect_changes`.
-- For high-risk runtime/security changes, use PDG tools when available.
-- No taint finding / no PDG layer is not proof of safety.
+Why it works this way: `.bearing/northstars.md` NS-25, NS-28 and NS-29, and the eval in
+`eval/teaching/REPORT.md`.

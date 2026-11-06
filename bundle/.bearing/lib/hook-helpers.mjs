@@ -173,7 +173,11 @@ export function retiredHookKeysInUse(root) {
   return found;
 }
 
-/** @typedef {'enforce' | 'guide'} HookMode */
+/**
+ * enforce: today's gates (being retired, NS-28) · guide: gates as nudges · teach: no gates — the
+ * moments in teach.mjs speak when the graph wins (NS-25) · off: no gates and no moments.
+ * @typedef {'enforce' | 'guide' | 'teach' | 'off'} HookMode
+ */
 /** @typedef {'none' | 'light' | 'medium' | 'full'} EditSensitivity */
 
 const DEFAULT_SOURCE_RES = [
@@ -297,7 +301,7 @@ export function loadHookConfig(root) {
 function applyHookConfigFile(cfg, cfgPath) {
   try {
     const file = JSON.parse(fs.readFileSync(cfgPath, "utf8"));
-    if (file.mode) cfg.mode = file.mode === "guide" ? "guide" : "enforce";
+    if (file.mode) cfg.mode = parseHookMode(file.mode);
     if (typeof file.readLineThreshold === "number")
       cfg.readLineThreshold = file.readLineThreshold;
     if (typeof file.stalenessCacheTtlMs === "number")
@@ -336,12 +340,19 @@ function applyHookConfigFile(cfg, cfgPath) {
 }
 
 function hookModeFromEnv() {
-  const m = (
-    process.env.GITNEXUS_MODE ||
-    process.env.GITNEXUS_HOOK_MODE ||
-    "enforce"
-  ).toLowerCase();
-  return m === "guide" ? "guide" : "enforce";
+  return parseHookMode(process.env.GITNEXUS_MODE || process.env.GITNEXUS_HOOK_MODE || "enforce");
+}
+
+/**
+ * `teach` and `off` are real modes. This used to map every value except "guide" to "enforce", so
+ * `"mode": "teach"` silently ran the gates it was written to replace — and an eval comparing teach
+ * against gates would have compared the gates with themselves. An unknown value still means
+ * enforce: a typo must not quietly switch enforcement off.
+ * @param {unknown} m @returns {HookMode}
+ */
+export function parseHookMode(m) {
+  const v = String(m ?? "").toLowerCase();
+  return v === "guide" || v === "teach" || v === "off" ? v : "enforce";
 }
 
 /**
@@ -378,36 +389,6 @@ export function isSourceCodePath(filePath, config, root) {
   norm = norm.replace(/^\.\//, "");
   if (!config.sourceExtRe.test(norm)) return false;
   return config.sourcePathRes.some((re) => re.test(norm));
-}
-
-/**
- * @param {string} pattern
- * @param {ReturnType<typeof loadHookConfig>} config
- */
-export function isBroadSourceGlob(pattern, config) {
-  const norm = (pattern ?? "").replace(/\\/g, "/").trim();
-  if (!norm) return false;
-  // The question is whether this sweeps source BROADLY, but the regexes below only ask "does it
-  // start in a source directory / end in a source extension". Those are different questions, and
-  // the gap ran both ways: `src/order.js` was blocked and `**/*` was allowed.
-
-  // No wildcard at all → a literal path. Glob is being used to check whether one known file
-  // exists, and `query` cannot answer a question about a path you already have. Blocking it is a
-  // false deny with advice the agent cannot act on (NS-5).
-  if (!/[*?{[]/.test(norm)) return false;
-
-  // Catch-alls sweep every source file in the repo while naming no directory and no extension —
-  // so the prefix/extension rules missed precisely the broadest patterns that exist.
-  if (/^(?:\.\/)?(?:\*{1,2}|\*\*\/\*)$/.test(norm)) return true;
-
-  // `**/*.{ts,tsx}` is as broad as `**/*.ts`; the single-extension rule alone never matched the
-  // brace form, which is the way most people actually write a multi-language sweep.
-  const brace = norm.match(/^\*\*\/\*\.\{([^}]+)\}$/);
-  if (brace) {
-    return brace[1].split(",").some((e) => config.sourceExtRe.test(`x.${e.trim()}`));
-  }
-
-  return config.broadGlobRes.some((re) => re.test(norm));
 }
 
 /**
@@ -489,39 +470,6 @@ export function mcpReadContext(repo) {
   return `READ gitnexus://repo/${repo}/context`;
 }
 
-/**
- * One playbook line for first nudge.
- * @param {object} hint
- * @param {string} repo
- */
-export function playbookForHint(hint, repo) {
-  const renamePlaybook = playbookRenameForHint(hint, repo);
-  if (renamePlaybook) return renamePlaybook;
-
-  const cypherPlaybook = playbookCypherForHint(hint, repo);
-  if (cypherPlaybook) return cypherPlaybook;
-
-  const snippet = (hint.snippet ?? "").replace(/"/g, "'").slice(0, 80);
-
-  if (hint.codeTask) {
-    const topic = hint.fileHint
-      ? path.basename(hint.fileHint, path.extname(hint.fileHint))
-      : hint.symbolHint || "<symbol>";
-    return `PLAYBOOK: ${mcpImpact(topic, repo)} → edit → ${mcpDetectChanges(repo)}`;
-  }
-  if (hint.reasoning) {
-    const sym = hint.symbolHint || "<symbol>";
-    return `PLAYBOOK: ${mcpContext(sym, repo)} → ${mcpImpact(sym, repo)}`;
-  }
-  if (hint.architecture || hint.explore) {
-    return `PLAYBOOK: ${mcpQuery({ query: snippet || "<topic>", taskContext: snippet, goal: "flows", repo })} → READ process/{name}`;
-  }
-  if (hint.symbolHint) {
-    return `PLAYBOOK: ${mcpContext(hint.symbolHint, repo)}`;
-  }
-  return "";
-}
-
 const DENY_CACHE_FILE = ".gitnexus-deny-cache.json";
 
 /** @param {string} root */
@@ -562,20 +510,6 @@ export function applyHookMode(result, mode) {
     };
   }
   return result;
-}
-
-/**
- * @param {boolean} graphUsedThisSession
- * @param {string} [root]
- */
-export function midSessionGraphNudge(graphUsedThisSession, root = "") {
-  if (!graphUsedThisSession || !root) return "";
-  return hookAgentMessage(
-    root,
-    "mid-session-graph",
-    "MID-SESSION: query (graph+embeddings) for orient; context/impact for symbols and edits; cypher for field access / N-hop chains / overrides.",
-    "",
-  );
 }
 
 /**

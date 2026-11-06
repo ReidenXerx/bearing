@@ -1,6 +1,6 @@
 ---
 name: bearing-pr
-description: "Use when opening a pull request, writing or improving a PR description, or preparing a branch for review. Examples: \"Open a PR for this\", \"Write the PR description\", \"Is this branch ready to review?\". For reviewing SOMEONE ELSE'S PR, use bearing-pr-review instead."
+description: "Use when opening a pull request, writing or improving a PR description, or preparing a branch for review. Examples: \"Open a PR for this\", \"Write the PR description\", \"Is this branch ready to review?\"."
 ---
 
 # Writing a PR someone can actually review

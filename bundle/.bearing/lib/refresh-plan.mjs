@@ -32,7 +32,11 @@ const EMBED_CAP = "0"; // no cap — the 50k default silently truncates large re
  * @returns {RefreshPlan}
  */
 export function planRefresh(stale, opts = {}) {
-  const skills = "--skills";
+  // NO GRAPH SKILLS. `--skills` had analyze generate a gitnexus-area-* skill per cluster, and without
+  // `--skip-skills` it also installs GitNexus's own standard skills — 26 of them in one repo, all
+  // model-visible every session and all steering the agent to the graph. GitNexus is opt-in and
+  // user-invoked (NS-25): bearing-gitnexus is the one skill, and it loads when the user asks.
+  const skills = "--skip-skills";
 
   // STEALTH: tell the indexer not to write into AGENTS.md / CLAUDE.md at all.
   //

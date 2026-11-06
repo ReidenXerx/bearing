@@ -3,47 +3,9 @@
  * Session-first-tool nudge + flag management for GitNexus hooks.
  */
 import fs from 'node:fs';
-import { howToRun } from './how-to-run.mjs';
 import os from 'node:os';
 import path from 'node:path';
-import { playbookForHint, mcpReadContext, repoName, clearDenyCache } from './hook-helpers.mjs';
-
-/**
- * Which feature modules the user actually chose, per the install manifest.
- *
- * The manifest is the ONLY authoritative record. Probing for a lib file instead does not work:
- * `session-primer.mjs` (needed by north-stars and task-core) imports `check-staleness.mjs`, so
- * `coreLibClosure()` absorbs the whole staleness chain into core and ships it even when GitNexus
- * was declined. File presence therefore says "core pulled this in", never "the user wants this".
- *
- * @returns {Set<string>|null} chosen features, or null when unknowable (no manifest, unreadable,
- *   or a pre-1.0.3 manifest with no `features` field) — callers must then fall back, never assume.
- */
-export function installedFeatures(root) {
-  // Newest first: during an interrupted upgrade both can exist, and the legacy copy is the stale
-  // one — reading it would report a module selection the user already changed.
-  for (const rel of ['.bearing/manifest.json', '.gitnexus/agent-kit-manifest.json']) {
-    try {
-      const m = JSON.parse(fs.readFileSync(path.join(root, rel), 'utf8'));
-      if (Array.isArray(m.features)) return new Set(m.features);
-    } catch {
-      /* missing or malformed → try the next location, then fall back */
-    }
-  }
-  return null;
-}
-
-/**
- * Is the GitNexus enforcement module installed? Manifest first; for pre-1.0.3 installs (no
- * `features` field) fall back to the file probe, which was accurate back when every install
- * included GitNexus. Fail toward ENABLED: an old GitNexus repo silently losing graph-first
- * discipline is a worse regression than an intel-only repo seeing one stale line.
- */
-export function graphFeatureEnabled(root) {
-  const features = installedFeatures(root);
-  if (features) return features.has('gitnexus');
-  return fs.existsSync(path.join(root, '.bearing/lib/check-staleness.mjs'));
-}
+import { repoName, clearDenyCache } from './hook-helpers.mjs';
 
 export function sessionPaths(root) {
   const stateDir = path.join(root, '.bearing');
@@ -279,29 +241,6 @@ export function bumpNorthStarCounter(root, reset = false, key = null) {
   return next;
 }
 
-// ── Classical fallback escape hatch ──────────────────────────────────────────
-// When GitNexus returns wrong / suspicious / incomplete info while the index is
-// FRESH, graph-first enforcement would otherwise trap the agent. grantClassicalFallback
-// opens a BOUNDED, REASONED, LOGGED window where classical Grep/Read/shell are allowed
-// (evaluateStalePolicy honours it → phase classical_fallback). It is surfaced in the
-// session brief + `gitnexus:status`, so it can never be a silent lazy bypass.
-
-const FALLBACK_TTL_MS = 15 * 60 * 1000; // 15 min, then enforcement auto-resumes
-
-/** @param {string} root @param {string} reason @param {number} [ttlMs] */
-export function grantClassicalFallback(root, reason = '', ttlMs = FALLBACK_TTL_MS) {
-  const { stateDir, fallbackFlag } = sessionPaths(root);
-  fs.mkdirSync(stateDir, { recursive: true });
-  fs.writeFileSync(
-    fallbackFlag,
-    JSON.stringify(
-      { at: new Date().toISOString(), reason: String(reason).slice(0, 300), ttlMs },
-      null,
-      2,
-    ),
-  );
-}
-
 // ── Fallback → telemetry bridge (a "where did GitNexus fail" report log) ──────
 // The grant flag is transient (expires/clears). To see WHERE GitNexus fell short and
 // report it upstream, every fallback also appends a durable record — the reason plus the
@@ -373,42 +312,6 @@ export function readFallbackReports(root) {
   return out;
 }
 
-/** @param {string} root */
-export function revokeClassicalFallback(root) {
-  try {
-    fs.unlinkSync(sessionPaths(root).fallbackFlag);
-  } catch {
-    /* ignore */
-  }
-}
-
-/**
- * Active classical-fallback grant, or null. Auto-expires (and self-cleans) after ttlMs.
- * @param {string} root
- * @returns {{ reason: string, remainingMs: number, expiresAt: string } | null}
- */
-export function fallbackGrant(root) {
-  let rec;
-  try {
-    rec = JSON.parse(fs.readFileSync(sessionPaths(root).fallbackFlag, 'utf8'));
-  } catch {
-    return null;
-  }
-  const startedAt = Date.parse(rec.at);
-  if (!Number.isFinite(startedAt)) return null;
-  const ttl = typeof rec.ttlMs === 'number' ? rec.ttlMs : FALLBACK_TTL_MS;
-  const remainingMs = startedAt + ttl - Date.now();
-  if (remainingMs <= 0) {
-    revokeClassicalFallback(root);
-    return null;
-  }
-  return {
-    reason: rec.reason || '',
-    remainingMs,
-    expiresAt: new Date(startedAt + ttl).toISOString(),
-  };
-}
-
 /**
  * Record which GitNexus MCP tool the agent used, so edit/commit guards can enforce
  * "impact before edit" and "detect_changes before commit" once per session.
@@ -434,10 +337,6 @@ export function isImpactUsed(root) {
 }
 
 /** @param {string} root */
-export function isDetectUsed(root) {
-  return fs.existsSync(sessionPaths(root).detectUsedFlag);
-}
-
 /**
  * Lightweight enforcement scorecard — counts how often the kit redirected the agent
  * from a lazy pattern to the graph. Surfaced in agent-brief / `gitnexus:scorecard`.
@@ -462,76 +361,6 @@ export function bumpScore(root, key) {
   } catch {
     /* best effort — never block a tool on telemetry */
   }
-}
-
-/** @param {string} root */
-/**
- * Is the enforcement layer earning its keep, or is it just getting in the way?
- *
- * The kit collects every number needed to answer that and never asked the question. A real session
- * logged 60 graph calls against 49 grep redirects and 8 read redirects — the gates were the
- * dominant interaction, not the graph — and nothing surfaced it. The operator only found out
- * because an agent wrote a report by hand.
- *
- * Deliberately conservative: it stays silent below a traffic floor (early ratios are noise), and
- * every finding names the concrete knob to turn. A diagnosis nobody can act on is just another
- * unactionable message (NS-6).
- *
- * @param {Record<string, number>} counts scorecard counts
- * @returns {{ level: 'warn'|'info', headline: string, advice: string }[]}
- */
-export function diagnoseEnforcement(counts = {}) {
-  const n = (k) => Number(counts[k] ?? 0);
-  const redirects = n('grepRedirects') + n('readRedirects');
-  const graphCalls = n('graphCalls');
-  const findings = [];
-  if (redirects + graphCalls < 15) return findings; // too little traffic to mean anything
-
-  // Not `redirects > graphCalls`: a real reported session ran 57 redirects against 60 graph calls
-  // and read as "the gates are the dominant interaction" to the operator, yet a strict majority
-  // rule stays silent on it. What matters is that enforcement is a large SHARE of the session.
-  if (redirects >= graphCalls * 0.75) {
-    findings.push({
-      level: 'warn',
-      headline:
-        `Enforcement is ${Math.round((redirects / (redirects + graphCalls)) * 100)}% of graph interaction: ` +
-        `${redirects} redirects vs ${graphCalls} graph calls.`,
-      advice:
-        'This reads two ways and the log tells you which: the gates may be firing on work the graph ' +
-        'cannot answer (a real misfit), OR they may be doing exactly their job on an agent that ' +
-        `keeps reaching for grep first (working as intended). Check \`${howToRun('bearing:fallback-log')}\` ` +
-        '— recurring distrust of the same tool is the first case and is worth reporting upstream; ' +
-        'an empty log points at the second. Only downgrade to `"mode": "guide"` for the first.',
-    });
-  }
-  if (n('classicalFallbackGranted') >= 3) {
-    findings.push({
-      level: 'warn',
-      headline: `${n('classicalFallbackGranted')} classical-fallback grants — agents repeatedly distrusted the graph.`,
-      advice:
-        `Each grant is a logged failure report. Review with \`${howToRun('bearing:fallback-log')} --json\` ` +
-        'and send it upstream; a recurring shape there is a real coverage gap, not agent error.',
-    });
-  }
-  if (n('impactVerdictsQuestioned') >= 2) {
-    findings.push({
-      level: 'warn',
-      headline: `${n('impactVerdictsQuestioned')} impact verdicts had no resolvable callers.`,
-      advice:
-        'The pre-edit gate is grading changes on a caller set it could not resolve (DI/factory ' +
-        'seams, module consts). Confirm blast radius classically before edits in those areas.',
-    });
-  }
-  if (n('driftRefreshBlocks') >= 5) {
-    findings.push({
-      level: 'info',
-      headline: `${n('driftRefreshBlocks')} drift-refresh blocks — the drift gate is firing often.`,
-      advice:
-        'Expected during a large refactor. If it is constant, raise `driftRefreshThreshold` in ' +
-        '.bearing/hooks.json (default 3 uncommitted source edits).',
-    });
-  }
-  return findings;
 }
 
 export function readScorecard(root) {
@@ -791,47 +620,5 @@ export function writePromptHint(root, hint) {
   const { stateDir, promptHint } = sessionPaths(root);
   fs.mkdirSync(stateDir, { recursive: true });
   fs.writeFileSync(promptHint, JSON.stringify({ ...hint, at: new Date().toISOString() }, null, 2));
-}
-
-export function readPromptHint(root) {
-  const { promptHint } = sessionPaths(root);
-  try {
-    return JSON.parse(fs.readFileSync(promptHint, 'utf8'));
-  } catch {
-    return {};
-  }
-}
-
-/**
- * Returns nudge text once per session (sets primed flag).
- * @param {object} stale from check-staleness.mjs
- */
-export function firstToolNudge(root, stale) {
-  const { primedFlag } = sessionPaths(root);
-  if (fs.existsSync(primedFlag)) return null;
-
-  fs.mkdirSync(path.dirname(primedFlag), { recursive: true });
-  fs.writeFileSync(primedFlag, new Date().toISOString());
-
-  const hint = readPromptHint(root);
-  const repo = repoName(root);
-  const parts = [];
-
-  if (!stale?.fresh) {
-    const reason =
-      stale?.reason === 'missing_embeddings'
-        ? 'MISSING EMBEDDINGS: semantic query unavailable — '
-        : 'STALE INDEX: ';
-    parts.push(
-      `${reason}next Shell MUST be ${howToRun('bearing:agent-refresh')} (required_permissions: ["all"]). Includes --embeddings. Run yourself — never ask user to analyze.`
-    );
-  } else {
-    parts.push(`SESSION: ${mcpReadContext(repo)} OR ${howToRun('bearing:agent-brief')}`);
-  }
-
-  const playbook = playbookForHint(hint, repo);
-  if (playbook) parts.push(playbook);
-
-  return parts.join('\n');
 }
 

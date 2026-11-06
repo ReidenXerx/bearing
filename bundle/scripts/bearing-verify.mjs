@@ -291,7 +291,7 @@ async function checkRetiredHookKeys() {
 }
 
 function checkSkillsStore() {
-  const store = path.join(root, SKILLS_STORE, 'bearing-workspace/SKILL.md');
+  const store = path.join(root, SKILLS_STORE, 'bearing-gitnexus/SKILL.md');
   return {
     id: 'skills_store',
     ok: fs.existsSync(store),
@@ -301,7 +301,7 @@ function checkSkillsStore() {
 }
 
 function checkSkillSymlinks(runtime) {
-  const zedOk = fs.existsSync(path.join(root, '.agents/skills/bearing-workspace/SKILL.md'));
+  const zedOk = fs.existsSync(path.join(root, '.agents/skills/bearing-gitnexus/SKILL.md'));
   // The `else` branch asserted the ZED directory for every runtime that was not Cursor — so a
   // Claude-only install failed on "missing .agents/skills symlinks", a Zed path it was never
   // supposed to have. Check the link dirs the runtimes ACTUALLY installed, and when none of them
@@ -309,7 +309,7 @@ function checkSkillSymlinks(runtime) {
   // sync-cursor-bearing-teaching.sh links `.claude/skills` for a claude runtime too, so a
   // claude-only repo DOES have a farm to check. Dropping Zed's path for it (correct) also dropped
   // Claude's (not), leaving this check vacuous on exactly the install it was rewritten for.
-  const claudeOk = fs.existsSync(path.join(root, '.claude/skills/bearing-workspace/SKILL.md'));
+  const claudeOk = fs.existsSync(path.join(root, '.claude/skills/bearing-gitnexus/SKILL.md'));
   const want = [];
   if (wantsZed(runtime)) want.push(['.agents/skills', zedOk]);
   if (wantsClaude(runtime)) want.push(['.claude/skills', claudeOk]);

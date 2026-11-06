@@ -142,15 +142,13 @@ CORE_SOURCES=(
   "scripts/bearing-gate-hint.mjs"
   "scripts/bearing-teaching/script-gates.mjs"
   "scripts/lib/setup-ui.mjs"
-  ".bearing/skills/bearing-workspace/SKILL.md"
-  ".bearing/skills/bearing-enforcement/SKILL.md"
+  ".bearing/skills/bearing-gitnexus/SKILL.md"
 )
 
 # These two moved out of the Cursor list rather than going with it: they are shared hook libs,
 # shipped for every runtime, and nothing else required them.
 CORE_LIB_SOURCES=(
   ".bearing/lib/hook-helpers.mjs"
-  ".bearing/lib/stale-policy.mjs"
 )
 
 ZED_SOURCES=(
@@ -170,14 +168,12 @@ if is_stealth; then
   CLAUDE_SOURCES=(
     ".claude/settings.local.json"
     ".bearing/contract.md"
-    ".bearing/lib/classify.mjs"
   )
 else
   CLAUDE_SOURCES=(
     ".mcp.json"
     ".claude/settings.json"
     "CLAUDE.md"
-    ".bearing/lib/classify.mjs"
   )
 fi
 

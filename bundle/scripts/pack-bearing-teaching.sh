@@ -46,11 +46,6 @@ ok()   { printf '\033[1;32m    ✓\033[0m %s\n' "$*"; }
 BUNDLE_PATHS=(
   .claude/settings.json
   .claude/hooks/bearing-session.mjs
-  .claude/hooks/bearing-grep-guard.mjs
-  .claude/hooks/bearing-read-guard.mjs
-  .claude/hooks/bearing-edit-guard.mjs
-  .claude/hooks/bearing-bash-guard.mjs
-  .claude/hooks/bearing-mcp-guard.mjs
   .claude/hooks/bearing-northstar-anchor.mjs
   .claude/hooks/bearing-taskcore-nudge.mjs
   .claude/hooks/bearing-microscope-nudge.mjs

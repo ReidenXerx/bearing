@@ -38,7 +38,7 @@ That failure has a name — **losing your bearings**.
 
 <img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/token-cost.svg" alt="bearing costs about 25,200 tokens a session — 13 percent of a 200k context window, 2.5 percent of 1M — split between its own contract block and the GitNexus tool schemas; one impact question costs 3 to 13 times less than grepping and reading the hits." width="100%">
 
-**It will not blow up your context.** ~25,200 tokens a session — and one *what breaks if I change this?*
+**It will not blow up your context.** ~2,600 tokens a session by default (~18,600 with every module and GitNexus) — and one *what breaks if I change this?*
 costs 3–13× less through the graph than grepping and reading the hits. Measure it on your own repo
 with `npm run bearing:token-benchmark`; [the numbers, and where the graph LOSES](#what-it-costs-your-context).
 
@@ -56,10 +56,10 @@ with `npm run bearing:token-benchmark`; [the numbers, and where the graph LOSES]
 | 🧪 **TS/JS rules** | **Catches code that compiles and is still wrong.** Numbered `TS-#` rules for the traps `tsc` and ESLint both stay silent about — `as` that verifies nothing, a union that falls through on the next variant, `||` overwriting a deliberate `0`. |
 | 🧱 **Frontend** | **Stops the near-duplicate component and the silent shared-component edit.** Search by shape before building a table or a panel; an optional prop with a safe default is yours, anything that changes what existing callers render is an ask. |
 | ⚛️ **React** | **Catches the form bugs that fail silently.** A field owns its `Controller`; spreading `field` keeps the `ref` that focus-on-error needs; a `name` typed `FieldPath<T>` turns a renamed field into a compile error instead of a value missing from the payload. |
-| 🕸 **GitNexus** | **Turns 40 text matches into a real code graph.** Hard gates redirect symbol greps to callers and flows. Requires the [GitNexus](https://github.com/abhigyanpatwari/GitNexus) MCP server. |
+| 🕸 **GitNexus** | **A code graph you reach for when you ask.** Opt-in: the installer explains it and asks. Say "use gitnexus" in a prompt and one skill loads — scope check, where the graph wins, where its counts are only a floor. No gates, no nudges. Requires the [GitNexus](https://github.com/abhigyanpatwari/GitNexus) MCP server. |
 | 🎭 **E2E** | **Turns "I checked it in the browser" into an exit code.** A harness your agent finishes: working substrate plus the scars, and a way to test a destructive write *without performing it*. Opt-in — it writes `.e2e/` and needs Playwright. |
 
-**And one thing that isn't a module:** the agent files bug reports against its own tooling, and the kit will tell you when *its own gates* are the problem. → [the receipts](#it-tells-you-when-its-the-problem)
+**And one thing that isn't a module:** the agent files bug reports against its own tooling, and the kit measures its own rules — it measured its GitNexus gates, found them costing 4–5× for one task's gain, and retired them. → [the receipts](#it-tells-you-when-its-the-problem)
 
 ## Install
 
@@ -70,8 +70,8 @@ npx bearing install . --runtime claude --features northstars,taskcore
 
 `--runtime` `claude` · `zed` · `codex` · `all`  ·  `--features` `northstars` · `goldpractices` · `taskcore` · `microscope` · `consult` · `minions` · `tsjs` · `frontend` · `react` · `gitnexus` · `e2e` · `all`
 
-Then restart your IDE. Enforcement needs tool-interception hooks, and **only Claude Code** exposes
-them:
+Then restart your IDE. The moments a module speaks up need tool-interception hooks, and **only
+Claude Code** exposes them:
 
 | | Claude Code | Zed | Codex |
 |---|:---:|:---:|:---:|
@@ -85,13 +85,13 @@ them:
 | TypeScript/JavaScript — traps that compile | ✅ | ✅ | ✅ |
 | Frontend — structure and blast radius | ✅ | ✅ | ✅ |
 | React — what the types do not catch | ✅ | ✅ | ✅ |
-| GitNexus — hard gates | ✅ | — | — |
+| GitNexus — graph + opt-in skill, when you ask | ✅ | ✅ | — |
 | E2E — browser verification | ✅ | ✅ | ✅ |
 
 ✅ means it fires without being asked. A `—` is not always absence: the **task-core** skill and its
 contract section install on every runtime, so you can invoke it by name — what Claude Code adds is
-the nudge that fires it unprompted. **Minions** and the **GitNexus gates** genuinely need hooks and
-are not present at all where the column says `—`.
+the nudge that fires it unprompted. **Minions** genuinely need hooks and are not present at all where
+the column says `—`. GitNexus fires only when you ask, on any runtime that has its skill and MCP server.
 
 ### 🎨 Prettier — so two tools stop rewriting each other
 
@@ -272,7 +272,9 @@ That `CHECKED`/`FOUND` split is load-bearing: `CHECKED` filled and `FOUND` empty
 
 <img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/gitnexus.svg" alt="A grep returns 40 unstructured matches; the graph returns the actual callers and flows, and a zero result is treated as unknown rather than as absence." width="100%">
 
-Two gates: a **stale index** blocks until refreshed, and so does **working-tree drift** — edit files and queries hold until you re-index, because the graph would otherwise answer about code you already changed.
+**Opt-in, and you invoke it.** It is not in the default install: the installer explains what it is, what it costs (the `gitnexus` CLI, an index build, a local MCP server) and when it helps, and asks. Once installed, nothing pushes the agent towards it — no gates, no nudges, no always-on instructions. Ask for it in a prompt ("use gitnexus to find what this diff affects") and the `bearing-gitnexus` skill loads: check scope first (the index is one checkout at one commit), where the graph wins, and where its counts are only a floor.
+
+It used to be graph-first by force: hooks that blocked greps and reads. A 180-run eval on a fixture with hand-verified answers measured it at 4–5× the cost per solved task for one task's gain, and a teaching-moments replacement almost never fired — so both were retired ([the report](eval/teaching/REPORT.md)). On a large repo, for the questions text search answers badly, the graph still earns its keep; that is what the skill is for.
 
 **A coverage limit presented as a fact is the failure this is built to survive.** `impact` can return zero callers for a function wired to a live route, because calls through factories and DI seams don't always resolve. So the contract is asymmetric, and the agent is told so:
 
@@ -315,20 +317,24 @@ The honest number, measured rather than guessed.
 
 | | tokens |
 | --- | --- |
-| bearing's contract block (`CLAUDE.md` / `AGENTS.md`) | ~10,300 |
-| GitNexus MCP tool schemas (17 tools) | ~14,900 |
-| **total** | **~25,200** |
+| bearing's contract block (`CLAUDE.md` / `AGENTS.md`), default install | ~2,600 |
+| … with every module | ~3,700 |
+| GitNexus MCP tool schemas (17 tools) — only if you install GitNexus | ~14,900 |
 
-That is **~13% of a 200k window, ~2.5% of a 1M one.** Skills are loaded on demand, not up front —
-a session typically pulls one or two, at ~1,500 tokens each.
+The default install is **~1.3% of a 200k window**; every module plus GitNexus is ~18,600, **~9%**.
+Skills are loaded on demand, not up front — a session typically pulls one or two, at ~1,500 tokens
+each; `bearing-gitnexus` is ~5,800, and loads only when you ask for the graph.
+
+The contract used to be ~10,300 tokens, most of it graph commandments every session paid for. Those
+moved into the opt-in skill when the gates were retired (NS-25).
 
 The second row is not bearing's — those are the graph tool definitions, present whenever the MCP
 server is connected, with or without this package. And bearing's own share scales with what you
 install:
 
 ```
-all modules            ~10,300 tokens
-intel only (no graph)   ~2,400
+all modules             ~3,700 tokens
+default install         ~2,600
 north-stars + task-core ~1,600
 ```
 
@@ -374,13 +380,11 @@ The reason is captured **with the graph state that produced it** — version, no
 
 One real project accumulated **93 reports across 47 commits in three weeks**. Read together they stopped being complaints and became a diagnosis: 30 were empty results for things that demonstrably existed. That corpus is what the rules above are calibrated against.
 
-The gates get measured too — `bearing:scorecard` reports whether enforcement is earning its keep, and refuses to draw the conclusion for you:
-
-> ⚠ Enforcement is 49% of graph interaction: 57 redirects vs 60 graph calls.
+Its own rules get measured too. The GitNexus gates were: across a fleet of real repos they produced one redirect for every graph call, and a 180-run eval with hand-verified answer keys put them at 4–5× the cost per solved task for one task's gain. So they were retired, and the graph became opt-in — the verdict and the numbers are in [`eval/teaching/REPORT.md`](eval/teaching/REPORT.md).
 
 Nothing leaves your repo. There is no telemetry endpoint.
 
-*A tool that can block your work should be able to show you when it was wrong to.*
+*A tool that asks to steer your agent should be able to show you when it was wrong to — and stop.*
 
 ## Commands
 
