@@ -85,9 +85,10 @@ Claude Code** exposes them:
 | TypeScript/JavaScript — traps that compile | ✅ | ✅ | ✅ |
 | Frontend — structure and blast radius | ✅ | ✅ | ✅ |
 | React — what the types do not catch | ✅ | ✅ | ✅ |
+| GitNexus — the graph, only when you ask | on ask | on ask | — |
 | E2E — browser verification | ✅ | ✅ | ✅ |
 
-✅ means it fires without being asked. A `—` is not always absence: the **task-core** skill and its
+✅ means it fires without being asked; *on ask* means it never does, by design, and answers when you ask. A `—` is not always absence: the **task-core** skill and its
 contract section install on every runtime, so you can invoke it by name — what Claude Code adds is
 the nudge that fires it unprompted. **Minions** genuinely need hooks and are not present at all where
 the column says `—`. GitNexus fires only when you ask, on any runtime that has its skill and MCP server.
