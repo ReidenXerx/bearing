@@ -162,8 +162,8 @@ each SKIPPED is a real gap in the brief, not a site the minion found inconvenien
   a rejected slice by hand: the fix belongs in the brief, or slice 31 makes the same mistake.
 
 **4. Then the whole.** Once the slices you accepted have landed, run the suite once, yourself. Remove
-the worktrees you are done with (`git worktree remove <path>`); Claude Code cleans up only the ones a
-minion left unchanged.
+the worktrees and branches you are done with — `git worktree remove <path>` and `git branch -D
+<branch>`, landed or rejected alike; Claude Code cleans up only the ones a minion left unchanged.
 
 If some slices were rejected, the only question that matters is whether a half-applied change is
 safe. Adding logging: keep what landed, re-run the rest, say which sites were not touched. A

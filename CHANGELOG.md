@@ -98,6 +98,11 @@ update: both minions reported success.
 - **Landed one slice at a time.** `--land` applies an accepted slice to the working tree and index.
   It never commits, and it keeps the patch so `git apply -R` can take that slice back on its own.
 
+Found by running two real minions: Claude Code puts their worktrees INSIDE the repo, under
+`.claude/worktrees/`, which nothing ignored. `git status` showed `?? .claude/` mid-fan-out, and a
+`git add -A` would have committed each worktree as an embedded repository. The path is now ignored,
+including in stealth installs.
+
 **Every minion runs on the middle tier** of the model family — `sonnet` for Anthropic — whether it
 gathers or applies. The shared spawning rule no longer leaves room to upgrade a minion that seems to
 need more. The configured `minionModel` is now named in the fan-out nudge; it used to be read into
