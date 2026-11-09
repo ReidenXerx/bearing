@@ -73,7 +73,7 @@ export function inspectPersistence(root) {
       label: 'PDG layer hint',
       detail: pdgKeys.length
         ? `PDG/taint stats present: ${pdgKeys.map((k) => `${k}=${s[k]}`).join(', ')}`
-        : 'No PDG stats advertised in meta.json; pre-commit gitnexus:pdg will build/refresh when supported',
+        : 'No PDG stats advertised in meta.json; build them when you need taint or dataflow: node .bearing/lib/refresh-cli.mjs . --pdg',
     });
   }
 

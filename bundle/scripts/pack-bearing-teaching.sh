@@ -60,7 +60,6 @@ BUNDLE_PATHS=(
   scripts/bearing-setup.sh
   scripts/sync-cursor-bearing-teaching.sh
   scripts/pack-bearing-teaching.sh
-  scripts/install-git-hooks.sh
   scripts/bearing-agent.mjs
   scripts/bearing-ci.mjs
   scripts/run-with-project-tmp.sh
@@ -71,7 +70,6 @@ BUNDLE_PATHS=(
   scripts/bearing-teaching/merge-package-scripts.mjs
   scripts/bearing-teaching/script-gates.mjs
   docs/GITNEXUS-TEAM-BUNDLE.md
-  .github/workflows/gitnexus-ci.yml
   .gitnexusignore
   skills
 )

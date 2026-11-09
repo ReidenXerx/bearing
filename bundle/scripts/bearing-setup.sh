@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
-# __GITNEXUS_REPO__ — all-in-one GitNexus teaching + git hooks team installer.
+# __GITNEXUS_REPO__ — all-in-one GitNexus team installer.
 #
 # Installs:
 #   • Teaching bundle (skills sync, manifest)
 #   • GitNexus MCP (project + optional global)
-#   • Git pre-commit PDG index refresh (no personal tooling)
-#   • Knowledge graph index
+#   • Knowledge graph index (the first build; after that it is refreshed when the developer asks)
 #
 # Run once after cloning:
 #   npm run bearing:setup
@@ -136,7 +135,6 @@ info "Verifying GitNexus teaching sources"
 CORE_SOURCES=(
   "scripts/bearing-setup.sh"
   "scripts/sync-cursor-bearing-teaching.sh"
-  "scripts/install-git-hooks.sh"
   "scripts/bearing-verify.mjs"
   "scripts/bearing-agent.mjs"
   "scripts/bearing-teaching/script-gates.mjs"
@@ -193,14 +191,9 @@ bash scripts/sync-cursor-bearing-teaching.sh
 # into .zed/settings.json — neither needs a step here. `--skip-global-mcp` still parses so an
 # existing caller keeps working (NS-15); it now controls nothing.
 
-# ── 6. git hooks (GitNexus refresh only — no personal tooling) ─────────────────
-
-if is_stealth; then
-  info "Skipping git hooks (stealth install — no .githooks/, and no npm scripts for it to call)"
-else
-  info "Installing git hooks"
-  bash scripts/install-git-hooks.sh
-fi
+# Step 6 installed a pre-commit hook that re-indexed on every commit. Retired: the index is refreshed
+# when the developer asks for it — in a chat ("refresh the gitnexus index") or with
+# `npm run bearing:agent-refresh` — not on a trigger (NS-25). An update removes the hook it wrote.
 
 # ── 7. knowledge graph index ─────────────────────────────────────────────────
 
@@ -249,7 +242,10 @@ cat <<'ONBOARD'
   Ask for it in a prompt ("use gitnexus to find what this change affects")
   and the bearing-gitnexus skill loads. Grep and Read are never blocked.
 
-  ✓ Graph + embeddings indexed (or run bearing:agent-refresh after --quick)
+  ✓ Graph indexed (or build it later after --quick)
+
+  Nothing refreshes the index on its own. When you want it current, ask
+  your agent ("refresh the gitnexus index") or run npm run bearing:agent-refresh.
 
   NEXT STEPS
   ──────────
@@ -259,23 +255,18 @@ cat <<'ONBOARD'
 
   Quick check:  npm run bearing:health
   Full audit:   npm run bearing:verify
-  Stale index:  npm run bearing:agent-refresh
+  Refresh:      npm run bearing:agent-refresh
 
   ── Maintainer details ────────────────────────────────────────
-
-  Agent workflow (enforced):
-    query → context → cypher (structural) → impact → detect_changes
 
   Daily commands:
     npm run bearing:health          human-friendly status
     npm run bearing:agent-brief     session orientation (agents)
     npm run bearing:agent-status    staleness (agents)
-    npm run bearing:agent-refresh   re-index when stale
+    npm run bearing:agent-refresh   re-index (only when you run it)
     npm run bearing:sync-teaching   after pulling kit updates
 
-  Hooks DENY (when fresh): symbol Grep, SemanticSearch, broad Glob, large Read
-  Hooks ALLOW: gitnexus npm scripts (agent refresh pre-approved)
-  MCP: gitnexus in .mcp.json (Claude) / .zed/settings.json (Zed) · pre-commit → bearing:pdg
+  MCP: gitnexus in .mcp.json (Claude) / .zed/settings.json (Zed)
 
 ONBOARD
 echo ""

@@ -115,9 +115,9 @@ if (nsLine) lines.unshift(nsLine);
 
 // STEALTH INSTALL: `gitnexus analyze` writes its own stats block into CLAUDE.md and AGENTS.md,
 // which in a stealth repo means a MODIFIED tracked file and a stray untracked one — the exact leak
-// the mode promises not to create. Normally the pre-commit hook or a refresh script strips it, but
-// stealth installs neither (package.json and .githooks are off-limits), so nothing was cleaning up
-// and a real install went dirty the moment its index was built. SessionStart is the one thing that
+// the mode promises not to create. Normally the refresh script strips it, but a stealth install has
+// no npm scripts (package.json is off-limits) and the index can be built by hand, so nothing was
+// cleaning up and a real install went dirty the moment its index was built. SessionStart is the one thing that
 // always runs, so it does the tidying here.
 try {
   const contractFile = path.join(root, ".bearing", "contract.md");

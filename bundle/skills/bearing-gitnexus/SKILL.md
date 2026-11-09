@@ -1,6 +1,6 @@
 ---
 name: bearing-gitnexus
-description: Use ONLY when the user explicitly asks for GitNexus or the code graph — "use gitnexus", "use the graph", "check with the knowledge graph", "what does the graph say", /bearing-gitnexus — or asks for a graph-based blast radius, callers, or change-impact analysis. Do NOT load it for ordinary searching, reading or editing; Grep and Read are the defaults and nothing here replaces them.
+description: Use ONLY when the user explicitly asks for GitNexus or the code graph — "use gitnexus", "use the graph", "check with the knowledge graph", "what does the graph say", /bearing-gitnexus — or asks for a graph-based blast radius, callers, or change-impact analysis, or asks to refresh, rebuild or check the GitNexus index ("refresh the gitnexus index", "is the graph up to date?", /bearing-gitnexus refresh). Do NOT load it for ordinary searching, reading or editing; Grep and Read are the defaults and nothing here replaces them.
 ---
 
 # GitNexus — the code graph, when the user asks for it
@@ -23,9 +23,27 @@ Linked git worktrees, other branches and PR refs, other repos, uncommitted files
 `.e2e/` and `.bearing/` are NOT indexed. There, "not found" means "not indexed", not "absent" —
 tell the user, and use Grep/Read instead.
 
-If the index is behind and the question depends on recent code, refresh it first:
-`node scripts/bearing-agent.mjs refresh` (or `npm run bearing:refresh` where that script exists).
-Every tool takes `repo: "__GITNEXUS_REPO__"`.
+If the index is behind and the question depends on recent code, **say how far behind it is and ask
+whether to refresh** — do not refresh on your own. Nothing refreshes the index automatically, by
+design: on a large repo a refresh takes minutes and holds a lock, so when it runs is the developer's
+call. How to run one: *Refreshing the index*, below. Every tool takes `repo: "__GITNEXUS_REPO__"`.
+
+## Refreshing the index — when the user asks
+
+No hook, commit or CI job refreshes the index; the developer does, usually by asking you
+("refresh the gitnexus index", `/bearing-gitnexus refresh`). Then:
+
+| Ask | Run |
+| --- | --- |
+| Is it current? | `node scripts/bearing-agent.mjs status` |
+| Refresh it | `node scripts/bearing-agent.mjs refresh` — diagnoses first, then does the least that fixes it: nothing, an incremental pass, or a rebuild only where one is required |
+| Rebuild from scratch | `node .bearing/lib/refresh-cli.mjs . --force` |
+| Build the PDG / taint layer too | `node .bearing/lib/refresh-cli.mjs . --pdg` |
+
+These work in every install, stealth included; `npm run bearing:agent-status` and
+`npm run bearing:agent-refresh` are the same commands where the npm scripts exist. Report what the
+refresh did — the tier it chose and why, or the error — and if it failed, say the graph may be stale
+rather than carrying on as if it were current.
 
 ## 2. Where the graph earns its keep
 
@@ -247,14 +265,15 @@ unrelated indexes (270, 543, 1126 communities): empty 100% of the time, and `lab
 `heuristicLabel` on every node. An empty `keywords` says the pass did not run, not that the area has
 no keywords. Use `heuristicLabel`, `cohesion`, `symbolCount`, `MEMBER_OF`.
 
-Refresh always includes `--embeddings` (`bearing:refresh` / `agent-refresh`). Missing embeddings = stale (same as commit behind).
+A graph with symbols but no embeddings counts as stale: semantic `query` ranking needs them, and only
+a rebuild adds them — `refresh` detects that and rebuilds (*Refreshing the index*, above).
 
 ## Deep precision — PDG, taint, trace
 
 When `cypher` isn't enough, escalate to statement-level tools.
 
 **These need a PDG index, and it is NOT built by default.** PDG roughly triples node count, so
-bearing stopped building it on every commit — it is opt-in, by `bearing:pdg`. Without one every tool
+bearing does not build it by default — ask for it (`refresh-cli.mjs . --pdg`, under *Refreshing the index*). Without one every tool
 below returns **zero rows, which is not an answer**: build it first, or say plainly you could not
 check. Keeping it fresh is the user's call, not something to trigger mid-task.
 

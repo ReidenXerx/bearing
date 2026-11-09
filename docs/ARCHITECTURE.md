@@ -85,7 +85,7 @@ flowchart TB
   IX --> VF
 ```
 
-- **Migration runs before the copy**, and inspects the bundle rather than the target, so it can tell what an older version left behind from what this one ships. An update removes what older versions installed and this one retired: hooks and their registrations, libraries, skills and their links, npm scripts, and the tool-less Zed profile.
+- **Migration runs before the copy**, and inspects the bundle rather than the target, so it can tell what an older version left behind from what this one ships. An update removes what older versions installed and this one retired: hooks and their registrations, libraries, skills and their links, npm scripts, the tool-less Zed profile, and the pre-commit index refresh with its two CI workflows (unsetting `core.hooksPath` when it pointed at the hook bearing removed).
 - **Install and update are idempotent**: a second run changes nothing.
 - **Removal is manifest-driven**: only what bearing recorded as its own is taken back. Seed-once files (`northstars.md`, `hooks.json`, `.gitnexusignore`) are written on the first install and never overwritten; a `northstars.md` you have written in survives uninstall.
 - **Your choices are inherited**: runtime, modules, MCP transport and the gitnexus binary are read back from the manifest — or, for the MCP entry, from your committed `.mcp.json`, which outranks a single machine's preference.
@@ -99,6 +99,8 @@ Opt-in: the interactive installer explains it and asks, or `--features +gitnexus
 - **Where its counts are only a floor**: JSX components, object-literal properties, injected receivers, callbacks, ORM columns — each with the grep that confirms it.
 - **Reading its uncertainty**: `epistemic`, `boundaries`, edge confidence, and that a zero is not absence.
 
+Nothing refreshes the index on its own — no commit hook, no CI job. A refresh can take minutes on a large repo, so it runs when the developer asks: in a chat ("refresh the gitnexus index"; the skill runs `bearing-agent.mjs refresh`, which diagnoses first and does the least that closes the gap) or with `npm run bearing:agent-refresh`. The install builds the first index unless `--quick`.
+
 When the graph is wrong, `npm run bearing:fallback -- "…"` files a report with the graph state that produced it (version, node and edge counts, indexed commit). Nothing leaves the repository.
 
 ## Bundle layout
@@ -111,7 +113,6 @@ bundle/
 ├── templates/       the contract (CLAUDE.gitnexus.md / AGENTS.gitnexus.md) and the status line
 ├── scripts/         setup, verify, the agent CLI, refresh helpers (gitnexus)
 ├── docs/            team guides shipped with the gitnexus module
-├── .githooks/       optional pre-commit index refresh (npm run hooks:install)
 ├── .e2e/            the browser harness (e2e)
 └── .gitnexusignore
 ```

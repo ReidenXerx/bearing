@@ -315,7 +315,7 @@ if (cmd === "refresh") {
     if (rc !== 0) {
       markRefreshOutcome(false, `analyze exited ${rc} — index could not be refreshed`);
       console.error(
-        "\n==> Refresh FAILED. Classical Grep/Read are now permitted so you are not stuck.\n" +
+        "\n==> Refresh FAILED. The index was not updated: graph answers may be stale until a refresh succeeds.\n" +
           `    Fix the cause (network, disk, gitnexus install) and re-run: ${howToRun('bearing:agent-refresh')}\n` +
           `    If GitNexus itself is the problem: ${howToRun('bearing:fallback')} -- \"<what went wrong>\"`,
       );
@@ -326,9 +326,9 @@ if (cmd === "refresh") {
     //
     // It used to run under `run()`, which throws into the catch below and reports "agent-refresh
     // failed (ENOSPC or command error)" with exit 1. A zed install hit exactly that: the sync
-    // verified a Cursor rule the repo never had, and every refresh looked catastrophic. Since
-    // `bearing:agent-status` tells the agent to run this AUTONOMOUSLY, exit 1 reads as an unusable
-    // graph and can stop work that was never broken. The runtime bug is fixed; this makes the
+    // verified a Cursor rule the repo never had, and every refresh looked catastrophic. An agent
+    // running this for the user reads exit 1 as an unusable graph and can stop work that was never
+    // broken. The runtime bug is fixed; this makes the
     // whole class survivable.
     if (
       fs.existsSync(path.join(ROOT, "scripts/sync-cursor-bearing-teaching.sh"))

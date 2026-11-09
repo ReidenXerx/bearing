@@ -18,18 +18,17 @@ Portable **contract + hooks + skills + scripts** for the GitNexus module. GitNex
 | `scripts/sync-cursor-bearing-teaching.sh` | Re-sync skills symlinks after pull |
 | `scripts/bearing-verify.mjs` | Runtime-aware kit verification |
 | `scripts/bearing-agent.mjs` | Agent CLI (`agent-status` / `agent-refresh`) |
-| `scripts/install-git-hooks.sh` + `.githooks/pre-commit` | PDG index refresh on commit |
 | `.vscode/settings.json` | npm task settings (optional) |
 | `.gitnexusignore` | GitNexus-only excludes (large caches) |
 | `package.json.scripts.snippet.json` | npm scripts to merge |
 
-**Automatic:** `install-from-bundle.sh` and `bearing:setup` run `merge-package-scripts.mjs --write`, which **adds or overwrites** all `bearing:*` and `hooks:install` scripts in `package.json` (creates `package.json` if missing).
+**Automatic:** `install-from-bundle.sh` and `bearing:setup` run `merge-package-scripts.mjs --write`, which **adds or overwrites** all `bearing:*` scripts in `package.json` (creates `package.json` if missing).
 
 ## NOT included (per-target repo)
 
 | Excluded | Why |
 | --- | --- |
-| `.gitnexus/` index | Built locally via `npm run bearing:refresh`; pre-commit upgrades it with `npm run bearing:full-pdg` |
+| `.gitnexus/` index | Built at install, then refreshed when you ask (`npm run bearing:agent-refresh`, or ask your agent) |
 | IDE skill symlinks | Created by install/update from canonical store |
 
 ## Large generated caches (recommended)
@@ -84,11 +83,11 @@ Or use the standalone kit (recommended):
 
 ## After install (every dev)
 
-1. **Restart your IDE** (MCP + hooks / Zed profile)
-2. `npm run bearing:agent-status` — index fresh?
+1. **Restart your IDE** (MCP + hooks)
+2. `npm run bearing:agent-status` — is the index current?
 3. When you want the graph, say so in the prompt — "use gitnexus to …" — and the `bearing-gitnexus` skill loads.
 
-**Refreshing:** nothing refreshes the index for you, and nothing is blocked while it is stale. Graph answers from a stale index may be wrong rather than refused, so refresh before relying on them: `npm run bearing:agent-refresh`. The optional pre-commit hook (`npm run hooks:install`) refreshes on every commit.
+**Refreshing:** nothing refreshes the index on its own — no commit hook, no CI job — and nothing is blocked while it is stale. On a large repo a refresh takes minutes, so when to run one is your call. Graph answers from a stale index may be wrong rather than refused, so refresh before relying on them: ask your agent ("refresh the gitnexus index", or `/bearing-gitnexus refresh` in Claude Code), or run `npm run bearing:agent-refresh`. It diagnoses first and does the least that fixes the gap.
 
 ## Daily commands
 

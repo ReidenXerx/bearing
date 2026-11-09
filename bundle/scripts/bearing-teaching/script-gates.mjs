@@ -5,12 +5,15 @@
  * The groups below are only an ordering for the generated package.json block. They used to be
  * "gates" — each group also wrote a `bearing.__gate.<n>.<name>` entry that printed the step of an
  * enforced graph-first loop. The gates were retired (NS-25, NS-28), so no gate entry is written any
- * more, and merging strips the ones earlier versions left behind (see isRetiredGateScript).
+ * more, and merging strips the ones earlier versions left behind (see isRetiredScript). So does
+ * `hooks:install`, which wired a pre-commit hook that re-indexed on every commit: the index is
+ * refreshed when the developer asks for it, not on a trigger (NS-25).
  */
 import fs from "node:fs";
 import path from "node:path";
 
 const WRAP = "bash scripts/run-with-project-tmp.sh";
+const STABILIZE = " && node .bearing/lib/stabilize-agent-docs.mjs .";
 
 /** @typedef {{ gate: string, name: string, title: string, description: string, scripts: Record<string, string> }} ScriptGate */
 
@@ -54,11 +57,13 @@ export const GITNEXUS_SCRIPT_GATES = [
     name: "index",
     title: "Graph index",
     description: "Build and refresh the index, branch and PR helpers.",
+    // `analyze` writes a volatile stats block into CLAUDE.md / AGENTS.md. The retired pre-commit
+    // hook stripped it before it reached a commit; with no hook, each raw analyze strips its own.
     scripts: {
-      "bearing:refresh": `${WRAP} npx gitnexus@latest analyze --embeddings 0 --skip-skills`,
-      "bearing:full": `${WRAP} npx gitnexus@latest analyze --force --embeddings 0 --skip-skills`,
-      "bearing:pdg": `${WRAP} npx gitnexus@latest analyze --embeddings 0 --skip-skills --pdg`,
-      "bearing:full-pdg": `${WRAP} npx gitnexus@latest analyze --force --embeddings 0 --skip-skills --pdg`,
+      "bearing:refresh": `${WRAP} npx gitnexus@latest analyze --embeddings 0 --skip-skills${STABILIZE}`,
+      "bearing:full": `${WRAP} npx gitnexus@latest analyze --force --embeddings 0 --skip-skills${STABILIZE}`,
+      "bearing:pdg": `${WRAP} npx gitnexus@latest analyze --embeddings 0 --skip-skills --pdg${STABILIZE}`,
+      "bearing:full-pdg": `${WRAP} npx gitnexus@latest analyze --force --embeddings 0 --skip-skills --pdg${STABILIZE}`,
       "bearing:status": `${WRAP} npx gitnexus@latest status`,
       "bearing:agent-refresh": "node scripts/bearing-agent.mjs refresh",
       "bearing:agent-review": "node scripts/bearing-agent.mjs review",
@@ -91,7 +96,6 @@ export const GITNEXUS_SCRIPT_GATES = [
       "bearing:setup": "bash scripts/bearing-setup.sh",
       "bearing:sync-teaching": "bash scripts/sync-cursor-bearing-teaching.sh",
       "bearing:pack": "bash scripts/pack-bearing-teaching.sh",
-      "hooks:install": "bash scripts/install-git-hooks.sh",
     },
   },
   {
@@ -108,16 +112,19 @@ export const GITNEXUS_SCRIPT_GATES = [
 ];
 
 /**
- * A `bearing.__gate.*` entry an earlier version wrote: the key shape AND our own gate-hint script
- * as the value (bearing-gate-hint.mjs, or gitnexus-gate-hint.mjs before the rename — no longer
- * shipped). Both, so a key someone repurposed for their own command survives —
- * package.json is theirs, and we only take back what we wrote (NS-1).
+ * A script an earlier version wrote and this one retired. Matched on the key AND our own command as
+ * the value, so a key someone repurposed for their own command survives — package.json is theirs,
+ * and we only take back what we wrote (NS-1):
+ *  - a `bearing.__gate.*` entry running our gate-hint script (bearing-gate-hint.mjs, or
+ *    gitnexus-gate-hint.mjs before the rename);
+ *  - `hooks:install` running our installer for the pre-commit index refresh.
  * @param {string} key @param {unknown} value
  */
-export function isRetiredGateScript(key, value) {
+export function isRetiredScript(key, value) {
+  if (typeof value !== "string") return false;
+  if (key === "hooks:install") return /^bash scripts\/install-git-hooks\.sh$/.test(value.trim());
   return (
     /^(bearing|gitnexus)\.__gate\./.test(key) &&
-    typeof value === "string" &&
     /\bscripts\/(bearing|gitnexus)-gate-hint\.mjs\b/.test(value)
   );
 }
@@ -179,10 +186,10 @@ export function mergeGitnexusScripts(pkg, opts = {}) {
   let added = 0;
   let updated = 0;
   let unchanged = 0;
-  // The retired gate entries go first, so an update converges on a block without them (NS-3).
+  // The retired entries go first, so an update converges on a block without them (NS-3).
   let removed = 0;
   for (const [key, value] of Object.entries(pkg.scripts)) {
-    if (isRetiredGateScript(key, value)) {
+    if (isRetiredScript(key, value)) {
       delete pkg.scripts[key];
       removed++;
     }

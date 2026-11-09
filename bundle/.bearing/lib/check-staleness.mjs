@@ -75,7 +75,7 @@ function git(cmd) {
  *
  * This was a list of PREFIXES (`.bearing/`, `scripts/bearing-`, `.claude/hooks/bearing-`) and it
  * missed everything bearing ships that is not named `bearing-*`: scripts/lib/setup-ui.mjs,
- * scripts/run-with-project-tmp.sh, scripts/install-git-hooks.sh and four more. Measured: 12 drift
+ * scripts/run-with-project-tmp.sh and five more. Measured: 12 drift
  * against 10 edited files right after an install. The manifest is the authoritative record of what
  * was installed, so read that rather than keep a second list in sync by hand (GP-11).
  */

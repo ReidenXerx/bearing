@@ -84,7 +84,7 @@ In a real target repo after update:
 ## 6. GitNexus v1.6.8 capability smoke
 
 - [ ] Agent brief shows routing for `trace`, `pdg_query`, `explain`, and Cypher.
-- [ ] Pre-commit hook calls `npm run bearing:full-pdg` before `bearing:graph-smoke`.
+- [ ] Nothing refreshes the index on its own: an update removes `.githooks/pre-commit` and the two index workflows from a repo that had them, and asking the agent to "refresh the gitnexus index" runs `bearing-agent.mjs refresh`.
 - [ ] Security review skill warns that no taint/PDG layer is not proof of safety.
 - [ ] MCP snippets use current parameter names:
   - `gitnexus_query({ search_query: ... })`

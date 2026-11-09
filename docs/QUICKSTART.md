@@ -75,7 +75,7 @@ bearing install
   → copy the bundle for the selected modules
   → materialize .bearing/skills/ and symlink it into .claude/skills/ and/or .agents/skills/
   → wire the runtime: .claude/settings.json hooks, CLAUDE.md / AGENTS.md contract,
-    and — GitNexus only — the MCP server, the Zed profile and the bearing:* npm scripts
+    and — GitNexus only — the MCP server and the bearing:* npm scripts
   → write the manifest (what it installed, so update and uninstall touch only that)
   → GitNexus only: scripts/bearing-setup.sh builds the .gitnexus/ index (unless --quick)
   → verify
@@ -93,7 +93,7 @@ npx bearing update /path/to/your-repo --features +e2e    # add a module
 npx bearing update /path/to/your-repo --full             # also rebuild the GitNexus index
 ```
 
-`update` reads the runtime and modules from the manifest, so you only pass them to **change** them. It defaults to `--quick` (no re-index). **Migration runs on every update**: anything an older version installed and this one retired — hooks, libs, skills and their links, npm scripts — is removed, and a second update changes nothing.
+`update` reads the runtime and modules from the manifest, so you only pass them to **change** them. It defaults to `--quick` (no re-index). **Migration runs on every update**: anything an older version installed and this one retired — hooks, libs, skills and their links, npm scripts, the pre-commit index refresh and its CI workflows — is removed, and a second update changes nothing.
 
 > **Fresh clone of an already-installed repo?** The manifest (`.bearing/manifest.json`) is **gitignored**, so it isn't in a new clone — `update` stops with *"Not installed. Run install first."* That's expected: run **`npx bearing install /path/to/repo --no-setup`** instead. Install is idempotent — it re-materializes the current bundle and rewrites the manifest without touching your code.
 
@@ -118,15 +118,16 @@ npx bearing uninstall /path/to/your-repo --remove-index   # also remove .gitnexu
 npm run bearing:health          # plain-language status
 npm run bearing:verify          # full kit check
 npm run bearing:agent-status    # is the index fresh?
-npm run bearing:agent-refresh   # re-index when stale
+npm run bearing:agent-refresh   # re-index — or ask your agent: "refresh the gitnexus index"
 npm run bearing:branch-status   # branch/base summary + branch-aware MCP calls
 npm run bearing:pr-impact       # branch-aware PR review
 npm run bearing:full-pdg        # full --force rebuild + PDG
 npm run bearing:graph-smoke     # Cypher / ACCESSES sanity check (CI)
 npm run bearing:detect-api      # HTTP router profile
 npm run bearing:fallback -- "…" # file a report when the graph was wrong
-npm run hooks:install           # optional pre-commit hook: refresh the index on every commit
 ```
+
+Nothing refreshes the index on its own — no commit hook, no CI job. On a large repo a refresh takes minutes, so you decide when: ask your agent ("refresh the gitnexus index", or `/bearing-gitnexus refresh` in Claude Code) or run `bearing:agent-refresh`. Either way it diagnoses first and does the least that closes the gap.
 
 A stealth install has no npm scripts; run the same commands as `node scripts/bearing-agent.mjs <command>`.
 

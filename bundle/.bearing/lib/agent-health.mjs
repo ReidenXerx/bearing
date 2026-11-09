@@ -53,7 +53,7 @@ async function main() {
   );
   lines.push("• Grep and Read are never blocked");
   lines.push(
-    `• When the index falls behind, refresh it: ${howToRun('bearing:agent-refresh')}`,
+    `• Nothing refreshes the index on its own. When you want it current, ask the agent ("refresh the gitnexus index") or run ${howToRun('bearing:agent-refresh')}`,
   );
   lines.push("");
   lines.push("Commands:");
@@ -63,8 +63,10 @@ async function main() {
   lines.push("");
   if (!audit.healthy) {
     lines.push("");
+    // It used to promise the agent would refresh "autonomously". Nothing does: the index is
+    // refreshed when the user asks (NS-25), so the action names the two ways to ask.
     lines.push(
-      "Action: open a new Agent chat — the agent will refresh the graph autonomously.",
+      `Action: refresh the index — ask your agent ("refresh the gitnexus index") or run ${howToRun('bearing:agent-refresh')}`,
     );
   }
 
