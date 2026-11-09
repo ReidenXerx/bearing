@@ -15,7 +15,7 @@ Tests catch code that breaks. They do not catch an agent that has read a stale d
 | **task-core** | compaction drops the goal, the decisions, and what was already tried | A dense save-state written **before** the summary lands and read back first on recovery, one file per chat. |
 | **microscope** | "it runs" reviewed as "it's right" | Adopts the expert role the project implies, reviews through several lenses, and refutes each finding before reporting it. |
 | **consult** | asking about everything, or deciding what only the user can | Asks only what is not in the repo; decides the rest; confirms before anything irreversible. |
-| **minions** | wide mechanical work ground through serially | Cheap anchored subagents gather citations (or apply a decided change to disjoint slices); the main agent concludes. |
+| **minions** | wide mechanical work ground through serially | Cheap anchored subagents on the middle tier gather citations — or apply a decided change, each in its own worktree, with every slice reviewed before it lands; the main agent concludes. |
 
 Precedence is the load-bearing idea: north-stars outrank every other doc, the code outranks prose for facts, and a conflict is reported rather than silently resolved.
 

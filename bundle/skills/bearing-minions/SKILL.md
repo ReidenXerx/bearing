@@ -74,10 +74,12 @@ empty-but-confused has REDUCED YOUR COVERAGE, and silence reads as "I checked ev
 it, or say plainly what went unchecked. Never let the count of agents you spawned stand in for the
 count that actually reported.
 
-**7. Tier follows the return contract.** A subagent that must REASON needs a capable model; one
-that only GATHERS does not. Decide the tier from what you are asking it to return, never from
-what the task feels like — and if a gatherer seems to need a smarter model, you have asked it to
-reason and should take that part back.
+**7. Every minion runs on the MIDDLE tier** of your model family — `sonnet` for Anthropic, or the
+`minionModel` set in `.bearing/hooks.json` / `hooks.local.json`. That holds for minions that
+gather and minions that apply, because neither decides anything (NS-24). The tier follows the return
+contract, never how important the task feels: if a minion seems to need a smarter model, you handed
+it a decision — take that part back. The one subagent that runs on your main model is one whose
+return IS the reasoning, a microscope lens, and that is not a minion.
 
 **8. Spot-check before you trust.** Open at least one cited `file:line` per subagent and confirm it
 says what the report claims. A fabricated citation is the one failure the return shape cannot catch
@@ -95,7 +97,7 @@ Plus, verbatim:
 *because* minions do no reasoning. Gathering citations does not need a flagship, and a whole fan-out
 on the top tier costs more than doing the work yourself would have.
 
-Override per machine in `.bearing/hooks.local.json` (`"minionModel": "..."`) if your account has
+Pin a different middle-tier model with `minionModel` in `.bearing/hooks.json` (team) or `.bearing/hooks.local.json` (this machine) — `"minionModel": "..."` — if your account has
 different models available. If the tier you ask for is unavailable, **run anyway on whatever you
 get** — a costlier minion is a nuisance; a skipped unit is a hole in the answer.
 

@@ -1,6 +1,6 @@
 ---
 name: bearing-invasive-minions
-description: "Fan out a DECIDED, mechanical code change across many independent sites at once, instead of grinding them one at a time — logging coverage, error handling, a settled API migration, adding a guard clause everywhere a shape is unwrapped. Each subagent EDITS its own disjoint slice and returns the diff it wrote. Use when the transformation is already decided, the sites are 3+ and independent, and no two slices touch the same file. NOT when the change differs per site in a way that needs judgment, when the sites interact, or when it is architectural. Examples: \"add structured logging to every handler\", \"wrap every fetch in the shared error envelope\", \"migrate the remaining 30 call sites to the new signature\"."
+description: "Fan out a DECIDED, mechanical code change across many independent sites at once, instead of grinding them one at a time — logging coverage, error handling, a settled API migration, adding a guard clause everywhere a shape is unwrapped. Each subagent edits its own slice in isolation — its own git worktree, or a patch file — and nothing lands until you have reviewed that slice. Use when the transformation is already decided, the sites are 3+ and independent, and the slices can be split by file. NOT when the change differs per site in a way that needs judgment, when the sites interact, or when it is architectural. Examples: \"add structured logging to every handler\", \"wrap every fetch in the shared error envelope\", \"migrate the remaining 30 call sites to the new signature\"."
 ---
 
 # Invasive minions — fan out to APPLY, keep the decision
@@ -34,9 +34,12 @@ The four from gathering — **bounded, verifiable, independent, 3+** — plus tw
 | | |
 | --- | --- |
 | **DECIDED** | The rule, the shapes it must handle, and what each becomes. Not "add error handling" but the exact wrapper, the exact import, and what an already-wrapped site looks like. |
-| **DISJOINT** | **No two minions write the same file.** Two agents editing one file is a lost update: the second clobbers the first, both report success, and nothing in either report shows it. Split by FILE, never by concern. |
+| **ISOLATED** | **No minion writes your working tree.** Each works in its own git worktree (Claude Code: spawn it with `isolation: "worktree"`) and commits its slice there, or — on a runtime without worktrees — writes its change as a patch file and edits nothing. Nothing lands until YOU have reviewed it (section 5). |
 
-DISJOINT is the only hard one — it is the failure that destroys work silently. The rest is judgment.
+Split by FILE, never by concern, and keep the slices disjoint. Isolation is what makes a mistake there
+survivable: two minions that edited one file used to be a lost update — the second clobbered the
+first, both reported success, nothing showed it. Isolated, the second slice simply no longer applies
+once the first has landed, and the review says so. That is a re-run, not lost work.
 
 **Do NOT fan out when** the change differs per site in a way that needs thinking (deciding *what* to
 log is the work; adding the line is not) · the sites interact, so changing A changes what B should
@@ -48,8 +51,13 @@ gives you a worked example to hand the minions.
 
 ## 2. Split
 
-By file. Enumerate the slices before spawning; if two name the same path, fix the split. Prefer more
-small slices to fewer large ones — a bad slice is discarded and re-run, so small failures are cheap.
+By file. Enumerate the slices before spawning — each one a name and the exact list of files it may
+touch; that list is what its review checks against. If two name the same path, fix the split. Prefer
+more small slices to fewer large ones: a bad slice is rejected and re-run on its own, so small
+failures are cheap.
+
+Start from a clean tree, or at least one whose uncommitted changes do not touch the slices. Each
+worktree branches from HEAD, so edits you have not committed are invisible to every minion.
 
 ## 3. What every minion gets
 
@@ -84,10 +92,12 @@ empty-but-confused has REDUCED YOUR COVERAGE, and silence reads as "I checked ev
 it, or say plainly what went unchecked. Never let the count of agents you spawned stand in for the
 count that actually reported.
 
-**7. Tier follows the return contract.** A subagent that must REASON needs a capable model; one
-that only GATHERS does not. Decide the tier from what you are asking it to return, never from
-what the task feels like — and if a gatherer seems to need a smarter model, you have asked it to
-reason and should take that part back.
+**7. Every minion runs on the MIDDLE tier** of your model family — `sonnet` for Anthropic, or the
+`minionModel` set in `.bearing/hooks.json` / `hooks.local.json`. That holds for minions that
+gather and minions that apply, because neither decides anything (NS-24). The tier follows the return
+contract, never how important the task feels: if a minion seems to need a smarter model, you handed
+it a decision — take that part back. The one subagent that runs on your main model is one whose
+return IS the reasoning, a microscope lens, and that is not a minion.
 
 **8. Spot-check before you trust.** Open at least one cited `file:line` per subagent and confirm it
 says what the report claims. A fabricated citation is the one failure the return shape cannot catch
@@ -98,14 +108,19 @@ Plus, verbatim:
 
 > Apply the transformation EXACTLY as specified. Do not improve it, generalise it, or fix unrelated
 > things you notice — note those and move on. Touch ONLY the files in your list. If a site does not
-> match any shape in the brief, leave it and report it as SKIPPED rather than guessing.
+> match any shape in the brief, leave it and report it as SKIPPED rather than guessing. Work only
+> in your own worktree and COMMIT your slice there when done — or, if you were given no worktree,
+> edit nothing and write your whole change as one unified diff to the patch path you were given.
 
-That last clause is the one that earns its place: nine agents each making one tasteful improvement
-produces a diff nobody decided on, in files nobody was reviewing for it.
+That clause about improvements is the one that earns its place: nine agents each making one tasteful
+improvement produces a diff nobody decided on, in files nobody was reviewing for it. The commit is
+the other half — an uncommitted worktree still reviews, but a minion that committed nothing and
+saved nothing has handed you a report with no change behind it.
 
 ## 4. The return contract
 
 ```
+SLICE    <name> — <branch, worktree path, or patch file>
 WROTE    <file:line> — <the exact text written>
 VERIFIED <the check run on THIS slice, and its exit code>
 SKIPPED  <site not changed, and which shape the brief failed to cover>
@@ -117,28 +132,55 @@ skipping the same shape means your specification had a hole. Name the shape, re-
 A serial agent would have quietly decided nine times and you would find out, if ever, in review.
 
 Each minion checks its **own slice** narrowly — typecheck what it touched, run the test that covers
-it. Not the full suite: agents racing it concurrently prove nothing while others are still writing.
+it. In its own worktree that check is not racing anyone else's half-written edits.
 
-## 5. Finishing
+## 5. Review, then land — one slice at a time
 
-Run the suite once, yourself. Then read `git diff` looking for **one thing**: the site where the
-transformation was applied to something it did not fit. That is what a swarm produces and a serial
-agent does not, and it is worth the skim even on a large diff.
+The minions applied; **you accept or reject**, slice by slice, before anything reaches your tree.
+Accepting is a decision, so it never goes to a subagent (NS-24).
 
-If some slices failed, the only question that matters is whether a half-applied change is safe.
-Adding logging: keep what landed, re-run the rest, say which sites were not touched. A migration
-where old and new must not coexist: revert the whole fan-out rather than finishing it by hand —
-that is how a two-hour job becomes a day.
+**1. The mechanical check** — everything that is not judgment:
+
+```bash
+node .bearing/lib/minion-review.mjs <branch|worktree-dir|file.patch> --allow <the slice's files or dir/>...
+```
+
+It rejects a slice that touched a file outside its list, one that no longer applies to HEAD (a
+second slice that edited a file the first already changed lands here, as a conflict instead of a
+lost update), and one that is empty. Otherwise it prints the diff.
+
+**2. Your review** — the judgment the check cannot make. Read every hunk and ask one question: *does
+this match a shape in the brief?* Look hardest for the site where the transformation was applied to
+something it did not fit — that is what a swarm produces and a serial agent does not. Check that
+each SKIPPED is a real gap in the brief, not a site the minion found inconvenient.
+
+**3. Land or reject.**
+- **Accept** → the same command with `--land`. It applies the slice to your working tree and index —
+  never commits; that stays yours or the user's — and keeps the patch, so `git apply -R --index
+  <patch>` takes that slice back on its own.
+- **Reject** → name the reason, fix the brief or the split, and re-run only that slice. Do not patch
+  a rejected slice by hand: the fix belongs in the brief, or slice 31 makes the same mistake.
+
+**4. Then the whole.** Once the slices you accepted have landed, run the suite once, yourself. Remove
+the worktrees you are done with (`git worktree remove <path>`); Claude Code cleans up only the ones a
+minion left unchanged.
+
+If some slices were rejected, the only question that matters is whether a half-applied change is
+safe. Adding logging: keep what landed, re-run the rest, say which sites were not touched. A
+migration where old and new must not coexist: take the landed slices back rather than finishing it
+by hand — that is how a two-hour job becomes a day.
 
 ## 6. Which model
 
-**Middle tier — `sonnet` by default**, the same as gathering minions. Writing feels like it should
-need more; it does not, *because the transformation is already decided*. The tier follows the return
-contract, not the stakes.
+**Every minion runs on the MIDDLE tier of your model family — `sonnet` for Anthropic** — the same as
+gathering minions. Writing feels like it should need more; it does not, *because the transformation
+is already decided*, and reviewing what came back is your job, on your model. The tier follows the
+return contract, not the stakes.
 
 If a slice keeps coming back wrong, fix the brief, not the model. A smarter minion papering over an
 ambiguous transformation will make nine different reasonable choices and you will not see it in
-review. Override per machine with `minionModel` in `.bearing/hooks.local.json`.
+review. To pin a different middle-tier model, set `minionModel` in `.bearing/hooks.json` (team) or
+`.bearing/hooks.local.json` (this machine).
 
 ## 7. Worked shapes
 
