@@ -45,6 +45,41 @@ North-stars: NS-25 rewritten ("GitNexus is opt-in and user-invoked"), NS-28 and 
 graveyard, NS-5/6 merged, NS-26 ("the index is one tree") and NS-27 ("count what changed, against an
 answer key the graph did not write") added.
 
+### Changed — nothing refreshes the index on its own; you ask for it
+
+Every GitNexus install that was not stealth wired a pre-commit hook (`core.hooksPath=.githooks`)
+that re-indexed on every commit, and shipped two CI workflows: one rebuilt the index on every push
+to main, the other read that cached index to comment on every PR. On a large repository that is
+minutes per commit, paid whether or not anyone was about to ask the graph anything. All three are
+retired. The developer decides when the index is refreshed:
+
+- **From the chat.** Say "refresh the gitnexus index", or `/bearing-gitnexus refresh` in Claude
+  Code. The `bearing-gitnexus` skill loads and runs `bearing-agent.mjs refresh`, which diagnoses
+  first and does the least that closes the gap. The skill tells the agent to report a stale index
+  and ask, never to refresh on its own.
+- **From a terminal.** `npm run bearing:agent-refresh`, or `node scripts/bearing-agent.mjs refresh`
+  in a stealth install.
+
+The install still builds the first index (skip it with `--quick`).
+
+An update removes the retired pieces from repos that have them: `.githooks/pre-commit`,
+`scripts/install-git-hooks.sh`, both workflows and the `hooks:install` npm script. It also unsets
+`core.hooksPath`, which otherwise keeps every hook in `.git/hooks` switched off. Only what bearing
+put there is removed. A hook of yours in `.githooks/` keeps the directory and the setting, a
+`hooksPath` you pointed elsewhere is untouched, and so are a workflow of yours and a
+`hooks:install` that runs your own command.
+
+The hook also kept GitNexus's volatile stats block out of commits. Each refresh bearing runs now
+strips the block itself: `refresh-cli` already did, and the `bearing:refresh` family of npm scripts
+now does too. If you run `gitnexus analyze` yourself, strip it with
+`node .bearing/lib/stabilize-agent-docs.mjs .`. The `--staged` mode existed only for the hook, and
+is gone with it.
+
+A real update, run from an install made with the previous code, also showed that **updating an unchanged install reported changes it had not made**. It printed "removed 1 files" because the generated `.bearing/commands.json` (and, in stealth, `.bearing/contract.md`) was deleted as "not in the bundle" and then written again. It also printed eight "skills: removed legacy" lines for skill links that were already current. Neither happens now, and dropping the module still removes those files.
+
+Two more lines from the gate era are fixed. `bearing:health` promised that the agent "will refresh
+the graph autonomously". A failed refresh announced that "Classical Grep/Read are now permitted".
+
 ### Fixed — found while removing the gates
 
 - **Retired skills left dangling symlinks** in `.claude/skills/` on every update: linking only ever
@@ -64,6 +99,33 @@ answer key the graph did not write") added.
 - **Core shipped graph code to every install**: `claude-emit.mjs`, which every hook loads, imported
   the classifier and the stale policy (NS-2).
 
+### Fixed — what the gates left behind
+
+- **The `bearing.__gate.*` npm scripts are gone, and an update removes them.** Each printed a step of
+  the retired graph-first loop. Updates only ever added or overwrote scripts, so every install kept
+  them; now an update (and deselecting GitNexus) removes the ones bearing wrote, and leaves a key of
+  that shape alone if its command is yours.
+- **`bearing:refresh` regenerated GitNexus's own skills.** The npm scripts still passed `--skills`
+  to `gitnexus analyze` — the same leak the automatic refresh path already closed. They pass
+  `--skip-skills` now.
+- **`install --features +gitnexus` failed** with "Unknown feature(s): +gitnexus" — only `update`
+  resolved `+`/`-` lists, and that is the documented way to opt in to the graph. Install now resolves
+  them against the recorded selection, or the default set on a first install.
+- **The "Zed + GitNexus" profile had no file tools.** Zed profiles are allowlists, and it listed only
+  `false` entries, so an agent on it could not read, search or edit a file. Zed's default Write
+  profile already enables every context server, so bearing no longer writes a profile; an update
+  removes the old one unless you turned tools on in it. `bearing:verify` stopped requiring it.
+- **The consult and microscope nudges shipped to every install.** Neither had an owning module, so a
+  north-stars-only repo was told to load a microscope skill it did not have. Each now ships with its
+  module.
+- **Text that still described the gates**, all printed to users: `bearing:health` ("grep and broad
+  reads are blocked — by design"), the stale-index message ("Hooks block Grep/Read/MCP/shell"), the
+  setup script's onboarding, the Codex and Claude Code runtime labels, `--help`, and the status line.
+  New installs no longer seed the dead `mode` and `readLineThreshold` keys in `.bearing/hooks.json`.
+- **Docs**: `docs/QUICKSTART.md`, `docs/ARCHITECTURE.md` and `docs/ZED.md` rewritten for the
+  current product (they still described Cursor, gates and graph-first enforcement); the orphaned
+  `docs/TEAM-BUNDLE.md` removed.
+
 ### Fixed — stealth hid the user's own nested files from `git status`
 
 A stealth install writes its excludes to `.git/info/exclude`, and most of them were unanchored:
@@ -76,24 +138,6 @@ are corrected by their next `bearing update`, which leaves exactly one block (NS
 
 It was found on bearing's own repo, where a leftover stealth block swallowed `bundle/.bearing/`: a
 newly written library was invisible to git while the hook that loads it was not.
-
-### Fixed — the GitNexus stats block still reached commits
-
-The pre-commit hook stripped the volatile stats block from `AGENTS.md` / `CLAUDE.md` on DISK, on
-the belief that this kept commits clean. It never did: git commits the INDEX. A block staged before
-the hook ran — an `analyze` bearing did not launch, then `git add -A` — went into the commit anyway,
-and the stripped files then showed up as ` D AGENTS.md` / ` M CLAUDE.md` for the next `git add -A`
-to sweep into an unrelated commit. One real repository's history alternated add / remove / add
-across four feature commits.
-
-The hook now runs the stabilizer with `--staged`, which also strips the staged copies, using git
-plumbing (`cat-file` → strip → `hash-object -w` → `update-index --cacheinfo`) rather than `git add`.
-That way a partially staged `CLAUDE.md` does not pick up its unstaged rest. Because the calls inherit
-`GIT_INDEX_FILE`, this works for `git commit`, `commit -a` and `commit -- <paths>`. It only touches
-docs the commit already changes. A block that is already in HEAD is left for one deliberate cleanup
-commit rather than written into an unrelated one. Until now, nothing had ever made a commit through
-this hook: the earlier tests only checked the text transform. The new test drives real commits in
-every mode, and it fails against the old hook.
 
 ### Changed — TS-18 guards every table read, not only the ones whose key looks untrusted
 

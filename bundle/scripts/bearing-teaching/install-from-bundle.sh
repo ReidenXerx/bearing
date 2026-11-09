@@ -34,7 +34,7 @@ fi
 if [[ -f scripts/bearing-teaching/merge-package-scripts.mjs ]]; then
   info "Injecting GitNexus npm scripts into package.json"
   GITNEXUS_REPO_NAME="$REPO_NAME" node scripts/bearing-teaching/merge-package-scripts.mjs --write
-  ok "package.json updated (bearing:* + hooks:install)"
+  ok "package.json updated (bearing:* scripts)"
 elif [[ -f package.json.scripts.snippet.json ]]; then
   warn "merge-package-scripts.mjs missing — falling back to snippet merge"
   node <<'NODE'

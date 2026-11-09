@@ -21,8 +21,7 @@ export {
   allManagedScriptKeys,
   mergeGitnexusScripts,
   mergeIntoPackageJson,
-  findGate,
-  gateCommentKey,
+  isRetiredScript,
 } from './script-gates.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

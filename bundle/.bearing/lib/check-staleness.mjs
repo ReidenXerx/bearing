@@ -75,7 +75,7 @@ function git(cmd) {
  *
  * This was a list of PREFIXES (`.bearing/`, `scripts/bearing-`, `.claude/hooks/bearing-`) and it
  * missed everything bearing ships that is not named `bearing-*`: scripts/lib/setup-ui.mjs,
- * scripts/run-with-project-tmp.sh, scripts/install-git-hooks.sh and four more. Measured: 12 drift
+ * scripts/run-with-project-tmp.sh and five more. Measured: 12 drift
  * against 10 edited files right after an install. The manifest is the authoritative record of what
  * was installed, so read that rather than keep a second list in sync by hand (GP-11).
  */
@@ -182,14 +182,14 @@ function countDrift(at, sourceExtRe) {
 // message a reader cannot check. With `stalenessGate: "off"` (the default) staleness denies
 // nothing, so asserting "hooks block" here made every stale-index report state a consequence that
 // does not happen. NS-20: an unchecked claim is a lie waiting to happen.
+// Nothing can block any more: the guards that read `stalenessGate` were retired (NS-28), so an old
+// hooks.json still saying "block" must not make this claim one (NS-20).
 const staleHookNote =
-  loadHookConfig(root).stalenessGate === 'block'
-    ? 'Hooks block Grep/Read/MCP/shell until refresh succeeds or fails.'
-    : 'Nothing is blocked (stalenessGate: off) — graph answers may be WRONG rather than refused, so confirm anything load-bearing.';
+  'Nothing is blocked — graph answers may be WRONG rather than refused, so confirm anything load-bearing.';
 // Resolved, not hardcoded: a stealth install has no npm scripts, so naming one made every block
 // point at a command that repo did not have (NS-6 — a block whose exit does not exist is a trap).
 const agentFix =
-  `${staleHookNote} Agent MUST run ${howToRun(root, "bearing:agent-refresh")} autonomously (required_permissions: ["all"]).`;
+  `${staleHookNote} Refresh with ${howToRun(root, "bearing:agent-refresh")} before relying on graph answers.`;
 
 const out = {
   fresh: true,

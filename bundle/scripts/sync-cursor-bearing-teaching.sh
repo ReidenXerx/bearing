@@ -37,7 +37,6 @@ fail()  { printf '\033[1;31mERROR:\033[0m %s\n' "$*" >&2; exit 1; }
 HOOK_LIBS=(
   ".bearing/hooks.json"
   "scripts/bearing-agent.mjs"
-  "scripts/bearing-gate-hint.mjs"
   "scripts/bearing-teaching/script-gates.mjs"
   "scripts/lib/setup-ui.mjs"
 )

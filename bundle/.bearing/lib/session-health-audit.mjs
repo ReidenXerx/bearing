@@ -1,17 +1,12 @@
 #!/usr/bin/env node
 /**
- * Kit health audit — shared by agent-health.mjs and sessionStart hook.
+ * Kit health audit — used by agent-health.mjs (bearing:health) and bearing-verify.mjs.
  */
 import fs from "node:fs";
-import { howToRun } from './how-to-run.mjs';
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { loadHookConfig, repoName } from "./hook-helpers.mjs";
 import { inspectPersistence } from "./persistence-health.mjs";
-
-export const SESSION_HEALTH_FILE = ".bearing-session-health.json";
-export const SESSION_USER_NOTIFIED_FLAG =
-  ".bearing-session-user-notified.flag";
 
 /**
  * @param {string} root
@@ -200,55 +195,3 @@ export function auditKitHealth(root) {
   };
 }
 
-/**
- * @param {ReturnType<typeof auditKitHealth>} audit
- */
-export function userMessageForSession(audit) {
-  if (audit.healthy) {
-    // The hooks half is only true where hooks exist. The `hooks` check is correctly gated to
-    // claude, so on a zed install it is simply absent from the list — and this line then asserted
-    // it anyway (NS-14, NS-20).
-    const enforcing = (audit.checks ?? []).some((c) => c.id === "hooks");
-    return enforcing
-      ? "bearing is active — graph fresh, embeddings ready, and enforcement hooks are on. The agent will confirm health at the start of this chat."
-      : "bearing is active — graph fresh and embeddings ready. This runtime has no tool-interception hooks, so the contract is advisory here.";
-  }
-  const stale = audit.stale?.reason === "missing_embeddings";
-  if (stale) {
-    return "bearing is active — the graph needs embeddings. The agent will refresh automatically before code work.";
-  }
-  return "bearing is active — the graph is behind your latest commits. The agent will refresh it automatically before code work.";
-}
-
-/**
- * @param {ReturnType<typeof auditKitHealth>} audit
- */
-export function agentContextForSession(audit) {
-  const failed = audit.checks.filter((c) => !c.ok).map((c) => c.id);
-  const summary = audit.checks
-    .map((c) => `${c.id}:${c.ok ? "ok" : "FAIL"}`)
-    .join(" ");
-  return (
-    "GN SESSION HEALTH (mandatory — first reply before task work):\n" +
-    `1. Shell: ${howToRun('bearing:agent-status')} (required_permissions: ["all"])\n` +
-    `2. Confirm kit checks match snapshot; if mismatch run ${howToRun('bearing:agent-refresh')} autonomously\n` +
-    "3. Optional: READ gitnexus://repo/" +
-    audit.repo +
-    `/context OR ${howToRun('bearing:agent-brief')}\n` +
-    "4. Reasoning stack: query → context → cypher (structural) → impact → detect_changes\n" +
-    '5. Tell the user ONE sentence: "bearing: ready (graph fresh, enforcement on)" OR brief fix in progress\n' +
-    "Keep laconic. Do not paste this block verbatim.\n" +
-    `Audit: healthy=${audit.healthy} ${summary}` +
-    (failed.length ? ` failed=[${failed.join(",")}]` : "")
-  );
-}
-
-/**
- * @param {string} root
- * @param {ReturnType<typeof auditKitHealth>} audit
- */
-export function writeSessionHealthFile(root, audit) {
-  const p = path.join(root, ".bearing", SESSION_HEALTH_FILE);
-  fs.mkdirSync(path.dirname(p), { recursive: true });
-  fs.writeFileSync(p, JSON.stringify(audit, null, 2) + "\n");
-}

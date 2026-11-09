@@ -1,13 +1,19 @@
 #!/usr/bin/env node
 /**
- * GitNexus npm script gates — single source of truth.
- * Maps enforcement-rule gates to copy-paste npm commands (with comment gate entries in package.json).
+ * GitNexus npm scripts — single source of truth.
+ *
+ * The groups below are only an ordering for the generated package.json block. They used to be
+ * "gates" — each group also wrote a `bearing.__gate.<n>.<name>` entry that printed the step of an
+ * enforced graph-first loop. The gates were retired (NS-25, NS-28), so no gate entry is written any
+ * more, and merging strips the ones earlier versions left behind (see isRetiredScript). So does
+ * `hooks:install`, which wired a pre-commit hook that re-indexed on every commit: the index is
+ * refreshed when the developer asks for it, not on a trigger (NS-25).
  */
 import fs from "node:fs";
 import path from "node:path";
 
 const WRAP = "bash scripts/run-with-project-tmp.sh";
-const GATE_HINT = "node scripts/bearing-gate-hint.mjs";
+const STABILIZE = " && node .bearing/lib/stabilize-agent-docs.mjs .";
 
 /** @typedef {{ gate: string, name: string, title: string, description: string, scripts: Record<string, string> }} ScriptGate */
 
@@ -16,9 +22,8 @@ export const GITNEXUS_SCRIPT_GATES = [
   {
     gate: "1",
     name: "session",
-    title: "Gate 1 — Session start",
-    description:
-      "Before task work: health check, agent brief, staleness. Matches enforcement rule + session-health hooks.",
+    title: "Session",
+    description: "Health check, agent brief, staleness.",
     scripts: {
       "bearing:health": "node scripts/bearing-agent.mjs health",
       "bearing:agent-brief": "node scripts/bearing-agent.mjs brief",
@@ -28,9 +33,8 @@ export const GITNEXUS_SCRIPT_GATES = [
   {
     gate: "2",
     name: "orient",
-    title: "Gate 2–4 — Orient, drill, Cypher (agents use MCP)",
-    description:
-      "Fuzzy work → query (embeddings). Symbols → context. Structural → cypher. Hooks inject MCP calls — not separate npm scripts.",
+    title: "Orient",
+    description: "Graph smoke test, capabilities, benchmark, maps and failure reports.",
     scripts: {
       "bearing:graph-smoke": "node scripts/bearing-agent.mjs graph-smoke",
       "bearing:capabilities": "node scripts/bearing-agent.mjs capabilities",
@@ -51,14 +55,15 @@ export const GITNEXUS_SCRIPT_GATES = [
   {
     gate: "5",
     name: "index",
-    title: "Gate 5 — Graph index (fresh embeddings)",
-    description:
-      "Humans/CI refresh the graph. Agents run bearing:agent-refresh autonomously when stale (hook pre-approved).",
+    title: "Graph index",
+    description: "Build and refresh the index, branch and PR helpers.",
+    // `analyze` writes a volatile stats block into CLAUDE.md / AGENTS.md. The retired pre-commit
+    // hook stripped it before it reached a commit; with no hook, each raw analyze strips its own.
     scripts: {
-      "bearing:refresh": `${WRAP} npx gitnexus@latest analyze --embeddings 0 --skills`,
-      "bearing:full": `${WRAP} npx gitnexus@latest analyze --force --embeddings 0 --skills`,
-      "bearing:pdg": `${WRAP} npx gitnexus@latest analyze --embeddings 0 --skills --pdg`,
-      "bearing:full-pdg": `${WRAP} npx gitnexus@latest analyze --force --embeddings 0 --skills --pdg`,
+      "bearing:refresh": `${WRAP} npx gitnexus@latest analyze --embeddings 0 --skip-skills${STABILIZE}`,
+      "bearing:full": `${WRAP} npx gitnexus@latest analyze --force --embeddings 0 --skip-skills${STABILIZE}`,
+      "bearing:pdg": `${WRAP} npx gitnexus@latest analyze --embeddings 0 --skip-skills --pdg${STABILIZE}`,
+      "bearing:full-pdg": `${WRAP} npx gitnexus@latest analyze --force --embeddings 0 --skip-skills --pdg${STABILIZE}`,
       "bearing:status": `${WRAP} npx gitnexus@latest status`,
       "bearing:agent-refresh": "node scripts/bearing-agent.mjs refresh",
       "bearing:agent-review": "node scripts/bearing-agent.mjs review",
@@ -74,7 +79,7 @@ export const GITNEXUS_SCRIPT_GATES = [
     name: "verify",
     title: "Install / CI verification",
     description:
-      "Full kit check + backend probe after install, update, or index build. Run before demoing to GitNexus authors.",
+      "Full kit check + backend probe after install, update, or index build.",
     scripts: {
       "bearing:verify": "node scripts/bearing-agent.mjs verify",
       "bearing:doctor": "node scripts/bearing-agent.mjs doctor",
@@ -91,7 +96,6 @@ export const GITNEXUS_SCRIPT_GATES = [
       "bearing:setup": "bash scripts/bearing-setup.sh",
       "bearing:sync-teaching": "bash scripts/sync-cursor-bearing-teaching.sh",
       "bearing:pack": "bash scripts/pack-bearing-teaching.sh",
-      "hooks:install": "bash scripts/install-git-hooks.sh",
     },
   },
   {
@@ -107,12 +111,24 @@ export const GITNEXUS_SCRIPT_GATES = [
   },
 ];
 
-/** Gate comment script key → prints gate title + description when run. */
-export function gateCommentKey(g) {
-  return `bearing.__gate.${g.gate}.${g.name}`;
+/**
+ * A script an earlier version wrote and this one retired. Matched on the key AND our own command as
+ * the value, so a key someone repurposed for their own command survives — package.json is theirs,
+ * and we only take back what we wrote (NS-1):
+ *  - a `bearing.__gate.*` entry running our gate-hint script (bearing-gate-hint.mjs, or
+ *    gitnexus-gate-hint.mjs before the rename);
+ *  - `hooks:install` running our installer for the pre-commit index refresh.
+ * @param {string} key @param {unknown} value
+ */
+export function isRetiredScript(key, value) {
+  if (typeof value !== "string") return false;
+  if (key === "hooks:install") return /^bash scripts\/install-git-hooks\.sh$/.test(value.trim());
+  return (
+    /^(bearing|gitnexus)\.__gate\./.test(key) &&
+    /\bscripts\/(bearing|gitnexus)-gate-hint\.mjs\b/.test(value)
+  );
 }
 
-/** Ordered scripts block for package.json (gate hints + commands). */
 /**
  * How the generated scripts invoke gitnexus. `npx gitnexus@latest` needs no global install and is
  * the right default, but a machine running a LOCAL build wants its own binary — otherwise
@@ -128,7 +144,6 @@ export function buildGatedScripts({ gitnexusCmd = DEFAULT_GITNEXUS_CMD } = {}) {
   /** @type {Record<string, string>} */
   const out = {};
   for (const g of GITNEXUS_SCRIPT_GATES) {
-    out[gateCommentKey(g)] = `${GATE_HINT} ${g.gate}-${g.name}`;
     for (const [key, rawCmd] of Object.entries(g.scripts)) {
       const cmd = sub(rawCmd);
       out[key] = cmd;
@@ -154,7 +169,7 @@ export function flatGitnexusScripts() {
   return out;
 }
 
-/** All keys managed by the kit (including gate comments). */
+/** All keys managed by the kit. */
 export function allManagedScriptKeys() {
   return Object.keys(buildGatedScripts());
 }
@@ -171,6 +186,14 @@ export function mergeGitnexusScripts(pkg, opts = {}) {
   let added = 0;
   let updated = 0;
   let unchanged = 0;
+  // The retired entries go first, so an update converges on a block without them (NS-3).
+  let removed = 0;
+  for (const [key, value] of Object.entries(pkg.scripts)) {
+    if (isRetiredScript(key, value)) {
+      delete pkg.scripts[key];
+      removed++;
+    }
+  }
 
   for (const [key, value] of Object.entries(gated)) {
     if (pkg.scripts[key] === undefined) added++;
@@ -179,7 +202,7 @@ export function mergeGitnexusScripts(pkg, opts = {}) {
     pkg.scripts[key] = value;
   }
 
-  return { added, updated, unchanged, total: Object.keys(gated).length };
+  return { added, updated, unchanged, removed, total: Object.keys(gated).length };
 }
 
 /**
@@ -223,11 +246,4 @@ export function mergeIntoPackageJson(pkgPath, opts = {}) {
 
   fs.writeFileSync(abs, JSON.stringify(pkg, null, 2) + "\n");
   return { ...stats, addedEngines, createdPackageJson };
-}
-
-/** @param {string} gateId e.g. "1-session" */
-export function findGate(gateId) {
-  const [gate, ...rest] = gateId.split("-");
-  const name = rest.join("-");
-  return GITNEXUS_SCRIPT_GATES.find((g) => g.gate === gate && g.name === name);
 }

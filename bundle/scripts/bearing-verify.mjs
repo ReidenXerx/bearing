@@ -11,7 +11,6 @@ const root = process.argv[2] ?? process.cwd();
 const jsonOut = process.argv.includes('--json');
 
 const ZED_PROFILE_KEY = 'zed-gitnexus';
-const ZED_PROFILE_NAME = 'Zed + GitNexus';
 const SKILLS_STORE = '.bearing/skills';
 
 // Newest first. The older paths stay readable because this script ships INTO the repo and can be
@@ -144,15 +143,13 @@ function checkPackageGates() {
   }
   try {
     const scripts = JSON.parse(fs.readFileSync(p, 'utf8')).scripts ?? {};
-    const ok =
-      Object.keys(scripts).some((k) => k.startsWith('bearing.__gate.')) &&
-      scripts['bearing:verify'] &&
-      scripts['bearing:agent-brief'];
+    // The id stays `pkg_gates` (CI and tests read it); the gate entries it once required are retired.
+    const ok = Boolean(scripts['bearing:verify'] && scripts['bearing:agent-brief']);
     return {
       id: 'pkg_gates',
       ok,
-      label: 'package.json gates',
-      detail: ok ? 'gated bearing:* scripts injected' : 'run kit install/update',
+      label: 'package.json scripts',
+      detail: ok ? 'bearing:* scripts present' : 'run kit install/update',
     };
   } catch {
     return { id: 'pkg_gates', ok: false, label: 'package.json gates', detail: 'invalid JSON' };
@@ -340,15 +337,18 @@ function checkZed() {
     label: 'GitNexus MCP (Zed)',
     detail: zedCfg.context_servers?.gitnexus ? 'context_servers.gitnexus' : 'missing',
   });
+  // bearing no longer writes a Zed profile: the default Write profile enables every context server.
+  // The one it used to write enabled NO built-in tool (Zed profiles are allowlists), so what is
+  // checked now is that it is gone — unless the user turned tools on, which makes it theirs.
+  const oldProfile = zedCfg.agent?.profiles?.[ZED_PROFILE_KEY];
+  const toolless = Boolean(oldProfile) && !Object.values(oldProfile.tools ?? {}).includes(true);
   checks.push({
     id: 'zed_profile',
-    ok: Boolean(zedCfg.agent?.profiles?.[ZED_PROFILE_KEY]),
+    ok: !toolless,
     label: 'Zed agent profile',
-    detail: zedCfg.agent?.profiles?.[ZED_PROFILE_KEY]
-      ? `"${ZED_PROFILE_NAME}"`
-      : zedCfg.agent?.profiles?.gitnexus
-        ? 'legacy key "gitnexus" — run kit update'
-        : 'missing',
+    detail: toolless
+      ? 'the old "Zed + GitNexus" profile has no file tools — run kit update to remove it'
+      : 'none needed (gitnexus tools are in the default Write profile)',
   });
   if (zedCfg.agent?.profiles?.gitnexus) {
     checks.push({
@@ -454,7 +454,7 @@ async function printHuman(report) {
 
   const steps = [await run('bearing:health')];
   if (wantsZed(report.runtime)) {
-    steps.unshift('Restart Zed — trust worktree; profile "Zed + GitNexus"');
+    steps.unshift('Restart Zed — trust the worktree (.agents/skills load only on trusted repos)');
   }
   ui.nextSteps(steps);
   return 0;

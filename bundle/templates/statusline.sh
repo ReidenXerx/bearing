@@ -17,8 +17,8 @@
 # kept on its own row: rows 1-2 are the session, row 3 is the box under it.
 #
 # The index field is the bearing-specific one, and the reason this ships with the kit:
-# a stale index DENIES Grep/Read/MCP in this repo, so its state belongs on screen
-# instead of being discovered by a blocked tool call halfway through a task.
+# a stale index gives graph answers that may be WRONG rather than refused, so its state belongs on
+# screen instead of being discovered halfway through a task.
 #
 # Claude Code pipes a JSON status payload on stdin and renders stdout, ANSI and all.
 # Without jq the line degrades to the word "claude" rather than failing.
