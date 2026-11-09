@@ -267,9 +267,8 @@ function checkModuleDelivery() {
 
 async function checkRetiredHookKeys() {
   // A setting that silently does nothing looks handled, which is why it outlasts the feature it
-  // configured. NS-19 retired the context-fullness family, but hooks.json is seed-once — an old
-  // install's own comment still worked-examples `"contextWindowTokens": 1000000`, so following the
-  // documentation configures a no-op and nothing says so.
+  // configured. hooks.json is seed-once, so a retired key stays wherever someone set it; an update
+  // drops the ones still holding bearing's own seeded value, and this names the rest.
   let inUse = [];
   try {
     const mod = await import(pathToFileURL(path.join(root, '.bearing/lib/hook-helpers.mjs')).href);
@@ -282,7 +281,7 @@ async function checkRetiredHookKeys() {
     ok: inUse.length === 0,
     label: 'Hook config has no retired keys',
     detail: inUse.length
-      ? `${inUse.map((k) => `${k.key} (${k.file})`).join(', ')} — retired by NS-19, read by nothing. Remove them; the window is not measurable at runtime.`
+      ? `read by nothing — remove: ${inUse.map((k) => `${k.key} in ${k.file} (${k.why ?? 'retired'})`).join('; ')}`
       : 'no dead settings',
   };
 }

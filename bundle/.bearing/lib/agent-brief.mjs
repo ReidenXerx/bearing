@@ -187,14 +187,16 @@ async function main() {
   const total = Object.values(counts).reduce((a, b) => a + b, 0);
   if (total > 0) {
     lines.push("");
-    lines.push("Enforcement scorecard (this session):");
+    lines.push("Session scorecard:");
+    // The last five are counters the retired gates kept (NS-28); only a session from before an
+    // upgrade still has them, so they are labelled as such rather than read as current behaviour.
     const label = {
       graphCalls: "graph calls",
-      grepRedirects: "grep→graph",
-      readRedirects: "read→graph",
-      impactGate: "impact gates",
-      commitGate: "commit gates",
-      editStaleBlocks: "stale-edit blocks",
+      grepRedirects: "grep→graph (retired gate)",
+      readRedirects: "read→graph (retired gate)",
+      impactGate: "impact gates (retired)",
+      commitGate: "commit gates (retired)",
+      editStaleBlocks: "stale-edit blocks (retired)",
     };
     lines.push(
       "  " +

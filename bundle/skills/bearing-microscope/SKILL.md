@@ -10,7 +10,7 @@ description: "Deep multi-lens audit ('microscope waves') for MILESTONE moments �
 
 A zero is not absence; a near-0.5 `r.confidence` edge is a lead, not proof (~92% of `USES`); a count
 can be a floor — `impact` says which in `epistemic`. Before a conclusion that matters, confirm with a
-scoped `Grep` (allowed here, not a gate violation) and say which check you ran.
+scoped `Grep` and say which check you ran.
 <!-- END GENERATED: graph-uncertainty -->
 
 
@@ -35,11 +35,12 @@ Kind B is what separates this from cascade review — a linter never asks *"why 
 
 ## The routine (one wave)
 
-> **With or without the graph.** Microscope does not require GitNexus. Steps 0 and 2 have a graph
-> path and a classical path; every other step is identical. Use the classical path whenever the
-> graph module is not installed, the index is stale and cannot be refreshed, or a graph call
-> returns nothing — and **say which path you used**, because the map's completeness bounds how much
-> the wave can claim to have covered.
+> **Classical by default; the graph when the user asks for it.** Microscope does not need GitNexus.
+> Steps 0 and 2 have a graph path and a classical path; every other step is identical. Take the
+> graph path only when the user asked for the graph, the module is installed, and the index is in
+> scope and current. Otherwise take the classical path, including when a graph call returns
+> nothing — and **say which path you used**, because the map's completeness bounds how much the wave
+> can claim to have covered.
 
 ```
 0. SCOPE-GATE: substantial? If not → skip or one lens.
@@ -65,10 +66,9 @@ Kind B is what separates this from cascade review — a linter never asks *"why 
              repeat until clean. Record each pass to memory as a handoff.
 ```
 
-> **Graph module installed and the index is stale?** Refresh it first with the
-> `bearing:agent-refresh` script — the graph map is only as good as the index. If that script is
-> not in this repo's `package.json`, the graph module is not installed: take the classical path
-> above rather than going looking for it.
+> **Asked for the graph, but the index is stale?** Say how far behind it is and ask whether to
+> refresh — a refresh can take minutes on a large repo, so that is the user's call. Until it is
+> refreshed, take the classical path.
 
 <!-- BEGIN GENERATED: anchored-spawn — bearing regenerates this block; edits here are replaced on update -->
 ### Anchored spawn — how to send work out
@@ -87,10 +87,10 @@ one that sees all of them pays that token cost once per agent.
 **3. Bounds.** State the unit, what to return, and **what NOT to decide**. Whatever you leave
 unstated, a subagent will decide anyway, using context it does not have.
 
-**4. The same tool discipline you follow.** If this repo has the GitNexus module, a subagent must
-use the graph — `query` to orient, `cypher` for structure — not grep. A subagent grepping for call
-sites is doing the exact thing the gates exist to redirect, one level down where no gate can see it,
-and what it brings back is the weaker kind of evidence.
+**4. The same tools you would use.** Grep and Read are the defaults. Hand a subagent the GitNexus
+graph only when the user asked for the graph in this task, and say so in its brief: a subagent
+never saw that request, so it cannot know the graph was wanted. When it does use the graph, its
+zeros and counts carry the same caveats yours do.
 
 **5. Parallel where the runtime allows it**, sequential where it does not. Claude Code can run them
 concurrently; treat that as an optimisation, never as a requirement — the routine must produce the

@@ -80,6 +80,62 @@ A real update, run from an install made with the previous code, also showed that
 Two more lines from the gate era are fixed. `bearing:health` promised that the agent "will refresh
 the graph autonomously". A failed refresh announced that "Classical Grep/Read are now permitted".
 
+### Fixed — a sweep for what the gates and Cursor left behind
+
+A repo-wide sweep before the next milestone found more of the old product still shipping.
+
+- **Skills still told subagents to use the graph.** A block generated into the minions, microscope
+  and invasive-minions skills said a subagent "must use the graph … not grep", because grepping was
+  "the exact thing the gates exist to redirect". Every fan-out in a GitNexus repo got that brief.
+  It now says Grep and Read are the defaults, and the graph goes to a subagent only when the user
+  asked for it. Also fixed in the skills:
+  - another generated block called Grep "allowed here, not a gate violation";
+  - the microscope skill refreshed a stale index without asking;
+  - microscope and the PR skill took their graph path whenever GitNexus was installed. Both now
+    take it only when the user asks (NS-25).
+- **The installer said the index is "refreshed on commit".** That stopped being true when the
+  automatic refresh was retired; it now says it is refreshed when you ask.
+- **The status line's index field never showed anything.** It read a staleness cache only the gates
+  wrote. The field is removed, along with the claim in QUICKSTART.
+- **Settings for the gates were still read, and still seeded.** Five keys are now retired:
+  - `mode`
+  - `readLineThreshold`
+  - `stalenessGate`
+  - `stalenessCacheTtlMs`
+  - `sourceGlobs`
+
+  An update removes them from `.bearing/hooks.json` while they still hold the value bearing seeded,
+  and refreshes the comment that documented them. A value you changed is yours: it stays, and
+  `bearing:verify` names it and gives the reason. The code they configured is gone: the
+  enforce/guide/teach modes, `GITNEXUS_MODE`, the deny cache and the "impact used" flags. A new
+  session still deletes the flag files an older version left behind.
+- **The Zed migration re-created the retired profile.** It renamed the oldest `gitnexus` profile
+  into the "Zed + GitNexus" one and printed "migrated", for a profile the next step deleted. It now
+  removes a profile with no tool turned on, and keeps one you made usable.
+- **Cursor-era packaging is retired.** These replaced the Cursor-era packaging:
+  - `bearing:pack` and `pack-bearing-teaching.sh` built a "gitnexus-cursor-teaching" tarball,
+    unpacked by `install-from-bundle.sh` into `.cursor/` paths; `npx bearing install` replaced all
+    three. An update removes the scripts, and the npm script while it still runs ours.
+  - The maintainer's `refresh-bundle-from-source.sh` copied from a Cursor-layout source repo, and
+    `sync-bundle-skills.mjs` was a stub that only explained it was retired. Both are deleted.
+- **Printed text and docs:**
+  - the install banner ("Cursor, Zed, Claude Code, Codex");
+  - `--help` (a Zed "profile");
+  - the `bin/install.sh` and `bin/update.sh` usage (`both = cursor+zed, default`);
+  - the "Enforcement scorecard" titles (the gate counters are now labelled retired);
+  - "enforcement is inactive", "(incl. gate hints)" and `/tmp/cursor-sandbox-cache`;
+  - `CONTRIBUTING.md` and `SECURITY.md`, the issue and PR templates, and an issue link to the old
+    `cursor-gitnexus-kit` repo;
+  - README's CI section (it described the retired workflow) and its file counts;
+  - the project page's `north-stars.md` filename;
+  - a `bearing-guide` skill that does not exist;
+  - the tsjs skill's rule range;
+  - the release checklist.
+- **A healthy Zed install reported "removed legacy copy" for every skill, on every update.** The
+  same false report #34 fixed for `.claude/skills`, in `.agents/skills`. Current links are no
+  longer reported.
+- **`npm test` named a test file that does not exist**, and printed "Could not find" on every run.
+
 ### Fixed — found while removing the gates
 
 - **Retired skills left dangling symlinks** in `.claude/skills/` on every update: linking only ever

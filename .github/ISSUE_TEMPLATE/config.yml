@@ -4,5 +4,5 @@ contact_links:
     url: https://github.com/abhigyanpatwari/GitNexus
     about: Core graph indexer and MCP — report indexer bugs there when not kit-specific
   - name: Quick start & install docs
-    url: https://github.com/ReidenXerx/cursor-gitnexus-kit#quick-start
+    url: https://github.com/ReidenXerx/bearing/blob/main/docs/QUICKSTART.md
     about: Install, verify, and daily commands

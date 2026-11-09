@@ -83,7 +83,7 @@ export function tmpSpaceReport(root = process.cwd()) {
     lines.push(`System temp (${systemTmp}): ${systemDf.used}/${systemDf.size} (${systemDf.usePct}), avail ${systemDf.avail}`);
     if (parseUsePct(systemDf.usePct) >= 95) {
       lines.push(
-        `  WARNING: ${systemTmp} nearly full — gitnexus/npm use project .tmp-agent/ instead; clear /tmp/cursor-sandbox-cache if needed.`
+        `  WARNING: ${systemTmp} nearly full — gitnexus/npm use project .tmp-agent/ instead.`
       );
     }
   }
@@ -109,7 +109,6 @@ export function enospcHelp(root = process.cwd()) {
     'Fix in your terminal:\n' +
     '  df -h /tmp\n' +
     '  sudo du -sh /tmp/* 2>/dev/null | sort -hr | head -10\n' +
-    '  rm -rf /tmp/cursor-sandbox-cache/*   # often safe\n' +
     `  rm -rf ${path.join(root, DEFAULT_DIR)}/*   # project temp cache\n` +
     'Then: npm run bearing:agent-refresh'
   );

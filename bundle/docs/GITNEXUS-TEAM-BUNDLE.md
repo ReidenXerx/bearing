@@ -1,12 +1,12 @@
-# GitNexus agent teaching bundle — team install
+# GitNexus module — team guide
 
-Portable **contract + hooks + skills + scripts** for the GitNexus module. GitNexus is **opt-in and user-invoked**: nothing blocks a tool or pushes the agent to the graph. Ask for it in a prompt ("use gitnexus to find what this change affects") and the `bearing-gitnexus` skill loads. Built for this repo; reusable on other projects with one rename step.
+What bearing's GitNexus module put in this repo, and how the team uses it. GitNexus is **opt-in and user-invoked**: nothing blocks a tool or pushes the agent to the graph. Ask for it in a prompt ("use gitnexus to find what this change affects") and the `bearing-gitnexus` skill loads.
 
-> **Standalone installer:** [`bearing`](https://github.com/ReidenXerx/bearing) — `install` / `update` / `uninstall` scripts for any repo (upstream for this teaching bundle). Updates **migrate** legacy `bearing` layouts automatically.
+> **Installer:** [`bearing`](https://github.com/ReidenXerx/bearing) — `npx bearing install` / `update` / `uninstall` for any repo. Updates remove what older versions installed and this one retired.
 
 > **Status in plain language:** `npm run bearing:health`.
 
-## What's in the bundle
+## What's installed
 
 | Included | Purpose |
 | --- | --- |
@@ -20,9 +20,9 @@ Portable **contract + hooks + skills + scripts** for the GitNexus module. GitNex
 | `scripts/bearing-agent.mjs` | Agent CLI (`agent-status` / `agent-refresh`) |
 | `.vscode/settings.json` | npm task settings (optional) |
 | `.gitnexusignore` | GitNexus-only excludes (large caches) |
-| `package.json.scripts.snippet.json` | npm scripts to merge |
+| `bearing:*` npm scripts | Written into `package.json` (none in a stealth install) |
 
-**Automatic:** `install-from-bundle.sh` and `bearing:setup` run `merge-package-scripts.mjs --write`, which **adds or overwrites** all `bearing:*` scripts in `package.json` (creates `package.json` if missing).
+**Automatic:** install, update and `bearing:setup` **add or overwrite** the `bearing:*` scripts in `package.json` (creating it if missing). Scripts of your own are left alone.
 
 ## NOT included (per-target repo)
 
@@ -55,27 +55,11 @@ If refresh still fails:
 ```bash
 df -h /tmp
 sudo du -sh /tmp/* 2>/dev/null | sort -hr | head -10
-rm -rf /tmp/cursor-sandbox-cache/*    # often safe
 npm run bearing:clean-tmp            # project temp only
 npm run bearing:agent-refresh
 ```
 
-## Pack (this repo)
-
-```bash
-npm run bearing:pack
-# → gitnexus-cursor-teaching-v2-YYYYMMDDTHHMMSSZ.tar.gz
-```
-
 ## Install (another repo)
-
-```bash
-tar -xzf gitnexus-cursor-teaching-*.tar.gz -C /path/to/their-repo --strip-components=1
-cd /path/to/their-repo
-GITNEXUS_REPO_NAME=their-repo-name bash scripts/bearing-teaching/install-from-bundle.sh
-```
-
-Or use the standalone kit (recommended):
 
 ```bash
 /path/to/bearing/bin/install.sh /path/to/their-repo --runtime claude --features +gitnexus
@@ -93,9 +77,9 @@ Or use the standalone kit (recommended):
 
 ```bash
 npm run bearing:verify          # full kit check
-npm run bearing:agent-status    # is the index fresh?
-npm run bearing:agent-refresh   # re-index when stale
-npm run bearing:sync-teaching   # after pulling rule/skill updates
+npm run bearing:agent-status    # is the index current?
+npm run bearing:agent-refresh   # re-index — or ask your agent
+npm run bearing:sync-teaching   # re-link skills after pulling
 npm run bearing:setup -- --quick  # hooks/skills only, skip index
 ```
 

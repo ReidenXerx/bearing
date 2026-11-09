@@ -1,10 +1,3 @@
 {
-  "comment": "Optional hook tuning, TEAM-SHARED (committed). sourceGlobs: gitignore-style roots of your source code. stalenessCacheTtlMs: reuse staleness within N ms to cut per-tool-call latency. sourceExts is intentionally omitted — the built-in polyglot default (see hook-helpers.mjs DEFAULT_SOURCE_EXT_RE) is the single source of truth; add a \"sourceExts\": [\"js\",\"py\", …] array here only to narrow/override it. For PER-MACHINE overrides that shouldn't be committed (e.g. \"taskCoreEveryEdits\": 40), create a gitignored .bearing/hooks.local.json with the same shape — it wins over this file.",
-  "stalenessCacheTtlMs": 2500,
-  "sourceGlobs": [
-    "src/**",
-    "lib/**",
-    "apps/**",
-    "packages/**"
-  ]
+  "comment": "Optional hook tuning, TEAM-SHARED (committed). Every key is optional — leave one out for its default: \"taskCoreEveryEdits\" (25; 0 disables), \"northStarAnchorEvery\" (25), \"northStarAnchorMaxLines\" (80), \"consultNudge\" (true), \"microscopeFileThreshold\" (5), \"minionModel\" (\"sonnet\"), \"minionFanoutThreshold\" (8), \"driftRefreshThreshold\" (8; 0 disables drift counting), \"sourceExts\" (an array that narrows which extensions count as source; the built-in polyglot default is in hook-helpers.mjs). For PER-MACHINE overrides that shouldn't be committed, create a gitignored .bearing/hooks.local.json with the same shape — it wins over this file."
 }

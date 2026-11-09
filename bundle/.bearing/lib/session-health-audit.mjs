@@ -188,7 +188,6 @@ export function auditKitHealth(root) {
     repo,
     healthy,
     stale,
-    config: { mode: config.mode },
     checks,
     stats,
     auditedAt: new Date().toISOString(),

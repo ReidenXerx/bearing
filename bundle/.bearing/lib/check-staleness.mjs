@@ -178,12 +178,9 @@ function countDrift(at, sourceExtRe) {
   return n;
 }
 
-// The blocking claim is CONDITIONAL, and this string is shipped into the session brief — the one
-// message a reader cannot check. With `stalenessGate: "off"` (the default) staleness denies
-// nothing, so asserting "hooks block" here made every stale-index report state a consequence that
-// does not happen. NS-20: an unchecked claim is a lie waiting to happen.
-// Nothing can block any more: the guards that read `stalenessGate` were retired (NS-28), so an old
-// hooks.json still saying "block" must not make this claim one (NS-20).
+// This string reaches the reader as fact, so it may claim only what happens (NS-20). It used to say
+// "hooks block" — true only under a gate setting, and the gates are retired (NS-28), so no setting
+// can make it a block now.
 const staleHookNote =
   'Nothing is blocked — graph answers may be WRONG rather than refused, so confirm anything load-bearing.';
 // Resolved, not hardcoded: a stealth install has no npm scripts, so naming one made every block
@@ -261,7 +258,7 @@ try {
 
     out.fresh = true;
 
-    out.detail = 'Repository has no commits yet — nothing to index; enforcement is inactive.';
+    out.detail = 'Repository has no commits yet — nothing to index.';
 
     process.stdout.write(JSON.stringify(out));
 

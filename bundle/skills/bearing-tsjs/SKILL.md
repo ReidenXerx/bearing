@@ -5,7 +5,7 @@ description: "Write and review TypeScript/JavaScript that is not merely type-cor
 
 # TypeScript / JavaScript — the traps that compile
 
-The rules live in **`.bearing/lang/typescript.md`**, numbered `TS-1` … `TS-17`. Read it before
+The rules live in **`.bearing/lang/typescript.md`**, numbered `TS-1` onward. Read it before
 non-trivial TS/JS work and cite the number when it decides something. This skill is *when* and
 *how* to apply them; the file is *what* they are.
 

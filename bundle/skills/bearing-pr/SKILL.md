@@ -10,7 +10,7 @@ description: "Use when opening a pull request, writing or improving a PR descrip
 
 A zero is not absence; a near-0.5 `r.confidence` edge is a lead, not proof (~92% of `USES`); a count
 can be a floor — `impact` says which in `epistemic`. Before a conclusion that matters, confirm with a
-scoped `Grep` (allowed here, not a gate violation) and say which check you ran.
+scoped `Grep` and say which check you ran.
 <!-- END GENERATED: graph-uncertainty -->
 
 It matters more here than anywhere else: a PR body states the blast radius **to the team**, in
@@ -40,7 +40,7 @@ Also match the repo's commit and title convention (`gh pr list` shows it): if ti
 
 ## Step 1 — Establish the real blast radius
 
-**With the graph:**
+**With the graph** — only when the user asked for it, and GitNexus is installed:
 
 ```
 gitnexus_detect_changes({ scope: "compare", base_ref: "<default-branch>", branch: "<current>" })
@@ -49,8 +49,8 @@ gitnexus_detect_changes({ scope: "compare", base_ref: "<default-branch>", branch
 Read `changed_symbols` and `affected_processes`. For anything HIGH/CRITICAL or surprising, run
 `gitnexus_impact({ target: "<symbol>", direction: "upstream" })` on it.
 
-**Without it:** `git diff --stat <base>...HEAD`, then for each changed exported symbol, grep its
-call sites. Slower, same question.
+**Otherwise (the default):** `git diff --stat <base>...HEAD`, then for each changed exported
+symbol, grep its call sites.
 
 **Then do the part that matters: reconcile the tool against reality.** A symbol changing is not the
 same as behaviour changing. If five call sites are listed and four are unaffected because your change

@@ -60,10 +60,10 @@ one that sees all of them pays that token cost once per agent.
 **3. Bounds.** State the unit, what to return, and **what NOT to decide**. Whatever you leave
 unstated, a subagent will decide anyway, using context it does not have.
 
-**4. The same tool discipline you follow.** If this repo has the GitNexus module, a subagent must
-use the graph — `query` to orient, `cypher` for structure — not grep. A subagent grepping for call
-sites is doing the exact thing the gates exist to redirect, one level down where no gate can see it,
-and what it brings back is the weaker kind of evidence.
+**4. The same tools you would use.** Grep and Read are the defaults. Hand a subagent the GitNexus
+graph only when the user asked for the graph in this task, and say so in its brief: a subagent
+never saw that request, so it cannot know the graph was wanted. When it does use the graph, its
+zeros and counts carry the same caveats yours do.
 
 **5. Parallel where the runtime allows it**, sequential where it does not. Claude Code can run them
 concurrently; treat that as an optimisation, never as a requirement — the routine must produce the

@@ -17,8 +17,7 @@ Use this checklist before tagging or publishing `bearing`.
   grep -R "/Users/" README.md docs bundle lib scripts package.json
   ```
 
-- [ ] `scripts/refresh-bundle-from-source.sh` was run with an explicit source path or `GITNEXUS_BUNDLE_SOURCE`.
-- [ ] Source repo basename was replaced with `__GITNEXUS_REPO__` in bundle content.
+- [ ] No repo name is hardcoded in bundle content — templates use `__GITNEXUS_REPO__`.
 
 ## 3. Local validation
 
@@ -52,16 +51,18 @@ Use temporary git repos for each runtime.
 - [ ] Fresh install: `--runtime claude --quick --no-setup`
 - [ ] Fresh install: `--runtime codex --quick --no-setup`
 - [ ] Fresh install: `--runtime all --quick --no-setup`
-- [ ] Feature subset: `--features northstars,taskcore,microscope` — assert NO enforcement gates land
-      and every installed hook still runs (a core module must never import a feature module)
+- [ ] Feature subset: `--features northstars,taskcore,microscope` — assert NO GitNexus file, script or
+      MCP entry lands, and every installed hook still runs (a core module must never import a feature module)
 - [ ] Upgrade from a legacy `.gnkit/` install — assert north-stars, task-core and per-machine
       config all survive, and that legacy `gitnexus:*` script aliases still resolve
 - [ ] `npm pack` → install the tarball in a scratch consumer → run the symlinked binary (catches
       npm's bin-symlink resolution, which silently broke the old bash wrappers)
 - [ ] Update a CURSOR-ERA install (1.1.x, `--runtime all`) → assert `.cursor/` is GONE afterwards,
       including `.cursor/mcp.json`, which the adapter wrote and the bundle sweep cannot see
-- [ ] Update existing zed-only → `--runtime both --no-setup --skip-verify`
-- [ ] `./bin/update.sh --all <tmp-workspace> --runtime both --no-setup --skip-verify`
+- [ ] Update an install made by the PREVIOUS release (its own CLI, setup included) → retired files,
+      scripts and settings are removed, and a second update reports and changes nothing
+- [ ] Update existing zed-only → `--runtime zed,claude --no-setup --skip-verify`
+- [ ] `./bin/update.sh --all <tmp-workspace> --no-setup --skip-verify` keeps each repo's own runtime and modules
 - [ ] Uninstall preserves unrelated user config.
 - [ ] Uninstall with `--remove-index` removes `.gitnexus` local state.
 
@@ -75,17 +76,18 @@ In a real target repo after update:
   - `.claude/skills/bearing-gitnexus` (when the gitnexus module is installed)
 - [ ] Zed files exist when runtime includes Zed:
   - `.zed/settings.json`
-  - `.agents/skills/gitnexus-workspace`
+  - `.agents/skills/bearing-northstars` (and `bearing-gitnexus` when that module is installed)
   - `AGENTS.md`
 - [ ] `npm run bearing:health`
 - [ ] `npm run bearing:verify`
 - [ ] `npm run bearing:branch-status -- main` or repo base branch
 
-## 6. GitNexus v1.6.8 capability smoke
+## 6. GitNexus module smoke (when installed)
 
-- [ ] Agent brief shows routing for `trace`, `pdg_query`, `explain`, and Cypher.
+- [ ] Nothing in the always-on contract pushes the agent to the graph; "use gitnexus …" loads the
+      `bearing-gitnexus` skill.
 - [ ] Nothing refreshes the index on its own: an update removes `.githooks/pre-commit` and the two index workflows from a repo that had them, and asking the agent to "refresh the gitnexus index" runs `bearing-agent.mjs refresh`.
-- [ ] Security review skill warns that no taint/PDG layer is not proof of safety.
+- [ ] The `bearing-gitnexus` skill says an empty taint result without a PDG layer is not proof of safety.
 - [ ] MCP snippets use current parameter names:
   - `gitnexus_query({ search_query: ... })`
   - `gitnexus_cypher({ statement: ... })`
@@ -95,7 +97,7 @@ In a real target repo after update:
 - [ ] `README.md` quick start matches actual CLI flags.
 - [ ] `docs/QUICKSTART.md` daily commands are current.
 - [ ] `docs/SKILLS.md` lists every canonical skill in `bundle/skills`.
-- [ ] `docs/ZED.md` matches the installed Zed profile name.
+- [ ] `docs/ZED.md` matches what an install writes to `.zed/settings.json` (no agent profile).
 
 ## 8. Release
 
