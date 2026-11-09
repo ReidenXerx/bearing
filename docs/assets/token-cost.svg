@@ -1,130 +1,43 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400" width="1200" height="400" role="img" aria-label="bearing costs about 25,200 tokens per session — 13 percent of a 200k context window, 2.5 percent of 1M — split between its own contract and the GitNexus tool schemas, and one impact question costs 3 to 13 times less than grepping and reading the hits.">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 450" width="1200" height="450" role="img" aria-label="bearing costs about 2,800 tokens a session by default — 1.4 percent of a 200k context window — and about 18,800 with every module plus the opt-in GitNexus tool schemas, 9.4 percent. When you ask for the graph, one impact question costs 3 to 13 times less than grepping and reading the hits.">
+  <defs><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#E0A458" stroke-opacity="0.35" stroke-width="2"/></pattern></defs>
   <style>
-    .s { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
-    .m { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; }
     .lab { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 12px; letter-spacing: 1.4px; fill: #8DA0A7; }
     .h { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 21px; font-weight: 700; fill: #E3EAE7; }
     .t { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; fill: #E3EAE7; }
     .d { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; fill: #8DA0A7; }
     .mono { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 13px; fill: #E3EAE7; }
-    .monod { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 13px; fill: #8DA0A7; }
     .small { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 11.5px; fill: #8DA0A7; }
   </style>
-  <rect width="1200" height="400" rx="14" fill="#0A1013"/>
-  <rect x="0.75" y="0.75" width="1198.5" height="398.5" rx="13.5" fill="none" stroke="#21303A" stroke-width="1.5"/>
-<text x="36" y="44" class="lab" text-anchor="start">WHAT IT COSTS YOUR CONTEXT</text>
-<text x="36" y="76" class="h" text-anchor="start">~25,200 tokens a session, measured</text>
-<text x="36" y="120" class="lab" text-anchor="start">200K CONTEXT WINDOW</text>
-<text x="1164" y="120" class="small" text-anchor="end">~25,200 tokens · 13%</text>
-<rect x="36.0" y="132" width="20" height="26" rx="3" fill="#E0A458" stroke="none" stroke-width="1"/>
-<rect x="59.5" y="132" width="20" height="26" rx="3" fill="#E0A458" stroke="none" stroke-width="1"/>
-<rect x="83.0" y="132" width="20" height="26" rx="3" fill="#E0A458" stroke="none" stroke-width="1"/>
-<rect x="106.5" y="132" width="20" height="26" rx="3" fill="#E0A458" stroke="none" stroke-width="1"/>
-<rect x="130.0" y="132" width="20" height="26" rx="3" fill="#E0A458" stroke="none" stroke-width="1"/>
-<rect x="153.5" y="132" width="20" height="26" rx="3" fill="#E0A458" stroke="none" stroke-width="1"/>
-<rect x="177.0" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="200.5" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="224.0" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="247.5" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="271.0" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="294.5" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="318.0" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="341.5" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="365.0" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="388.5" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="412.0" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="435.5" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="459.0" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="482.5" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="506.0" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="529.5" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="553.0" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="576.5" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="600.0" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="623.5" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="647.0" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="670.5" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="694.0" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="717.5" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="741.0" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="764.5" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="788.0" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="811.5" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="835.0" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="858.5" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="882.0" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="905.5" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="929.0" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="952.5" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="976.0" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="999.5" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="1023.0" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="1046.5" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="1070.0" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="1093.5" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="1117.0" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="1140.5" y="132" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<text x="36" y="194" class="lab" text-anchor="start">1M CONTEXT WINDOW</text>
-<text x="1164" y="194" class="small" text-anchor="end">~25,200 tokens · 2.5%</text>
-<rect x="36.0" y="206" width="20" height="26" rx="3" fill="#E0A458" stroke="none" stroke-width="1"/>
-<rect x="59.5" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="83.0" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="106.5" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="130.0" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="153.5" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="177.0" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="200.5" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="224.0" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="247.5" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="271.0" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="294.5" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="318.0" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="341.5" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="365.0" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="388.5" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="412.0" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="435.5" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="459.0" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="482.5" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="506.0" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="529.5" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="553.0" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="576.5" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="600.0" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="623.5" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="647.0" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="670.5" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="694.0" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="717.5" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="741.0" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="764.5" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="788.0" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="811.5" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="835.0" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="858.5" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="882.0" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="905.5" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="929.0" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="952.5" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="976.0" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="999.5" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="1023.0" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="1046.5" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="1070.0" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="1093.5" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="1117.0" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="1140.5" y="206" width="20" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
-<rect x="36" y="262" width="552" height="104" rx="10" fill="#0D161A" stroke="#21303A" stroke-width="1.5"/>
-<text x="60" y="290" class="d" text-anchor="start">bearing's contract block</text>
-<text x="564" y="290" class="mono" text-anchor="end">~10,300</text>
-<line x1="60" y1="300" x2="564" y2="300" stroke="#21303A" stroke-width="1"/>
-<text x="60" y="322" class="d" text-anchor="start">GitNexus MCP tool schemas (17 tools)</text>
-<text x="564" y="322" class="mono" text-anchor="end">~14,900</text>
-<line x1="60" y1="332" x2="564" y2="332" stroke="#21303A" stroke-width="1"/>
-<text x="60" y="354" class="t" text-anchor="start">total</text>
-<text x="564" y="354" class="mono" text-anchor="end" style="fill:#E0A458">~25,200</text>
-<rect x="612" y="262" width="552" height="104" rx="10" fill="#0D161A" stroke="#21303A" stroke-width="1.5"/>
-<text x="636" y="290" class="d" text-anchor="start">one "what breaks if I change this?"</text>
-<text x="636" y="318" class="mono" text-anchor="start">graph 65,645   ·   grep + read 199,737</text>
-<text x="636" y="344" class="mono" text-anchor="start" style="fill:#E0A458">3.0× on 234 files   ·   13.2× on 709</text>
+  <rect width="1200" height="450" rx="14" fill="#0A1013"/>
+  <rect x="0.75" y="0.75" width="1198.5" height="448.5" rx="13.5" fill="none" stroke="#21303A" stroke-width="1.5"/>
+<text x="36" y="44" class="lab">WHAT IT COSTS YOUR CONTEXT</text>
+<text x="36" y="76" class="h">~2,800 tokens a session by default, measured</text>
+<text x="36" y="120" class="lab">200K CONTEXT WINDOW</text>
+<text x="1164" y="120" class="small" text-anchor="end">default ~2,800 · 1.4%   ·   everything + GitNexus ~18,800 · 9.4%</text>
+<rect x="36" y="132" width="1128" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="58.0" y="132.5" width="84.0" height="25" fill="url(#hatch)" stroke="#E0A458" stroke-width="1" stroke-dasharray="3 2"/>
+<rect x="51.8" y="132" width="6.2" height="26" fill="#E0A458" fill-opacity="0.45"/>
+<rect x="36" y="132" width="15.8" height="26" fill="#E0A458"/>
+<text x="36" y="194" class="lab">1M CONTEXT WINDOW</text>
+<text x="1164" y="194" class="small" text-anchor="end">default ~2,800 · 0.3%   ·   everything + GitNexus ~18,800 · 1.9%</text>
+<rect x="36" y="206" width="1128" height="26" rx="3" fill="#0D161A" stroke="#21303A" stroke-width="1"/>
+<rect x="40.4" y="206.5" width="16.8" height="25" fill="url(#hatch)" stroke="#E0A458" stroke-width="1" stroke-dasharray="3 2"/>
+<rect x="39.2" y="206" width="1.2" height="26" fill="#E0A458" fill-opacity="0.45"/>
+<rect x="36" y="206" width="3.2" height="26" fill="#E0A458"/>
+<rect x="36" y="252" width="12" height="12" rx="2" fill="#E0A458"/><text x="56" y="262" class="small">default install</text>
+<rect x="196" y="252" width="12" height="12" rx="2" fill="#E0A458" fill-opacity="0.45"/><text x="216" y="262" class="small">+ every other module</text>
+<rect x="396" y="252" width="12" height="12" fill="url(#hatch)" stroke="#E0A458" stroke-width="1" stroke-dasharray="3 2"/><text x="416" y="262" class="small">GitNexus tool schemas — only if you install it</text>
+<rect x="36" y="284" width="552" height="140" rx="10" fill="#0D161A" stroke="#21303A" stroke-width="1.5"/>
+<text x="60" y="312" class="d">bearing's contract, default install</text><text x="564" y="312" class="mono" text-anchor="end">~2,800</text>
+<line x1="60" y1="322" x2="564" y2="322" stroke="#21303A" stroke-width="1"/>
+<text x="60" y="342" class="d">… with every module</text><text x="564" y="342" class="mono" text-anchor="end">~3,900</text>
+<line x1="60" y1="352" x2="564" y2="352" stroke="#21303A" stroke-width="1"/>
+<text x="60" y="372" class="d">GitNexus MCP tool schemas (17 tools), opt-in</text><text x="564" y="372" class="mono" text-anchor="end">~14,900</text>
+<line x1="60" y1="382" x2="564" y2="382" stroke="#21303A" stroke-width="1"/>
+<text x="60" y="404" class="t">the most you can install</text><text x="564" y="404" class="mono" text-anchor="end" style="fill:#E0A458">~18,800</text>
+<rect x="612" y="284" width="552" height="140" rx="10" fill="#0D161A" stroke="#21303A" stroke-width="1.5"/>
+<text x="636" y="314" class="d">one "what breaks if I change this?", when you ask the graph</text>
+<text x="636" y="348" class="mono">graph 65,645   ·   grep + read 199,737</text>
+<text x="636" y="378" class="mono" style="fill:#E0A458">3.0× on 234 files   ·   13.2× on 709</text>
+<text x="636" y="406" class="small">every call site vs grep's hits + 40 lines around each</text>
 </svg>

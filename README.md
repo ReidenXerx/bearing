@@ -36,9 +36,9 @@ That failure has a name — **losing your bearings**.
 
 **Contributing to a repo that isn't yours?** `npx bearing install . --stealth` keeps `git status` clean — no tracked file is touched. Details under [Install](#install).
 
-<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/token-cost.svg" alt="bearing costs about 25,200 tokens a session — 13 percent of a 200k context window, 2.5 percent of 1M — split between its own contract block and the GitNexus tool schemas; one impact question costs 3 to 13 times less than grepping and reading the hits." width="100%">
+<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/token-cost.svg" alt="bearing costs about 2,800 tokens a session by default — 1.4 percent of a 200k context window — and about 18,800 with every module plus the opt-in GitNexus tool schemas; when you ask the graph, one impact question costs 3 to 13 times less than grepping and reading the hits." width="100%">
 
-**It will not blow up your context.** ~2,600 tokens a session by default (~18,600 with every module and GitNexus) — and one *what breaks if I change this?*
+**It will not blow up your context.** ~2,800 tokens a session by default (~18,800 with every module and GitNexus) — and one *what breaks if I change this?*
 costs 3–13× less through the graph than grepping and reading the hits. Measure it on your own repo
 with `npm run bearing:token-benchmark`; [the numbers, and where the graph LOSES](#what-it-costs-your-context).
 
@@ -85,10 +85,10 @@ Claude Code** exposes them:
 | TypeScript/JavaScript — traps that compile | ✅ | ✅ | ✅ |
 | Frontend — structure and blast radius | ✅ | ✅ | ✅ |
 | React — what the types do not catch | ✅ | ✅ | ✅ |
-| GitNexus — graph + opt-in skill, when you ask | ✅ | ✅ | — |
+| GitNexus — the graph, only when you ask | on ask | on ask | — |
 | E2E — browser verification | ✅ | ✅ | ✅ |
 
-✅ means it fires without being asked. A `—` is not always absence: the **task-core** skill and its
+✅ means it fires without being asked; *on ask* means it never does, by design, and answers when you ask. A `—` is not always absence: the **task-core** skill and its
 contract section install on every runtime, so you can invoke it by name — what Claude Code adds is
 the nudge that fires it unprompted. **Minions** genuinely need hooks and are not present at all where
 the column says `—`. GitNexus fires only when you ask, on any runtime that has its skill and MCP server.
@@ -317,11 +317,11 @@ The honest number, measured rather than guessed.
 
 | | tokens |
 | --- | --- |
-| bearing's contract block (`CLAUDE.md` / `AGENTS.md`), default install | ~2,600 |
-| … with every module | ~3,700 |
+| bearing's contract block (`CLAUDE.md` / `AGENTS.md`), default install | ~2,800 |
+| … with every module | ~3,900 |
 | GitNexus MCP tool schemas (17 tools) — only if you install GitNexus | ~14,900 |
 
-The default install is **~1.3% of a 200k window**; every module plus GitNexus is ~18,600, **~9%**.
+The default install is **~1.4% of a 200k window**; every module plus GitNexus is ~18,800, **~9%**.
 Skills are loaded on demand, not up front — a session typically pulls one or two, at ~1,500 tokens
 each; `bearing-gitnexus` is ~5,800, and loads only when you ask for the graph.
 
@@ -333,9 +333,9 @@ server is connected, with or without this package. And bearing's own share scale
 install:
 
 ```
-all modules             ~3,700 tokens
-default install         ~2,600
-north-stars + task-core ~1,600
+all modules             ~3,900 tokens
+default install         ~2,800
+north-stars + task-core ~1,400
 ```
 
 **What it buys back.** Answering `what breaks if I change this?` through the graph, against

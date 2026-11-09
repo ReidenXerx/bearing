@@ -255,6 +255,14 @@
   .gauge svg { width: 100%; height: auto; display: block; }
   .gauge .fill { fill: var(--brass); }
   .gauge .empty { fill: var(--chip); }
+  .gauge .more { fill-opacity: .45; }
+  .gauge .opt { fill: var(--brass); fill-opacity: .14; stroke: var(--brass); stroke-width: 1; stroke-dasharray: 3 2; }
+  .gauge figcaption { flex-wrap: wrap; }
+  .gauge figcaption .dim { color: var(--muted); font-weight: 400; }
+  .gauge-key { display: flex; flex-wrap: wrap; gap: 6px 20px; margin-top: 12px; font: 400 12px/1.5 var(--mono); color: var(--muted); }
+  .gauge-key i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; background: var(--brass); }
+  .gauge-key i.more { opacity: .45; }
+  .gauge-key i.opt { background: transparent; border: 1px dashed var(--brass); }
 
   .scroll { overflow-x: auto; margin-top: 24px; }
   table { border-collapse: collapse; width: 100%; min-width: 520px; font-size: .94rem; }
@@ -267,6 +275,7 @@
   .matrix td { text-align: center; font-size: 1.05rem; }
   .matrix td.yes { color: var(--true); }
   .matrix td.no { color: var(--muted); opacity: .55; }
+  .matrix td.ask { font: 500 11px/1.5 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--brass); }
   .matrix thead th:not(:first-child) { text-align: center; }
 
   /* receipts stats */
@@ -335,7 +344,7 @@
     </div>
     <ul class="facts">
       <li>11 modules · each works alone</li>
-      <li>~25,200 tokens a session</li>
+      <li>~2,800 tokens a session by default</li>
       <li>Claude Code · Zed · Codex</li>
     </ul>
   </div>
@@ -524,8 +533,8 @@
       <article class="instrument" id="m-gitnexus">
         <svg class="glyph" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="12" r="4" class="brass-fill"/><circle cx="12" cy="32" r="4" class="brass-fill"/><circle cx="36" cy="32" r="4" class="brass-fill"/><circle cx="24" cy="24" r="4" class="ink-fill"/><path d="M24 16v4M21 26 L15 30M27 26 L33 30M15 32h18" class="hair"/></svg>
         <h3>GitNexus</h3>
-        <p class="claim">Turns 40 text matches into a real code graph.</p>
-        <p class="detail">Hard gates redirect symbol greps to callers and flows, and a stale index blocks until it is refreshed. Needs the GitNexus MCP server.</p>
+        <p class="claim">A code graph you reach for when you ask.</p>
+        <p class="detail">Opt-in: the installer explains it and asks. Say “use gitnexus” in a prompt and one skill loads — scope check, where the graph wins, where its counts are only a floor. No gates, no nudges. Needs the GitNexus MCP server.</p>
       </article>
       <article class="instrument" id="m-e2e">
         <svg class="glyph" viewBox="0 0 48 48" aria-hidden="true"><rect x="8" y="11" width="32" height="26" rx="3" class="hair"/><path d="M8 18h32" class="hair"/><circle cx="13" cy="14.5" r="1.4" class="ink-fill"/><path d="M18 27 L22 31 L31 22" stroke="var(--brass)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
@@ -537,7 +546,7 @@
         <svg class="glyph" viewBox="0 0 48 48" aria-hidden="true"><path d="M12 9h24v30l-6-4-6 4-6-4-6 4z" class="hair"/><path d="M18 19h12M18 26h9" class="hair" stroke-linecap="round"/><circle cx="31" cy="26" r="2.2" class="brass-fill"/></svg>
         <h3>Not a module</h3>
         <p class="claim">The agent files bug reports against its own tooling.</p>
-        <p class="detail">And the kit tells you when its own gates are the problem — 93 of those reports are what the rules are calibrated against. See the receipts.</p>
+        <p class="detail">And the kit measures its own rules: it measured its GitNexus gates, found them costing 4–5× for one task's gain, and retired them. See the receipts.</p>
       </a>
   </div>
 </section>
@@ -572,36 +581,44 @@
 <section id="cost">
   <p class="label">The honest number</p>
   <h2>What it costs your context — measured, not guessed</h2>
-  <p class="section-lede">Every intel layer costs tokens. Most don't tell you how many. bearing's share is fixed per session, and half of it isn't even bearing: the graph tool schemas are there whenever the MCP server is connected, with or without this package.</p>
+  <p class="section-lede">Every intel layer costs tokens. Most don't tell you how many. bearing's share is fixed per session: about 2,800 tokens by default. The biggest line isn't bearing's at all — the graph's tool schemas outweigh everything else, so they are there only if you install GitNexus.</p>
 
   <figure class="gauge">
-  <figcaption><span>200k context window</span><b>~25,200 tokens · 13%</b></figcaption>
-  <svg viewBox="0 0 600 26" role="img" aria-label="~25,200 tokens · 13% of 200k context window">
-    <rect class="fill" x="0" y="0" width="13" height="26" rx="2"/><rect class="fill" x="15" y="0" width="13" height="26" rx="2"/><rect class="fill" x="30" y="0" width="13" height="26" rx="2"/><rect class="fill" x="45" y="0" width="13" height="26" rx="2"/><rect class="fill" x="60" y="0" width="13" height="26" rx="2"/><rect class="empty" x="75" y="0" width="13" height="26" rx="2"/><rect class="empty" x="90" y="0" width="13" height="26" rx="2"/><rect class="empty" x="105" y="0" width="13" height="26" rx="2"/><rect class="empty" x="120" y="0" width="13" height="26" rx="2"/><rect class="empty" x="135" y="0" width="13" height="26" rx="2"/><rect class="empty" x="150" y="0" width="13" height="26" rx="2"/><rect class="empty" x="165" y="0" width="13" height="26" rx="2"/><rect class="empty" x="180" y="0" width="13" height="26" rx="2"/><rect class="empty" x="195" y="0" width="13" height="26" rx="2"/><rect class="empty" x="210" y="0" width="13" height="26" rx="2"/><rect class="empty" x="225" y="0" width="13" height="26" rx="2"/><rect class="empty" x="240" y="0" width="13" height="26" rx="2"/><rect class="empty" x="255" y="0" width="13" height="26" rx="2"/><rect class="empty" x="270" y="0" width="13" height="26" rx="2"/><rect class="empty" x="285" y="0" width="13" height="26" rx="2"/><rect class="empty" x="300" y="0" width="13" height="26" rx="2"/><rect class="empty" x="315" y="0" width="13" height="26" rx="2"/><rect class="empty" x="330" y="0" width="13" height="26" rx="2"/><rect class="empty" x="345" y="0" width="13" height="26" rx="2"/><rect class="empty" x="360" y="0" width="13" height="26" rx="2"/><rect class="empty" x="375" y="0" width="13" height="26" rx="2"/><rect class="empty" x="390" y="0" width="13" height="26" rx="2"/><rect class="empty" x="405" y="0" width="13" height="26" rx="2"/><rect class="empty" x="420" y="0" width="13" height="26" rx="2"/><rect class="empty" x="435" y="0" width="13" height="26" rx="2"/><rect class="empty" x="450" y="0" width="13" height="26" rx="2"/><rect class="empty" x="465" y="0" width="13" height="26" rx="2"/><rect class="empty" x="480" y="0" width="13" height="26" rx="2"/><rect class="empty" x="495" y="0" width="13" height="26" rx="2"/><rect class="empty" x="510" y="0" width="13" height="26" rx="2"/><rect class="empty" x="525" y="0" width="13" height="26" rx="2"/><rect class="empty" x="540" y="0" width="13" height="26" rx="2"/><rect class="empty" x="555" y="0" width="13" height="26" rx="2"/><rect class="empty" x="570" y="0" width="13" height="26" rx="2"/><rect class="empty" x="585" y="0" width="13" height="26" rx="2"/>
+  <figcaption><span>200k context window</span><b>~2,800 · 1.4% <span class="dim">— with everything + GitNexus ~18,800 · 9.4%</span></b></figcaption>
+  <svg viewBox="0 0 600 26" role="img" aria-label="~2,800 tokens by default, 1.4% of a 200k context window; ~18,800 with every module and GitNexus, 9.4%">
+    <rect class="empty" x="0" y="0" width="600" height="26" rx="2"/>
+    <rect class="opt" x="11.7" y="0.5" width="44.7" height="25"/>
+    <rect class="fill more" x="8.4" y="0" width="3.3" height="26"/>
+    <rect class="fill" x="0" y="0" width="8.4" height="26" rx="2"/>
   </svg>
 </figure>
   <figure class="gauge">
-  <figcaption><span>1M context window</span><b>~25,200 tokens · 2.5%</b></figcaption>
-  <svg viewBox="0 0 600 26" role="img" aria-label="~25,200 tokens · 2.5% of 1M context window">
-    <rect class="fill" x="0" y="0" width="13" height="26" rx="2"/><rect class="empty" x="15" y="0" width="13" height="26" rx="2"/><rect class="empty" x="30" y="0" width="13" height="26" rx="2"/><rect class="empty" x="45" y="0" width="13" height="26" rx="2"/><rect class="empty" x="60" y="0" width="13" height="26" rx="2"/><rect class="empty" x="75" y="0" width="13" height="26" rx="2"/><rect class="empty" x="90" y="0" width="13" height="26" rx="2"/><rect class="empty" x="105" y="0" width="13" height="26" rx="2"/><rect class="empty" x="120" y="0" width="13" height="26" rx="2"/><rect class="empty" x="135" y="0" width="13" height="26" rx="2"/><rect class="empty" x="150" y="0" width="13" height="26" rx="2"/><rect class="empty" x="165" y="0" width="13" height="26" rx="2"/><rect class="empty" x="180" y="0" width="13" height="26" rx="2"/><rect class="empty" x="195" y="0" width="13" height="26" rx="2"/><rect class="empty" x="210" y="0" width="13" height="26" rx="2"/><rect class="empty" x="225" y="0" width="13" height="26" rx="2"/><rect class="empty" x="240" y="0" width="13" height="26" rx="2"/><rect class="empty" x="255" y="0" width="13" height="26" rx="2"/><rect class="empty" x="270" y="0" width="13" height="26" rx="2"/><rect class="empty" x="285" y="0" width="13" height="26" rx="2"/><rect class="empty" x="300" y="0" width="13" height="26" rx="2"/><rect class="empty" x="315" y="0" width="13" height="26" rx="2"/><rect class="empty" x="330" y="0" width="13" height="26" rx="2"/><rect class="empty" x="345" y="0" width="13" height="26" rx="2"/><rect class="empty" x="360" y="0" width="13" height="26" rx="2"/><rect class="empty" x="375" y="0" width="13" height="26" rx="2"/><rect class="empty" x="390" y="0" width="13" height="26" rx="2"/><rect class="empty" x="405" y="0" width="13" height="26" rx="2"/><rect class="empty" x="420" y="0" width="13" height="26" rx="2"/><rect class="empty" x="435" y="0" width="13" height="26" rx="2"/><rect class="empty" x="450" y="0" width="13" height="26" rx="2"/><rect class="empty" x="465" y="0" width="13" height="26" rx="2"/><rect class="empty" x="480" y="0" width="13" height="26" rx="2"/><rect class="empty" x="495" y="0" width="13" height="26" rx="2"/><rect class="empty" x="510" y="0" width="13" height="26" rx="2"/><rect class="empty" x="525" y="0" width="13" height="26" rx="2"/><rect class="empty" x="540" y="0" width="13" height="26" rx="2"/><rect class="empty" x="555" y="0" width="13" height="26" rx="2"/><rect class="empty" x="570" y="0" width="13" height="26" rx="2"/><rect class="empty" x="585" y="0" width="13" height="26" rx="2"/>
+  <figcaption><span>1M context window</span><b>~2,800 · 0.3% <span class="dim">— with everything + GitNexus ~18,800 · 1.9%</span></b></figcaption>
+  <svg viewBox="0 0 600 26" role="img" aria-label="~2,800 tokens by default, 0.3% of a 1M context window; ~18,800 with every module and GitNexus, 1.9%">
+    <rect class="empty" x="0" y="0" width="600" height="26" rx="2"/>
+    <rect class="opt" x="2.3" y="0.5" width="8.9" height="25"/>
+    <rect class="fill more" x="1.7" y="0" width="1.5" height="26"/>
+    <rect class="fill" x="0" y="0" width="1.7" height="26" rx="2"/>
   </svg>
 </figure>
+  <p class="gauge-key"><span><i></i>default install</span><span><i class="more"></i>+ every other module</span><span><i class="opt"></i>GitNexus tool schemas — only if you install it</span></p>
 
   <div class="two" style="margin-top: 30px;">
     <div class="scroll">
       <table>
         <caption>Fixed, every session</caption>
         <tbody>
-          <tr><th scope="row">bearing's contract block</th><td class="num">~10,300</td></tr>
-          <tr><th scope="row">GitNexus MCP tool schemas (17 tools)</th><td class="num">~14,900</td></tr>
+          <tr><th scope="row">bearing's contract, default install</th><td class="num">~2,800</td></tr>
+          <tr><th scope="row">… with every module</th><td class="num">~3,900</td></tr>
+          <tr><th scope="row">GitNexus MCP tool schemas (17 tools) — only if you install it</th><td class="num">~14,900</td></tr>
         </tbody>
-        <tfoot><tr><td>total</td><td class="num">~25,200</td></tr></tfoot>
+        <tfoot><tr><td>the most you can install</td><td class="num">~18,800</td></tr></tfoot>
       </table>
-      <p class="note" style="margin-top: 12px;">Skills load on demand, not up front — a session typically pulls one or two, at about 1,500 tokens each. Install less and bearing's own share falls to ~2,400 (intel only) or ~1,600 (north-stars and task-core).</p>
+      <p class="note" style="margin-top: 12px;">Skills load on demand, not up front — a session typically pulls one or two, at about 1,500 tokens each; <code>bearing-gitnexus</code> is ~5,800 and loads only when you ask for the graph. Install less and bearing's share falls to ~1,400 (north-stars and task-core). The contract used to be ~10,300 tokens, most of it graph rules every session paid for.</p>
     </div>
     <div class="scroll">
       <table>
-        <caption>What one "what breaks if I change this?" costs</caption>
+        <caption>What one "what breaks if I change this?" costs, when you ask the graph</caption>
         <thead><tr><th>repo</th><th class="num">graph</th><th class="num">grep + read</th><th class="num">saved</th></tr></thead>
         <tbody>
           <tr><th scope="row">lead-sniffer <span class="note">(234 files)</span></th><td class="num">65,645</td><td class="num">199,737</td><td class="num">3.0×</td></tr>
@@ -617,8 +634,8 @@
 
 <section id="receipts">
   <p class="label">It tells you when it's the problem</p>
-  <h2>A tool that can block your work should show you when it was wrong to</h2>
-  <p class="section-lede">Every enforcement tool believes its own rules are correct. This one assumes they might not be — and keeps the evidence, with the graph state that produced it: version, node and edge counts, the indexed commit. Not "the graph was wrong once", but <b>this query, on this index, at this commit</b>.</p>
+  <h2>A tool that steers your agent should show you when it was wrong to</h2>
+  <p class="section-lede">Every tool that steers an agent believes its own rules are correct. This one assumes they might not be — and keeps the evidence, with the graph state that produced it: version, node and edge counts, the indexed commit. Not "the graph was wrong once", but <b>this query, on this index, at this commit</b>.</p>
 
   <div class="stats">
     <div class="stat"><b>93</b><span>fallback reports filed by the agent against its own tooling</span></div>
@@ -627,18 +644,19 @@
     <div class="stat"><b>30</b><span>of them empty results for things that demonstrably existed</span></div>
   </div>
 
-  <p class="section-lede" style="margin-top: 24px;">Read together they stopped being complaints and became a diagnosis. That corpus is what the rules are calibrated against — and the gates are measured too:</p>
+  <p class="section-lede" style="margin-top: 24px;">Read together they stopped being complaints and became a diagnosis. That corpus is what the rules are calibrated against — and the rules are measured too. This is what the GitNexus gates scored:</p>
 <pre>$ npm run bearing:scorecard
 
 <span class="no">⚠</span> Enforcement is 49% of graph interaction:
   57 redirects vs 60 graph calls.</pre>
-  <p class="note" style="margin-top: 14px;">It refuses to draw the conclusion for you. <b>Nothing leaves your repo. There is no telemetry endpoint.</b></p>
+  <p class="section-lede" style="margin-top: 18px;">One redirect for every graph call, across a fleet of real repos. A 180-run eval with hand-verified answer keys then put the gates at 4–5× the cost per solved task, for one task's gain. <b>So they were retired, and the graph became opt-in</b> — <a href="https://github.com/ReidenXerx/bearing/blob/main/eval/teaching/REPORT.md">the numbers</a>.</p>
+  <p class="note" style="margin-top: 14px;"><b>Nothing leaves your repo. There is no telemetry endpoint.</b></p>
 </section>
 
 <section id="runtimes">
   <p class="label">Where it fires by itself</p>
-  <h2>Enforcement needs hooks, and not every runtime has them</h2>
-  <p class="section-lede">Only Claude Code exposes tool-interception hooks, and a dash is not always absence: the task-core skill and its contract section install everywhere, so you can invoke it by name — what Claude Code adds is the nudge that fires it unprompted. Minions and the GitNexus gates genuinely need the hooks and are not there at all.</p>
+  <h2>Nudges need hooks, and not every runtime has them</h2>
+  <p class="section-lede">Only Claude Code exposes tool-interception hooks, and a dash is not always absence: the task-core skill and its contract section install everywhere, so you can invoke it by name — what Claude Code adds is the nudge that fires it unprompted. Minions genuinely need the hooks and are not there at all. GitNexus never fires by itself: it answers when you ask, on any runtime that has its skill and MCP server.</p>
   <div class="scroll">
     <table class="matrix">
       <thead><tr><th>Fires without being asked</th><th>Claude Code</th><th>Zed</th><th>Codex</th></tr></thead>
@@ -653,7 +671,7 @@
         <tr><th scope="row">TypeScript / JavaScript — traps that compile</th><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td></tr>
         <tr><th scope="row">Frontend — structure and blast radius</th><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td></tr>
         <tr><th scope="row">React — what the types do not catch</th><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td></tr>
-        <tr><th scope="row">GitNexus — hard gates</th><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td><td class="no"><span aria-hidden="true">·</span><span class="sr">not on this runtime</span></td><td class="no"><span aria-hidden="true">·</span><span class="sr">not on this runtime</span></td></tr>
+        <tr><th scope="row">GitNexus — the graph, only when you ask</th><td class="ask">on ask</td><td class="ask">on ask</td><td class="no"><span aria-hidden="true">·</span><span class="sr">not on this runtime</span></td></tr>
         <tr><th scope="row">E2E — browser verification</th><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td><td class="yes"><span aria-hidden="true">◆</span><span class="sr">yes</span></td></tr>
       </tbody>
     </table>
