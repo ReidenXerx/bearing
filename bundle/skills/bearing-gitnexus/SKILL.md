@@ -257,7 +257,7 @@ Nodes carry more than a name — `returnType`, `parameterCount`, `isAsync`, `vis
 `annotations`, `declaredType` on symbols; `cohesion` and `symbolCount` on a `Community`; `processType`
 and `stepCount` on a `Process`. Signature-shaped searches are one query instead of reading every file.
 `cohesion` measured 0.04–0.98 on one repo, so read it before trusting an area name. Full list: the
-`bearing-guide` skill.
+schema resource, `gitnexus://repo/__GITNEXUS_REPO__/schema`.
 
 **Three `Community` fields are always empty — do not query them.** `keywords`, `description` and
 `label` are filled by an enrichment pass the analyzer ships and never calls. Measured across three

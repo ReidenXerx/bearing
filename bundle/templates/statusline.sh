@@ -2,11 +2,10 @@
 # bearing statusline for Claude Code — a three-row cockpit.
 #
 # Row 1: identity    — model / effort / thinking / branch / repo
-# Row 2: consumption — context, 5h + 7d burn (with pace warning), prompt-cache TTL,
-#                      index freshness
+# Row 2: consumption — context, 5h + 7d burn (with pace warning), prompt-cache TTL
 # Row 3: the machine — dGPU power state, free RAM, IO stall
 #
-# The rule rows 1 and 2 are written to: a field either costs quota or blocks tools,
+# The rule rows 1 and 2 are written to: a field either costs quota or needs action,
 # and anything merely fine stays quiet. A status line you have to read carefully is
 # one you stop reading.
 #
@@ -16,9 +15,9 @@
 # renders dim and constant, and only a crossed threshold takes colour. It is also
 # kept on its own row: rows 1-2 are the session, row 3 is the box under it.
 #
-# The index field is the bearing-specific one, and the reason this ships with the kit:
-# a stale index gives graph answers that may be WRONG rather than refused, so its state belongs on
-# screen instead of being discovered halfway through a task.
+# There is no GitNexus index field. It read a staleness cache that only the retired graph gates
+# wrote, so after they went it never showed anything. GitNexus is used when you ask for it, and the
+# skill checks freshness at that moment.
 #
 # Claude Code pipes a JSON status payload on stdin and renders stdout, ANSI and all.
 # Without jq the line degrades to the word "claude" rather than failing.
@@ -263,30 +262,6 @@ if num "$iof"; then
     (( iof > ${SL_IO_WARN:-15} )) && c=$RED || c=$D
     add io "$c" "${iof}%"
 fi
-fi
-
-# Index freshness. Read from the hooks' own staleness cache rather than recomputed here:
-# a status line must never be the thing that runs a git/graph query on every keystroke.
-# That also means it is only as current as the last hook run, which the ~ marker admits.
-# Absent cache (no gitnexus module, or nothing has run yet) prints nothing at all.
-gn="${projdir:-$curdir}/.bearing/.gitnexus-staleness-cache.json"
-if [ -f "$gn" ]; then
-    IFS=$'\x1f' read -r fresh behindn nodes emb agems <<<"$(
-      jq -r '[ (if .data.fresh then "1" else "" end)
-             , (.data.commitsBehind // 0)
-             , (.data.nodeCount     // 0)
-             , (if .data.embeddingsReady then "1" else "" end)
-             , (((now * 1000) - (.at // 0)) | floor)
-             ] | map(tostring) | join("\u001f")' "$gn" 2>/dev/null)"
-    if [ -n "$nodes" ]; then
-        # The cache is written by hooks; if none fired recently, say "last known".
-        (( agems > 600000 )) && age="${D}~${R}" || age=''
-        if [ -z "$emb" ]; then       s="${RED}⚠ no-emb${R}"
-        elif [ -n "$fresh" ];  then  s="${GRN}✓${R}"
-        elif (( behindn > 0 )); then s="${YLW}⚠ ${behindn} behind${R}"
-        else                         s="${YLW}⚠ drift${R}"; fi
-        l2+="${D}   ⬢ ${age}idx ${R}${s}${D} · $(kn "$nodes")${R}"
-    fi
 fi
 
 # Vitals get their own row so they never read as part of the consumption line — those

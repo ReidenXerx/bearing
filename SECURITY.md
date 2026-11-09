@@ -2,7 +2,7 @@
 
 ## Scope
 
-This repo ships **local Cursor hooks, rules, and install scripts** for your machine and your git repos. It does not run a hosted service.
+This repo ships **local agent hooks, skills, and install scripts** for your machine and your git repos. It does not run a hosted service.
 
 ## Reporting
 
@@ -16,5 +16,5 @@ For **GitNexus core** (indexer, MCP server, graph data), report to the upstream 
 ## Safe defaults
 
 - Install requires an explicit target path inside a git worktree.
-- Hooks only affect Cursor sessions on projects where the kit is installed.
+- Hooks only affect Claude Code sessions on projects where the kit is installed. None of them blocks a tool call.
 - No credentials are stored in the bundle; wiki scripts expect API keys in your env only.

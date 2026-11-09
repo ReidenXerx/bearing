@@ -95,9 +95,9 @@ the column says `—`. GitNexus fires only when you ask, on any runtime that has
 
 ### 🎨 Prettier — so two tools stop rewriting each other
 
-An install puts ~90 tracked, formattable files into your repo — the hook lib alone is 31 `.mjs`
+An install puts up to ~75 tracked, formattable files into your repo — the hook lib alone is 26 `.mjs`
 modules — and every one is bearing's, replaced wholesale on the next update. If you format on
-commit, Prettier reformats all 90, the next `bearing update` overwrites them back, and that diff
+commit, Prettier reformats all of them, the next `bearing update` overwrites them back, and that diff
 returns every cycle.
 
 If the installer finds Prettier (`.prettierrc*`, `prettier.config.*`, a `prettier` key or
@@ -305,9 +305,9 @@ Every scar in the shipped README is one that produced a **green run over a real 
 stored as a pass turning an all-skipped run into a pass, a URL pattern that matched the list instead
 of the create, a blanket POST block that severed the session and made a working feature look missing.
 
-## 🤖 CI
+## 🤖 PR impact report — when you want one
 
-A sticky PR comment, not a merge gate: blast radius per changed symbol, affected flows, security-sensitive paths, import cycles. It **never fails your build** — the graph can't distinguish "nothing calls this" from "I couldn't resolve the callers", and a hard block on that fails honest PRs. `GITNEXUS_CI_MODE=block` is opt-in.
+With the GitNexus module, `npm run bearing:ci -- <base>` reports a branch's blast radius per changed symbol, affected flows, security-sensitive paths and import cycles. Run inside a GitHub Actions pull-request job it also posts a sticky PR comment. bearing ships no workflow for it — nothing builds or refreshes the index on a trigger — so wire it into your own CI only if you keep an index there. It **never fails your build** by default: the graph can't distinguish "nothing calls this" from "I couldn't resolve the callers", and a hard block on that fails honest PRs. `GITNEXUS_CI_MODE=block` is opt-in.
 
 ## 🧮 What it costs your context
 

@@ -50,9 +50,6 @@ usage() {
   echo "  npm run bearing:setup              # full team onboarding (recommended)"
   echo "  npm run bearing:setup -- --quick   # teaching + hooks/MCP, skip index"
   echo "  npm run bearing:setup -- --full    # force full graph rebuild"
-  echo ""
-  echo "Re-sync teaching only (after pulling rule/skill updates):"
-  echo "  npm run bearing:pack             # tar.gz for other projects"
 }
 
 while [[ $# -gt 0 ]]; do

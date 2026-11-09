@@ -138,23 +138,37 @@ export function bashWriteTargets(command) {
 export const LOCAL_CONFIG_FILE = ".bearing/hooks.local.json";
 
 /**
- * Keys that once did something and now do nothing.
- *
- * NS-19 retired the whole context-fullness family: the window is not knowable at runtime, so a gate
- * on a percentage of it produced confident false alarms. The settings kept being SET, though —
- * hooks.json is seed-once, so an old install's comment still worked-examples
- * `"contextWindowTokens": 1000000`, and a reader who follows it configures a no-op. A setting that
- * silently does nothing is worse than one that errors: it looks handled.
+ * Keys that once did something and now do nothing, and why. A setting that silently does nothing is
+ * worse than one that errors: it looks handled. hooks.json is seed-once, so an old install keeps
+ * whatever its version seeded — an update drops a retired key only while it still holds the value
+ * bearing seeded (see SEEDED_RETIRED_VALUES); one you set yourself stays, and verify names it.
+ *  - NS-19 retired the context-fullness family: the window is not knowable at runtime.
+ *  - NS-28 retired the gates, and with them every setting that tuned one.
  */
-export const RETIRED_HOOK_KEYS = new Set([
-  "contextWindowTokens",
-  "contextPressureThreshold",
-  "contextCheckpointEvery",
+export const RETIRED_HOOK_KEYS = new Map([
+  ["contextWindowTokens", "NS-19: the context window is not measurable at runtime"],
+  ["contextPressureThreshold", "NS-19: the context window is not measurable at runtime"],
+  ["contextCheckpointEvery", "NS-19: the context window is not measurable at runtime"],
+  ["mode", "NS-28: it chose how the GitNexus gates enforced, and the gates are retired"],
+  ["readLineThreshold", "NS-28: it sized the large-Read gate, which is retired"],
+  ["stalenessGate", "NS-28: nothing blocks on a stale index any more"],
+  ["graceCommitsBehind", "NS-28: it tuned a staleness gate that is retired"],
+  ["stalenessCacheTtlMs", "NS-28: only the retired gates kept a staleness cache"],
+  ["sourceGlobs", "NS-28: it scoped the retired Read/Edit gates; drift counts use sourceExts"],
 ]);
+
+/** What bearing itself seeded for each retired key, across every version that seeded it. */
+export const SEEDED_RETIRED_VALUES = {
+  mode: "enforce",
+  readLineThreshold: 60,
+  graceCommitsBehind: 2,
+  stalenessCacheTtlMs: 2500,
+  sourceGlobs: ["src/**", "lib/**", "apps/**", "packages/**"],
+};
 
 /**
  * Retired keys the user has actually set, across the team file and the per-machine override.
- * @param {string} root @returns {{key: string, file: string}[]}
+ * @param {string} root @returns {{key: string, file: string, why: string}[]}
  */
 export function retiredHookKeysInUse(root) {
   const found = [];
@@ -167,43 +181,19 @@ export function retiredHookKeysInUse(root) {
     }
     if (!cfg || typeof cfg !== "object") continue;
     for (const key of Object.keys(cfg)) {
-      if (RETIRED_HOOK_KEYS.has(key)) found.push({ key, file: rel });
+      if (RETIRED_HOOK_KEYS.has(key)) found.push({ key, file: rel, why: RETIRED_HOOK_KEYS.get(key) });
     }
   }
   return found;
 }
 
-/**
- * enforce: today's gates (being retired, NS-28) · guide: gates as nudges · teach: no gates — the
- * moments in teach.mjs speak when the graph wins (NS-25) · off: no gates and no moments.
- * @typedef {'enforce' | 'guide' | 'teach' | 'off'} HookMode
- */
-/** @typedef {'none' | 'light' | 'medium' | 'full'} EditSensitivity */
-
-const DEFAULT_SOURCE_RES = [
-  /(?:^|\/)src(?:\/|$)/,
-  /(?:^|\/)lib(?:\/|$)/,
-  /(?:^|\/)apps(?:\/|$)/,
-  /(?:^|\/)packages(?:\/|$)/,
-];
-
-const DEFAULT_BROAD_GLOB_RES = [
-  /^\*\*\/\*\.(js|mjs|cjs|ts|tsx|jsx|py|rb|go|rs|java|kt|swift|php|cs|cpp|cc|c|cu|cuh|scala)$/,
-  /^\*\*\/src\//,
-  /^src\//,
-  /^\*\*\/lib\//,
-  /^lib\//,
-  /^\*\*\/apps\//,
-  /^apps\//,
-];
-
-// Polyglot: GitNexus indexes many languages — enforcement should not be JS/TS-only.
+// Polyglot: GitNexus indexes many languages — drift counting should not be JS/TS-only.
 // Override in .bearing/hooks.json via "sourceExts": ["js","py","rs", …].
 // Every extension the ANALYZER indexes, plus a few it does not — the asymmetry is deliberate.
 //
 // This list decides what counts as drift, and drift decides whether the graph is too stale to
 // answer with. An extension missing here is not a wrong count, it is NO count: those edits never
-// register and the gate never fires. `.vue` was missing while the analyzer ships a vue module —
+// register and drift is never reported. `.vue` was missing while the analyzer ships a vue module —
 // a whole framework whose graph went stale on exactly the files being edited, silently. `.cbl`,
 // `.cob` and `.cpy` were missing the same way.
 //
@@ -231,34 +221,15 @@ function buildExtRe(exts) {
  */
 export function loadHookConfig(root) {
   const cfg = {
-    mode: hookModeFromEnv(),
-    readLineThreshold: 60,
-    sourcePathRes: DEFAULT_SOURCE_RES,
-    broadGlobRes: DEFAULT_BROAD_GLOB_RES,
     sourceExtRe: DEFAULT_SOURCE_EXT_RE,
-    stalenessCacheTtlMs: 2500,
     // Pose the consult test once per chat, at the first edit. false/0 disables.
     consultNudge: true,
     // Distinct files edited before the deep-review nudge fires. 0 disables.
     microscopeFileThreshold: 5,
-    // Working-tree drift: after this many uncommitted source edits since the index,
-    // graph query tools require a fast incremental refresh. 0 disables the drift gate.
-    // Does a STALE INDEX block anything? "off" (default) | "block".
-    //
-    // Off by default because the judgement is not good enough yet to spend the user's attention on.
-    // Deciding that a graph is too far behind to answer with means predicting whether the drift
-    // touches what is being asked about, and neither the file count nor the commit count knows that
-    // — so the gate stopped work it did not need to stop and the cost landed on whoever was typing.
-    // A gate that is wrong often enough to be worked around protects nothing (NS-5).
-    //
-    // What still happens with it off: the graph refreshes on commit and on demand, and the staleness
-    // is REPORTED. What stops: denying tools because of it, and ordering an autonomous refresh.
-    // Set "block" in .bearing/hooks.json to restore the gates.
-    stalenessGate: "off",
-    // 8, not 3. Three dirty source files is an ordinary five minutes of work, so the gate fired
-    // during normal editing rather than at the point the graph had actually drifted away from the
-    // code. A gate that interrupts routine work gets worked around, and a worked-around gate
-    // protects nothing (NS-5: a false deny is worse than a missed gate).
+    // Working-tree drift: after this many uncommitted source edits since the index, the staleness
+    // report counts the index as drifted. It is REPORTED, never enforced — nothing blocks on it and
+    // nothing refreshes because of it (NS-25). 0 disables drift counting. 8, not 3: three dirty
+    // files is five minutes of ordinary work, not a graph that has drifted away from the code.
     driftRefreshThreshold: 8,
     // TASK-CORE: nudge after this many EDITS since the core was last written. Counts unsaved work
     // rather than context fullness, because the window is not knowable at runtime — see
@@ -285,10 +256,6 @@ export function loadHookConfig(root) {
   // the prior). A missing file is a no-op — readFileSync throws inside the helper and is swallowed.
   applyHookConfigFile(cfg, path.join(root, CONFIG_FILE));
   applyHookConfigFile(cfg, path.join(root, LOCAL_CONFIG_FILE));
-
-  // Per-machine env override wins over both files (handy for CI / ad-hoc). The context window is
-  // model-specific — a 1M-context session and a teammate's 200k model can't share one committed
-
   return cfg;
 }
 
@@ -301,13 +268,6 @@ export function loadHookConfig(root) {
 function applyHookConfigFile(cfg, cfgPath) {
   try {
     const file = JSON.parse(fs.readFileSync(cfgPath, "utf8"));
-    if (file.mode) cfg.mode = parseHookMode(file.mode);
-    if (typeof file.readLineThreshold === "number")
-      cfg.readLineThreshold = file.readLineThreshold;
-    if (typeof file.stalenessCacheTtlMs === "number")
-      cfg.stalenessCacheTtlMs = file.stalenessCacheTtlMs;
-    if (file.stalenessGate === "block" || file.stalenessGate === "off")
-      cfg.stalenessGate = file.stalenessGate;
     if (typeof file.driftRefreshThreshold === "number")
       cfg.driftRefreshThreshold = file.driftRefreshThreshold;
     if (typeof file.taskCoreEveryEdits === "number")
@@ -328,9 +288,6 @@ function applyHookConfigFile(cfg, cfgPath) {
       cfg.northStarAnchorEvery = file.northStarAnchorEvery;
     if (typeof file.northStarAnchorMaxLines === "number")
       cfg.northStarAnchorMaxLines = file.northStarAnchorMaxLines;
-    if (Array.isArray(file.sourceGlobs) && file.sourceGlobs.length) {
-      cfg.sourcePathRes = file.sourceGlobs.map((g) => globToRegExp(g));
-    }
     if (Array.isArray(file.sourceExts) && file.sourceExts.length) {
       cfg.sourceExtRe = buildExtRe(file.sourceExts);
     }
@@ -339,80 +296,10 @@ function applyHookConfigFile(cfg, cfgPath) {
   }
 }
 
-function hookModeFromEnv() {
-  return parseHookMode(process.env.GITNEXUS_MODE || process.env.GITNEXUS_HOOK_MODE || "enforce");
-}
-
-/**
- * `teach` and `off` are real modes. This used to map every value except "guide" to "enforce", so
- * `"mode": "teach"` silently ran the gates it was written to replace — and an eval comparing teach
- * against gates would have compared the gates with themselves. An unknown value still means
- * enforce: a typo must not quietly switch enforcement off.
- * @param {unknown} m @returns {HookMode}
- */
-export function parseHookMode(m) {
-  const v = String(m ?? "").toLowerCase();
-  return v === "guide" || v === "teach" || v === "off" ? v : "enforce";
-}
-
-/**
- * @param {string} glob
- */
-function globToRegExp(glob) {
-  const norm = glob.replace(/\\/g, "/").replace(/^\.\//, "");
-  const re = norm
-    .replace(/[.+^${}()|[\]\\]/g, "\\$&")
-    .replace(/\*\*/g, "\0")
-    .replace(/\*/g, "[^/]*")
-    .replace(/\0/g, ".*");
-  return new RegExp(`(?:^|/)${re}`);
-}
-
 /** @param {string} root */
 export function repoName(root) {
   if (process.env.GITNEXUS_REPO) return process.env.GITNEXUS_REPO;
   return path.basename(root);
-}
-
-/**
- * @param {string} filePath
- * @param {ReturnType<typeof loadHookConfig>} config
- */
-export function isSourceCodePath(filePath, config, root) {
-  let norm = (filePath ?? "").replace(/\\/g, "/");
-  // Match against the REPO-RELATIVE path. sourceGlobs like `src/**` compile to patterns that match
-  // "/src/" anywhere in the string, so an absolute path made enforcement depend on where the repo
-  // happens to live: a checkout under ~/src or ~/go/src had EVERY file classified as source, so
-  // every large Read and every Edit was gated repo-wide, with nothing in the message explaining why.
-  const base = (root ?? "").replace(/\\/g, "/").replace(/\/+$/, "");
-  if (base && norm.startsWith(base + "/")) norm = norm.slice(base.length + 1);
-  norm = norm.replace(/^\.\//, "");
-  if (!config.sourceExtRe.test(norm)) return false;
-  return config.sourcePathRes.some((re) => re.test(norm));
-}
-
-/**
- * @param {string} filePath
- * @param {ReturnType<typeof loadHookConfig>} config
- * @returns {EditSensitivity}
- */
-export function editSensitivity(filePath, config, root) {
-  const norm = (filePath ?? "").replace(/\\/g, "/");
-  if (!norm) return "none";
-  if (
-    /\.(md|mdc|json|yaml|yml|txt|gitignore)$/i.test(norm) ||
-    /(?:^|\/)docs\//.test(norm)
-  ) {
-    return "light";
-  }
-  if (/(\.cursor\/hooks|\.claude\/hooks|\.bearing)\//.test(norm) || /(?:^|\/)bundle\//.test(norm))
-    return "light";
-  if (/(?:^|\/)tests?\//.test(norm)) return "medium";
-  if (/(?:^|\/)scripts\//.test(norm)) return "medium";
-  if (isSourceCodePath(norm, config, root)) return "full";
-  if (/(?:^|\/)apps\//.test(norm) && config.sourceExtRe.test(norm))
-    return "full";
-  return "none";
 }
 
 /** @param {string} repo */
@@ -468,48 +355,6 @@ export function mcpDetectChanges(repo, scope = "unstaged") {
 /** @param {string} repo */
 export function mcpReadContext(repo) {
   return `READ gitnexus://repo/${repo}/context`;
-}
-
-const DENY_CACHE_FILE = ".gitnexus-deny-cache.json";
-
-/** @param {string} root */
-function denyCachePath(root) {
-  return path.join(root, ".bearing", DENY_CACHE_FILE);
-}
-
-/** @param {string} root */
-export function clearDenyCache(root) {
-  try {
-    fs.unlinkSync(denyCachePath(root));
-  } catch {
-    /* ignore */
-  }
-}
-
-/**
- * Hook agent_message — always full (local LLM; no repeat compaction).
- * @param {string} _root
- * @param {string} _cacheKey
- * @param {string} full
- * @param {string} [_compact]
- */
-export function hookAgentMessage(_root, _cacheKey, full, _compact) {
-  return full;
-}
-
-/**
- * @param {{ permission: 'allow' | 'deny', agent_message?: string, user_message?: string }} result
- * @param {HookMode} mode
- */
-export function applyHookMode(result, mode) {
-  if (mode === "guide" && result.permission === "deny") {
-    return {
-      permission: "allow",
-      agent_message: `[GUIDE MODE — normally blocked]\n${result.agent_message ?? ""}`,
-      user_message: result.user_message,
-    };
-  }
-  return result;
 }
 
 

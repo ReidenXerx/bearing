@@ -95,7 +95,6 @@ export const GITNEXUS_SCRIPT_GATES = [
     scripts: {
       "bearing:setup": "bash scripts/bearing-setup.sh",
       "bearing:sync-teaching": "bash scripts/sync-cursor-bearing-teaching.sh",
-      "bearing:pack": "bash scripts/pack-bearing-teaching.sh",
     },
   },
   {
@@ -117,12 +116,16 @@ export const GITNEXUS_SCRIPT_GATES = [
  * and we only take back what we wrote (NS-1):
  *  - a `bearing.__gate.*` entry running our gate-hint script (bearing-gate-hint.mjs, or
  *    gitnexus-gate-hint.mjs before the rename);
- *  - `hooks:install` running our installer for the pre-commit index refresh.
+ *  - `hooks:install` running our installer for the pre-commit index refresh;
+ *  - `bearing:pack` (and its `gitnexus:pack` alias) running the Cursor-era bundle packer, which
+ *    `npx bearing install` replaced.
  * @param {string} key @param {unknown} value
  */
 export function isRetiredScript(key, value) {
   if (typeof value !== "string") return false;
   if (key === "hooks:install") return /^bash scripts\/install-git-hooks\.sh$/.test(value.trim());
+  if (key === "bearing:pack" || key === "gitnexus:pack")
+    return /^bash scripts\/pack-bearing-teaching\.sh$/.test(value.trim());
   return (
     /^(bearing|gitnexus)\.__gate\./.test(key) &&
     /\bscripts\/(bearing|gitnexus)-gate-hint\.mjs\b/.test(value)

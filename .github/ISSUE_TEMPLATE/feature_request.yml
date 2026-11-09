@@ -1,5 +1,5 @@
 name: Feature request
-description: New enforcement gate, hook, skill, or install UX improvement
+description: A new module, hook, skill, or install UX improvement
 title: "[feat]: "
 labels: ["enhancement"]
 body:
@@ -23,10 +23,10 @@ body:
     attributes:
       label: Area
       options:
-        - Hooks / enforcement
+        - Hooks / nudges
         - Install / verify UX
-        - Skills / rules
-        - MCP / graph tools
+        - Skills / rule packs
+        - GitNexus module (opt-in graph)
         - Docs / onboarding
         - Other
     validations:

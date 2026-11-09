@@ -5,7 +5,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { repoName, clearDenyCache } from './hook-helpers.mjs';
+import { repoName } from './hook-helpers.mjs';
 
 export function sessionPaths(root) {
   const stateDir = path.join(root, '.bearing');
@@ -15,10 +15,13 @@ export function sessionPaths(root) {
     promptHint: path.join(stateDir, '.gitnexus-prompt-hint.json'),
     refreshPendingFlag: path.join(stateDir, '.gitnexus-refresh-pending.flag'),
     refreshFailedFlag: path.join(stateDir, '.gitnexus-refresh-failed.flag'),
+    // Written only by the retired gates (NS-28). Still named so a new session deletes what an
+    // upgraded install left behind; nothing writes them any more.
     mcpUsedFlag: path.join(stateDir, '.gitnexus-mcp-used.flag'),
     impactUsedFlag: path.join(stateDir, '.gitnexus-impact-used.flag'),
     detectUsedFlag: path.join(stateDir, '.gitnexus-detect-used.flag'),
     stalenessCacheFile: path.join(stateDir, '.gitnexus-staleness-cache.json'),
+    denyCacheFile: path.join(stateDir, '.gitnexus-deny-cache.json'),
     scorecardFile: path.join(stateDir, '.gitnexus-scorecard.json'),
     fallbackFlag: path.join(stateDir, '.gitnexus-fallback.json'),
     northStarCounter: path.join(stateDir, '.gitnexus-northstar-counter.json'),
@@ -313,33 +316,9 @@ export function readFallbackReports(root) {
 }
 
 /**
- * Record which GitNexus MCP tool the agent used, so edit/commit guards can enforce
- * "impact before edit" and "detect_changes before commit" once per session.
- * @param {string} root
- * @param {string} toolName e.g. "gitnexus_impact" / "mcp_gitnexus_detect_changes"
- */
-export function setMcpToolUsed(root, toolName) {
-  const { stateDir, mcpUsedFlag, impactUsedFlag, detectUsedFlag } = sessionPaths(root);
-  fs.mkdirSync(stateDir, { recursive: true });
-  const stamp = new Date().toISOString();
-  try {
-    fs.writeFileSync(mcpUsedFlag, stamp);
-    if (/impact|rename/i.test(toolName)) fs.writeFileSync(impactUsedFlag, stamp);
-    if (/detect_changes|detect-changes/i.test(toolName)) fs.writeFileSync(detectUsedFlag, stamp);
-  } catch {
-    /* best effort */
-  }
-}
-
-/** @param {string} root */
-export function isImpactUsed(root) {
-  return fs.existsSync(sessionPaths(root).impactUsedFlag);
-}
-
-/** @param {string} root */
-/**
- * Lightweight enforcement scorecard — counts how often the kit redirected the agent
- * from a lazy pattern to the graph. Surfaced in agent-brief / `gitnexus:scorecard`.
+ * Session scorecard — counts what the hooks did this session (nudges shown, re-anchors,
+ * compactions). Surfaced in agent-brief and `bearing:scorecard`. Older sessions also hold the
+ * retired gates' redirect counts.
  * @param {string} root
  * @param {string} key
  */
@@ -516,9 +495,8 @@ export function isRefreshFailed(root) {
 }
 
 // ── Durable memory + compaction recovery ────────────────────────────────────
-// Context compaction (auto or manual) drops the middle of a conversation. The
-// per-session gate flags + a running memory file must survive it, so the agent
-// doesn't re-run cleared gates or lose task state after a compaction.
+// Context compaction (auto or manual) drops the middle of a conversation. Per-session state
+// (nudges already shown, counters) must survive it, so the agent is not re-nudged mid-task.
 
 const MEMORY_FILE = 'MEMORY.md';
 
@@ -537,8 +515,7 @@ export function memoryPath(root) {
 
 /**
  * Clear per-session state ONLY on a genuinely new session. A compaction/resume
- * is the SAME task continuing — clearing there would wipe satisfied gates and
- * re-block the agent mid-task.
+ * is the SAME task continuing — clearing there would re-arm nudges already shown.
  * @param {string} [source] Claude SessionStart source: startup|clear|compact|resume
  */
 export function shouldClearOnSource(source) {
@@ -573,13 +550,14 @@ export function clearSessionState(root) {
     detectUsedFlag,
     refreshFailedFlag,
     // refreshFailedFlag is deliberately NOT here. Everything else in this list is per-session —
-    // gates satisfied, nudges shown, counters — and resetting it for a new session is right.
+    // nudges shown, counters — and resetting it for a new session is right.
     // "The index could not be built" is not a fact about the session: an index does not repair
     // itself because the user opened a new chat. Clearing it meant a failed refresh's warning
     // survived only until the next session, after which the agent went back to trusting a graph
     // that had failed to build. It is cleared where it is actually disproven — bearing-agent
     // passes `clear` on a successful refresh and `set-failed` on a failed one.
     stalenessCacheFile,
+    denyCacheFile,
     scorecardFile,
     fallbackFlag,
     northStarCounter,
@@ -594,6 +572,7 @@ export function clearSessionState(root) {
     impactUsedFlag,
     detectUsedFlag,
     stalenessCacheFile,
+    denyCacheFile,
     scorecardFile,
     fallbackFlag,
     // NB the north-stars DOC itself is never touched here (it's user-owned + committed) — only the
@@ -613,12 +592,6 @@ export function clearSessionState(root) {
       /* ignore */
     }
   }
-  clearDenyCache(root);
 }
 
-export function writePromptHint(root, hint) {
-  const { stateDir, promptHint } = sessionPaths(root);
-  fs.mkdirSync(stateDir, { recursive: true });
-  fs.writeFileSync(promptHint, JSON.stringify({ ...hint, at: new Date().toISOString() }, null, 2));
-}
 

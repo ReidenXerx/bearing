@@ -5,15 +5,14 @@
 ## Type
 
 - [ ] Bug fix
-- [ ] Feature / enforcement
+- [ ] Feature
 - [ ] Docs / repo polish
-- [ ] Bundle sync from production repo
 
 ## Test plan
 
 - [ ] `npm test` passes locally
 - [ ] Install or update tested on a target repo (if behavior changed)
-- [ ] `npm run gitnexus:verify` clean on target (if bundle/hooks changed)
+- [ ] `npm run bearing:verify` clean on target (if bundle/hooks changed)
 
 ## Notes for reviewers
 

@@ -28,14 +28,15 @@ import { fileURLToPath, pathToFileURL } from "node:url";
  */
 const labels = {
   graphCalls: "GitNexus MCP calls",
-  grepRedirects: "Grep → graph redirects",
-  readRedirects: "Large Read → graph redirects",
-  impactGate: "Impact-before-edit gates",
-  commitGate: "detect_changes-before-commit gates",
-  editStaleBlocks: "Stale-edit blocks",
+  // Counted only by the retired gates (NS-28) — present in telemetry from before an upgrade.
+  grepRedirects: "Grep → graph redirects (retired gate)",
+  readRedirects: "Large Read → graph redirects (retired gate)",
+  impactGate: "Impact-before-edit gates (retired)",
+  commitGate: "detect_changes-before-commit gates (retired)",
+  editStaleBlocks: "Stale-edit blocks (retired)",
+  classicalFallbackGranted: "Classical-fallback grants (retired)",
+  driftRefreshBlocks: "Graph-drift refresh blocks (retired)",
   compactions: "Context compactions",
-  classicalFallbackGranted: "Classical-fallback grants (GN distrusted)",
-  driftRefreshBlocks: "Graph-drift refresh blocks (edited since index)",
   taskCoreNudges: "Task-core nudges (edits since the core was last written)",
   northStarAnchors: "North-star re-anchors (mid-session drift guards)",
   impactVerdictsQuestioned: "Impact verdicts questioned (LOW from unresolved callers)",
@@ -766,7 +767,7 @@ if (cmd === "scorecard") {
   );
   const card = readScorecard(ROOT);
   const counts = card.counts ?? {};
-  console.log("GitNexus enforcement scorecard (this session)");
+  console.log("bearing session scorecard (this session)");
   console.log(
     card.startedAt ? `  since ${card.startedAt}` : "  (no activity yet)",
   );
@@ -777,7 +778,7 @@ if (cmd === "scorecard") {
   const keys = Object.keys(counts).filter((k) => counts[k]);
   if (!keys.length) {
     console.log(
-      "  No enforcement events yet — run some tools in a chat first.",
+      "  Nothing counted yet — run some tools in a chat first.",
     );
   } else {
     for (const k of keys) console.log(`  ${labelFor(k)}: ${counts[k]}`);
@@ -806,7 +807,7 @@ if (cmd === "stats") {
     process.stdout.write(JSON.stringify({ ...s, latestIndex }, null, 2) + "\n");
     process.exit(0);
   }
-  console.log("GitNexus telemetry — all sessions");
+  console.log("bearing telemetry — all sessions");
   if (!s.sessions) {
     console.log("  No sessions recorded yet. A session is archived on the NEXT");
     console.log("  session start; run some tools + start a new chat to accrue data.");
@@ -822,7 +823,7 @@ if (cmd === "stats") {
   console.log("  " + "metric".padEnd(width) + "total   avg/session");
   const keys = Object.keys(s.totals).filter((k) => s.totals[k]);
   if (!keys.length) {
-    console.log("  (no enforcement events across recorded sessions)");
+    console.log("  (nothing counted across recorded sessions)");
   } else {
     for (const k of keys) {
       console.log(
