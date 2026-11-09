@@ -1,14 +1,14 @@
 # Quick start
 
-Install **bearing** into any git repo. It copies hooks, rules and skills, wires your IDE, and — if you choose the GitNexus module — builds the code graph and verifies the stack.
+Install **bearing** into any git repo. It copies the contract, hooks and skills for the modules you pick, wires your agent runtime, and checks its own work.
 
 ## Prerequisites
 
 | Requirement | Notes |
 |-------------|--------|
 | Node.js ≥ 22.9.0 | `node -v` |
-| git | target must be a worktree |
-| An agent runtime | Claude Code · Cursor · Zed · Codex |
+| git | the target must be a git worktree |
+| An agent runtime | Claude Code · Zed · Codex |
 | *(GitNexus module only)* | the [GitNexus](https://github.com/abhigyanpatwari/GitNexus) MCP server |
 
 ## Install
@@ -26,132 +26,111 @@ npx bearing install /path/to/repo --runtime all    --features all
 
 ### Runtimes
 
-`claude` · `cursor` · `zed` · `codex` · `both` (=cursor+zed) · `all` — or a comma list like `cursor,claude`.
+`claude` · `zed` · `codex` · `all` (= all three) — or a comma list like `zed,claude`.
 
-Only Claude Code and Cursor expose tool-interception hooks, so only they can *enforce*. On Zed and Codex the same rules arrive as instruction via `AGENTS.md`. See the matrix in the [README](../README.md#module-support-by-runtime).
+Only Claude Code exposes tool-interception hooks, so only there do the nudges fire by themselves (the north-star re-anchor, the task-core reminder). Zed and Codex get the same rules through `AGENTS.md`. None of the hooks blocks a tool call. See the matrix in the [README](../README.md#install).
 
-### Features
+### Modules
 
-`northstars` · `taskcore` · `microscope` · `gitnexus` · `all`
+`northstars` · `goldpractices` · `taskcore` · `microscope` · `consult` · `minions` · `tsjs` · `frontend` · `react` · `gitnexus` · `e2e` · `all`
 
-Each module installs and works independently — none depends on another. Choosing fewer ships fewer files: an intel-only install (`northstars,taskcore,microscope`) writes 9 libs, 3 skills and 4 hooks, with no enforcement gates at all.
+The default install is the first six. Each module installs and works on its own — none depends on another. **GitNexus is opt-in**: the interactive installer explains what it is and what it costs, and asks; `--features +gitnexus` adds it directly. Once installed it pushes nothing — ask for it in a prompt ("use gitnexus to find what this change affects") and the `bearing-gitnexus` skill loads.
 
-Your selection is recorded in the manifest and **inherited on update**, so you only pass `--features` to change it.
+Your selection is recorded in the manifest and **inherited on update**, so you only pass `--features` to change it (`+e2e`, `-minions`, or a full list).
 
 ### Other flags
 
 ```bash
---quick        # skip the graph index build (GitNexus module); build it later
---no-setup     # copy the bundle only — no setup, no index
---skip-verify  # skip the post-install audit
---repo-name X  # when the folder name ≠ the indexed repo name
+--stealth          # for a repo that isn't yours: nothing tracked changes (see below)
+--quick            # GitNexus module: skip the index build; build it later
+--no-setup         # copy the bundle only — no setup, no index
+--skip-verify      # skip the post-install audit
+--repo-name X      # when the folder name ≠ the indexed repo name
+--mcp http|stdio   # GitNexus module: one shared server, or one process per client
+--gitnexus-cmd C   # GitNexus module: the gitnexus binary to call (default: the installed one, else npx)
 ```
+
+**Stealth** installs for you only: ignores go in `.git/info/exclude` (per clone, never pushed), no npm scripts are added, and the contract is injected each session instead of written to `CLAUDE.md`. `git status` stays clean.
 
 ### From a clone
 
 ```bash
 git clone https://github.com/ReidenXerx/bearing.git
 cd bearing
-./bin/install.sh /path/to/repo --runtime all
+./bin/install.sh /path/to/repo --runtime claude
 ```
 
-## After install (target repo)
+## After install
 
-1. **Restart your IDE** on the target project — MCP + hooks (Cursor), agent profile (Zed), or hooks + MCP + `CLAUDE.md` (Claude Code) load on restart.
-2. `npm run bearing:verify` — runtime-aware kit audit (also runs at end of install).
-3. `npm run bearing:health` — human-friendly status for your team.
-4. Open a **new Agent chat** and describe your task.
-5. Share [`docs/GITNEXUS-TEAM-BUNDLE.md`](../bundle/docs/GITNEXUS-TEAM-BUNDLE.md) with the team (copied to target on install).
-
-> Install overwrites `.cursor/hooks.json` when runtime includes Cursor. Existing file is backed up to `.cursor/hooks.json.bearing.bak`. Global `~/.cursor/mcp.json` is not modified.
+1. **Restart your agent** on the target project — hooks, MCP and skills load on restart.
+2. Open a **new chat** and describe your task.
+3. With the GitNexus module: `npm run bearing:health` for a plain-language status, `npm run bearing:verify` for the full audit (it also runs at the end of install).
 
 ## What install does
 
 ```
 bearing install
-  → stepped banner UI (validate → migrate legacy → copy → merge → manifest → setup)
-  → migrate legacy bearing layout (rsync skills, old manifest, zed profile)
-  → copy bundle (rules, hooks, skills store, scripts, team guide)
-  → materialize .bearing/skills/ + symlink into .cursor/ and/or .agents/
-  → merge gated package.json bearing:* scripts + .cursor/mcp.json (Cursor)
-  → merge .zed/settings.json + AGENTS.md (Zed)
-  → gitnexus-setup.sh (--skip-global-mcp)
-      → build .gitnexus/ index (unless --quick)
-  → npm run bearing:verify
+  → validate the target repo
+  → migrate an older install (renamed paths, retired hooks and skills, old manifests)
+  → copy the bundle for the selected modules
+  → materialize .bearing/skills/ and symlink it into .claude/skills/ and/or .agents/skills/
+  → wire the runtime: .claude/settings.json hooks, CLAUDE.md / AGENTS.md contract,
+    and — GitNexus only — the MCP server, the Zed profile and the bearing:* npm scripts
+  → write the manifest (what it installed, so update and uninstall touch only that)
+  → GitNexus only: scripts/bearing-setup.sh builds the .gitnexus/ index (unless --quick)
+  → verify
 ```
 
-Skills live once in `.bearing/skills/` and are **symlinked** — not copied — into IDE skill paths. Updates replace the store and refresh symlinks.
+Skills live once in `.bearing/skills/` and are **symlinked**, not copied, into the runtime's skill path. Updates replace the store and refresh the links; a retired skill's link is removed, and your own skills are never touched.
 
-A **status line** for Claude Code ships with bearing but is NOT wired by an install — it is one bar at the bottom of every session in every project, so it is a machine-wide opt-in, not a per-repo one. Turn it on once with `npx bearing statusline` (installs `~/.claude/statusline.sh` and wires `~/.claude/settings.json`); `npx bearing statusline --remove` takes it back out. A `statusLine` you configured yourself is never overwritten — bearing installs the script and prints the one line to switch, leaving the choice to you. It shows context, 5h/7d quota burn with an on-pace warning, prompt-cache TTL, and index freshness — a stale index denies Grep/Read/MCP, so it belongs on screen rather than surfacing as a blocked tool call — and stays quiet unless something is off. One copy covers every repo: it reads the project directory out of the session payload, and in a repo without bearing the index field simply prints nothing. Tunables (`SL_NERD`, `SL_VITALS`, `SL_MEM_WARN_MB`, `SL_IO_WARN`) are documented in the script header.
+A **status line** for Claude Code ships with bearing but is NOT wired by an install — it is one bar at the bottom of every session in every project, so it is a machine-wide opt-in, not a per-repo one. Turn it on once with `npx bearing statusline` (installs `~/.claude/statusline.sh` and wires `~/.claude/settings.json`); `npx bearing statusline --remove` takes it back out. A `statusLine` you configured yourself is never overwritten — bearing installs the script and prints the one line to switch, leaving the choice to you. It shows context, 5h/7d quota burn with an on-pace warning, prompt-cache TTL, and index freshness — a stale index gives graph answers that may be wrong rather than refused, so it belongs on screen — and stays quiet unless something is off. One copy covers every repo: it reads the project directory out of the session payload, and in a repo without bearing the index field simply prints nothing. Tunables (`SL_NERD`, `SL_VITALS`, `SL_MEM_WARN_MB`, `SL_IO_WARN`) are documented in the script header.
 
 ## Update
 
 ```bash
-./bin/update.sh /path/to/your-repo                  # keeps the installed runtime (read from the manifest)
-./bin/update.sh /path/to/your-repo --runtime all    # CHANGE runtime, e.g. add Claude Code to an old install
+npx bearing update /path/to/your-repo                    # keeps the recorded runtime and modules
+npx bearing update /path/to/your-repo --features +e2e    # add a module
+npx bearing update /path/to/your-repo --full             # also rebuild the GitNexus index
 ```
 
-`update` reads the runtime from the manifest, so you only pass `--runtime` to **change** it. Default: `--quick` (skips full re-index). **Migration runs on every update** — old rsync'd `.cursor/skills/*`, `.claude/skills/*`, legacy manifest, and Zed profile key `gitnexus` are cleaned automatically.
+`update` reads the runtime and modules from the manifest, so you only pass them to **change** them. It defaults to `--quick` (no re-index). **Migration runs on every update**: anything an older version installed and this one retired — hooks, libs, skills and their links, npm scripts — is removed, and a second update changes nothing.
 
-> **Fresh clone of an already-installed repo?** The manifest (`.bearing/manifest.json`) is **gitignored**, so it isn't in a new clone — `update` will stop with *"Not installed. Run install first."* That's expected: run **`./bin/install.sh /path/to/repo --runtime all --no-setup`** instead. Install is idempotent — it re-materializes the current bundle and rewrites the manifest without touching your code.
+> **Fresh clone of an already-installed repo?** The manifest (`.bearing/manifest.json`) is **gitignored**, so it isn't in a new clone — `update` stops with *"Not installed. Run install first."* That's expected: run **`npx bearing install /path/to/repo --no-setup`** instead. Install is idempotent — it re-materializes the current bundle and rewrites the manifest without touching your code.
 
-Bulk update every installed repo under a workspace root:
+Update every installed repo under a folder:
 
 ```bash
-./bin/update.sh --all /path/to/projects --runtime both --no-setup --skip-verify
+npx bearing update-all /path/to/projects --no-setup --skip-verify
 ```
 
-Restart your IDE after updating.
+Restart your agent after updating.
 
 ## Uninstall
 
 ```bash
-./bin/uninstall.sh /path/to/your-repo
-./bin/uninstall.sh /path/to/your-repo --remove-index   # also remove .gitnexus/
+npx bearing uninstall /path/to/your-repo
+npx bearing uninstall /path/to/your-repo --remove-index   # also remove .gitnexus/
 ```
 
-## Daily commands (target repo)
+## GitNexus commands (target repo, GitNexus module only)
 
 ```bash
-npm run bearing:verify          # full kit check (cursor / zed / both)
-npm run bearing:health          # team-friendly status
-npm run bearing:agent-brief     # session orientation (agents)
-npm run bearing:agent-status    # staleness (agents)
+npm run bearing:health          # plain-language status
+npm run bearing:verify          # full kit check
+npm run bearing:agent-status    # is the index fresh?
 npm run bearing:agent-refresh   # re-index when stale
 npm run bearing:branch-status   # branch/base summary + branch-aware MCP calls
-npm run bearing:pr-impact       # branch-aware PR review playbook
-npm run bearing:pdg             # incremental embeddings + skills + PDG (mid-session)
-npm run bearing:full-pdg        # full --force rebuild + PDG (pre-commit hook uses this)
-npm run bearing:graph-smoke     # Cypher / ACCESSES sanity (CI)
+npm run bearing:pr-impact       # branch-aware PR review
+npm run bearing:full-pdg        # full --force rebuild + PDG
+npm run bearing:graph-smoke     # Cypher / ACCESSES sanity check (CI)
 npm run bearing:detect-api      # HTTP router profile
-npm run bearing:sync-teaching   # after pulling kit updates
+npm run bearing:fallback -- "…" # file a report when the graph was wrong
+npm run hooks:install           # optional pre-commit hook: refresh the index on every commit
 ```
 
-### Gate docs in package.json
+A stealth install has no npm scripts; run the same commands as `node scripts/bearing-agent.mjs <command>`.
 
-```bash
-npm run bearing.__gate.1.session      # Gate 1 — health, brief, status
-npm run bearing.__gate.2.orient         # Gate 2–4 — orient + MCP
-npm run bearing.__gate.5.index          # Gate 5 — refresh / embeddings
-npm run bearing.__gate.6.verify         # Install / CI verification
-npm run bearing.__gate.kit.maintainer   # setup, sync, pack, hooks
-```
-
-Source: `scripts/bearing-teaching/script-gates.mjs`
-
-## Advanced capabilities
-
-| Capability | Commands / hooks |
-|------------|------------------|
-| **Cypher** | Field ACCESSES, N-hop CALLS — `grep-guard`, `read-guard`, `agent-brief` |
-| **`rename` MCP** | Graph-coordinated rename — `edit-guard`, prompt-router |
-| **API router profile** | `npm run bearing:detect-api` → `.cursor/gitnexus-api-profile.json` |
-| **Branch-aware PR review** | `npm run bearing:branch-status -- main`; `npm run bearing:pr-impact -- main` |
-| **PDG pre-commit refresh** | `.githooks/pre-commit` runs `npm run bearing:full-pdg` before `bearing:graph-smoke` |
-| **Graph smoke test** | `npm run bearing:graph-smoke`; pre-commit after PDG refresh |
-| **Zed + Ollama** | See [ZED.md](./ZED.md) — **Zed + GitNexus** profile, local model hints |
-
-See [Architecture](./ARCHITECTURE.md) for diagrams and failure-mode mapping. See [Skills](./SKILLS.md) for task-to-skill routing.
+See [Architecture](./ARCHITECTURE.md) for how the pieces fit, and [Skills](./SKILLS.md) for what each skill is for. With Zed and a local model: [ZED.md](./ZED.md).
 
 ## Release / maintainer docs
 

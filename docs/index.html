@@ -246,6 +246,9 @@
   blockquote { margin: 22px 0 0; padding: 16px 20px; border-left: 2px solid var(--brass); background: var(--surface); border-radius: 0 6px 6px 0; color: var(--muted); }
   blockquote b { color: var(--ink); }
   .two { display: grid; gap: 26px; margin-top: 8px; }
+  /* A grid item will not shrink below its content by default, so a long <pre> line widened the
+     whole column past a phone screen instead of scrolling inside its own box. */
+  .two > * { min-width: 0; }
   @media (min-width: 880px) { .two { grid-template-columns: 1fr 1fr; gap: 34px; } }
 
   /* gauges + tables */
@@ -264,7 +267,9 @@
   .gauge-key i.more { opacity: .45; }
   .gauge-key i.opt { background: transparent; border: 1px dashed var(--brass); }
 
-  .scroll { overflow-x: auto; margin-top: 24px; }
+  /* position: relative makes this the containing block of the absolutely positioned .sr labels in
+     its cells. Without it they escaped the scroll box and widened the whole page on a phone. */
+  .scroll { overflow-x: auto; margin-top: 24px; position: relative; }
   table { border-collapse: collapse; width: 100%; min-width: 520px; font-size: .94rem; }
   caption { text-align: left; font: 500 11.5px/1.4 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding-bottom: 10px; }
   th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--rule); }

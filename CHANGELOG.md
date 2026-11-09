@@ -64,6 +64,33 @@ answer key the graph did not write") added.
 - **Core shipped graph code to every install**: `claude-emit.mjs`, which every hook loads, imported
   the classifier and the stale policy (NS-2).
 
+### Fixed — what the gates left behind
+
+- **The `bearing.__gate.*` npm scripts are gone, and an update removes them.** Each printed a step of
+  the retired graph-first loop. Updates only ever added or overwrote scripts, so every install kept
+  them; now an update (and deselecting GitNexus) removes the ones bearing wrote, and leaves a key of
+  that shape alone if its command is yours.
+- **`bearing:refresh` regenerated GitNexus's own skills.** The npm scripts still passed `--skills`
+  to `gitnexus analyze` — the same leak the automatic refresh path already closed. They pass
+  `--skip-skills` now.
+- **`install --features +gitnexus` failed** with "Unknown feature(s): +gitnexus" — only `update`
+  resolved `+`/`-` lists, and that is the documented way to opt in to the graph. Install now resolves
+  them against the recorded selection, or the default set on a first install.
+- **The "Zed + GitNexus" profile had no file tools.** Zed profiles are allowlists, and it listed only
+  `false` entries, so an agent on it could not read, search or edit a file. Zed's default Write
+  profile already enables every context server, so bearing no longer writes a profile; an update
+  removes the old one unless you turned tools on in it. `bearing:verify` stopped requiring it.
+- **The consult and microscope nudges shipped to every install.** Neither had an owning module, so a
+  north-stars-only repo was told to load a microscope skill it did not have. Each now ships with its
+  module.
+- **Text that still described the gates**, all printed to users: `bearing:health` ("grep and broad
+  reads are blocked — by design"), the stale-index message ("Hooks block Grep/Read/MCP/shell"), the
+  setup script's onboarding, the Codex and Claude Code runtime labels, `--help`, and the status line.
+  New installs no longer seed the dead `mode` and `readLineThreshold` keys in `.bearing/hooks.json`.
+- **Docs**: `docs/QUICKSTART.md`, `docs/ARCHITECTURE.md` and `docs/ZED.md` rewritten for the
+  current product (they still described Cursor, gates and graph-first enforcement); the orphaned
+  `docs/TEAM-BUNDLE.md` removed.
+
 ### Fixed — stealth hid the user's own nested files from `git status`
 
 A stealth install writes its excludes to `.git/info/exclude`, and most of them were unanchored:

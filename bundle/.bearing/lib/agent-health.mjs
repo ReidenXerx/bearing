@@ -3,25 +3,10 @@
  * Human-friendly bearing + graph status (for developers and team leads).
  * Usage: node .bearing/lib/agent-health.mjs [repoRoot]
  */
-import fs from "node:fs";
 import { howToRun } from './how-to-run.mjs';
-import path from "node:path";
 import { auditKitHealth } from "./session-health-audit.mjs";
 
 const root = process.argv[2] ?? process.cwd();
-
-/** Runtimes this install actually covers, from the manifest. */
-function installedRuntime(root) {
-  for (const rel of ['.bearing/manifest.json', '.gitnexus/agent-kit-manifest.json']) {
-    try {
-      const r = JSON.parse(fs.readFileSync(path.join(root ?? '.', rel), 'utf8')).runtime;
-      if (r) return String(r).split(',').map((t) => t.trim().toLowerCase());
-    } catch {
-      /* try the next */
-    }
-  }
-  return ['both']; // unknown — keep the historical behaviour rather than hide the guide
-}
 
 function mark(ok) {
   return ok ? "✓" : "✗";
@@ -61,28 +46,15 @@ async function main() {
 
   lines.push("");
   lines.push("What this means for you:");
+  // These bullets used to describe the gates — grep and reads blocked, refresh forced, pre-edit
+  // checks. All retired (NS-25, NS-28); a summary that says otherwise is the NS-20 failure.
   lines.push(
-    "• Your agent uses the GitNexus knowledge graph for code reasoning",
+    "• GitNexus is opt-in: the agent uses the graph when you ask for it (\"use gitnexus …\")",
   );
-  // GATED. `installedRuntime()` was declared in this file and never called, so these two bullets —
-  // the ones describing tool interception — printed on a Zed or Codex install, which has no hooks
-  // at all (NS-14, NS-20).
-  if (installedRuntime(root).some((r) => ["claude", "both", "all"].includes(r))) {
-    lines.push(
-      "• When the graph is fresh, grep and broad reads are blocked — by design",
-    );
-  }
+  lines.push("• Grep and Read are never blocked");
   lines.push(
-    "• Field/property searches route to Cypher (ACCESSES) — readers/writers from the graph",
+    `• When the index falls behind, refresh it: ${howToRun('bearing:agent-refresh')}`,
   );
-  lines.push(
-    "• The agent refreshes the index automatically when it falls behind",
-  );
-  if (installedRuntime(root).some((r) => ["claude", "both", "all"].includes(r))) {
-    lines.push(
-      "• Pre-edit checks reduce “what breaks if I change this?” surprises",
-    );
-  }
   lines.push("");
   lines.push("Commands:");
   lines.push(`  ${howToRun('bearing:health')}        this summary`);

@@ -139,7 +139,6 @@ CORE_SOURCES=(
   "scripts/install-git-hooks.sh"
   "scripts/bearing-verify.mjs"
   "scripts/bearing-agent.mjs"
-  "scripts/bearing-gate-hint.mjs"
   "scripts/bearing-teaching/script-gates.mjs"
   "scripts/lib/setup-ui.mjs"
   ".bearing/skills/bearing-gitnexus/SKILL.md"
@@ -246,11 +245,11 @@ echo "╚═══════════════════════�
 echo ""
 cat <<'ONBOARD'
 
-  GitNexus is now your agent's code brain — with enforcement on Claude Code.
+  GitNexus is installed. It is opt-in: nothing pushes your agent towards it.
+  Ask for it in a prompt ("use gitnexus to find what this change affects")
+  and the bearing-gitnexus skill loads. Grep and Read are never blocked.
 
   ✓ Graph + embeddings indexed (or run bearing:agent-refresh after --quick)
-  ✓ Hooks block grep-first habits when the graph is fresh (Claude Code only)
-  ✓ Agent refreshes the index autonomously when stale
 
   NEXT STEPS
   ──────────
@@ -260,10 +259,7 @@ cat <<'ONBOARD'
 
   Quick check:  npm run bearing:health
   Full audit:   npm run bearing:verify
-  Gate docs:    npm run bearing.__gate.1.session
-
-  When hooks redirect the agent (grep/read blocked), that is expected —
-  GitNexus is enforcing graph-first reasoning.
+  Stale index:  npm run bearing:agent-refresh
 
   ── Maintainer details ────────────────────────────────────────
 

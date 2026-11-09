@@ -182,14 +182,14 @@ function countDrift(at, sourceExtRe) {
 // message a reader cannot check. With `stalenessGate: "off"` (the default) staleness denies
 // nothing, so asserting "hooks block" here made every stale-index report state a consequence that
 // does not happen. NS-20: an unchecked claim is a lie waiting to happen.
+// Nothing can block any more: the guards that read `stalenessGate` were retired (NS-28), so an old
+// hooks.json still saying "block" must not make this claim one (NS-20).
 const staleHookNote =
-  loadHookConfig(root).stalenessGate === 'block'
-    ? 'Hooks block Grep/Read/MCP/shell until refresh succeeds or fails.'
-    : 'Nothing is blocked (stalenessGate: off) — graph answers may be WRONG rather than refused, so confirm anything load-bearing.';
+  'Nothing is blocked — graph answers may be WRONG rather than refused, so confirm anything load-bearing.';
 // Resolved, not hardcoded: a stealth install has no npm scripts, so naming one made every block
 // point at a command that repo did not have (NS-6 — a block whose exit does not exist is a trap).
 const agentFix =
-  `${staleHookNote} Agent MUST run ${howToRun(root, "bearing:agent-refresh")} autonomously (required_permissions: ["all"]).`;
+  `${staleHookNote} Refresh with ${howToRun(root, "bearing:agent-refresh")} before relying on graph answers.`;
 
 const out = {
   fresh: true,

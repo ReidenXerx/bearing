@@ -63,7 +63,6 @@ BUNDLE_PATHS=(
   scripts/install-git-hooks.sh
   scripts/bearing-agent.mjs
   scripts/bearing-ci.mjs
-  scripts/bearing-gate-hint.mjs
   scripts/run-with-project-tmp.sh
   scripts/clean-project-tmp.sh
   scripts/lib/project-tmp.mjs
