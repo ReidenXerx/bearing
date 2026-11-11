@@ -49,6 +49,9 @@ try {
   process.exit(0); // no kit lib → nothing to do
 }
 const threshold = Number(config.minionFanoutThreshold);
+// Named in the nudge, so the configured tier is what the agent spawns on. It was read into the config
+// and shown nowhere, so a team's override changed nothing an agent could see.
+const model = `\`${config.minionModel || "sonnet"}\` (the middle tier)`;
 if (!(threshold > 0)) process.exit(0); // 0 disables
 
 function readState() {
@@ -140,16 +143,16 @@ emitContext(
     ? `· You have edited ${state.wrote.length} different files in a row by hand. If the remaining ` +
         "work is the SAME decided change applied at more independent sites — logging coverage, an " +
         "error envelope, the rest of a settled migration — fan it out instead of grinding: load " +
-        "the `bearing-invasive-minions` skill. One subagent per DISJOINT slice (two writing the " +
-        "same file silently lose a write), each applying the transformation exactly as specified " +
-        "and returning WROTE / VERIFIED / SKIPPED / FAILED. They apply; YOU decided, and you " +
-        "review the whole diff. Ignore this if each site needs its own judgment, if the sites " +
-        "interact, or if the tree has unrelated uncommitted work in it."
+        "the `bearing-invasive-minions` skill. One subagent per slice, each in its own worktree " +
+        `on ${model}, applying the transformation exactly as specified and returning WROTE / ` +
+        "VERIFIED / SKIPPED / FAILED. They apply; YOU decided, and you review each slice before it " +
+        "lands. Ignore this if each site needs its own judgment, if the sites interact, or if the " +
+        "tree has unrelated uncommitted work in it."
     : `· You have gathered from ${state.seen.length} different targets in a row without delegating. ` +
         "If the remaining work is a LIST of similar, independent lookups — every call site, every " +
         "file still on the old API, every route to check against one rule — fan it out instead of " +
-        "grinding: load the `bearing-minions` skill. One anchored subagent per unit, on a middle " +
-        "tier, each returning FOUND file:line / CHECKED / MISSED. They gather; YOU conclude. " +
+        "grinding: load the `bearing-minions` skill. One anchored subagent per unit, " +
+        `on ${model}, each returning FOUND file:line / CHECKED / MISSED. They gather; YOU conclude. ` +
         "Ignore this if the work is sequential, needs your judgment per step, or is nearly done.",
   "PostToolUse",
 );

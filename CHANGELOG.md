@@ -80,6 +80,34 @@ A real update, run from an install made with the previous code, also showed that
 Two more lines from the gate era are fixed. `bearing:health` promised that the agent "will refresh
 the graph autonomously". A failed refresh announced that "Classical Grep/Read are now permitted".
 
+### Changed — invasive minions work isolated, and every slice is reviewed before it lands
+
+Invasive minions used to edit the shared working tree directly, guarded only by "split by file".
+A minion that strayed outside its files, or two that edited one file, could only be caught in one
+skim of the combined diff, after everything had already landed. The second case was a silent lost
+update: both minions reported success.
+
+- **Isolated.** Each minion works in its own git worktree (Claude Code: `isolation: "worktree"`)
+  and commits its slice there. On a runtime without worktrees, it writes a patch file and edits
+  nothing.
+- **Reviewed.** `node .bearing/lib/minion-review.mjs <slice> --allow <files>` does the mechanical
+  half. It rejects a slice that touched a file outside its list, one that no longer applies to HEAD
+  (two slices on the same file now meet here as a conflict), and one that is empty. It accepts a
+  branch, an uncommitted worktree (new files included) or a patch file. Whether every hunk matches
+  the brief stays the main agent's call (NS-24).
+- **Landed one slice at a time.** `--land` applies an accepted slice to the working tree and index.
+  It never commits, and it keeps the patch so `git apply -R` can take that slice back on its own.
+
+Found by running two real minions: Claude Code puts their worktrees INSIDE the repo, under
+`.claude/worktrees/`, which nothing ignored. `git status` showed `?? .claude/` mid-fan-out, and a
+`git add -A` would have committed each worktree as an embedded repository. The path is now ignored,
+including in stealth installs.
+
+**Every minion runs on the middle tier** of the model family — `sonnet` for Anthropic — whether it
+gathers or applies. The shared spawning rule no longer leaves room to upgrade a minion that seems to
+need more. The configured `minionModel` is now named in the fan-out nudge; it used to be read into
+the config and shown nowhere, so overriding it changed nothing an agent could see.
+
 ### Fixed — a sweep for what the gates and Cursor left behind
 
 A repo-wide sweep before the next milestone found more of the old product still shipping.
