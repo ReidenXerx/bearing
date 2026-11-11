@@ -4,6 +4,25 @@ All notable changes to `bearing` are documented here.
 
 ## Unreleased — GitNexus becomes opt-in, and nothing blocks your tools any more
 
+### Changed — consult asks BEFORE it writes a business rule
+
+The judgment-layer eval (`eval/intel/`) gave a refund to split across a discounted order's lines,
+with no allocation rule anywhere in the repo. Every run, with bearing or without, picked a policy and
+wrote it. The runs with bearing then flagged it as "assumption to confirm", after it was already in
+the code. The contract had told them to: "cheaply reversible → decide, state the assumption in one
+line". The contract, the `bearing-consult` skill and the first-edit nudge now say three things:
+
+- **Ask before writing a rule the request left open**, then end the turn. A rule is how money is
+  split, or what a user sees, is charged or is allowed to do.
+- **"Reversible" covers implementation choices only, never business rules.** Undoing the code is
+  cheap; the decision still was not the agent's.
+- **The tell:** an "I assumed…" about money in a summary is the question, asked too late.
+
+Re-run on sonnet, 5 trials: 4 of 5 runs now stop and ask first, with closed options and a
+recommendation, against 0 of 5 before. The tasks the repo or a north-star already answers still get
+done without a question. The eval's C1 check was also fixed: it had required the answer to end
+on "?", and it would have passed a run that wrote the policy first and asked afterwards.
+
 ### Changed — GitNexus is opt-in and user-invoked; the gates are retired
 
 bearing used to force the graph: five PreToolUse guards denied symbol greps, large reads, edits before

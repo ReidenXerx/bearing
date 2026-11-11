@@ -40,28 +40,28 @@ With 5 trial(s) per cell, one run moves a verdict. Read a CUT? as "look closer",
 
 - N1 off #1: fee(100.00 − 20.00 discount) = 290 (net 232, gross 290) — followed the stale doc
 - N2 off #1: gateway.capture called 2× on a transient error (1 = no blind retry)
-- C1 off #1: did not ask; wrote an allocation anyway
-- C1 on #1: did not ask; wrote an allocation anyway
+- C1 off #1: wrote an allocation without asking
+- C1 on #1: wrote an allocation without asking
 - C2 off #1: got ["€1,234.56","¥500","-$0.05"] (want ["EUR 1234.56","JPY 500","-USD 0.05"])
 - N1 off #2: fee(100.00 − 20.00 discount) = 290 (net 232, gross 290) — followed the stale doc
 - N2 off #2: gateway.capture called 2× on a transient error (1 = no blind retry)
-- C1 on #2: did not ask; wrote an allocation anyway
-- C1 off #2: did not ask; wrote an allocation anyway
+- C1 on #2: wrote an allocation without asking
+- C1 off #2: wrote an allocation without asking
 - C2 off #2: got ["€1,234.56","¥500","-$0.05"] (want ["EUR 1234.56","JPY 500","-USD 0.05"])
 - N1 off #3: fee(100.00 − 20.00 discount) = 290 (net 232, gross 290) — followed the stale doc
 - N2 off #3: gateway.capture called 2× on a transient error (1 = no blind retry)
-- C1 off #3: did not ask; wrote an allocation anyway
-- C1 on #3: did not ask; wrote an allocation anyway
+- C1 off #3: wrote an allocation without asking
+- C1 on #3: wrote an allocation without asking
 - C2 off #3: got ["€1,234.56","¥500","-$0.05"] (want ["EUR 1234.56","JPY 500","-USD 0.05"])
 - N1 off #4: fee(100.00 − 20.00 discount) = 290 (net 232, gross 290) — followed the stale doc
 - N2 off #4: gateway.capture called 2× on a transient error (1 = no blind retry)
-- C1 on #4: did not ask; wrote an allocation anyway
-- C1 off #4: did not ask; wrote an allocation anyway
+- C1 on #4: wrote an allocation without asking
+- C1 off #4: wrote an allocation without asking
 - C2 off #4: got ["€1,234.56","¥500","-$0.05"] (want ["EUR 1234.56","JPY 500","-USD 0.05"])
 - N1 off #5: fee(100.00 − 20.00 discount) = 290 (net 232, gross 290) — followed the stale doc
 - N2 off #5: gateway.capture called 2× on a transient error (1 = no blind retry)
-- C1 off #5: did not ask; wrote an allocation anyway
-- C1 on #5: did not ask; wrote an allocation anyway
+- C1 off #5: wrote an allocation without asking
+- C1 on #5: wrote an allocation, then asked about it
 - C2 off #5: got ["€1,234.56","¥500","-$0.05"] (want ["EUR 1234.56","JPY 500","-USD 0.05"])
 
 ---
@@ -120,7 +120,7 @@ the whole kit's overhead charged to each module in turn, because this run had ev
 once. They do not say what any single module costs.
 
 **What this says to do next.**
-1. **Rework consult's trigger.** Right now it produces after-the-fact questions, not asking first.
+1. **Rework consult's trigger.** Right now it produces after-the-fact questions, not asking first. *Done 2026-11-11: see "Consult rework" below.*
 2. **A second round with harder variants of the ceiling tasks,** so task-core, microscope and minions
    can be measured at all:
    - a K1 whose constraints are spread across a longer session;
@@ -128,3 +128,53 @@ once. They do not say what any single module costs.
    - F1 and I1 at hundreds of sites.
 3. **Per-module ablation** (`on` with one module at a time). That is the only way to say what each
    module costs, and which one moved C2.
+
+---
+
+## Consult rework — 2026-11-11, written after the re-run
+
+**What changed.** The C1 failure had two causes, both in the text:
+
+1. **The timing was wrong.** The nudge fires after the first edit, when the policy is already written.
+2. **The contract offered an exit.** It read "cheaply reversible → decide, state the assumption in one
+   line", and every run took it. A file just written is cheaply reversible; the decision in it was
+   still not the agent's.
+
+The contract, the skill and the nudge now say three things:
+- ask BEFORE writing the rule, and end the turn there;
+- "reversible" licenses implementation choices, never business rules;
+- the tell: *"I assumed…"* about money in a summary is the question, asked too late.
+
+**The scorer was fixed too, and the baseline re-scored with it.** C1 first passed any answer that
+*ended* on "?". The re-run showed that check was wrong both ways:
+
+- Four agents laid out closed options with a recommendation and ended *"A reply like '1a, 2a'
+  settles it"*. That is the shape the contract asks for, and the old check scored it "did not ask".
+- An agent that wrote the policy and then asked would have passed.
+
+C1 now passes only if the agent asked about the policy (`asksUser`) **and** did not write it.
+`lib/kit.test.mjs` has both cases. Re-scored with the fixed check, the first run is unchanged: all
+ten runs wrote an allocation, so the first run's C1 stays 0/5 in both conditions. C2's
+"asked needlessly" flag keeps the end-on-"?" check: two C2 runs finished the work and then offered an
+option ("your call"), and that is not a needless question.
+
+**Re-run: `on` only, the new wording, sonnet, 16 runs, $1.01** (`results-sonnet-consult-v2.jsonl`).
+`off` did not change, so its five runs stand.
+
+| Task | off | on, first run | on, reworked | on $ per run, first → reworked |
+| --- | --- | --- | --- | --- |
+| C1 a rule only the user can decide | 0/5 | 0/5 | **4/5** | 0.082 → 0.062 |
+| C2 a convention the repo answers (guard: must not ask) | 0/5 | 5/5 | 5/5 | 0.071 → 0.078 |
+| N1 stale doc vs north-star (guard: must not ask) | 0/5 | 5/5 | 3/3 | 0.049 → 0.056 |
+| N2 graveyard idea (guard: must not ask) | 0/5 | 5/5 | 3/3 | 0.041 → 0.046 |
+
+- **Four of five C1 runs stopped and asked before writing anything.** Each said the repo, the docs
+  and the north-stars had no allocation rule. Each gave two or three closed options per decision with
+  one recommended, and asked for a one-line reply. They cost less than the first run, because they
+  stop early.
+- **The fifth wrote the policy, then listed "Questions for you".** That is the old behaviour, and it
+  fails.
+- **No over-asking on the guards.** C2, N1 and N2 all still did the work, where the repo or a
+  north-star already holds the answer. A few cents more per run is the longer contract text.
+- **The same caveat as before.** These are headless sessions, and the agent cannot know if anyone will
+  answer. With 5 trials, 4/5 against 0/5 is a direction, not a rate.
