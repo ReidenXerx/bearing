@@ -1,15 +1,42 @@
-# Eval harness
+# Eval harnesses
 
-Two complementary approaches to measuring GitNexus value:
+Three generations live here. Only the first two are current.
 
-1. **Real-repo benchmark** (`bench-realrepo.mjs`) — tests **your kit** (hooks + rules + skills + MCP + PDG)
-2. **SWE-bench Verified** (`swebench/`) — tests **GitNexus MCP** alone (industry-standard comparison)
+| Harness | Measures | Status |
+| --- | --- | --- |
+| [`intel/`](intel/) | bearing's judgment layer — north-stars, task-core, consult, microscope, minions — with bearing off vs on | **current** |
+| [`teaching/`](teaching/) | whether GitNexus gates or teaching moments paid for themselves | done — the evidence for retiring the gates (NS-25, NS-28, NS-29); see `teaching/REPORT.md` |
+| `run-eval.mjs`, `bench-realrepo.mjs`, `swebench/` | GitNexus value, driven through the Cursor CLI | **legacy** — written for the gate era and for Cursor, which bearing no longer supports; kept as a record |
 
-> ⚠️ These measure different things. The real-repo benchmark proves your kit's enforcement
-> adds value ON TOP of MCP. SWE-bench proves MCP helps agents explore code. See the
-> [two-tier breakdown](#what-each-tier-proves) below.
+Both current harnesses drive headless Claude Code (`claude -p`, `eval/lib/claude-run.mjs`), isolated from
+your own settings, and score every run with a check the harness owns — never with bearing's telemetry (NS-27).
+Their fixtures are synthetic on purpose: an answer key has to be known exactly, and it comes from how
+the fixture was built.
 
-## Quick start
+## `intel/` — the judgment layer
+
+```bash
+node eval/intel/run.mjs --prepare-only                          # build the off / on slots, check them
+node eval/intel/run.mjs --tasks all --trials 3 --model sonnet  # costs real money — see below
+node eval/intel/report.mjs ~/.cache/bearing-eval/intel/results-sonnet.jsonl > eval/intel/REPORT.md
+```
+
+Nine tasks, each planting one moment a module claims to handle — a stale doc against a north-star, a
+graveyard idea requested, constraints that must survive a real `/compact`, a rule only the user can
+decide, a "done" feature with a semantic bug, a 28-caller trace, a decided change at 24 sites. The
+decision rule (keep / rework / cut) is written in `report.mjs` before any run. Every check is proven
+to pass a right answer and fail a wrong one in `lib/kit.test.mjs` before it scores anything (NS-9).
+
+A run is one headless session per task per condition, each capped by `--max-budget-usd` (default 5).
+
+---
+
+## Legacy — the GitNexus-era harnesses (Cursor CLI)
+
+Everything below describes the original harnesses. They drive `cursor-agent` and measured the gates
+and GitNexus MCP; they are not maintained.
+
+### Quick start
 
 ```bash
 # 1) Dry run — validate task specs, see the matrix (no model needed)
