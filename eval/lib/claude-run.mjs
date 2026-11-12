@@ -76,6 +76,10 @@ export function measure(events) {
   // count — the classifier below is a regex, and a regex is a claim (NS-20).
   const denialSamples = [];
   const errorSamples = [];
+  // Whether a tool was USED, from the commands themselves — counted, never stored, because a command
+  // line can carry a private repository's paths and code into a results file.
+  let astGrepCalls = 0;
+  const skills = [];
   for (const e of events) {
     const content = e?.message?.content;
     if (!Array.isArray(content)) continue;
@@ -84,6 +88,8 @@ export function measure(events) {
         tools[b.name] = (tools[b.name] ?? 0) + 1;
         names.set(b.id, b.name);
         sequence.push(b.name);
+        if (b.name === "Bash" && /\bast-grep\b|@ast-grep\/cli/.test(String(b.input?.command ?? ""))) astGrepCalls++;
+        if (b.name === "Skill" && typeof b.input?.skill === "string") skills.push(b.input.skill);
       } else if (b.type === "tool_result" && b.is_error) {
         toolErrors++;
         const text = typeof b.content === "string" ? b.content : JSON.stringify(b.content ?? "");
@@ -128,6 +134,8 @@ export function measure(events) {
     subagents,
     compactions,
     hookDenials,
+    astGrepCalls,
+    skills,
     denialSamples,
     errorSamples,
     toolErrors,

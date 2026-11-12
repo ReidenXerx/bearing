@@ -29,8 +29,9 @@ import fs from "node:fs";
 import { TASKS as BASE_TASKS } from "./tasks.mjs";
 import { HARD_TASKS } from "./tasks-hard.mjs";
 import { INVOKED_TASKS } from "./tasks-invoked.mjs";
+import { REAL_TASKS } from "./tasks-real.mjs";
 
-const TASKS = [...BASE_TASKS, ...HARD_TASKS, ...INVOKED_TASKS];
+const TASKS = [...BASE_TASKS, ...HARD_TASKS, ...INVOKED_TASKS, ...REAL_TASKS];
 
 const rows = process.argv.slice(2).flatMap((f) =>
   fs.readFileSync(f, "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l)),

@@ -5,6 +5,12 @@
  *   node eval/intel/run.mjs --conditions off,on --tasks all --trials 3 --model sonnet
  *   node eval/intel/run.mjs --conditions off,on --tasks hard --trials 3   # the hard round (tasks-hard.mjs)
  *   node eval/intel/run.mjs --conditions off,on --tasks invoked --trials 3  # the user asks (tasks-invoked.mjs)
+ *   node eval/intel/run.mjs --tasks real --repo ~/Projects/some-repo --trials 3  # ast-grep on a real repo
+ *
+ * The REAL round (tasks-real.mjs) is different in both axes: the fixture is a real repository, and
+ * BOTH conditions carry bearing — the repo's own recorded modules, from the working tree — so the only
+ * difference is the `astgrep` module, which `on` adds. Its results hold another person's code paths:
+ * write them outside this repository (the default --out is under --slots) and commit only the report.
  *
  * Conditions:
  *   off — the fixture with no kit at all
@@ -27,10 +33,12 @@ import { fileURLToPath } from "node:url";
 import { buildFixture, fixtureFiles } from "./fixture.mjs";
 import { HARD_TASKS } from "./tasks-hard.mjs";
 import { INVOKED_TASKS } from "./tasks-invoked.mjs";
+import { REAL_TASKS } from "./tasks-real.mjs";
+import { buildRealFixture, realFixtureStamp } from "./fixture-real.mjs";
 import { TASKS } from "./tasks.mjs";
 import { agent, measure } from "../lib/claude-run.mjs";
 
-const ALL_TASKS = [...TASKS, ...HARD_TASKS, ...INVOKED_TASKS];
+const ALL_TASKS = [...TASKS, ...HARD_TASKS, ...INVOKED_TASKS, ...REAL_TASKS];
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(HERE, "../..");
@@ -51,7 +59,7 @@ function args(argv) {
     if (argv[i] === "--conditions") a.conditions = v().split(",");
     else if (argv[i] === "--tasks") {
       const t = v();
-      a.tasks = t === "all" ? a.tasks : t === "hard" ? HARD_TASKS.map((x) => x.id) : t === "invoked" ? INVOKED_TASKS.map((x) => x.id) : t.split(",");
+      a.tasks = t === "all" ? a.tasks : t === "hard" ? HARD_TASKS.map((x) => x.id) : t === "invoked" ? INVOKED_TASKS.map((x) => x.id) : t === "real" ? REAL_TASKS.map((x) => x.id) : t.split(",");
     }
     else if (argv[i] === "--trials") a.trials = Math.max(1, Number(v()) || 1);
     else if (argv[i] === "--model") a.model = v();
@@ -60,6 +68,7 @@ function args(argv) {
     else if (argv[i] === "--timeout-min") a.timeoutMin = Number(v());
     else if (argv[i] === "--max-budget-usd") a.maxBudgetUsd = Number(v());
     else if (argv[i] === "--prepare-only") a.prepareOnly = true;
+    else if (argv[i] === "--repo") process.env.BEARING_EVAL_REPO = path.resolve(v().replace(/^~(?=\/)/, os.homedir()));
   }
   a.out ??= path.join(a.slots, `results-${a.model}.jsonl`);
   return a;
@@ -86,6 +95,7 @@ function kitKey() {
  * kit changes. The base variant keeps its old slot name, so the first round's cache stays valid.
  */
 function prepareSlot(a, condition, variant = "base") {
+  if (variant === "real") return prepareRealSlot(a, condition);
   const slot = path.join(a.slots, variant === "base" ? condition : `${condition}-${variant}`);
   const pristine = `${slot}.pristine`;
   const stamp = JSON.stringify({
@@ -119,6 +129,48 @@ function prepareSlot(a, condition, variant = "base") {
     git(slot, "add", "-A");
     git(slot, "commit", "-qm", "bearing");
   }
+  fs.cpSync(slot, pristine, { recursive: true });
+  fs.writeFileSync(stampFile, stamp);
+  return { slot, pristine };
+}
+
+/**
+ * The real round's slot: `git archive HEAD` of --repo, then bearing from the WORKING TREE with the
+ * repo's own recorded modules — `update`, which keeps them — and, for `on` only, `+astgrep`. A repo
+ * that already has astgrep recorded would make the two conditions identical, so that is refused.
+ */
+function prepareRealSlot(a, condition) {
+  const slot = path.join(a.slots, `${condition}-real`);
+  const pristine = `${slot}.pristine`;
+  const stamp = JSON.stringify({ repo: process.env.BEARING_EVAL_REPO, head: realFixtureStamp(), condition, kit: kitKey() });
+  const stampFile = path.join(pristine, ".eval-stamp");
+  if (fs.existsSync(stampFile) && fs.readFileSync(stampFile, "utf8") === stamp) return { slot, pristine };
+
+  console.error(`[prepare] ${condition}-real: building slot`);
+  for (const d of [slot, pristine]) fs.rmSync(d, { recursive: true, force: true });
+  buildRealFixture(slot);
+  git(slot, "init", "-q", "-b", "main");
+  git(slot, "config", "user.email", "eval@example.invalid");
+  git(slot, "config", "user.name", "eval");
+  git(slot, "config", "commit.gpgsign", "false");
+  git(slot, "add", "-A");
+  git(slot, "commit", "-qm", "fixture");
+  const manifest = path.join(slot, ".bearing/manifest.json");
+  const recorded = fs.existsSync(manifest) ? JSON.parse(fs.readFileSync(manifest, "utf8")).features ?? [] : [];
+  if (recorded.includes("astgrep")) throw new Error("--repo already records the astgrep module — `off` would not be without it");
+  const kit = path.join(REPO, "lib/kit.mjs");
+  const base = ["--no-setup", "--skip-verify"];
+  if (fs.existsSync(manifest)) {
+    run(process.execPath, [kit, "update", slot, ...base, ...(condition === "on" ? ["--features", "+astgrep"] : [])], slot);
+  } else {
+    run(process.execPath, [kit, "install", slot, "--runtime", "claude", ...base, "--quick",
+      ...(condition === "on" ? ["--features", "+astgrep"] : [])], slot);
+  }
+  const claudeMd = fs.readFileSync(path.join(slot, "CLAUDE.md"), "utf8");
+  const has = /Searching and rewriting by code shape/.test(claudeMd);
+  if (has !== (condition === "on")) throw new Error(`the ${condition}-real contract ${has ? "carries" : "lacks"} the astgrep section — the slot is invalid`);
+  git(slot, "add", "-A");
+  git(slot, "commit", "-qm", "bearing", "--allow-empty");
   fs.cpSync(slot, pristine, { recursive: true });
   fs.writeFileSync(stampFile, stamp);
   return { slot, pristine };
@@ -161,6 +213,8 @@ function combine(steps) {
     subagents: sum((s) => s.subagents),
     compactions: sum((s) => s.compactions),
     hookDenials: sum((s) => s.hookDenials),
+    astGrepCalls: sum((s) => s.astGrepCalls),
+    skills: steps.flatMap((s) => s.skills ?? []),
     toolErrors: sum((s) => s.toolErrors),
     costUsd: sum((s) => s.costUsd),
     durationMs: sum((s) => s.durationMs),
