@@ -50,9 +50,9 @@ with `npm run bearing:token-benchmark`; [the numbers, and where the graph LOSES]
 | ⚑ **North-stars** | **Stops killed ideas respawning six months later.** Numbered, authoritative claims about what your project *is* — **outranks every other doc**, re-injected as the session runs. |
 | 🏅 **Gold practices** | **The mistakes that get made anyway.** Numbered `GP-#` rules earned from real defects — a claim from reading rather than running is unverified, a test that has never failed has never been tested. Language- and project-neutral. |
 | 💾 **Task-core** | **Survives compaction.** A dense save-state of the current task, written **before** the summary lands and drops the detail. |
-| 🔬 **Microscope** | **Catches code that runs perfectly and is still wrong.** A panel of lens agents reviews as an expert in *your* domain — each finding must survive its own refutation pass. |
+| 🔬 **Microscope** | **Catches code that runs perfectly and is still wrong.** Say "microscope this" and a panel of lens agents reviews as an expert in *your* domain — each finding must survive its own refutation pass. |
 | 🙋 **Consult** | **Asks about the right things, decides the rest.** Asks you only what isn't in the repo — which reading you meant, what a user should see — and decides everything else. Confirms before anything irreversible. |
-| 🐜 **Minions** | **Parallelises wide mechanical work.** Cheap anchored subagents return **citations, not opinions** — they gather; your agent concludes. Invasive minions do the same for a *decided* change: each applies it to its own slice in an isolated worktree, and your agent reviews every slice before it lands. |
+| 🐜 **Minions** | **Parallelises wide mechanical work, when you say so.** Cheap anchored subagents return **citations, not opinions** — they gather; your agent concludes. Invasive minions do the same for a *decided* change: each applies it to its own slice in an isolated worktree, and your agent reviews every slice before it lands. |
 | 🧪 **TS/JS rules** | **Catches code that compiles and is still wrong.** Numbered `TS-#` rules for the traps `tsc` and ESLint both stay silent about — `as` that verifies nothing, a union that falls through on the next variant, `||` overwriting a deliberate `0`. |
 | 🧱 **Frontend** | **Stops the near-duplicate component and the silent shared-component edit.** Search by shape before building a table or a panel; an optional prop with a safe default is yours, anything that changes what existing callers render is an ask. |
 | ⚛️ **React** | **Catches the form bugs that fail silently.** A field owns its `Controller`; spreading `field` keeps the `ref` that focus-on-error needs; a `name` typed `FieldPath<T>` turns a renamed field into a compile error instead of a value missing from the payload. |
@@ -79,9 +79,9 @@ Claude Code** exposes them:
 | North-stars — re-anchored mid-session | ✅ | — | — |
 | Gold practices — cited as authority | ✅ | ✅ | ✅ |
 | Task-core — survives compaction | ✅ | — | — |
-| Microscope — domain-expert review | ✅ | ✅ | — |
+| Microscope — domain-expert review | on ask | on ask | — |
 | Consult — ask vs decide | ✅ | ✅ | — |
-| Minions — anchored fan-out | ✅ | — | — |
+| Minions — anchored fan-out | on ask | — | — |
 | TypeScript/JavaScript — traps that compile | ✅ | ✅ | ✅ |
 | Frontend — structure and blast radius | ✅ | ✅ | ✅ |
 | React — what the types do not catch | ✅ | ✅ | ✅ |
@@ -90,8 +90,9 @@ Claude Code** exposes them:
 
 ✅ means it fires without being asked; *on ask* means it never does, by design, and answers when you ask. A `—` is not always absence: the **task-core** skill and its
 contract section install on every runtime, so you can invoke it by name — what Claude Code adds is
-the nudge that fires it unprompted. **Minions** genuinely need hooks and are not present at all where
-the column says `—`. GitNexus fires only when you ask, on any runtime that has its skill and MCP server.
+the nudge that fires it unprompted. **Minions** need Claude Code's subagents and are not present at all
+where the column says `—`. Microscope, minions and GitNexus fire only when you ask, on any runtime that
+has their skill.
 
 ### 🎨 Prettier — so two tools stop rewriting each other
 
@@ -199,6 +200,9 @@ It stores what a summary reliably loses: `GOAL · CONSTRAINTS · DECISIONS(+why)
 
 **Most review asks "is this code correct?" — a question a linter can ask.**
 
+You start it — *"microscope this"*, *"audit before we ship"*, *"is this solid?"* — and nothing starts it for
+you: a review panel costs time and tokens, and when to spend them is your call.
+
 <img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/microscope.svg" alt="A change split into slices, one lens agent per slice carrying the same pinned domain persona, and a refutation pass every finding must survive before it reaches you." width="100%">
 
 It maps your change into slices and spawns **one lens agent per slice** — in parallel where your runtime supports it — each carrying the **same pinned persona**, resolved from your repo at install and stored in `.bearing/domain.json`. A trading repo is reviewed by a quant trader; a payments repo by a ledger engineer. Pinned, so wave 2 can't quietly become a different expert than wave 1.
@@ -215,7 +219,7 @@ Permission to rename a file; silence while they invent a business rule. Consult 
 
 **The test that does most of the work: is the answer discoverable in the repo?** Code, tests, config, git history, north-stars — then it goes and finds it, because asking is offloading. If it exists only in *your* head — which of two readings you meant, which tradeoff you prefer, what a user should actually see — no amount of reading produces it. **That** is the question.
 
-And when it does ask: closed options, the tradeoff, a recommendation, and what it will do without an answer. Never *"shall I proceed?"* — that is not a question, it is accountability being handed back to you.
+And it asks **before** it writes the rule, not after: closed options, the tradeoff, and the one it recommends, so a one-word reply settles it. Never *"shall I proceed?"* — that is not a question, it is accountability being handed back to you.
 
 **One-way doors are a different act.** Deleting data, force-pushing, publishing, migrating — it *confirms*, even when the right answer is obvious, because irreversible is the reason, not ambiguity. Reversible work needs no permission.
 
@@ -223,11 +227,11 @@ Then the part that compounds: **an answer that is a RULE gets proposed as a nort
 
 ## 🐜 Minions
 
-**Your agent can already spawn subagents. It doesn't know when it should.**
+**Your agent can already spawn subagents. You say when; minions is how.**
 
 <img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/minions.svg" alt="Forty files ground through serially by one agent, versus eight anchored subagents returning citations — FOUND file:line, CHECKED, MISSED — for the main agent to conclude from." width="100%">
 
-So it grinds through forty files serially — or samples five and generalises. Minions is that missing judgment: fan out when the work is **bounded, verifiable, independent and wide** (3+ units), and *don't* when the judgment itself is the work.
+Say *"fan this out"* or *"use minions"* and the skill checks the work first — fan out only when it is **bounded, verifiable, independent and wide** (3+ units), and *say so* when the judgment itself is the work. Nothing fans out unasked: on the eval's 200-file audit, an agent left to itself wrote a script and got it right.
 
 Each subagent carries the same north-stars and pinned persona, and returns evidence in a fixed shape:
 

@@ -1,6 +1,6 @@
 ---
 name: bearing-minions
-description: "Fan work out to a swarm of cheap, anchored subagents that GATHER — for wide mechanical work you would otherwise grind through serially: finding every call site, auditing N files against one rule, discovering migration sites, cross-referencing a list against the codebase, 'where is this used and how does it flow'. Use when the work is bounded, verifiable, independent and wide (3+ units). NOT when the judgment IS the work, when the answer only survives verbatim, or when the unit needs conversation context the minion was never in. Examples: \"find every place we do X\", \"which files still use the old API\", \"trace all callers of these 12 symbols\", \"audit every route for auth\"."
+description: "Fan work out to a swarm of cheap, anchored subagents that GATHER, when the USER asks to — \"use minions to find every place we do X\", \"fan this out\", \"split this across subagents\", \"which files still use the old API — fan out\". Each returns citations, never a verdict; you conclude. Do not fan out on your own initiative. If the work fails the gates (bounded, verifiable, independent, 3+), say so instead of fanning out."
 ---
 
 # Minions — fan out to gather, keep the thinking
@@ -11,6 +11,8 @@ through forty files serially, or worse, sample five and generalise. This skill i
 **Minions gather. You conclude.** They do **minimal or zero reasoning**.
 
 ## 1. Should you fan out at all?
+
+The user asked — that settles WHEN, not WHETHER. If the work fails the gates below, say which one and do it serially instead; fanning out only to comply is the expensive way to get a worse answer.
 
 All four must hold:
 

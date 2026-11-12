@@ -4,6 +4,27 @@ All notable changes to `bearing` are documented here.
 
 ## Unreleased — GitNexus becomes opt-in, and nothing blocks your tools any more
 
+### Changed — microscope and minions run when you ask, not on their own
+
+Microscope and minions were always tools you invoke: *"microscope this"*, *"fan this out"*. bearing
+still pushed them on the agent, with a nudge hook each and always-on contract text telling it when to
+start a review panel or fan out. The judgment-layer eval's hard round (`eval/intel/REPORT-HARD.md`)
+built tasks for exactly those moments: a 200-file audit, a 106-site change, a feature with four
+semantic bugs. No agent ever needed either. It wrote a script, or reviewed it in one pass, and got it
+right with or without bearing. The push only cost money, about 1.5–2× per task.
+
+- **The trigger is yours.** The contract now says: when the user asks for a deep review, load
+  `bearing-microscope`; when they ask to fan out, load `bearing-minions` or `bearing-invasive-minions`;
+  never on your own initiative. The skills' descriptions say the same, so they don't auto-load
+  either.
+- **One rule stays always-on:** any subagent the agent spawns executes a decision and never makes one.
+- **The skills still check the work when you ask.** If it fails the gates (bounded, verifiable,
+  independent, 3+, and for writes, decided and disjoint), the agent says which one and does the work
+  serially rather than fanning out to comply.
+- **Retired:** the `bearing-microscope-nudge` and `bearing-minion-nudge` hooks, and their settings
+  `microscopeFileThreshold` and `minionFanoutThreshold`, which now do nothing if set. An update
+  removes the hook files and their registrations, and keeps your own hooks. `minionModel` stays.
+
 ### Changed — consult asks BEFORE it writes a business rule
 
 The judgment-layer eval (`eval/intel/`) gave a refund to split across a discounted order's lines,

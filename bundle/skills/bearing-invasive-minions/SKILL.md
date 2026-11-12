@@ -1,6 +1,6 @@
 ---
 name: bearing-invasive-minions
-description: "Fan out a DECIDED, mechanical code change across many independent sites at once, instead of grinding them one at a time — logging coverage, error handling, a settled API migration, adding a guard clause everywhere a shape is unwrapped. Each subagent edits its own slice in isolation — its own git worktree, or a patch file — and nothing lands until you have reviewed that slice. Use when the transformation is already decided, the sites are 3+ and independent, and the slices can be split by file. NOT when the change differs per site in a way that needs judgment, when the sites interact, or when it is architectural. Examples: \"add structured logging to every handler\", \"wrap every fetch in the shared error envelope\", \"migrate the remaining 30 call sites to the new signature\"."
+description: "Fan out a DECIDED, mechanical code change across many independent sites, when the USER asks to — \"use minions to add structured logging to every handler\", \"fan this migration out\", \"wrap every fetch in the error envelope with minions\". Each subagent edits its own slice in isolation — its own git worktree, or a patch file — and nothing lands until you have reviewed that slice. Do not fan out on your own initiative. If the change is not decided in full, differs per site, or the slices overlap, say so instead of fanning out."
 ---
 
 # Invasive minions — fan out to APPLY, keep the decision
@@ -28,6 +28,8 @@ So write it even when you decide not to fan out. A brief you cannot write is a c
 finished thinking about.
 
 ## 1. Gates
+
+The user asked — that settles WHEN, not WHETHER. If a gate below fails, say which one and apply the change serially instead.
 
 The four from gathering — **bounded, verifiable, independent, 3+** — plus two:
 
