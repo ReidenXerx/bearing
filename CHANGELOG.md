@@ -4,6 +4,24 @@ All notable changes to `bearing` are documented here.
 
 ## Unreleased — GitNexus becomes opt-in, and nothing blocks your tools any more
 
+### Changed — bearing speaks up less, and `bearing status` shows what it does
+
+bearing is for developers who already work with coding agents (NS-31). It speaks up unasked only
+about what nobody can see from inside a session: drift across a long context, and unsaved work before
+a compaction. Each of those moments now has a knob that turns it off.
+
+- **The consult prompt is off by default.** It fired at the first edit of every session to ask whether
+  the edit decided a rule only you can answer. Whether to stop and ask is your call. Turn it on with
+  `"consultNudge": true` in `.bearing/hooks.json`, then `bearing update`. While off, it is not
+  registered at all, so it costs no process per tool call. The consult contract still ships.
+- **Two moments had no off switch, and now do:** the session-start brief (`"sessionBrief": false`) and
+  the GitNexus impact audit (`"impactAudit": false`). Silencing the brief keeps a stealth install's
+  contract, which is delivered the same way.
+- **`npx bearing status [repo]`** lists what is always loaded (with a token estimate), each moment with
+  its knob, its current value and how often it fired in the last 30 days, and the skills you can
+  invoke. `--json` for scripts. The test suite drives every moment until it speaks, then checks that
+  its knob alone silences it.
+
 ### Changed — the ast-grep skill knows when NOT to use ast-grep
 
 Measured on a real 650-file backend (`eval/intel/REPORT-REAL.md`). Agents with the module used

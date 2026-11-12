@@ -112,6 +112,14 @@ if (recovering) {
   ];
 }
 if (nsLine) lines.unshift(nsLine);
+// The knob (NS-31). Only the brief goes quiet: the per-session state above was still reset, and a
+// stealth install's contract below is still delivered — that is the contract, not a moment.
+try {
+  const { loadHookConfig } = await lib("hook-helpers.mjs");
+  if (loadHookConfig(root).sessionBrief === false) lines = [];
+} catch {
+  /* no config lib → the default, which is on */
+}
 
 // STEALTH INSTALL: `gitnexus analyze` writes its own stats block into CLAUDE.md and AGENTS.md,
 // which in a stealth repo means a MODIFIED tracked file and a stray untracked one — the exact leak
@@ -145,4 +153,6 @@ try {
   // A missing or unreadable contract must not cost the session its brief.
 }
 
-emitContext(contractPrefix + lines.filter(Boolean).join(" "), "SessionStart");
+const body = lines.filter(Boolean).join(" ");
+const brief = body ? contractPrefix + body : contractPrefix.replace(/\n\n---\n\n$/, "");
+if (brief.trim()) emitContext(brief, "SessionStart");

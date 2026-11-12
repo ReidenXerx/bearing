@@ -57,14 +57,17 @@ A **stealth** install (`--stealth`) writes none of the tracked files: ignores go
 
 ## Hooks (Claude Code)
 
-| Hook | Event | What it does |
-| --- | --- | --- |
-| `bearing-session` | SessionStart | Resets per-session state and injects the brief: north-stars, the task-core path, memory. |
-| `bearing-northstar-anchor` | PostToolUse | Re-anchors the agent on the north-stars periodically and right after a doc is written. |
-| `bearing-taskcore-nudge` | PostToolUse | Asks for a task-core refresh once enough unsaved work has piled up. |
-| `bearing-consult-nudge` | PostToolUse | Poses the ask-or-decide test at the moment implementation starts. |
-| `bearing-precompact` | PreCompact | Counts the compaction. |
-| `bearing-impact-audit` | PostToolUse on `impact` (GitNexus) | Annotates an `impact` result whose caller count may only be a floor. |
+| Hook | Event | What it does | Knob (off) |
+| --- | --- | --- | --- |
+| `bearing-session` | SessionStart | Resets per-session state and injects the brief: north-stars, the task-core path, memory. | `sessionBrief: false` |
+| `bearing-northstar-anchor` | PostToolUse | Re-anchors the agent on the north-stars as the context grows, and on the relevant ones after a doc is written. | `northStarAnchorEvery: 0` |
+| `bearing-taskcore-nudge` | PostToolUse | Asks for a task-core refresh once enough unsaved work has piled up. | `taskCoreEveryEdits: 0` |
+| `bearing-consult-nudge` | PostToolUse | Poses the ask-or-decide test at the first edit. **Off by default**: `consultNudge: true`, then `bearing update`. | `consultNudge: false` |
+| `bearing-precompact` | PreCompact | Counts the compaction. Says nothing. | — |
+| `bearing-impact-audit` | PostToolUse on `impact` (GitNexus) | Annotates an `impact` result whose caller count may only be a floor. | `impactAudit: false` |
+
+Knobs go in `.bearing/hooks.json` (team, committed) or `.bearing/hooks.local.json` (this machine; it wins).
+`bearing status` prints each one with its current value and how often it fired in the last 30 days.
 
 Each is registered only when its module is installed, runs on every matching tool call and so stays cheap, and fails open: a hook that errors says nothing rather than getting in the way.
 

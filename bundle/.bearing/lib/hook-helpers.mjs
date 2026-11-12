@@ -179,8 +179,18 @@ function buildExtRe(exts) {
 export function loadHookConfig(root) {
   const cfg = {
     sourceExtRe: DEFAULT_SOURCE_EXT_RE,
-    // Pose the consult test once per chat, at the first edit. false/0 disables.
-    consultNudge: true,
+    // Pose the consult test once per chat, at the first edit. OFF unless set to true/1 — and the
+    // hook is registered only then, so `bearing update` after turning it on. It is the one moment
+    // that pushes a workflow rather than guarding something nobody can see from inside a session:
+    // whether to stop and ask is the user's call (NS-31). The consult contract still ships.
+    consultNudge: false,
+    // The session-start brief: north-stars first, this chat's task-core path, memory, and the
+    // recovery steps after a compaction. false/0 silences it — a stealth install's contract is
+    // still delivered, because that is the contract, not a moment (NS-31: every moment has a knob).
+    sessionBrief: true,
+    // After a GitNexus `impact` call, question a LOW verdict built on callers the graph could not
+    // resolve. false/0 silences it.
+    impactAudit: true,
     // Working-tree drift: after this many uncommitted source edits since the index, the staleness
     // report counts the index as drifted. It is REPORTED, never enforced — nothing blocks on it and
     // nothing refreshes because of it (NS-25). 0 disables drift counting. 8, not 3: three dirty
@@ -231,8 +241,10 @@ function applyHookConfigFile(cfg, cfgPath) {
       cfg.taskCoreEveryEdits = file.taskCoreEveryEdits;
     // Boolean OR 0, because "off" is spelled both ways by different people and a setting that
     // silently ignores the spelling you chose is the same defect as one nothing reads at all.
-    if (file.consultNudge === false || file.consultNudge === 0) cfg.consultNudge = false;
-    if (file.consultNudge === true || file.consultNudge === 1) cfg.consultNudge = true;
+    const onOff = (v, prior) => (v === false || v === 0 ? false : v === true || v === 1 ? true : prior);
+    cfg.consultNudge = onOff(file.consultNudge, cfg.consultNudge);
+    cfg.sessionBrief = onOff(file.sessionBrief, cfg.sessionBrief);
+    cfg.impactAudit = onOff(file.impactAudit, cfg.impactAudit);
     // A non-empty string only: `"minionModel": ""` or a stray number would otherwise be handed to
     // a spawn as a model name.
     if (typeof file.minionModel === "string" && file.minionModel.trim())

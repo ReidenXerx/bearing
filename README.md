@@ -76,6 +76,10 @@ a hook pointing at a file an update deleted, an install older than the package â
 that fixes each. `npx bearing doctor ~/Projects --all` checks every install under a folder. It changes
 nothing.
 
+`npx bearing status` says what bearing does in a repo: what is always loaded and roughly how many
+tokens, each thing that speaks up without being asked, the knob that turns it off and how often it
+fired in the last 30 days, and the skills you can invoke.
+
 Then restart your IDE. The moments a module speaks up need tool-interception hooks, and **only
 Claude Code** exposes them:
 
