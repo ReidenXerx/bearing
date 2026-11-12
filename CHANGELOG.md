@@ -4,6 +4,22 @@ All notable changes to `bearing` are documented here.
 
 ## Unreleased — GitNexus becomes opt-in, and nothing blocks your tools any more
 
+### Changed — the north-star reminder is rarer, and after a doc write it is short
+
+The reminder re-sent every north-star every 25 tool calls and after every doc write. Both were
+noise you could see in the transcript.
+
+- **The full list now follows how much the context has grown**, not how many tools were called.
+  It fires once the agent's context has grown by 40k tokens since the list was last in front of it,
+  read from the size the transcript records on every turn — never from the window, which it does
+  not record (NS-19). On this repo, 25 tool calls added anywhere from 25k to 155k tokens, so the old
+  rhythm fired too often on cheap calls and too rarely after large reads. A compaction resets the
+  baseline. Where the size cannot be read, the old call count still applies. Tune it with
+  `northStarAnchorEveryTokens` in `.bearing/hooks.json`.
+- **After a doc write, only the north-stars the new text is about** — usually two to four — and
+  nothing at all when it is about none of them. Matching is by shared words, so it can miss a
+  north-star that applies in other words; the full list is the backstop for that.
+
 ### Fixed — every hook ran twice in a repo that was once installed in stealth mode
 
 A stealth install registers bearing's hooks in `.claude/settings.local.json`; a shared install
