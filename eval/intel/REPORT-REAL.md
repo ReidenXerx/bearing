@@ -75,3 +75,36 @@ makes the agent worse. Two things this round cannot tell: whether a weaker model
 write its own parser scripts, would gain; and whether a repo too large for ad-hoc scripts would.
 The skill's own advice was missing one rule this run makes plain: **a question about bindings,
 references or types is not a shape question — use the language's compiler API, not ast-grep.**
+
+---
+
+## Round 2 — the skill learns "shape is not bindings" (2026-11-12, same day)
+
+The fix that round 1 called for, and nothing else: the skill gained §1a and the contract one line —
+*a question about which variable, symbol or type is not a shape question; ast-grep cannot carry a name
+from one part of a rule to another (`$E` captured in `inside:` is a fresh wildcard in `not: has:`),
+so parse with the compiler API.* The suite now executes both halves of that claim.
+
+**Sonnet, S3, `on` only, 3 trials ($0.30):** 3/3, 28 of 28 every time, against 0/3 in round 1.
+`off` is unchanged by a skill it does not have, so round 1's 3/3 stands as its baseline. The detail
+that matters: all three runs **loaded the skill and then ran ast-grep zero times**. They read §1a,
+recognised a binding question, and parsed with the TypeScript compiler. What the module changed was
+the judgment of when not to use the tool (NS-23).
+
+**Haiku, all three tasks, 3 trials ($0.21)** — the question round 1 could not answer, whether a
+weaker model gains:
+
+| Task | off pass | on pass | found, mean (off → on) |
+| --- | --- | --- | --- |
+| S1 SQL by interpolation | 3/3 | 3/3 | 22 → 22 |
+| S2 radix rewrite, 74 sites | **1/3** | **3/3** | 72.7 → 74 |
+| S3 error log drops the caught variable | 3/3 | 3/3 | 28 → 28 |
+
+Verdict under the pre-registered rule: **KEEP** (9/9 against 7/9, at 1.24× of about a cent a run).
+The gain is in the rewrite: without ast-grep, Haiku's own edits left 1–3 of 74 sites wrong or touched
+something else in two of three trials; with it, the preview-apply-recount routine landed all 74 every
+time.
+
+**Where this leaves the module.** With the revised skill: Sonnet is as right with it as without
+(9/9 across rounds, S3 now passing), at about 1.2× the cost; Haiku is more right with it. Still three
+trials a cell — one run moves a verdict — and one repository.
