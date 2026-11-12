@@ -20,12 +20,17 @@
  * tasks-hard.mjs): when `on` and `off` pass the same number of trials, the mean `found` decides
  * instead — higher is KEEP, lower is CUT?, equal falls through to the cost rule. A pass is all-or-
  * nothing, and the first round showed what that does at the ceiling: it cannot tell 63 of 75 from 75.
+ *
+ * ADDED BEFORE THE INVOKED ROUND RAN (2026-11-12), for tasks that report `broken` (decoys a review
+ * "fixed" into a bug — tasks-invoked.mjs): when pass and mean `found` both tie, FEWER broken decoys is
+ * KEEP and more is CUT?. A review that breaks correct code is worse than one that misses a bug.
  */
 import fs from "node:fs";
 import { TASKS as BASE_TASKS } from "./tasks.mjs";
 import { HARD_TASKS } from "./tasks-hard.mjs";
+import { INVOKED_TASKS } from "./tasks-invoked.mjs";
 
-const TASKS = [...BASE_TASKS, ...HARD_TASKS];
+const TASKS = [...BASE_TASKS, ...HARD_TASKS, ...INVOKED_TASKS];
 
 const rows = process.argv.slice(2).flatMap((f) =>
   fs.readFileSync(f, "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l)),
@@ -33,7 +38,7 @@ const rows = process.argv.slice(2).flatMap((f) =>
 const mean = (xs) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null);
 const fmt = (x, d = 2) => (x == null ? "—" : Number(x).toFixed(d));
 const pct = (x) => (x == null ? "—" : `${Math.round(x * 100)}%`);
-const FLAGS = ["flagged", "invented", "askedNeedlessly", "overkill", "fannedOut"];
+const FLAGS = ["flagged", "invented", "askedNeedlessly", "overkill", "fannedOut", "brokeDecoy"];
 
 function cell(condition, pred) {
   const rs = rows.filter((r) => r.condition === condition && pred(r));
@@ -45,6 +50,7 @@ function cell(condition, pred) {
     secs: mean(rs.map((r) => (r.durationMs ?? 0) / 1000)),
     tools: mean(rs.map((r) => r.toolCalls ?? 0)),
     subagents: mean(rs.map((r) => r.subagents ?? 0)),
+    broken: rs.some((r) => typeof r.broken === "number") ? mean(rs.filter((r) => typeof r.broken === "number").map((r) => r.broken)) : null,
     found: rs.some((r) => typeof r.found === "number") ? mean(rs.filter((r) => typeof r.found === "number").map((r) => r.found)) : null,
     errors: rs.filter((r) => r.error).length,
     flags,
@@ -65,7 +71,7 @@ for (const t of TASKS) {
   const on = cell("on", (r) => r.task === t.id);
   if (!off.n && !on.n) continue;
   const flags = FLAGS.filter((f) => off.flags[f] || on.flags[f]).map((f) => `${f} ${off.flags[f]}→${on.flags[f]}`).join(", ");
-  const found = off.found == null && on.found == null ? "—" : `${fmt(off.found, 1)} → ${fmt(on.found, 1)}`;
+  const found = off.found == null && on.found == null ? "—" : `${fmt(off.found, 1)} → ${fmt(on.found, 1)}` + (off.broken != null || on.broken != null ? ` (decoys broken ${fmt(off.broken, 1)} → ${fmt(on.broken, 1)})` : "");
   out.push(`| ${t.id} ${t.title} | ${t.module} | ${off.pass}/${off.n} | ${on.pass}/${on.n} | ${found} | ${fmt(off.cost)} | ${fmt(on.cost)} | ${fmt(off.subagents, 1)} | ${fmt(on.subagents, 1)} | ${flags || "—"} |`);
 }
 
@@ -79,10 +85,12 @@ for (const mod of [...new Set(TASKS.map((t) => t.module))]) {
   const ratio = off.cost ? on.cost / off.cost : null;
   const flagOnly = on.pass === off.pass && FLAGS.some((f) => f === "flagged" && on.flags[f] > off.flags[f]);
   const byFound = on.pass === off.pass && off.found != null && on.found != null && on.found !== off.found;
+  const byBroken = on.pass === off.pass && !byFound && off.broken != null && on.broken != null && on.broken !== off.broken;
   const verdict =
     on.pass > off.pass ? "KEEP" :
     on.pass < off.pass ? "CUT?" :
     byFound ? (on.found > off.found ? "KEEP (more found)" : "CUT? (less found)") :
+    byBroken ? (on.broken < off.broken ? "KEEP (fewer decoys broken)" : "CUT? (more decoys broken)") :
     flagOnly ? "REWORK (changes what it says, not what it does)" :
     ratio != null && ratio > 1.25 ? "REWORK (same outcome, more cost)" : "KEEP";
   out.push(`| ${mod} | ${off.pass}/${off.n} | ${on.pass}/${on.n} | ${fmt(ratio)}× | ${verdict} |`);

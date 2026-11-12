@@ -19,6 +19,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { hardFiles } from "./fixture-hard.mjs";
+import { invokedFiles } from "./fixture-invoked.mjs";
 
 // ── F1: who calls postEntry from src/ledger/post.ts ─────────────────────────
 // direct · alias (import { postEntry as post }) · ns (import * as ledger) · barrel (via
@@ -206,8 +207,10 @@ export function fixtureFiles(variant = "base") {
   // A suite the agent can run. It covers what exists, so it never answers a task's question.
   add("test/fees.test.ts", `import { test } from "node:test";\nimport assert from "node:assert/strict";\nimport { platformFee } from "../src/fees.ts";\n\ntest("fee is 2.9% of the net amount, rounded", () => {\n  assert.equal(platformFee(10_000), 290);\n  assert.equal(platformFee(8_000), 232);\n});\n`);
   add("test/handlers.test.ts", `import { test } from "node:test";\nimport assert from "node:assert/strict";\nimport { handle } from "../src/handlers/getAccount.ts";\n\ntest("a handler answers", async () => {\n  assert.deepEqual(await handle({ id: "a1" }), { status: 200, body: "getAccount:a1" });\n});\n`);
-  if (variant === "hard") files.push(...hardFiles());
-  else if (variant !== "base") throw new Error(`unknown fixture variant: ${variant}`);
+  // "invoked" is the hard variant plus src/settlement/ — the hard round keeps its own repo.
+  if (variant === "hard" || variant === "invoked") files.push(...hardFiles());
+  if (variant === "invoked") files.push(...invokedFiles());
+  else if (variant !== "base" && variant !== "hard") throw new Error(`unknown fixture variant: ${variant}`);
   return files;
 }
 
