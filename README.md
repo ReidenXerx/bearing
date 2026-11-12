@@ -44,7 +44,7 @@ with `npm run bearing:token-benchmark`; [the numbers, and where the graph LOSES]
 
 ## What you get
 
-**Eleven independent modules. Pick any combination — each works alone, none depends on another.**
+**Twelve independent modules. Pick any combination — each works alone, none depends on another.**
 | | |
 |---|---|
 | ⚑ **North-stars** | **Stops killed ideas respawning six months later.** Numbered, authoritative claims about what your project *is* — **outranks every other doc**, re-injected as the session runs. |
@@ -56,6 +56,7 @@ with `npm run bearing:token-benchmark`; [the numbers, and where the graph LOSES]
 | 🧪 **TS/JS rules** | **Catches code that compiles and is still wrong.** Numbered `TS-#` rules for the traps `tsc` and ESLint both stay silent about — `as` that verifies nothing, a union that falls through on the next variant, `||` overwriting a deliberate `0`. |
 | 🧱 **Frontend** | **Stops the near-duplicate component and the silent shared-component edit.** Search by shape before building a table or a panel; an optional prop with a safe default is yours, anything that changes what existing callers render is an ask. |
 | ⚛️ **React** | **Catches the form bugs that fail silently.** A field owns its `Controller`; spreading `field` keeps the `ref` that focus-on-error needs; a `name` typed `FieldPath<T>` turns a renamed field into a compile error instead of a value missing from the payload. |
+| 🌳 **ast-grep** | **Searches and rewrites by code shape, and proves the pattern first.** Every `fetch` with no `signal`, every swallowed `catch`, a decided change at 100 sites — matched on the syntax tree, not a regex. The skill carries the traps that make it lie quietly: a pattern that does not parse returns `[]` exactly like a clean codebase, `-l ts` skips `.tsx`. Opt-in; uses ast-grep from `PATH` or `npx`, adds nothing to `package.json`. |
 | 🕸 **GitNexus** | **A code graph you reach for when you ask.** Opt-in: the installer explains it and asks. Say "use gitnexus" in a prompt and one skill loads — scope check, where the graph wins, where its counts are only a floor. No gates, no nudges. Requires the [GitNexus](https://github.com/abhigyanpatwari/GitNexus) MCP server. |
 | 🎭 **E2E** | **Turns "I checked it in the browser" into an exit code.** A harness your agent finishes: working substrate plus the scars, and a way to test a destructive write *without performing it*. Opt-in — it writes `.e2e/` and needs Playwright. |
 
@@ -68,7 +69,7 @@ npx bearing                                    # interactive — explains each m
 npx bearing install . --runtime claude --features northstars,taskcore
 ```
 
-`--runtime` `claude` · `zed` · `codex` · `all`  ·  `--features` `northstars` · `goldpractices` · `taskcore` · `microscope` · `consult` · `minions` · `tsjs` · `frontend` · `react` · `gitnexus` · `e2e` · `all`
+`--runtime` `claude` · `zed` · `codex` · `all`  ·  `--features` `northstars` · `goldpractices` · `taskcore` · `microscope` · `consult` · `minions` · `tsjs` · `frontend` · `react` · `astgrep` · `gitnexus` · `e2e` · `all`
 
 Then restart your IDE. The moments a module speaks up need tool-interception hooks, and **only
 Claude Code** exposes them:
@@ -85,6 +86,7 @@ Claude Code** exposes them:
 | TypeScript/JavaScript — traps that compile | ✅ | ✅ | ✅ |
 | Frontend — structure and blast radius | ✅ | ✅ | ✅ |
 | React — what the types do not catch | ✅ | ✅ | ✅ |
+| ast-grep — search and rewrite by shape | ✅ | ✅ | ✅ |
 | GitNexus — the graph, only when you ask | on ask | on ask | — |
 | E2E — browser verification | ✅ | ✅ | ✅ |
 

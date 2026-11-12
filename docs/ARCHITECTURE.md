@@ -19,7 +19,7 @@ Tests catch code that breaks. They do not catch an agent that has read a stale d
 
 Precedence is the load-bearing idea: north-stars outrank every other doc, the code outranks prose for facts, and a conflict is reported rather than silently resolved.
 
-The remaining modules are rule packs and tools: **tsjs**, **frontend** and **react** (numbered rules for code that type-checks and is still wrong), **gitnexus** (the code graph, when you ask), and **e2e** (a browser verification harness).
+The remaining modules are rule packs and tools: **tsjs**, **frontend** and **react** (numbered rules for code that type-checks and is still wrong), **astgrep** (search and rewrite by code shape, with the pattern proven first), **gitnexus** (the code graph, when you ask), and **e2e** (a browser verification harness).
 
 ## Two independent axes
 
@@ -28,7 +28,7 @@ Installation resolves the **runtime** (which agent) and the **modules** (which c
 ```
 runtime:  claude · zed · codex · all        (or a comma list)
 modules:  northstars · goldpractices · taskcore · microscope · consult · minions
-          tsjs · frontend · react · gitnexus · e2e · all
+          tsjs · frontend · react · astgrep · gitnexus · e2e · all
 ```
 
 The default install is the first six modules. `lib/features.mjs` maps every bundle file to the module that owns it; unclaimed files are **core** and always ship. One rule keeps this honest: **a core file may never import a module's file** — otherwise a module's absence breaks core. It is computed, not hand-maintained (`coreLibClosure()` walks the real import graph), because the hand-written list broke twice.
