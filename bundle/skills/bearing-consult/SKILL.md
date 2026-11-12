@@ -32,21 +32,35 @@ If you cannot decide which case you are in, you have not looked yet.
   they lead somewhere different. Guessing wastes the whole task, not part of it.
 - **Observable behaviour changes.** What a user of the product sees, is charged, is shown, or is
   allowed to do. Behaviour is theirs; implementation is yours.
-- **A rule has to be invented.** A threshold, a precedence, an edge case nobody specified. You are
-  about to write a business rule into code — that is authoring, not implementing.
+- **A rule has to be invented.** A threshold, a precedence, how money is split, an edge case nobody
+  specified. You are about to write a business rule into code — that is authoring, not implementing.
 - **Scope is genuinely ambiguous.** The same sentence could mean an afternoon or a fortnight.
 - **Their stated constraint conflicts with what you found.** Do not quietly resolve it. Say both.
+
+**WHEN: before the rule is written, not after.** Ask, and end your turn there; build only what does
+not depend on the answer. Once the guess is in the diff, "please confirm" is a review request for a
+decision you already made, and the cheapest reply is to accept it.
+
+**The tell that you skipped it:** your summary is about to say *"I assumed…"*, *"assumption to
+confirm"* or *"questions for you"* about money or what a user sees. That sentence is the question —
+asked too late. It was measured: given a refund to split across a discounted order's lines, all ten
+runs picked a policy and wrote it; the five with this skill installed then flagged it as an
+assumption to confirm. Not one asked first.
 
 ## 3. Do NOT ask when
 
 - **The repo answers it.** Naming, structure, which helper, how to test, where a file goes, which
   library is already in use. Decide, and be consistent with what is there.
-- **It is cheaply reversible.** A refactor, a rename, an internal boundary. Decide, state the
-  assumption in one line, move on. They will say so if it is wrong.
+- **It is a cheaply reversible IMPLEMENTATION choice.** A refactor, a rename, an internal boundary.
+  Decide, state the assumption in one line, move on. They will say so if it is wrong. This licenses
+  implementation only: a business rule is never "cheaply reversible" because its code is — undoing
+  the code is cheap, but the decision still was not yours.
 - **You are asking for insurance.** *"Shall I proceed?"* on an obvious path is not a question — it
   is you transferring accountability. If you already know the answer, act and say what you did.
 - **You already asked something equivalent this session.** They answered a rule; apply it.
-- **A competent engineer would pick the obvious default.** Pick it. Mention it in one clause.
+- **A competent engineer would pick the obvious default** — for an implementation detail. Pick it.
+  Mention it in one clause. "Pro rata looks obvious" about how a customer's money is split is not
+  this case: obvious to you is still a rule nobody gave you.
 
 ## 4. How to ask, if you are asking
 
@@ -55,8 +69,11 @@ A senior engineer does not want *"what do you think?"* — that is your thinking
 - **Closed, not open.** Two or three concrete options, not a blank prompt.
 - **State the tradeoff**, one line each. What each choice costs.
 - **Recommend one**, and say why. You have read the code; they have not, today.
-- **Say what you will do absent an answer.** If you cannot, you are not ready to ask — you have not
-  thought it through far enough to have framed the alternatives.
+- **Say which one you would pick**, so a one-word reply settles it. If you cannot, you are not ready
+  to ask — you have not thought it through far enough to have framed the alternatives. Then STOP:
+  implementing your pick "pending confirmation" is the invention this skill exists to prevent.
+- **If they told you to proceed without asking**, take your recommendation, and say on the first
+  line of your reply which rule you chose — not in a footnote.
 - **One question, one decision.** Bundling three unrelated choices makes all three worse.
 
 > Claude Code has a structured multiple-choice tool for this. Elsewhere, ask in prose — the

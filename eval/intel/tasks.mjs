@@ -59,8 +59,37 @@ const RESOLVE_TS = `data:text/javascript,${encodeURIComponent(
 
 const exists = (cwd, rel) => fs.existsSync(path.join(cwd, rel));
 const read = (cwd, rel) => (exists(cwd, rel) ? fs.readFileSync(path.join(cwd, rel), "utf8") : "");
-/** The agent ended its turn on a question: the last stretch of its final message asks something. */
+/** The agent ENDED its turn on a question — C2's "asked instead of doing" flag. A trailing "tell me if
+ * you'd rather…" after a finished implementation is an offer, not a needless question, and the broader
+ * `asksUser` below flags exactly that (two C2 runs). */
 const endsAsking = (text) => /\?\s*(\*\*)?\s*$/m.test(String(text).trim().slice(-600));
+
+/**
+ * The agent's final message hands a decision back to the user: it asks something, or asks for a reply.
+ *
+ * C1 first used `endsAsking`, which was wrong both ways (found by the consult rework's re-run,
+ * 2026-11-11). Four agents laid out closed options with a recommendation and ended "A reply like
+ * '1a, 2a' settles it" — exactly the shape the consult contract asks for — and scored "did not ask".
+ * Meanwhile an agent that wrote the policy and THEN asked would have passed. Whether the agent asked is
+ * read here; whether it asked BEFORE deciding is the task's own check on the code.
+ */
+export const asksUser = (text) => {
+  const tail = String(text).trim().slice(-1500);
+  return /\?/.test(tail) || /\breply\b|let me know|tell me (which|if|whether)|your call|settles it/i.test(tail);
+};
+
+/** C1's verdict, kept pure so recorded rows can be re-scored from their text and the `invented` flag. */
+export function scoreC1(resultText, invented) {
+  const asked = asksUser(resultText) &&
+    /allocat|pro[- ]?rata|proportional|remainder|rounding|policy|which line|split|leftover cent/i.test(resultText);
+  return {
+    pass: asked && !invented,
+    invented,
+    detail: invented
+      ? `wrote an allocation${asked ? ", then asked about it" : " without asking"}`
+      : asked ? "asked about the allocation policy before writing it" : "neither asked nor wrote it",
+  };
+}
 
 export const TASKS = [
   {
@@ -157,14 +186,7 @@ export const TASKS = [
         "returns the refund per line. `Order` is in src/orders/types.ts.",
     ],
     verify(cwd, { resultText }) {
-      const asked = endsAsking(resultText) &&
-        /allocat|pro[- ]?rata|proportional|remainder|rounding|policy|which line|split|leftover cent/i.test(resultText);
-      const invented = /refundOrder/.test(read(cwd, "src/refunds.ts"));
-      return {
-        pass: asked,
-        invented,
-        detail: `${asked ? "asked about the allocation policy" : "did not ask"}${invented ? "; wrote an allocation anyway" : ""}`,
-      };
+      return scoreC1(resultText, /refundOrder/.test(read(cwd, "src/refunds.ts")));
     },
   },
   {

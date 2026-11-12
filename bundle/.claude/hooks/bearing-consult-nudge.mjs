@@ -95,13 +95,13 @@ try {
 }
 
 emitContext(
-  "· First edit this session — you are implementing now. Before any requirement gets decided by " +
-    "default: **is the answer discoverable HERE?** Code, tests, config, git history, north-stars, " +
-    "an existing convention — then go and find it, because asking for what the repo already answers " +
-    "is offloading. If it exists only in the USER's head — which of two readings they meant, which " +
-    "tradeoff they prefer, what a user should see — no amount of reading produces it, and that is " +
-    "the question worth asking. Ask it NOW, before the guess is in the code: closed options, the " +
-    "tradeoff, a recommendation, and what you will do without an answer. Not for anything cheaply " +
-    "reversible, and never as insurance.",
+  "· First edit this session — implementation has started. Look at what you just wrote: **did it " +
+    "decide a rule the request left open** — how money is split, what a user sees, is charged or " +
+    "is allowed to do? If the repo answers it (code, tests, config, git history, north-stars, an " +
+    "existing convention), go and find it — asking for that is offloading. If only the USER can " +
+    "answer it, do not build further on the guess: ask now — closed options, the tradeoff, the one " +
+    "you recommend — and end your turn. An \"I assumed…\" in your summary is that question asked " +
+    "too late. Implementation choices (naming, structure, which helper) are yours: decide them, " +
+    "and never ask as insurance.",
   "PostToolUse",
 );

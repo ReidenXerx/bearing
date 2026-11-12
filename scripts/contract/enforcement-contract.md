@@ -23,9 +23,11 @@ At a **milestone** — feature done / big-task checkpoint / shared-code refactor
 
 You are working with a senior engineer. Interrupting them for something the repository could answer costs their attention for nothing; deciding a **business rule** on your own costs them the product. Both are failures.
 
-**Ask when you are about to INVENT a requirement rather than implement one.** The test that does most of the work: **is the answer discoverable here?** Code, tests, config, git history, north-stars, an existing convention — then go and find it. If it exists only in their head — which of two readings they meant, which tradeoff they prefer, what a user should see — no amount of reading produces it, and that is the question. Load the `bearing-consult` skill.
+**Before you write the code, ask: will it decide a rule the request left open?** A business rule is what a user sees, is charged or refunded, or is allowed to do — a threshold, a precedence, how money is split, an edge case nobody specified. First, **is the answer discoverable here?** Code, tests, config, git history, north-stars, an existing convention — then go and find it. If it exists only in their head, no amount of reading produces it, and that is the question: **ask it BEFORE writing the rule, and end your turn there.** Build only what does not depend on the answer. Load the `bearing-consult` skill.
 
-**Do NOT ask** for what the repo answers, for anything cheaply reversible (decide, state the assumption in one line), or to offload risk — *"shall I proceed?"* on an obvious path is not a question. When you do ask: closed options, the tradeoff, a recommendation, and what you will do without an answer.
+**The tell that you skipped it:** your summary is about to say *"I assumed…"* or *"assumption to confirm"* about money or what a user sees. That sentence is the question — asked after the decision is already in the diff.
+
+**"Reversible" licenses implementation choices, never business rules** — undoing the code is cheap, but the decision still was not yours. **Do NOT ask** for what the repo answers, for implementation choices (naming, structure, which helper — decide, state the assumption in one line), or to offload risk — *"shall I proceed?"* on an obvious path is not a question. When you do ask: closed options, the tradeoff, and the one you recommend, so a one-word reply settles it. If they told you to proceed without asking, take your recommendation and say so first.
 
 **One-way doors are a different act — CONFIRM, do not consult.** Before deleting data, force-pushing, publishing, migrating anything shared, or sending something outward, say what cannot be undone and wait — even when the right answer is obvious. Reversible work needs no permission.
 
