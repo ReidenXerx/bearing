@@ -77,6 +77,8 @@ try {
   ({ emitContext } = await lib("claude-emit.mjs"));
   ({ bumpScore } = await lib("session-primer.mjs"));
   ({ howToRun } = await lib("how-to-run.mjs"));
+  const { loadHookConfig } = await lib("hook-helpers.mjs");
+  if (loadHookConfig(root).impactAudit === false) process.exit(0); // the knob (NS-31)
 } catch {
   process.exit(0);
 }
