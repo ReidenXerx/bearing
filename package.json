@@ -1,7 +1,7 @@
 {
   "name": "bearing",
   "version": "1.3.0",
-  "description": "An intel layer for AI coding agents that assumes its own rules might be wrong — and keeps the evidence. Authoritative north-stars the agent must cite, a task-core written before compaction eats it, review by an expert in YOUR domain, and an installer that verifies its own claims instead of printing success. Claude Code, Zed, Codex.",
+  "description": "Your tests catch code that breaks; nothing catches an agent that has drifted about what the code means. A toolbelt for developers who already work with coding agents: north-stars that outrank stale docs, a task-core that survives compaction, ast-grep with its traps, review and fan-out when you ask — no gates, and a knob for anything that speaks up unasked. Claude Code, Zed, Codex.",
   "type": "module",
   "private": false,
   "repository": {
