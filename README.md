@@ -4,9 +4,11 @@
 
 # bearing
 
-**An intel layer for AI coding agents.**
+**Your tests catch code that breaks. Nothing catches an agent that has drifted about what the code *means*.**
 
-Your tests catch code that breaks. Nothing catches an agent that has drifted about what the code *means*.
+A toolbelt for developers who already work with coding agents: north-stars that outrank stale docs,
+a task-core that survives compaction, ast-grep with the traps that make it lie, review and fan-out
+when you ask for them. **You decide when.**
 
 [![npm](https://img.shields.io/npm/v/bearing?color=3987e5)](https://www.npmjs.com/package/bearing)
 [![npm downloads](https://img.shields.io/npm/dt/bearing?color=3987e5)](https://www.npmjs.com/package/bearing)
@@ -59,6 +61,11 @@ with `npm run bearing:token-benchmark`; [the numbers, and where the graph LOSES]
 | 🌳 **ast-grep** | **Searches and rewrites by code shape, and proves the pattern first.** Every `fetch` with no `signal`, every swallowed `catch`, a decided change at 100 sites — matched on the syntax tree, not a regex. The skill carries the traps that make it lie quietly: a pattern that does not parse returns `[]` exactly like a clean codebase, `-l ts` skips `.tsx`. On by default since a real-repo eval showed it earns it; uses ast-grep from `PATH` or `npx`, adds nothing to `package.json`. |
 | 🕸 **GitNexus** | **A code graph you reach for when you ask.** Opt-in: the installer explains it and asks. Say "use gitnexus" in a prompt and one skill loads — scope check, where the graph wins, where its counts are only a floor. No gates, no nudges. Requires the [GitNexus](https://github.com/abhigyanpatwari/GitNexus) MCP server. |
 | 🎭 **E2E** | **Turns "I checked it in the browser" into an exit code.** A harness your agent finishes: working substrate plus the scars, and a way to test a destructive write *without performing it*. Opt-in — it writes `.e2e/` and needs Playwright. |
+
+**What it won't do:** block a tool, push a workflow on you, or decide when you review, fan out or
+reach for the graph. It speaks up unasked only to keep the agent's grip on your project — a brief at
+session start, the north-stars again as the context grows, a nudge when unsaved work piles up before a
+compaction — and `npx bearing status` lists each one with the knob that turns it off.
 
 **And one thing that isn't a module:** the agent files bug reports against its own tooling, and the kit measures its own rules — it measured its GitNexus gates, found them costing 4–5× for one task's gain, and retired them. → [the receipts](#it-tells-you-when-its-the-problem)
 
@@ -233,6 +240,10 @@ Permission to rename a file; silence while they invent a business rule. Consult 
 And it asks **before** it writes the rule, not after — as options you click, not a question you have to answer in a paragraph: two to four concrete choices, its recommendation first, one line of tradeoff each, and related questions in one prompt so you answer once. Never *"shall I proceed?"* — that is not a question, it is accountability being handed back to you.
 
 **One-way doors are a different act.** Deleting data, force-pushing, publishing, migrating — it *confirms*, even when the right answer is obvious, because irreversible is the reason, not ambiguity. Reversible work needs no permission.
+
+The contract carries this judgment on its own. A prompt that poses the test at the first edit of a
+session is there too, **off by default** — whether to stop and ask is your call; turn it on with
+`"consultNudge": true` in `.bearing/hooks.json` and `bearing update`.
 
 Most answers are just applied. The rare one that is a **rule** — one a future task would otherwise break — gets proposed as a north-star in the same reply, so that question is never asked again.
 
@@ -412,6 +423,8 @@ Nothing leaves your repo. There is no telemetry endpoint.
 npx bearing install <repo> [--runtime ...] [--features ...] [--mcp http|stdio|<port>] [--stealth] [--prettierignore]
 npx bearing update <repo>       # keeps your module + transport choices
 npx bearing uninstall <repo>    # restores what it overwrote
+npx bearing status [<repo>]     # what is loaded, what speaks up unasked + its knob, the skills
+npx bearing doctor [<repo>]     # is the install healthy; --all <folder> for every install
 ```
 
 With the GitNexus module: `bearing:northstars` · `bearing:health` · `bearing:refresh` · `bearing:fallback-log` · `bearing:scorecard` · `bearing:verify` · `bearing:token-benchmark`

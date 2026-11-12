@@ -21,6 +21,12 @@ a compaction. Each of those moments now has a knob that turns it off.
   its knob, its current value and how often it fired in the last 30 days, and the skills you can
   invoke. `--json` for scripts. The test suite drives every moment until it speaks, then checks that
   its knob alone silences it.
+- **The installer is shorter, and ends with the command that repeats it.** One line per module (what it
+  stops) instead of a paragraph. The wizard's last line is `npx bearing install <repo> --runtime …
+  --features …` with every answer you gave, so the next repo needs no questions. The test suite runs
+  that command and checks it installs the same thing.
+- **README, npm and the site** now say who bearing is for: developers who already work with coding
+  agents and decide when to use each tool.
 
 ### Changed — the ast-grep skill knows when NOT to use ast-grep
 
