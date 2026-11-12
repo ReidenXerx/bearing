@@ -18,9 +18,9 @@ file — it is yours, and bearing will not overwrite it.
 __BEARING_PERSONA_NOTE__
 
 <!-- feature: microscope -->
-## Deep review (intel layer)
+## Deep review — when the user asks (intel layer)
 
-At a **milestone** — feature done / big-task checkpoint / shared-code refactor / pre-ship, or "audit / find real bugs / is this solid?" — **and** only when the work is *substantial* (multi-file, or a change many other files depend on): run a **microscope-waves** pass → load the `bearing-microscope` skill. Multi-lens, opinionated (not just defects), adversarially verified, iterated in waves. Skip it for small localized changes.
+When the user asks for a deep review — *"microscope this"*, *"audit before we ship"*, *"is this solid?"*, *"find the real bugs"* — load the `bearing-microscope` skill and run it as written. Do not start one on your own initiative: the user decides when a change has earned a review panel.
 
 <!-- feature: consult -->
 ## Ask, or decide? (intel layer)
@@ -36,13 +36,11 @@ You are working with a senior engineer. Interrupting them for something the repo
 **One-way doors are a different act — CONFIRM, do not consult.** Before deleting data, force-pushing, publishing, migrating anything shared, or sending something outward, say what cannot be undone and wait — even when the right answer is obvious. Reversible work needs no permission.
 
 <!-- feature: minions -->
-## Wide mechanical work — fan it out (intel layer)
+## Fan-out — when the user asks (intel layer)
 
-Before grinding through a long list of files or symbols **serially** — every call site of X, every file still on the old API, every route to audit against one rule, every migration site — stop and check the four: is each unit **bounded**, **verifiable**, **independent**, and are there **3 or more**? If so, fan out → load the `bearing-minions` skill. One anchored subagent per unit, each carrying the north-stars and persona.
+When the user asks you to fan work out — *"use minions"*, *"fan this out"*, *"split this across subagents"* — load `bearing-minions` to GATHER (every call site, every file checked against one rule) or `bearing-invasive-minions` to APPLY a decided change at many sites. Do not fan out on your own initiative.
 
-**Minions gather; you conclude — they do minimal or zero reasoning.** Every minion runs on the MIDDLE tier of your model family (`sonnet` for Anthropic; `minionModel` in `.bearing/hooks.json` to change it) — cheap is correct *because* they do not reason. Wanting a smarter minion means you delegated judgment and should take it back. They return `FOUND file:line` (verbatim), `CHECKED` (the exact query) and `MISSED` — never a verdict. A subagent that concludes puts a lossy summary between the evidence and your decision. Do not fan out when the judgment IS the work, when the answer only survives verbatim, or when the unit needs context the subagent was never in.
-
-**When the work is a WRITE, not a lookup** — the same decided change applied at many independent sites (logging coverage, an error envelope, the rest of a settled migration) — the shape is `bearing-invasive-minions`. Same four gates plus two: the transformation is **DECIDED** in full before you spawn, and each minion works **ISOLATED** — its own git worktree, or a patch file — so nothing it writes reaches your tree until you have reviewed that slice (`node .bearing/lib/minion-review.mjs` checks its scope and that it still applies; whether every hunk matches the brief is your call) and landed it. **A gathering minion must not decide what is TRUE; an invasive one must not decide what to CHANGE.** Each returns `WROTE file:line`, `VERIFIED` (a narrow check on its own slice, not the full suite) and `SKIPPED` — and SKIPPED is the point: three minions skipping the same shape means your brief had a hole, which a serial agent would instead have quietly decided nine times. **Write the brief even when you do not fan out.** It survives compaction, it keeps site 30 consistent with site 3, and a brief you cannot write is a change you have not finished thinking about.
+**Any subagent you spawn executes a decision; it never makes one.** It gathers and returns evidence — `file:line`, verbatim output, the exact query — or applies a change decided in full beforehand and returns what it wrote. You conclude.
 
 <!-- feature: tsjs -->
 ## Writing TypeScript/JavaScript (intel layer)

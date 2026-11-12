@@ -62,9 +62,7 @@ A **stealth** install (`--stealth`) writes none of the tracked files: ignores go
 | `bearing-session` | SessionStart | Resets per-session state and injects the brief: north-stars, the task-core path, memory. |
 | `bearing-northstar-anchor` | PostToolUse | Re-anchors the agent on the north-stars periodically and right after a doc is written. |
 | `bearing-taskcore-nudge` | PostToolUse | Asks for a task-core refresh once enough unsaved work has piled up. |
-| `bearing-microscope-nudge` | PostToolUse | Offers the deep review once a change has grown substantial. |
 | `bearing-consult-nudge` | PostToolUse | Poses the ask-or-decide test at the moment implementation starts. |
-| `bearing-minion-nudge` | PostToolUse | Notices serial grinding and suggests a fan-out. |
 | `bearing-precompact` | PreCompact | Counts the compaction. |
 | `bearing-impact-audit` | PostToolUse on `impact` (GitNexus) | Annotates an `impact` result whose caller count may only be a floor. |
 

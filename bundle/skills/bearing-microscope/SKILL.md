@@ -1,6 +1,6 @@
 ---
 name: bearing-microscope
-description: "Deep multi-lens audit ('microscope waves') for MILESTONE moments — feature done / big-task checkpoint / shared-code refactor / pre-ship, or when asked to 'audit / find real bugs / is this solid'. NOT for small localized changes. Goes beyond cascade code-review: it opinionates (relevance, soundness, over-engineering) as a senior domain expert, verifies findings adversarially, and iterates in waves. Examples: \"microscope this\", \"audit before we ship\", \"find the real oversights\", \"deep review this refactor\"."
+description: "Deep multi-lens audit ('microscope waves'), run when the USER asks for one — \"microscope this\", \"audit before we ship\", \"is this solid?\", \"find the real bugs\", \"deep review this refactor\". Do not start it on your own initiative. Goes beyond cascade code-review: it opinionates (relevance, soundness, over-engineering) as a senior domain expert, verifies findings adversarially, and iterates in waves."
 ---
 
 # Microscope waves — deep, opinionated, verified audit
@@ -16,11 +16,11 @@ scoped `Grep` and say which check you ran.
 
 This is **not** a cascade code review or a linter pass. A microscope wave scrutinizes a target from many independent angles, **has real opinions** (is this even needed? is this the right approach? is it over-engineered?), verifies every finding **against real logic — not "does it run"**, and iterates in numbered **waves** until clean. With the GitNexus module installed it is the power-composition of that whole toolset; without it the same routine runs on a classically-built map.
 
-## When to run (trigger) — and when NOT (scope gate)
+## When to run — the user asks — and how much (scope gate)
 
-Fire at **milestone boundaries**: a feature is "done" / pre-PR / pre-ship · a checkpoint in a large multi-step task · after a refactor touching shared/hub code · the user asks to "audit / review deeply / find real bugs / is this solid?".
+**The user starts it**: "microscope this", "audit before we ship", "is this solid?", "find the real bugs". That is the trigger, and the only one. A review panel the user did not ask for costs them time and tokens they did not choose to spend — and measured on sonnet, an agent left to decide never needed one (`eval/intel/REPORT-HARD.md`).
 
-**Scope gate (avoid harm):** run the full waves only when the work is *substantial* — multi-file, OR touches a hub (`impact` blast-radius with the graph; `git diff --stat` plus who-imports-this without it), OR high-risk path. A small localized change → **skip**, or run one quick lens. Don't fan out six agents on a one-file fix. This is a **capability you invoke**, not a mandatory gate — use judgment.
+**Scope gate (avoid harm):** run the full waves only when the work is *substantial* — multi-file, OR touches a hub (`impact` blast-radius with the graph; `git diff --stat` plus who-imports-this without it), OR high-risk path. A small localized change → **skip**, or run one quick lens. Don't fan out six agents on a one-file fix. When the user asked for it on a small change, say it is small and run one quick lens rather than the full waves.
 
 ## Two KINDS of lenses (not a fixed list)
 

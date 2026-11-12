@@ -89,51 +89,6 @@ export function bashWritesFiles(command) {
   return redirect || inPlace || writers || formatters || scripted;
 }
 
-/**
- * Which FILES a shell command writes, where that is knowable.
- *
- * `bashWritesFiles` answers "was this an edit", which is enough to COUNT edits. The deep-review
- * nudge counts DISTINCT FILES — twenty passes over one file is iteration, five files touched once
- * is a change with a shape — so it needs the paths, and a Bash call does not hand you one.
- *
- * Best-effort by design, and partial on purpose: a python heredoc that computes its target at
- * runtime cannot be read off the command line, and guessing would inflate the distinct-file count
- * with paths that were never touched. Returning fewer, certain paths keeps the threshold meaning
- * what it says.
- * @param {string} command @returns {string[]} repo-relative-ish paths, deduped
- */
-export function bashWriteTargets(command) {
-  const cmd = String(command ?? "");
-  if (!cmd.trim()) return [];
-  const out = new Set();
-  const add = (p) => {
-    const clean = String(p || "").replace(/^['"]|['"]$/g, "").trim();
-    if (!clean || clean.startsWith("/dev/") || clean.startsWith("-")) return;
-    // Must LOOK like a path. A capture with no separator and no extension is far more likely to be
-    // a string that happened to sit where a path goes — which is how `write_text('x')` once
-    // registered a file called `x`. Rejecting it costs a missed count; accepting it costs a wrong
-    // one AND suppresses the fallback that would have been right.
-    if (!clean.includes("/") && !/\.[A-Za-z0-9]{1,6}$/.test(clean)) return;
-    out.add(clean);
-  };
-
-  // `> path`, `>> path`
-  for (const m of cmd.matchAll(/(?:^|[^0-9<>|&])>>?\s*(?!\/dev\/)([^\s;|&<>]+)/g)) add(m[1]);
-  // `sed -i [ext] 's/…/…/' path…` — the trailing operands are the files
-  for (const m of cmd.matchAll(/\bsed\s+-i\b[^\n;|&]*/g)) {
-    const tail = m[0].split(/\s+/).slice(1).filter((t) => !t.startsWith("-") && !/^['"]?s[\/|]/.test(t));
-    for (const t of tail.slice(1)) add(t);
-  }
-  // `cp a b` / `mv a b` / `install a b` — the DESTINATION is what changed
-  for (const m of cmd.matchAll(/\b(?:cp|mv|install)\s+(?:-\S+\s+)*(\S+)\s+(\S+)/g)) add(m[2]);
-  // A quoted path inside a heredoc body. `Path(...)` and `writeFileSync(path, data)` take the path
-  // first; `write_text(...)` takes the CONTENT and was captured here by mistake — it recorded a
-  // file's text as its name, and worse, a non-empty bogus target suppressed the git fallback that
-  // would have got the answer right.
-  for (const m of cmd.matchAll(/(?:writeFileSync|Path|open)\s*\(\s*['"]([^'"]+)['"]/g)) add(m[1]);
-
-  return [...out];
-}
 
 export const LOCAL_CONFIG_FILE = ".bearing/hooks.local.json";
 
@@ -155,6 +110,8 @@ export const RETIRED_HOOK_KEYS = new Map([
   ["graceCommitsBehind", "NS-28: it tuned a staleness gate that is retired"],
   ["stalenessCacheTtlMs", "NS-28: only the retired gates kept a staleness cache"],
   ["sourceGlobs", "NS-28: it scoped the retired Read/Edit gates; drift counts use sourceExts"],
+  ["microscopeFileThreshold", "microscope is user-invoked: the nudge it sized is retired"],
+  ["minionFanoutThreshold", "minions are user-invoked: the nudge it sized is retired"],
 ]);
 
 /** What bearing itself seeded for each retired key, across every version that seeded it. */
@@ -224,8 +181,6 @@ export function loadHookConfig(root) {
     sourceExtRe: DEFAULT_SOURCE_EXT_RE,
     // Pose the consult test once per chat, at the first edit. false/0 disables.
     consultNudge: true,
-    // Distinct files edited before the deep-review nudge fires. 0 disables.
-    microscopeFileThreshold: 5,
     // Working-tree drift: after this many uncommitted source edits since the index, the staleness
     // report counts the index as drifted. It is REPORTED, never enforced — nothing blocks on it and
     // nothing refreshes because of it (NS-25). 0 disables drift counting. 8, not 3: three dirty
@@ -243,9 +198,6 @@ export function loadHookConfig(root) {
     // .bearing/hooks.local.json if your account has different models. Wanting a SMARTER minion is a
     // design smell, not a config problem: it means judgment was delegated.
     minionModel: "sonnet",
-    // MINIONS nudge: after this many DISTINCT gather targets in a row with no delegation, suggest
-    // fanning out. Once per session, advisory only. 0 disables.
-    minionFanoutThreshold: 8,
     northStarAnchorEvery: 25,
     // Cap on how many NS-# propositions the re-anchor repeats. Each is clipped to its opening
     // claim, so the whole set normally fits; raise this only for an unusually large north-stars doc.
@@ -276,14 +228,10 @@ function applyHookConfigFile(cfg, cfgPath) {
     // silently ignores the spelling you chose is the same defect as one nothing reads at all.
     if (file.consultNudge === false || file.consultNudge === 0) cfg.consultNudge = false;
     if (file.consultNudge === true || file.consultNudge === 1) cfg.consultNudge = true;
-    if (typeof file.microscopeFileThreshold === "number")
-      cfg.microscopeFileThreshold = file.microscopeFileThreshold;
     // A non-empty string only: `"minionModel": ""` or a stray number would otherwise be handed to
     // a spawn as a model name.
     if (typeof file.minionModel === "string" && file.minionModel.trim())
       cfg.minionModel = file.minionModel.trim();
-    if (typeof file.minionFanoutThreshold === "number")
-      cfg.minionFanoutThreshold = file.minionFanoutThreshold;
     if (typeof file.northStarAnchorEvery === "number")
       cfg.northStarAnchorEvery = file.northStarAnchorEvery;
     if (typeof file.northStarAnchorMaxLines === "number")
@@ -356,7 +304,6 @@ export function mcpDetectChanges(repo, scope = "unstaged") {
 export function mcpReadContext(repo) {
   return `READ gitnexus://repo/${repo}/context`;
 }
-
 
 /**
  * Is this path a test file?
