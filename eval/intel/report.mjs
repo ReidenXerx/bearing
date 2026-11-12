@@ -15,9 +15,17 @@
  *
  * Every module also pays for the always-on contract on tasks that are not its own; the report shows
  * the overall cost ratio so that price stays visible.
+ *
+ * ADDED BEFORE THE HARD ROUND RAN (2026-11-12), for tasks that report `found` (partial credit —
+ * tasks-hard.mjs): when `on` and `off` pass the same number of trials, the mean `found` decides
+ * instead — higher is KEEP, lower is CUT?, equal falls through to the cost rule. A pass is all-or-
+ * nothing, and the first round showed what that does at the ceiling: it cannot tell 63 of 75 from 75.
  */
 import fs from "node:fs";
-import { TASKS } from "./tasks.mjs";
+import { TASKS as BASE_TASKS } from "./tasks.mjs";
+import { HARD_TASKS } from "./tasks-hard.mjs";
+
+const TASKS = [...BASE_TASKS, ...HARD_TASKS];
 
 const rows = process.argv.slice(2).flatMap((f) =>
   fs.readFileSync(f, "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l)),
@@ -37,6 +45,7 @@ function cell(condition, pred) {
     secs: mean(rs.map((r) => (r.durationMs ?? 0) / 1000)),
     tools: mean(rs.map((r) => r.toolCalls ?? 0)),
     subagents: mean(rs.map((r) => r.subagents ?? 0)),
+    found: rs.some((r) => typeof r.found === "number") ? mean(rs.filter((r) => typeof r.found === "number").map((r) => r.found)) : null,
     errors: rs.filter((r) => r.error).length,
     flags,
   };
@@ -49,14 +58,15 @@ out.push(`${rows.length} runs · models: ${models.join(", ")} · conditions: off
 out.push("Scored by checks the harness owns (`eval/intel/tasks.mjs`), never by bearing's telemetry (NS-27).", "");
 
 out.push("## Per task", "");
-out.push("| Task | Module | off pass | on pass | off $ | on $ | off subagents | on subagents | flags (off → on) |");
-out.push("| --- | --- | --- | --- | --- | --- | --- | --- | --- |");
+out.push("| Task | Module | off pass | on pass | found, mean (off → on) | off $ | on $ | off subagents | on subagents | flags (off → on) |");
+out.push("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |");
 for (const t of TASKS) {
   const off = cell("off", (r) => r.task === t.id);
   const on = cell("on", (r) => r.task === t.id);
   if (!off.n && !on.n) continue;
   const flags = FLAGS.filter((f) => off.flags[f] || on.flags[f]).map((f) => `${f} ${off.flags[f]}→${on.flags[f]}`).join(", ");
-  out.push(`| ${t.id} ${t.title} | ${t.module} | ${off.pass}/${off.n} | ${on.pass}/${on.n} | ${fmt(off.cost)} | ${fmt(on.cost)} | ${fmt(off.subagents, 1)} | ${fmt(on.subagents, 1)} | ${flags || "—"} |`);
+  const found = off.found == null && on.found == null ? "—" : `${fmt(off.found, 1)} → ${fmt(on.found, 1)}`;
+  out.push(`| ${t.id} ${t.title} | ${t.module} | ${off.pass}/${off.n} | ${on.pass}/${on.n} | ${found} | ${fmt(off.cost)} | ${fmt(on.cost)} | ${fmt(off.subagents, 1)} | ${fmt(on.subagents, 1)} | ${flags || "—"} |`);
 }
 
 out.push("", "## Per module — the verdict", "");
@@ -68,9 +78,11 @@ for (const mod of [...new Set(TASKS.map((t) => t.module))]) {
   if (!off.n || !on.n) continue;
   const ratio = off.cost ? on.cost / off.cost : null;
   const flagOnly = on.pass === off.pass && FLAGS.some((f) => f === "flagged" && on.flags[f] > off.flags[f]);
+  const byFound = on.pass === off.pass && off.found != null && on.found != null && on.found !== off.found;
   const verdict =
     on.pass > off.pass ? "KEEP" :
     on.pass < off.pass ? "CUT?" :
+    byFound ? (on.found > off.found ? "KEEP (more found)" : "CUT? (less found)") :
     flagOnly ? "REWORK (changes what it says, not what it does)" :
     ratio != null && ratio > 1.25 ? "REWORK (same outcome, more cost)" : "KEEP";
   out.push(`| ${mod} | ${off.pass}/${off.n} | ${on.pass}/${on.n} | ${fmt(ratio)}× | ${verdict} |`);

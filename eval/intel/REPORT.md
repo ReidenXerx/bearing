@@ -5,17 +5,17 @@ Scored by checks the harness owns (`eval/intel/tasks.mjs`), never by bearing's t
 
 ## Per task
 
-| Task | Module | off pass | on pass | off $ | on $ | off subagents | on subagents | flags (off → on) |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| N1 A stale doc contradicts a north-star | northstars | 0/5 | 5/5 | 0.01 | 0.05 | 0.0 | 0.0 | flagged 0→5 |
-| N2 A request for an idea the graveyard rejected | northstars | 0/5 | 5/5 | 0.02 | 0.04 | 0.0 | 0.0 | flagged 4→5 |
-| K1 Constraints agreed in conversation survive a compaction | taskcore | 5/5 | 5/5 | 0.13 | 0.30 | 0.0 | 0.0 | — |
-| C1 A business rule only the user can decide | consult | 0/5 | 0/5 | 0.04 | 0.08 | 0.0 | 0.0 | invented 5→5 |
-| C2 A convention the repo already answers | consult | 0/5 | 5/5 | 0.03 | 0.07 | 0.0 | 0.0 | — |
-| M1 A finished feature with a semantic bug across files | microscope | 5/5 | 5/5 | 0.04 | 0.09 | 0.0 | 0.0 | — |
-| M2 A one-line change gets no review panel | microscope | 5/5 | 5/5 | 0.01 | 0.04 | 0.0 | 0.0 | — |
-| F1 A 28-caller trace with decoys | minions | 5/5 | 5/5 | 0.03 | 0.06 | 0.0 | 0.0 | — |
-| I1 A decided change at 24 sites, with shapes to leave alone | minions | 5/5 | 5/5 | 0.03 | 0.08 | 0.0 | 0.0 | — |
+| Task | Module | off pass | on pass | found, mean (off → on) | off $ | on $ | off subagents | on subagents | flags (off → on) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| N1 A stale doc contradicts a north-star | northstars | 0/5 | 5/5 | — | 0.01 | 0.05 | 0.0 | 0.0 | flagged 0→5 |
+| N2 A request for an idea the graveyard rejected | northstars | 0/5 | 5/5 | — | 0.02 | 0.04 | 0.0 | 0.0 | flagged 4→5 |
+| K1 Constraints agreed in conversation survive a compaction | taskcore | 5/5 | 5/5 | — | 0.13 | 0.30 | 0.0 | 0.0 | — |
+| C1 A business rule only the user can decide | consult | 0/5 | 0/5 | — | 0.04 | 0.08 | 0.0 | 0.0 | invented 5→5 |
+| C2 A convention the repo already answers | consult | 0/5 | 5/5 | — | 0.03 | 0.07 | 0.0 | 0.0 | — |
+| M1 A finished feature with a semantic bug across files | microscope | 5/5 | 5/5 | — | 0.04 | 0.09 | 0.0 | 0.0 | — |
+| M2 A one-line change gets no review panel | microscope | 5/5 | 5/5 | — | 0.01 | 0.04 | 0.0 | 0.0 | — |
+| F1 A 28-caller trace with decoys | minions | 5/5 | 5/5 | — | 0.03 | 0.06 | 0.0 | 0.0 | — |
+| I1 A decided change at 24 sites, with shapes to leave alone | minions | 5/5 | 5/5 | — | 0.03 | 0.08 | 0.0 | 0.0 | — |
 
 ## Per module — the verdict
 
@@ -121,7 +121,7 @@ once. They do not say what any single module costs.
 
 **What this says to do next.**
 1. **Rework consult's trigger.** Right now it produces after-the-fact questions, not asking first. *Done 2026-11-11: see "Consult rework" below.*
-2. **A second round with harder variants of the ceiling tasks,** so task-core, microscope and minions
+2. **A second round with harder variants of the ceiling tasks,** so task-core, microscope and minions *(done 2026-11-12: still at the ceiling — see `REPORT-HARD.md`)*
    can be measured at all:
    - a K1 whose constraints are spread across a longer session;
    - a subtler M1;

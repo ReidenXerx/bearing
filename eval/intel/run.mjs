@@ -3,6 +3,7 @@
  * Judgment-layer eval runner.
  *
  *   node eval/intel/run.mjs --conditions off,on --tasks all --trials 3 --model sonnet
+ *   node eval/intel/run.mjs --conditions off,on --tasks hard --trials 3   # the hard round (tasks-hard.mjs)
  *
  * Conditions:
  *   off — the fixture with no kit at all
@@ -23,8 +24,11 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { buildFixture, fixtureFiles } from "./fixture.mjs";
+import { HARD_TASKS } from "./tasks-hard.mjs";
 import { TASKS } from "./tasks.mjs";
 import { agent, measure } from "../lib/claude-run.mjs";
+
+const ALL_TASKS = [...TASKS, ...HARD_TASKS];
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(HERE, "../..");
@@ -43,7 +47,10 @@ function args(argv) {
   for (let i = 0; i < argv.length; i++) {
     const v = () => argv[++i];
     if (argv[i] === "--conditions") a.conditions = v().split(",");
-    else if (argv[i] === "--tasks") { const t = v(); a.tasks = t === "all" ? a.tasks : t.split(","); }
+    else if (argv[i] === "--tasks") {
+      const t = v();
+      a.tasks = t === "all" ? a.tasks : t === "hard" ? HARD_TASKS.map((x) => x.id) : t.split(",");
+    }
     else if (argv[i] === "--trials") a.trials = Math.max(1, Number(v()) || 1);
     else if (argv[i] === "--model") a.model = v();
     else if (argv[i] === "--slots") a.slots = path.resolve(v());
@@ -72,12 +79,15 @@ function kitKey() {
   return h.digest("hex").slice(0, 16);
 }
 
-/** Build (once) the pristine slot for a condition; rebuilt when the fixture or the kit changes. */
-function prepareSlot(a, condition) {
-  const slot = path.join(a.slots, condition);
+/**
+ * Build (once) the pristine slot for a condition and fixture variant; rebuilt when the fixture or the
+ * kit changes. The base variant keeps its old slot name, so the first round's cache stays valid.
+ */
+function prepareSlot(a, condition, variant = "base") {
+  const slot = path.join(a.slots, variant === "base" ? condition : `${condition}-${variant}`);
   const pristine = `${slot}.pristine`;
   const stamp = JSON.stringify({
-    fixture: createHash("sha256").update(JSON.stringify(fixtureFiles())).digest("hex"),
+    fixture: createHash("sha256").update(JSON.stringify(fixtureFiles(variant))).digest("hex"),
     condition,
     kit: condition === "on" ? kitKey() : null,
   });
@@ -87,7 +97,7 @@ function prepareSlot(a, condition) {
   console.error(`[prepare] ${condition}: building slot`);
   for (const d of [slot, pristine]) fs.rmSync(d, { recursive: true, force: true });
   fs.mkdirSync(slot, { recursive: true });
-  buildFixture(slot);
+  buildFixture(slot, variant);
   git(slot, "init", "-q", "-b", "main");
   git(slot, "config", "user.email", "eval@example.invalid");
   git(slot, "config", "user.name", "eval");
@@ -166,8 +176,12 @@ function combine(steps) {
 async function main() {
   const a = args(process.argv.slice(2));
   fs.mkdirSync(a.slots, { recursive: true });
-  const tasks = TASKS.filter((t) => a.tasks.includes(t.id));
-  const slots = Object.fromEntries(a.conditions.map((c) => [c, prepareSlot(a, c)]));
+  const tasks = ALL_TASKS.filter((t) => a.tasks.includes(t.id));
+  const unknown = a.tasks.filter((id) => !ALL_TASKS.some((t) => t.id === id));
+  if (unknown.length) throw new Error(`unknown task(s): ${unknown.join(", ")}`);
+  const variants = [...new Set(tasks.map((t) => t.fixture ?? "base"))];
+  const slots = {};
+  for (const c of a.conditions) for (const v of variants) slots[`${c}/${v}`] = prepareSlot(a, c, v);
   if (a.prepareOnly) {
     for (const [c, s] of Object.entries(slots)) console.error(`[prepare] ${c}: ${s.pristine}`);
     return;
@@ -179,7 +193,7 @@ async function main() {
       // Alternate the condition order per trial, so neither always runs on a warmer cache.
       const order = trial % 2 ? a.conditions : [...a.conditions].reverse();
       for (const condition of order) {
-        const { slot, pristine } = slots[condition];
+        const { slot, pristine } = slots[`${condition}/${task.fixture ?? "base"}`];
         restore(slot, pristine);
         clearSlotSessions(a.slots);
         let row = { at: new Date().toISOString(), model: a.model, condition, task: task.id, module: task.module, trial };

@@ -99,8 +99,23 @@ export function measure(events) {
       }
     }
   }
-  const result = [...events].reverse().find((e) => e.type === "result") ?? {};
-  const u = result.usage ?? {};
+  // One process can emit SEVERAL result events: when the agent starts a background command, Claude
+  // Code wakes it again when the command finishes, and that extra turn ends in a result of its own.
+  // Found in the hard round's smoke: rows reported 3 seconds and one turn for an agent that had
+  // wrapped 106 files, and the "answer" was "Nothing else is pending." Verified with a probe:
+  // total_cost_usd is CUMULATIVE across the results, while num_turns, duration_ms and usage are per
+  // segment. So cost is the largest total, the rest are summed, and the answer is every result's
+  // text in order — the real answer is rarely the last one.
+  const results = events.filter((e) => e?.type === "result");
+  const result = results[results.length - 1] ?? {};
+  const sumOf = (f) => results.reduce((s, r) => s + (f(r) ?? 0), 0);
+  const u = {
+    input_tokens: sumOf((r) => r.usage?.input_tokens),
+    output_tokens: sumOf((r) => r.usage?.output_tokens),
+    cache_read_input_tokens: sumOf((r) => r.usage?.cache_read_input_tokens),
+    cache_creation_input_tokens: sumOf((r) => r.usage?.cache_creation_input_tokens),
+  };
+  const costs = results.map((r) => r.total_cost_usd).filter((c) => typeof c === "number");
   const graphCalls = Object.entries(tools).filter(([n]) => n.startsWith("mcp__gitnexus__")).reduce((s, [, c]) => s + c, 0);
   // Subagents spawned. Claude Code names the tool `Agent`; older builds named it `Task`. Counted here
   // because what microscope and minions change is mostly whether, and how much, the agent fans out.
@@ -123,11 +138,12 @@ export function measure(events) {
       cacheRead: u.cache_read_input_tokens ?? 0,
       cacheCreate: u.cache_creation_input_tokens ?? 0,
     },
-    costUsd: result.total_cost_usd ?? null,
-    turns: result.num_turns ?? null,
-    durationMs: result.duration_ms ?? null,
+    costUsd: costs.length ? Math.max(...costs) : null,
+    turns: results.length ? sumOf((r) => r.num_turns) : null,
+    durationMs: results.length ? sumOf((r) => r.duration_ms) : null,
+    results: results.length,
     isError: Boolean(result.is_error),
-    resultText: typeof result.result === "string" ? result.result : "",
+    resultText: results.map((r) => (typeof r.result === "string" ? r.result : "")).filter(Boolean).join("\n\n"),
   };
 }
 
