@@ -32,7 +32,7 @@ Only Claude Code exposes tool-interception hooks, so only there do the nudges fi
 
 ### Modules
 
-`northstars` · `goldpractices` · `taskcore` · `microscope` · `consult` · `minions` · `tsjs` · `frontend` · `react` · `astgrep` · `gitnexus` · `e2e` · `all`
+`northstars` · `goldpractices` · `taskcore` · `microscope` · `consult` · `minions` · `tsjs` · `frontend` · `react` · `astgrep` · `history` · `knip` · `gitnexus` · `e2e` · `all`
 
 The default install is the first six. Each module installs and works on its own — none depends on another. **GitNexus is opt-in**: the interactive installer explains what it is and what it costs, and asks; `--features +gitnexus` adds it directly. Once installed it pushes nothing — ask for it in a prompt ("use gitnexus to find what this change affects") and the `bearing-gitnexus` skill loads.
 

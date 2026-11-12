@@ -50,6 +50,24 @@ When the user asks you to fan work out — *"use minions"*, *"fan this out"*, *"
 - **Rewrite in three steps:** `-r` without `-U` only previews the diff — read it; apply with `-U`; then run the search again and show it returns zero.
 - **Shape is not bindings.** Whether a call mentions *that* variable, refers to *that* symbol or has *that* type is not a shape question: ast-grep cannot carry a name from one part of a rule to another, and a regex on the node's text counts `errorMemory` as `error`. Parse with the language's compiler API for those — measured, it is the difference between 28 of 28 and 25.
 
+<!-- feature: history -->
+## Why code is this way — git history (intel layer)
+
+**Before changing code whose reason you do not know** — a magic number, an odd guard, a check that looks redundant — or re-proposing something that may have been tried, find the commit that made it so: the message and its PR are the only place the WHY was written down. Load `bearing-history` for the commands; the traps that point at the wrong commit:
+
+- **Plain `git blame` names the formatter.** Use `git blame -w -C -C10`; if it still lands on a reformat, rename or move, blame again from that commit's parent. `-C` alone follows moved code only for blocks of 40+ alphanumeric characters.
+- **`git log -S` lists moves too, and `-G` lists reformats** — read each diff before naming the commit that changed the behaviour. `log -L :name:file` finds no TS/JS method; use a regex range.
+- **A shallow clone blames everything to one `^boundary` commit.** Check `git rev-parse --is-shallow-repository` first. Separate "the history says why" from "it only says when".
+
+<!-- feature: knip -->
+## What is really unused — knip (intel layer)
+
+**Before deleting a file, export or dependency you believe is unused, or when asked what is dead in a JS/TS project,** run `npx -y knip@latest --reporter json` — nothing to install, nothing added to `package.json` — and load `bearing-knip` before acting on its output. Its list is **candidates, not a verdict**: unreachable from the entry points knip found is not unused.
+
+- **Live code that looks dead:** files an ORM loads by glob (entities, migrations), folders behind a template `import()`, scripts a runner or a human starts, tests under a second config. Grep each candidate's path stem as a string before deleting it; say why something is live to knip with `--config` in a file outside the repo.
+- **Dependencies are used by name too:** a driver an ORM loads, a `-r` preload, a peer. Grep the package name *with its quote* — `'@nestjs/bull'` is a prefix of `'@nestjs/bullmq'`.
+- **Delete in small batches, then typecheck, test, build and boot** — a DI framework compiles a missing provider and fails at startup.
+
 <!-- feature: tsjs -->
 ## Writing TypeScript/JavaScript (intel layer)
 

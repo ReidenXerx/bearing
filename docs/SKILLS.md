@@ -17,6 +17,8 @@ depending on the runtime. A skill ships only with the module that owns it.
 | `bearing-frontend` | frontend | building UI structure, or editing a shared component |
 | `bearing-react` | react | react-hook-form and other React traps that compile and are still wrong |
 | `bearing-astgrep` | astgrep | a question about code SHAPE, writing an ast-grep rule, or a decided rewrite at many sites |
+| `bearing-history` | history | changing code whose reason is unknown, "why is this like this?", "was this tried?" |
+| `bearing-knip` | knip | "what is unused?", before deleting a file, export or dependency believed dead |
 | `bearing-e2e` | e2e | verifying behaviour in a real browser, or taking a screenshot of a view |
 | `bearing-gitnexus` | gitnexus (opt-in) | **only when you ask for it** — "use gitnexus", "use the graph", `/bearing-gitnexus` |
 
