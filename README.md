@@ -46,7 +46,7 @@ with `npm run bearing:token-benchmark`; [the numbers, and where the graph LOSES]
 
 ## What you get
 
-**Twelve independent modules. Pick any combination — each works alone, none depends on another.**
+**Fourteen independent modules. Pick any combination — each works alone, none depends on another.**
 | | |
 |---|---|
 | ⚑ **North-stars** | **Stops killed ideas respawning six months later.** Numbered, authoritative claims about what your project *is* — **outranks every other doc**, re-injected as the session runs. |
@@ -59,6 +59,8 @@ with `npm run bearing:token-benchmark`; [the numbers, and where the graph LOSES]
 | 🧱 **Frontend** | **Stops the near-duplicate component and the silent shared-component edit.** Search by shape before building a table or a panel; an optional prop with a safe default is yours, anything that changes what existing callers render is an ask. |
 | ⚛️ **React** | **Catches the form bugs that fail silently.** A field owns its `Controller`; spreading `field` keeps the `ref` that focus-on-error needs; a `name` typed `FieldPath<T>` turns a renamed field into a compile error instead of a value missing from the payload. |
 | 🌳 **ast-grep** | **Searches and rewrites by code shape, and proves the pattern first.** Every `fetch` with no `signal`, every swallowed `catch`, a decided change at 100 sites — matched on the syntax tree, not a regex. The skill carries the traps that make it lie quietly: a pattern that does not parse returns `[]` exactly like a clean codebase, `-l ts` skips `.tsx`. On by default since a real-repo eval showed it earns it; uses ast-grep from `PATH` or `npx`, adds nothing to `package.json`. |
+| 📜 **Git history** | **Finds why code is the way it is before anyone changes it.** The commit and the PR behind a magic number or an odd guard, so a deliberate fix is not removed as noise. The skill carries where git points at the wrong commit: plain blame names the formatter, `-C` follows a moved block only past 40 characters, `log -L` finds no TypeScript method, a shallow clone blames everything to one commit. Opt-in; uses git and `gh`. |
+| 🧹 **knip** | **Finds dead code without deleting live code.** Runs [knip](https://knip.dev) with `npx` and treats its list as candidates: on a real NestJS backend 114 of 191 "unused files" were migrations TypeORM loads by glob. The skill names what makes live code look dead — glob-loaded entities, template `import()`, hand-run scripts, packages loaded by name — and how to tell knip without touching the repo. Opt-in; adds nothing to `package.json`. |
 | 🕸 **GitNexus** | **A code graph you reach for when you ask.** Opt-in: the installer explains it and asks. Say "use gitnexus" in a prompt and one skill loads — scope check, where the graph wins, where its counts are only a floor. No gates, no nudges. Requires the [GitNexus](https://github.com/abhigyanpatwari/GitNexus) MCP server. |
 | 🎭 **E2E** | **Turns "I checked it in the browser" into an exit code.** A harness your agent finishes: working substrate plus the scars, and a way to test a destructive write *without performing it*. Opt-in — it writes `.e2e/` and needs Playwright. |
 
@@ -76,7 +78,7 @@ npx bearing                                    # interactive — explains each m
 npx bearing install . --runtime claude --features northstars,taskcore
 ```
 
-`--runtime` `claude` · `zed` · `codex` · `all`  ·  `--features` `northstars` · `goldpractices` · `taskcore` · `microscope` · `consult` · `minions` · `tsjs` · `frontend` · `react` · `astgrep` · `gitnexus` · `e2e` · `all`
+`--runtime` `claude` · `zed` · `codex` · `all`  ·  `--features` `northstars` · `goldpractices` · `taskcore` · `microscope` · `consult` · `minions` · `tsjs` · `frontend` · `react` · `astgrep` · `history` · `knip` · `gitnexus` · `e2e` · `all`
 
 Later, `npx bearing doctor` tells you whether an install is still healthy — a hook registered twice,
 a hook pointing at a file an update deleted, an install older than the package — and the exact command
@@ -103,6 +105,8 @@ Claude Code** exposes them:
 | Frontend — structure and blast radius | ✅ | ✅ | ✅ |
 | React — what the types do not catch | ✅ | ✅ | ✅ |
 | ast-grep — search and rewrite by shape | ✅ | ✅ | ✅ |
+| Git history — why code is this way | ✅ | ✅ | ✅ |
+| knip — what is really unused | ✅ | ✅ | ✅ |
 | GitNexus — the graph, only when you ask | on ask | on ask | — |
 | E2E — browser verification | ✅ | ✅ | ✅ |
 

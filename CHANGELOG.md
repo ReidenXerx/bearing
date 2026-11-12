@@ -4,6 +4,27 @@ All notable changes to `bearing` are documented here.
 
 ## Unreleased — GitNexus becomes opt-in, and nothing blocks your tools any more
 
+### Added — two opt-in tools: git history as evidence, and knip for dead code
+
+Both ship the way ast-grep did: a contract section that says WHEN, a skill that carries the traps,
+nothing installed and nothing added to `package.json`. Both are opt-in until measured (NS-30).
+Every trap they teach is run by the test suite, not just read.
+
+- **`history`:** before changing code whose reason it doesn't know, the agent finds the commit and
+  the PR that made it so. The traps:
+  - plain `git blame` names the formatter;
+  - `-C` follows a moved block only past 40 alphanumeric characters (`-w -C -C10` gets through);
+  - `log -S` lists moves and `-G` lists reformats;
+  - `log -L :name:file` finds no TypeScript method (use a regex range);
+  - a shallow clone blames every line to one `^boundary` commit.
+- **`knip`:** `npx -y knip@latest` lists unused files, exports and dependencies, and the agent treats
+  that list as candidates. On a real NestJS + TypeORM backend, 114 of its 191 "unused files" were
+  migrations loaded by glob. The skill names what makes live code look dead (ORM globs, template
+  `import()`, hand-run scripts, a second test config, packages loaded by name). It also shows how to
+  tell knip with a config kept outside the repo, so the repo is never touched.
+
+`npx bearing update . --features +history,+knip` to add them.
+
 ### Changed — bearing speaks up less, and `bearing status` shows what it does
 
 bearing is for developers who already work with coding agents (NS-31). It speaks up unasked only
