@@ -22,6 +22,11 @@ npx -y knip@latest --reporter json > /tmp/knip.json   # exit 1 = it found someth
 npx -y knip@latest --include files                   # one category, human-readable
 ```
 
+**knip needs Node `^20.19` or `>=22.12`.** On an older Node it crashes (`ERR_REQUIRE_ESM` on stderr),
+prints nothing on stdout and exits 1 — the exit code for "found something" — so a `--reporter json`
+file comes out empty. An empty result there is not "nothing unused". Check
+`node -v` first; with nvm or fnm, run knip under a newer Node for that one command.
+
 Nothing is installed and nothing is added to `package.json`. Do not write a `knip.json` into the
 repo unless the user asks for one — put extra configuration in a file OUTSIDE the repo and pass
 `--config /path/outside/knip.json` (it takes `entry`, `project`, `ignore`).

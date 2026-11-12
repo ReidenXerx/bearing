@@ -62,7 +62,7 @@ When the user asks you to fan work out — *"use minions"*, *"fan this out"*, *"
 <!-- feature: knip -->
 ## What is really unused — knip (intel layer)
 
-**Before deleting a file, export or dependency you believe is unused, or when asked what is dead in a JS/TS project,** run `npx -y knip@latest --reporter json` — nothing to install, nothing added to `package.json` — and load `bearing-knip` before acting on its output. Its list is **candidates, not a verdict**: unreachable from the entry points knip found is not unused.
+**Before deleting a file, export or dependency you believe is unused, or when asked what is dead in a JS/TS project,** run `npx -y knip@latest --reporter json` — nothing to install, nothing added to `package.json` — and load `bearing-knip` before acting on its output. It needs Node `^20.19` or `>=22.12`; on an older Node it crashes with nothing on stdout and exit 1. Its list is **candidates, not a verdict**: unreachable from the entry points knip found is not unused.
 
 - **Live code that looks dead:** files an ORM loads by glob (entities, migrations), folders behind a template `import()`, scripts a runner or a human starts, tests under a second config. Grep each candidate's path stem as a string before deleting it; say why something is live to knip with `--config` in a file outside the repo.
 - **Dependencies are used by name too:** a driver an ORM loads, a `-r` preload, a peer. Grep the package name *with its quote* — `'@nestjs/bull'` is a prefix of `'@nestjs/bullmq'`.

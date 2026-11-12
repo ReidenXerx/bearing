@@ -21,7 +21,9 @@ Every trap they teach is run by the test suite, not just read.
   that list as candidates. On a real NestJS + TypeORM backend, 114 of its 191 "unused files" were
   migrations loaded by glob. The skill names what makes live code look dead (ORM globs, template
   `import()`, hand-run scripts, a second test config, packages loaded by name). It also shows how to
-  tell knip with a config kept outside the repo, so the repo is never touched.
+  tell knip with a config kept outside the repo, so the repo is never touched. knip needs Node `^20.19`
+  or `>=22.12`, above bearing's own floor; on an older Node it crashes with nothing on stdout, and the
+  skill says so.
 
 `npx bearing update . --features +history,+knip` to add them.
 
