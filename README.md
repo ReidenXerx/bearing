@@ -51,7 +51,7 @@ with `npm run bearing:token-benchmark`; [the numbers, and where the graph LOSES]
 | 🏅 **Gold practices** | **The mistakes that get made anyway.** Numbered `GP-#` rules earned from real defects — a claim from reading rather than running is unverified, a test that has never failed has never been tested. Language- and project-neutral. |
 | 💾 **Task-core** | **Survives compaction.** A dense save-state of the current task, written **before** the summary lands and drops the detail. |
 | 🔬 **Microscope** | **Catches code that runs perfectly and is still wrong.** Say "microscope this" and a panel of lens agents reviews as an expert in *your* domain — each finding must survive its own refutation pass. |
-| 🙋 **Consult** | **Asks about the right things, decides the rest.** Asks you only what isn't in the repo — which reading you meant, what a user should see — and decides everything else. Confirms before anything irreversible. |
+| 🙋 **Consult** | **Asks about the right things, decides the rest.** Asks you only what isn't in the repo — which reading you meant, what a user should see — as options you click, not a paragraph you write, and decides everything else. Confirms before anything irreversible. |
 | 🐜 **Minions** | **Parallelises wide mechanical work, when you say so.** Cheap anchored subagents return **citations, not opinions** — they gather; your agent concludes. Invasive minions do the same for a *decided* change: each applies it to its own slice in an isolated worktree, and your agent reviews every slice before it lands. |
 | 🧪 **TS/JS rules** | **Catches code that compiles and is still wrong.** Numbered `TS-#` rules for the traps `tsc` and ESLint both stay silent about — `as` that verifies nothing, a union that falls through on the next variant, `||` overwriting a deliberate `0`. |
 | 🧱 **Frontend** | **Stops the near-duplicate component and the silent shared-component edit.** Search by shape before building a table or a panel; an optional prop with a safe default is yours, anything that changes what existing callers render is an ask. |
@@ -219,11 +219,11 @@ Permission to rename a file; silence while they invent a business rule. Consult 
 
 **The test that does most of the work: is the answer discoverable in the repo?** Code, tests, config, git history, north-stars — then it goes and finds it, because asking is offloading. If it exists only in *your* head — which of two readings you meant, which tradeoff you prefer, what a user should actually see — no amount of reading produces it. **That** is the question.
 
-And it asks **before** it writes the rule, not after: closed options, the tradeoff, and the one it recommends, so a one-word reply settles it. Never *"shall I proceed?"* — that is not a question, it is accountability being handed back to you.
+And it asks **before** it writes the rule, not after — as options you click, not a question you have to answer in a paragraph: two to four concrete choices, its recommendation first, one line of tradeoff each, and related questions in one prompt so you answer once. Never *"shall I proceed?"* — that is not a question, it is accountability being handed back to you.
 
 **One-way doors are a different act.** Deleting data, force-pushing, publishing, migrating — it *confirms*, even when the right answer is obvious, because irreversible is the reason, not ambiguity. Reversible work needs no permission.
 
-Then the part that compounds: **an answer that is a RULE gets proposed as a north-star.** Not every answer — a rule constrains future work, an instance doesn't. Ask once, write it down, never ask again.
+Most answers are just applied. The rare one that is a **rule** — one a future task would otherwise break — gets proposed as a north-star in the same reply, so that question is never asked again.
 
 ## 🐜 Minions
 
