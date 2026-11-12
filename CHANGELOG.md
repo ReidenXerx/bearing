@@ -4,6 +4,17 @@ All notable changes to `bearing` are documented here.
 
 ## Unreleased — GitNexus becomes opt-in, and nothing blocks your tools any more
 
+### Fixed — every hook ran twice in a repo that was once installed in stealth mode
+
+A stealth install registers bearing's hooks in `.claude/settings.local.json`; a shared install
+registers them in `.claude/settings.json`. Install and update only ever wrote the current file, so a
+repo that moved from stealth to shared kept the old registrations, and Claude Code ran both sets.
+The north-star reminder doubled on every doc write, and the retired guards and nudges stayed
+registered against files the update had already deleted, failing on every tool call. Found on
+bearing's own repo. A shared install or update now removes bearing's own hook groups from the local
+file. Your own hooks stay, and the file is deleted only if nothing else is in it. A stealth install
+still never edits the shared file, which may be your team's.
+
 ### Changed — consult asks with options you click, not a question you answer in a paragraph
 
 Consult exists so the agent can get your preference without friction. You pick one of its options
