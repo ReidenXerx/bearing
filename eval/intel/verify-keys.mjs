@@ -60,3 +60,55 @@ export function deriveFromText(dir) {
     handlersExcluded: [...excluded].sort(),
   };
 }
+
+/**
+ * The hard variant's keys, from text alone. F2 needs the most care: whether a job breaks the
+ * idempotency rule depends on what its key EXPRESSION does — including a helper defined in the same
+ * file or exported from src/ledger/keys.ts — so this reads the expression and follows the helper,
+ * which is the judgment the task asks of the agent, done here by rule instead.
+ */
+export function deriveHardFromText(dir) {
+  const stripBlock = (s) => s.replace(/\/\*[\s\S]*?\*\//g, "");
+  const unstable = /Date\.now|Math\.random|randomUUID|\+\+/;
+  const keysSrc = fs.readFileSync(path.join(dir, "src/ledger/keys.ts"), "utf8");
+  const shared = {};
+  for (const m of keysSrc.matchAll(/export const (\w+) = \(([^)]*)\)[^=]*=>\s*([^;]+);/g)) shared[m[1]] = m[3];
+  /** Does a key expression or helper body yield the same, per-event key on every retry? */
+  const stableAndPerEvent = (expr) => !unstable.test(expr) && /\be(vt)?\.id\b/.test(expr);
+
+  const violators = [];
+  const jDir = path.join(dir, "src/jobs");
+  for (const f of fs.readdirSync(jDir).sort()) {
+    const src = stripBlock(fs.readFileSync(path.join(jDir, f), "utf8"));
+    const call = src.match(/postIdempotent\(([^;]*)\);/)[1];
+    const key = call.match(/idempotencyKey:\s*(.+?)\s*\}\s*$/)?.[1];
+    let ok;
+    if (!key) ok = false;
+    else if (/^keyOf\(evt\)$/.test(key)) ok = stableAndPerEvent(src.match(/function keyOf\([^)]*\)[^{]*\{([\s\S]*?)\n\}/)[1]);
+    else if (/^(\w+)\((evt)?\)$/.test(key) && shared[key.match(/^(\w+)/)[1]] !== undefined) ok = stableAndPerEvent(shared[key.match(/^(\w+)/)[1]]);
+    else ok = stableAndPerEvent(key);
+    if (!ok) violators.push(`src/jobs/${f}`);
+  }
+
+  const policy = fs.readFileSync(path.join(dir, "src/routes/policy.ts"), "utf8");
+  const excluded = JSON.parse(policy.match(/ROUTE_EXCLUDED = (\[[^\]]*\])/)[1]);
+  const toWrap = [];
+  const wrapped = [];
+  const withBatch = [];
+  const rDir = path.join(dir, "src/routes");
+  for (const f of fs.readdirSync(rDir).sort()) {
+    if (f === "policy.ts") continue;
+    const name = f.replace(/\.ts$/, "");
+    if (excluded.includes(name)) continue;
+    const src = fs.readFileSync(path.join(rDir, f), "utf8");
+    (/withAudit\(/.test(src) ? wrapped : toWrap).push(name);
+    if (/export async function handleBatch/.test(src)) withBatch.push(name);
+  }
+  return {
+    jobViolators: violators,
+    routesToWrap: toWrap.sort(),
+    routesWithBatch: withBatch.sort(),
+    routesAlreadyWrapped: wrapped.sort(),
+    routesExcluded: [...excluded].sort(),
+  };
+}

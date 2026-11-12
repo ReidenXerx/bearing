@@ -18,6 +18,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
+import { hardFiles } from "./fixture-hard.mjs";
 
 // ── F1: who calls postEntry from src/ledger/post.ts ─────────────────────────
 // direct · alias (import { postEntry as post }) · ns (import * as ledger) · barrel (via
@@ -150,8 +151,11 @@ When a source conflicts with a north-star, the north-star wins and that source i
   end; it does not today.
 `;
 
-/** Every file of the fixture, as [relPath, content]. */
-export function fixtureFiles() {
+/**
+ * Every file of the fixture, as [relPath, content]. `variant` "hard" adds fixture-hard.mjs's files on
+ * top: a separate slot, so the first round's tasks keep the repo they were measured on.
+ */
+export function fixtureFiles(variant = "base") {
   const files = [];
   const add = (rel, content) => files.push([rel, content]);
 
@@ -202,12 +206,14 @@ export function fixtureFiles() {
   // A suite the agent can run. It covers what exists, so it never answers a task's question.
   add("test/fees.test.ts", `import { test } from "node:test";\nimport assert from "node:assert/strict";\nimport { platformFee } from "../src/fees.ts";\n\ntest("fee is 2.9% of the net amount, rounded", () => {\n  assert.equal(platformFee(10_000), 290);\n  assert.equal(platformFee(8_000), 232);\n});\n`);
   add("test/handlers.test.ts", `import { test } from "node:test";\nimport assert from "node:assert/strict";\nimport { handle } from "../src/handlers/getAccount.ts";\n\ntest("a handler answers", async () => {\n  assert.deepEqual(await handle({ id: "a1" }), { status: 200, body: "getAccount:a1" });\n});\n`);
+  if (variant === "hard") files.push(...hardFiles());
+  else if (variant !== "base") throw new Error(`unknown fixture variant: ${variant}`);
   return files;
 }
 
 /** Write the fixture into an empty directory. */
-export function buildFixture(dir) {
-  for (const [rel, content] of fixtureFiles()) {
+export function buildFixture(dir, variant = "base") {
+  for (const [rel, content] of fixtureFiles(variant)) {
     const p = path.join(dir, rel);
     fs.mkdirSync(path.dirname(p), { recursive: true });
     fs.writeFileSync(p, content);

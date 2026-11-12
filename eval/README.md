@@ -18,6 +18,7 @@ the fixture was built.
 ```bash
 node eval/intel/run.mjs --prepare-only                          # build the off / on slots, check them
 node eval/intel/run.mjs --tasks all --trials 3 --model sonnet  # costs real money — see below
+node eval/intel/run.mjs --tasks hard --trials 3 --model sonnet # the hard round, ~$3.50 per trial
 node eval/intel/report.mjs ~/.cache/bearing-eval/intel/results-sonnet.jsonl > eval/intel/REPORT.md
 ```
 
@@ -28,6 +29,18 @@ decision rule (keep / rework / cut) is written in `report.mjs` before any run. E
 to pass a right answer and fail a wrong one in `lib/kit.test.mjs` before it scores anything (NS-9).
 
 A run is one headless session per task per condition, each capped by `--max-budget-usd` (default 5).
+
+**The hard round** (`--tasks hard`) is a second set of four tasks for the modules the first round put at
+the ceiling: task-core, microscope and minions. It runs on a fixture variant of its own
+(`fixture-hard.mjs`), in its own slots, so the first round's repo is unchanged.
+
+- **K2:** a ten-rule spec survives two unrelated jobs and two compactions.
+- **M3:** a "finished" feature has four semantic bugs, checked by running it.
+- **F2:** 200 jobs are audited against a rule grep can't apply.
+- **I2:** a decided change goes to 106 sites in seven shapes, with 14 sites to leave alone.
+
+Each task also reports `found`, a partial-credit count, so two conditions that both pass can still be
+told apart. Results: [`intel/REPORT-HARD.md`](intel/REPORT-HARD.md).
 
 ---
 
