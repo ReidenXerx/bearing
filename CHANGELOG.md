@@ -44,7 +44,7 @@ is gone.
 
 ### Added — ast-grep: search and rewrite by code shape, with the pattern proven first
 
-A new opt-in module, `astgrep`. When the question is about the shape of code, the agent searches the
+A new module, `astgrep`, on by default. When the question is about the shape of code, the agent searches the
 syntax tree instead of writing a regex. Examples: every `fetch` with no `signal`, every `catch` that
 swallows, every handler not wrapped in the audit call. A regex misses a call split over three lines
 and matches the same words in a comment; ast-grep does neither. Text questions stay with grep.
@@ -64,7 +64,10 @@ Rewrites are previewed, applied, then searched again to show zero remain.
 ast-grep comes from `PATH`, or from `npx -y -p @ast-grep/cli ast-grep` on first use. Plain
 `npx @ast-grep/cli` fails. Nothing is added to your `package.json`.
 
-The module is off by default until an eval shows agents use it and do better (NS-23). The test
+It is a **default module**, decided on evidence rather than enthusiasm. It started opt-in. A
+real-repo eval then showed agents given it used it every time, and with the skill's "shape is not
+bindings" rule (below) they were as right as without it on Sonnet and more right on Haiku (9/9
+against 7/9) — see `eval/intel/REPORT-REAL.md` and NS-30. `--features -astgrep` leaves it out. The test
 suite runs every trap the teaching claims against the latest ast-grep release, so the day one of
 them stops being true, the test fails. Writing that test is how the first trap above was found:
 the skill had said "exits 0 with a warning", which is only true with `-l`.
