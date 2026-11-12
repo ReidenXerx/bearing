@@ -52,6 +52,7 @@ When the user asks you to fan work out — *"use minions"*, *"fan this out"*, *"
 - **Run it as** `ast-grep run -p '<pattern>' <path>` — or `npx -y -p @ast-grep/cli ast-grep …` where it is not installed (plain `npx @ast-grep/cli` fails). **Leave `-l` out** to search a mixed tree: each file is parsed by its own extension. `-l ts` silently skips every `.tsx`.
 - **A zero is not absence until the pattern has matched something you know is there.** A pattern that does not parse prints `[]` — run without `-l`, with the same exit code as "no matches" and no warning at all. Prove the pattern — and every sub-rule inside a `not:` or `has:` — on one known site first (`--stdin`), and count what grep finds for the same name to explain the difference.
 - **Rewrite in three steps:** `-r` without `-U` only previews the diff — read it; apply with `-U`; then run the search again and show it returns zero.
+- **Shape is not bindings.** Whether a call mentions *that* variable, refers to *that* symbol or has *that* type is not a shape question: ast-grep cannot carry a name from one part of a rule to another, and a regex on the node's text counts `errorMemory` as `error`. Parse with the language's compiler API for those — measured, it is the difference between 28 of 28 and 25.
 
 <!-- feature: tsjs -->
 ## Writing TypeScript/JavaScript (intel layer)

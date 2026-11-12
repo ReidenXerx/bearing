@@ -4,6 +4,22 @@ All notable changes to `bearing` are documented here.
 
 ## Unreleased — GitNexus becomes opt-in, and nothing blocks your tools any more
 
+### Changed — the ast-grep skill knows when NOT to use ast-grep
+
+Measured on a real 650-file backend (`eval/intel/REPORT-REAL.md`). Agents with the module used
+ast-grep every time, and were wrong more often on one kind of question: *does this error log mention
+the caught variable?* That is about **bindings**, not shape. ast-grep cannot carry a name from one
+part of a rule to another: a `$E` captured in `inside:` is a fresh wildcard in `not: has:`, so the
+rule excludes everything. The agents fell back to matching text, and counted `errorMemory` as `error`.
+They missed 2–3 of 28 sites in every trial; agents without the module parsed with the TypeScript
+compiler and got all 28.
+
+The skill now says so (§1a), and so does the contract. A question about which variable, symbol or
+type goes to the language's compiler API. Re-measured: Sonnet 3/3 on that task, from 0/3. It loaded
+the skill, then chose the compiler instead of ast-grep. Haiku with the module passed 9 of 9 across the
+three tasks, against 7 of 9 without, and the gain was the 74-site rewrite. The test suite executes both
+halves of the new claim against the latest ast-grep.
+
 ### Added — `bearing doctor`: is this install healthy, right now
 
 `npx bearing doctor [repo]` reads an install and changes nothing. `--all <folder>` checks every install

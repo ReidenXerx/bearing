@@ -22,12 +22,32 @@ pattern before you trust its count.
 | Every `catch` with an empty body; every `await` inside a loop | ast-grep |
 | Every route handler not wrapped in `withAudit(…)` | ast-grep (`not: inside:`) |
 | A decided rewrite of one call shape at many sites | ast-grep `-r`, previewed, then `-U` |
+| Does this call mention **the caught variable**; is this **the same symbol**; is this value **of type T** | the language's compiler API — **not ast-grep** (§1a) |
 | A name in comments, docs, config, logs, SQL strings | grep |
 | "Where is this error message produced?" | grep |
 | One known file, one obvious edit | just edit it |
 
 If you would need a regex that spans lines, or a regex plus "but not in comments", the question is
 structural.
+
+### 1a. Shape is not bindings — where ast-grep is the wrong tool
+
+ast-grep sees syntax. It does not know which declaration a name refers to, and **a rule cannot carry
+a name from one part of itself to another**: a `$E` captured in `inside:` is a fresh wildcard again
+inside `not: has:`, so `not: { has: { pattern: $E } }` excludes *everything* — each half of such a
+rule matches on its own, and together they return `[]`. The fallback agents reach for, a `regex:` on
+the node's text, is worse: it counts `errorMemory` as a mention of `error`, and the word inside
+`'Unknown error'` too.
+
+This was measured, not guessed. On a real 650-file backend, agents using ast-grep for "error logs in a
+`catch` that never mention the caught variable" missed 2–3 of 28 sites in every trial. Agents that
+parsed the code with the TypeScript compiler and compared identifiers got all 28, every time.
+
+So when the question turns on **which variable, which symbol, or which type** — "does it reference
+the parameter", "is this the same `logger`", "every call whose argument is a `Date`" — write a short
+script against the language's own parser instead. For TypeScript/JavaScript: `ts.createSourceFile`
+and a walk, comparing `Identifier.text` within the right scope; for types, `ts.createProgram` and its
+type checker. ast-grep can still FIND the candidates; the binding check is the compiler's job.
 
 ## 2. Running it
 
