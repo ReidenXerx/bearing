@@ -209,7 +209,6 @@ export function northStarsDigest(root, max = 0) {
  * @returns {number} the count AFTER this call
  */
 export function bumpNorthStarCounter(root, reset = false, key = null) {
-  const { stateDir, northStarCounter } = sessionPaths(root);
   // ONE COUNTER PER CHAT, not per repo — the same correction the task-core was given, and for the
   // same reason: several agent sessions in one repository is the normal case, not the edge one.
   // A single shared counter meant every concurrent agent bumped it, so with N sessions the repo
@@ -218,30 +217,177 @@ export function bumpNorthStarCounter(root, reset = false, key = null) {
   // bumps per one of the observing agent's own tool calls, and 391 anchors in a single repo's
   // telemetry against 8 impact gates fleet-wide. Its neighbours `.bearing-microscope-<key>.json`
   // and `.bearing-consult-<key>.flag` were already keyed; this one was not.
-  const counterPath = key
+  const state = readNorthStarState(root, key);
+  const next = reset ? 0 : state.n + 1;
+  writeNorthStarState(root, key, { ...state, n: next });
+  return next;
+}
+
+function northStarStatePath(root, key) {
+  const { stateDir, northStarCounter } = sessionPaths(root);
+  return key
     ? path.join(stateDir, `.gitnexus-northstar-counter-${sessionKey(key)}.json`)
     : northStarCounter;
-  let n = 0;
-  if (!reset) {
-    try {
-      n = JSON.parse(fs.readFileSync(counterPath, 'utf8')).n || 0;
-    } catch {
-      n = 0;
-    }
-  }
-  const next = reset ? 0 : n + 1;
+}
+
+/** @returns {{n: number, ctx: number|null}} calls since the last anchor, context size at the last full one */
+function readNorthStarState(root, key) {
   try {
-    fs.mkdirSync(stateDir, { recursive: true });
+    const j = JSON.parse(fs.readFileSync(northStarStatePath(root, key), 'utf8'));
+    return { n: Number(j.n) || 0, ctx: Number.isFinite(j.ctx) ? j.ctx : null };
+  } catch {
+    return { n: 0, ctx: null };
+  }
+}
+
+function writeNorthStarState(root, key, state) {
+  const p = northStarStatePath(root, key);
+  try {
+    fs.mkdirSync(path.dirname(p), { recursive: true });
     // Two PostToolUse hooks run per tool call and both touch session state. Write-then-rename so a
     // concurrent reader never observes a partially-written file. (Lost updates are still possible
     // and are benign here: the anchor fires a little later than configured.)
-    const tmp = `${counterPath}.${process.pid}.tmp`;
-    fs.writeFileSync(tmp, JSON.stringify({ n: next }));
-    fs.renameSync(tmp, counterPath);
+    const tmp = `${p}.${process.pid}.tmp`;
+    fs.writeFileSync(tmp, JSON.stringify(state));
+    fs.renameSync(tmp, p);
   } catch {
     /* best-effort — a missing counter just means we anchor again sooner */
   }
-  return next;
+}
+
+/**
+ * The context size, in tokens, when the last FULL anchor fired (or when this chat was first seen).
+ * @returns {number|null} null when no baseline has been recorded yet
+ */
+export function northStarBaseline(root, key = null) {
+  return readNorthStarState(root, key).ctx;
+}
+
+/** Record the context size a full anchor just re-established (or a fresh baseline). */
+export function setNorthStarBaseline(root, key, ctx) {
+  const state = readNorthStarState(root, key);
+  writeNorthStarState(root, key, { ...state, ctx });
+}
+
+/**
+ * How many tokens the agent's context holds right now, read from the newest main-chain `usage`
+ * record in the Claude Code transcript.
+ *
+ * This is the SIZE of the context, which the transcript records on every assistant turn — not the
+ * WINDOW, which it never records (NS-19). The anchor needs only the size: how much has been added
+ * since the north-stars were last in front of the agent is what dilutes them. A count of tool calls
+ * was a poor stand-in — measured on this repo, 25 calls added anywhere from 25k (p10) to 65k (p90)
+ * tokens, and up to 155k.
+ *
+ * NS-7: this runs on every tool call, so it reads a bounded TAIL of the file, never the whole of it.
+ * NS-8: any surprise — no file, a format that changed, no usage line in the tail — returns null and
+ * the caller falls back to counting calls.
+ * @param {string} transcriptPath
+ * @param {number} tailBytes
+ * @returns {number|null}
+ */
+export function transcriptContextTokens(transcriptPath, tailBytes = 1 << 20) {
+  if (!transcriptPath) return null;
+  let fd;
+  try {
+    fd = fs.openSync(transcriptPath, 'r');
+    const size = fs.fstatSync(fd).size;
+    const len = Math.min(size, tailBytes);
+    const buf = Buffer.alloc(len);
+    fs.readSync(fd, buf, 0, len, size - len);
+    const lines = buf.toString('utf8').split('\n');
+    // The first line of the tail is usually cut mid-record; JSON.parse rejects it and we move on.
+    for (let i = lines.length - 1; i >= 0; i--) {
+      const l = lines[i];
+      if (!l.includes('"usage"')) continue;
+      let rec;
+      try {
+        rec = JSON.parse(l);
+      } catch {
+        continue;
+      }
+      // A subagent's turns describe ITS context, not this agent's.
+      if (rec.isSidechain) continue;
+      const u = rec.message?.usage;
+      if (!u) continue;
+      const total =
+        (Number(u.input_tokens) || 0) +
+        (Number(u.cache_read_input_tokens) || 0) +
+        (Number(u.cache_creation_input_tokens) || 0);
+      if (total > 0) return total;
+    }
+    return null;
+  } catch {
+    return null;
+  } finally {
+    if (fd !== undefined) {
+      try {
+        fs.closeSync(fd);
+      } catch {
+        /* already closed */
+      }
+    }
+  }
+}
+
+// Words too common to say what a sentence is ABOUT. Kept short on purpose: an over-eager list
+// removes domain words, and a missed common word only adds a little noise to every score equally.
+const NS_STOPWORDS = new Set(
+  ('that this with from have when what which their there they them then than into only also ' +
+    'each other were will your been being here same after before about because where while ' +
+    'should would could these those does just more must never every always any all not but ' +
+    'for the and are was its can how why who our out own one two use used using has had you ' +
+    'get got let put see new old way too may now off per via yes did don isn doesn')
+    .split(' '),
+);
+
+// A crude stem, so "registered" meets "registration" and "subagents" meets "subagent". It only has
+// to make two forms of one word collide; it never has to produce a real word.
+function stem(w) {
+  return w.replace(/(?:ations?|ings?|ed|es|s)$/, '').replace(/(.)\1$/, '$1') || w;
+}
+
+function contentWords(text) {
+  const out = new Set();
+  // Three letters is the floor: "npm", "git", "tsx" carry meaning here.
+  for (const w of String(text).toLowerCase().match(/[a-z][a-z0-9_]{2,}/g) || []) {
+    if (!NS_STOPWORDS.has(w)) out.add(stem(w));
+  }
+  return out;
+}
+
+/**
+ * The north-stars that what the agent just WROTE is about — so the anchor after a doc write can
+ * carry three relevant claims instead of all of them.
+ *
+ * Scored by shared content words, plus a large bonus for an explicit `NS-#` in the text: an agent
+ * that cites one is telling you exactly which it is relying on. This is lexical, so it can miss a
+ * north-star that applies in different words; the periodic FULL anchor is the backstop for that.
+ * @param {string[]} lines full NS-# lines (from northStarsDigest)
+ * @param {string} text what was written
+ * @param {{max?: number, minScore?: number}} [opts]
+ * @returns {string[]} the matching lines, most relevant first; [] when nothing clears the bar
+ */
+export function relevantNorthStars(lines, text, { max = 4, minScore = 2.5 } = {}) {
+  const words = contentWords(text);
+  const cited = new Set((String(text).match(/\bNS-\d+\b/g) || []).map((s) => s.toUpperCase()));
+  const lineWords = lines.map(contentWords);
+  // A word in every north-star says nothing about which one applies; a word in one says a lot.
+  // And a plain overlap count ranks the LONGEST north-star first for any long document — measured
+  // on this repo, the longest one topped all five real docs tried. So: rare words weigh more, and a
+  // line's score is divided by the square root of its length.
+  const df = new Map();
+  for (const ws of lineWords) for (const w of ws) df.set(w, (df.get(w) || 0) + 1);
+  const scored = [];
+  lines.forEach((line, i) => {
+    const id = (line.match(/^NS-\d+/) || [''])[0].toUpperCase();
+    let overlap = 0;
+    for (const w of lineWords[i]) if (words.has(w)) overlap += Math.log((lines.length + 1) / df.get(w));
+    const score = (cited.has(id) ? 100 : 0) + overlap / Math.sqrt(Math.max(lineWords[i].size, 1) / 10);
+    if (score >= minScore) scored.push({ line, score, i });
+  });
+  scored.sort((a, b) => b.score - a.score || a.i - b.i);
+  return scored.slice(0, max).map((s) => s.line);
 }
 
 // ── Fallback → telemetry bridge (a "where did GitNexus fail" report log) ──────

@@ -199,6 +199,11 @@ export function loadHookConfig(root) {
     // design smell, not a config problem: it means judgment was delegated.
     minionModel: "sonnet",
     northStarAnchorEvery: 25,
+    // The full re-anchor fires once the agent's context has GROWN by this many tokens since the
+    // north-stars were last in front of it — the size is read from the transcript (NS-19: the size,
+    // never the window). 40k is the median growth of the old 25-call rhythm, measured on this repo.
+    // 0, or a transcript whose size cannot be read, falls back to every `northStarAnchorEvery` calls.
+    northStarAnchorEveryTokens: 40000,
     // Cap on how many NS-# propositions the re-anchor repeats. Each is clipped to its opening
     // claim, so the whole set normally fits; raise this only for an unusually large north-stars doc.
     northStarAnchorMaxLines: 80,
@@ -234,6 +239,8 @@ function applyHookConfigFile(cfg, cfgPath) {
       cfg.minionModel = file.minionModel.trim();
     if (typeof file.northStarAnchorEvery === "number")
       cfg.northStarAnchorEvery = file.northStarAnchorEvery;
+    if (typeof file.northStarAnchorEveryTokens === "number")
+      cfg.northStarAnchorEveryTokens = file.northStarAnchorEveryTokens;
     if (typeof file.northStarAnchorMaxLines === "number")
       cfg.northStarAnchorMaxLines = file.northStarAnchorMaxLines;
     if (Array.isArray(file.sourceExts) && file.sourceExts.length) {
