@@ -71,6 +71,11 @@ npx bearing install . --runtime claude --features northstars,taskcore
 
 `--runtime` `claude` · `zed` · `codex` · `all`  ·  `--features` `northstars` · `goldpractices` · `taskcore` · `microscope` · `consult` · `minions` · `tsjs` · `frontend` · `react` · `astgrep` · `gitnexus` · `e2e` · `all`
 
+Later, `npx bearing doctor` tells you whether an install is still healthy — a hook registered twice,
+a hook pointing at a file an update deleted, an install older than the package — and the exact command
+that fixes each. `npx bearing doctor ~/Projects --all` checks every install under a folder. It changes
+nothing.
+
 Then restart your IDE. The moments a module speaks up need tool-interception hooks, and **only
 Claude Code** exposes them:
 

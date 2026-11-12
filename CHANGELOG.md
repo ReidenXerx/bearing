@@ -4,6 +4,28 @@ All notable changes to `bearing` are documented here.
 
 ## Unreleased — GitNexus becomes opt-in, and nothing blocks your tools any more
 
+### Added — `bearing doctor`: is this install healthy, right now
+
+`npx bearing doctor [repo]` reads an install and changes nothing. `--all <folder>` checks every install
+under it; `--json` for scripts. It exits 1 when something is wrong, and each finding names the command
+that fixes it — the test suite runs that command and checks it does.
+
+It exists because of the bug fixed below: every hook ran twice in bearing's own repo for weeks,
+and two registrations failed on every tool call, with nothing to say so. The post-install checks could
+not see it: they run once, on the files the install wrote, and the stale file was not one of them.
+
+What it checks, beyond every post-install check:
+- **each hook registered once**, across both `settings.json` and `settings.local.json`;
+- **every registered hook exists** on disk;
+- **the install is as new as the package**;
+- **no retired hook settings**, and which fix applies: `update` removes a value bearing seeded; a value
+  you chose is yours, and doctor tells you to delete it rather than promising update will.
+
+A clone or worktree of a repo that committed its install has no manifest, since the manifest is
+gitignored. Doctor reports that as a warning with `bearing update` as the fix, never as "not installed".
+The first run across 28 local installs said `bearing install` for 17 of them; that advice was wrong and
+is gone.
+
 ### Added — ast-grep: search and rewrite by code shape, with the pattern proven first
 
 A new opt-in module, `astgrep`. When the question is about the shape of code, the agent searches the

@@ -39,7 +39,7 @@ const implied = VERB_SUFFIX.find(([suffix]) => invokedAs.endsWith(suffix))?.[1];
 // wrapper treats the first argument as a PATH and quietly runs an install against it, so
 // `bearing statusline` became `install ./statusline` and failed with "Not a git repository".
 // Caught by running the packed binary rather than lib/kit.mjs, which is the only way this shows up.
-const VERBS = new Set(["install", "update", "update-all", "uninstall", "statusline"]);
+const VERBS = new Set(["install", "update", "update-all", "uninstall", "statusline", "doctor"]);
 const VERBLESS_FLAGS = new Set(["--help", "-h", "--version", "-v"]);
 const first = argv[0];
 const needsImpliedInstall =
