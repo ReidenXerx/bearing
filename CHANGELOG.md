@@ -4,6 +4,23 @@ All notable changes to `bearing` are documented here.
 
 ## Unreleased — GitNexus becomes opt-in, and nothing blocks your tools any more
 
+### Changed — consult asks with options you click, not a question you answer in a paragraph
+
+Consult exists so the agent can get your preference without friction. You pick one of its options
+instead of writing a message to explain what you want. It wasn't doing that: the choice tool was one
+footnote in the skill and absent from the contract, and every run that asked in the eval ended
+"reply 1a, 2a", which is still a message you have to type.
+
+- **Ask with the structured choice tool when the agent has one** (Claude Code: `AskUserQuestion`).
+  It offers two to four concrete options, puts its recommendation first and marks it, and gives one
+  line of tradeoff each. "Other" is always there.
+- **Related questions arrive in one prompt** (up to four), so you answer once instead of across a
+  back-and-forth.
+- **Runtimes without the tool** still ask in numbered prose, so "1a" is a complete reply.
+- **Fewer north-star proposals.** Most answers are simply applied. Only the rare answer that a future
+  task would otherwise break is proposed as a north-star, in the same reply, never as a separate
+  question.
+
 ### Changed — microscope and minions run when you ask, not on their own
 
 Microscope and minions were always tools you invoke: *"microscope this"*, *"fan this out"*. bearing

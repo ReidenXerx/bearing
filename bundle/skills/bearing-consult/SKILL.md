@@ -64,9 +64,16 @@ assumption to confirm. Not one asked first.
 
 ## 4. How to ask, if you are asking
 
-A senior engineer does not want *"what do you think?"* — that is your thinking, outsourced.
+A senior engineer does not want *"what do you think?"* — that is your thinking, outsourced. Nor
+do they want to write you a paragraph explaining what they prefer. **Asking well means the answer is a
+click, not a message.**
 
-- **Closed, not open.** Two or three concrete options, not a blank prompt.
+- **Use the structured choice tool when you have one.** In Claude Code that is `AskUserQuestion`:
+  the user clicks an option instead of typing, and "Other" is always offered for what you did not
+  foresee. Put your recommendation FIRST and mark it "(Recommended)". Where comparing options needs a
+  look — two API shapes, two layouts — add a short preview. Without the tool, ask in prose, numbered,
+  so "1a" is a complete reply.
+- **Closed, not open.** Two to four concrete options, not a blank prompt.
 - **State the tradeoff**, one line each. What each choice costs.
 - **Recommend one**, and say why. You have read the code; they have not, today.
 - **Say which one you would pick**, so a one-word reply settles it. If you cannot, you are not ready
@@ -74,10 +81,13 @@ A senior engineer does not want *"what do you think?"* — that is your thinking
   implementing your pick "pending confirmation" is the invention this skill exists to prevent.
 - **If they told you to proceed without asking**, take your recommendation, and say on the first
   line of your reply which rule you chose — not in a footnote.
-- **One question, one decision.** Bundling three unrelated choices makes all three worse.
-
-> Claude Code has a structured multiple-choice tool for this. Elsewhere, ask in prose — the
-> judgment above is identical, only the presentation differs.
+- **One question per decision — but related decisions in ONE prompt.** Each question settles one
+  thing; three choices folded into one option list make all three worse. Send the decisions a task
+  needs together (the tool takes up to four), so the user answers once instead of across a
+  back-and-forth.
+- **Make every option self-explaining.** A label of a few words and one line of what choosing it
+  means. If the user has to scroll back through your message to understand an option, the question
+  is not finished.
 
 ## 5. One-way doors are a DIFFERENT act — confirm, do not consult
 
@@ -100,13 +110,16 @@ cannot be undone, and wait.
 The inverse is equally binding: **a reversible act does not need confirmation.** Asking permission
 to edit a file is the noise this skill exists to remove.
 
-## 6. After they answer — is it a RULE or an INSTANCE?
+## 6. After they answer — apply it; record it only if it is a RULE
 
-An answer worth keeping is one a FUTURE task could violate.
+**Most answers are instances: apply them and move on.** Consult exists to get the user's preference
+cheaply, not to grow the north-stars — a proposal after every answer turns a one-click question back
+into a conversation. Only an answer a FUTURE task could violate is worth recording.
 
 - **A rule** — *"fees are computed on net, never gross"*, *"we never block a commit on the indexer"*.
-  It constrains decisions beyond this task. **Propose it as a north-star**, so the question is asked
-  once and never again. Never write one silently; propose it and let them decide.
+  It constrains decisions beyond this task. **Propose it as a north-star** — one line, in the same
+  reply, never as a separate question — so it is asked once and never again. Never write one
+  silently; propose it and let them decide. This is the rare case, not the follow-up to every choice.
 - **An instance** — *"call it `orderTotal`"*, *"put it in `utils/`"*. It constrains nothing further.
   Just do it. A north-star for every answer is its own kind of noise, and a bloated anchor stops
   being read.

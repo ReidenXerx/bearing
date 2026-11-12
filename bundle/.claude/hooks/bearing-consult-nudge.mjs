@@ -99,8 +99,9 @@ emitContext(
     "decide a rule the request left open** — how money is split, what a user sees, is charged or " +
     "is allowed to do? If the repo answers it (code, tests, config, git history, north-stars, an " +
     "existing convention), go and find it — asking for that is offloading. If only the USER can " +
-    "answer it, do not build further on the guess: ask now — closed options, the tradeoff, the one " +
-    "you recommend — and end your turn. An \"I assumed…\" in your summary is that question asked " +
+    "answer it, do not build further on the guess: ask now, as options to CLICK (AskUserQuestion — " +
+    "your recommendation first, one line of tradeoff each, related questions in one prompt) — and " +
+    "end your turn. An \"I assumed…\" in your summary is that question asked " +
     "too late. Implementation choices (naming, structure, which helper) are yours: decide them, " +
     "and never ask as insurance.",
   "PostToolUse",
