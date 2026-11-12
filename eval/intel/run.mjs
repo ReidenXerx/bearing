@@ -4,6 +4,7 @@
  *
  *   node eval/intel/run.mjs --conditions off,on --tasks all --trials 3 --model sonnet
  *   node eval/intel/run.mjs --conditions off,on --tasks hard --trials 3   # the hard round (tasks-hard.mjs)
+ *   node eval/intel/run.mjs --conditions off,on --tasks invoked --trials 3  # the user asks (tasks-invoked.mjs)
  *
  * Conditions:
  *   off — the fixture with no kit at all
@@ -25,10 +26,11 @@ import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { buildFixture, fixtureFiles } from "./fixture.mjs";
 import { HARD_TASKS } from "./tasks-hard.mjs";
+import { INVOKED_TASKS } from "./tasks-invoked.mjs";
 import { TASKS } from "./tasks.mjs";
 import { agent, measure } from "../lib/claude-run.mjs";
 
-const ALL_TASKS = [...TASKS, ...HARD_TASKS];
+const ALL_TASKS = [...TASKS, ...HARD_TASKS, ...INVOKED_TASKS];
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(HERE, "../..");
@@ -49,7 +51,7 @@ function args(argv) {
     if (argv[i] === "--conditions") a.conditions = v().split(",");
     else if (argv[i] === "--tasks") {
       const t = v();
-      a.tasks = t === "all" ? a.tasks : t === "hard" ? HARD_TASKS.map((x) => x.id) : t.split(",");
+      a.tasks = t === "all" ? a.tasks : t === "hard" ? HARD_TASKS.map((x) => x.id) : t === "invoked" ? INVOKED_TASKS.map((x) => x.id) : t.split(",");
     }
     else if (argv[i] === "--trials") a.trials = Math.max(1, Number(v()) || 1);
     else if (argv[i] === "--model") a.model = v();
