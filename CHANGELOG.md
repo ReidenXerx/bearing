@@ -27,6 +27,16 @@ Every trap they teach is run by the test suite, not just read.
 
 `npx bearing update . --features +history,+knip` to add them.
 
+Measured on a real 650-file backend (`eval/intel/REPORT-TOOLS.md`, 24 runs):
+- **knip:** with the module, no run deleted a live file (6 of 6). Without it, 2 of 6 runs deleted one
+  or two, though they too found every dead file.
+- **history:** agents already looked past the formatter commit when asked directly, so it showed no
+  difference on that task.
+
+Both stay opt-in. Building the eval also corrected the history teaching: `-w` does not see through
+Prettier re-wrapping lines (44 of 45 lines stayed blamed to the Prettier commit), so the skill now
+teaches `--ignore-rev <sha>`.
+
 ### Changed — bearing speaks up less, and `bearing status` shows what it does
 
 bearing is for developers who already work with coding agents (NS-31). It speaks up unasked only

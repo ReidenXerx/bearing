@@ -79,6 +79,10 @@ export function measure(events) {
   // Whether a tool was USED, from the commands themselves — counted, never stored, because a command
   // line can carry a private repository's paths and code into a results file.
   let astGrepCalls = 0;
+  let knipCalls = 0;
+  let blameCalls = 0;
+  // A blame that looks past a reformat: an ignored revision, or a re-blame from a commit's parent.
+  let blamePastFormatCalls = 0;
   const skills = [];
   for (const e of events) {
     const content = e?.message?.content;
@@ -88,7 +92,13 @@ export function measure(events) {
         tools[b.name] = (tools[b.name] ?? 0) + 1;
         names.set(b.id, b.name);
         sequence.push(b.name);
-        if (b.name === "Bash" && /\bast-grep\b|@ast-grep\/cli/.test(String(b.input?.command ?? ""))) astGrepCalls++;
+        const cmd = b.name === "Bash" ? String(b.input?.command ?? "") : "";
+        if (/\bast-grep\b|@ast-grep\/cli/.test(cmd)) astGrepCalls++;
+        if (/\bknip\b/.test(cmd)) knipCalls++;
+        if (/\bgit\s+blame\b/.test(cmd)) {
+          blameCalls++;
+          if (/--ignore-revs?(?:-file)?\b|\s[0-9a-f]{6,40}\^/.test(cmd)) blamePastFormatCalls++;
+        }
         if (b.name === "Skill" && typeof b.input?.skill === "string") skills.push(b.input.skill);
       } else if (b.type === "tool_result" && b.is_error) {
         toolErrors++;
@@ -135,6 +145,9 @@ export function measure(events) {
     compactions,
     hookDenials,
     astGrepCalls,
+    knipCalls,
+    blameCalls,
+    blamePastFormatCalls,
     skills,
     denialSamples,
     errorSamples,

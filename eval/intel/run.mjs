@@ -33,12 +33,21 @@ import { fileURLToPath } from "node:url";
 import { buildFixture, fixtureFiles } from "./fixture.mjs";
 import { HARD_TASKS } from "./tasks-hard.mjs";
 import { INVOKED_TASKS } from "./tasks-invoked.mjs";
-import { REAL_TASKS } from "./tasks-real.mjs";
-import { buildRealFixture, realFixtureStamp } from "./fixture-real.mjs";
+import { REAL_TASKS, REAL_TASKS_TOOLS } from "./tasks-real.mjs";
+import { buildRealFixture, buildRealHistoryFixture, realFixtureStamp } from "./fixture-real.mjs";
 import { TASKS } from "./tasks.mjs";
 import { agent, measure } from "../lib/claude-run.mjs";
 
-const ALL_TASKS = [...TASKS, ...HARD_TASKS, ...INVOKED_TASKS, ...REAL_TASKS];
+const ALL_TASKS = [...TASKS, ...HARD_TASKS, ...INVOKED_TASKS, ...REAL_TASKS, ...REAL_TASKS_TOOLS];
+// Ids select tasks, so a repeated one runs a task nobody asked for: the knip task was first named
+// K1, which the base round already uses, and `--tasks tools` prepared that round's slots too.
+{
+  const seen = new Set();
+  for (const t of ALL_TASKS) {
+    if (seen.has(t.id)) throw new Error(`task id ${t.id} is used twice — ids select tasks, so each must be unique`);
+    seen.add(t.id);
+  }
+}
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(HERE, "../..");
@@ -59,7 +68,7 @@ function args(argv) {
     if (argv[i] === "--conditions") a.conditions = v().split(",");
     else if (argv[i] === "--tasks") {
       const t = v();
-      a.tasks = t === "all" ? a.tasks : t === "hard" ? HARD_TASKS.map((x) => x.id) : t === "invoked" ? INVOKED_TASKS.map((x) => x.id) : t === "real" ? REAL_TASKS.map((x) => x.id) : t.split(",");
+      a.tasks = t === "all" ? a.tasks : t === "hard" ? HARD_TASKS.map((x) => x.id) : t === "invoked" ? INVOKED_TASKS.map((x) => x.id) : t === "real" ? REAL_TASKS.map((x) => x.id) : t === "tools" ? REAL_TASKS_TOOLS.map((x) => x.id) : t.split(",");
     }
     else if (argv[i] === "--trials") a.trials = Math.max(1, Number(v()) || 1);
     else if (argv[i] === "--model") a.model = v();
@@ -94,8 +103,9 @@ function kitKey() {
  * Build (once) the pristine slot for a condition and fixture variant; rebuilt when the fixture or the
  * kit changes. The base variant keeps its old slot name, so the first round's cache stays valid.
  */
-function prepareSlot(a, condition, variant = "base") {
-  if (variant === "real") return prepareRealSlot(a, condition);
+function prepareSlot(a, condition, variant = "base", module = "astgrep") {
+  if (variant === "real") return prepareRealSlot(a, condition, module, false);
+  if (variant === "real-history") return prepareRealSlot(a, condition, module, true);
   const slot = path.join(a.slots, variant === "base" ? condition : `${condition}-${variant}`);
   const pristine = `${slot}.pristine`;
   const stamp = JSON.stringify({
@@ -139,36 +149,50 @@ function prepareSlot(a, condition, variant = "base") {
  * repo's own recorded modules — `update`, which keeps them — and, for `on` only, `+astgrep`. A repo
  * that already has astgrep recorded would make the two conditions identical, so that is refused.
  */
-function prepareRealSlot(a, condition) {
-  const slot = path.join(a.slots, `${condition}-real`);
+/** The contract section each `on` module adds — the slot is invalid unless exactly `on` carries it. */
+const SECTION = {
+  astgrep: /Searching and rewriting by code shape/,
+  history: /Why code is this way — git history/,
+  knip: /What is really unused — knip/,
+};
+
+function prepareRealSlot(a, condition, module = "astgrep", history = false) {
+  // The ast-grep round's slot keeps its original name, so its cached slot and results stay valid.
+  const slot = path.join(a.slots, module === "astgrep" ? `${condition}-real` : `${condition}-real-${module}`);
   const pristine = `${slot}.pristine`;
-  const stamp = JSON.stringify({ repo: process.env.BEARING_EVAL_REPO, head: realFixtureStamp(), condition, kit: kitKey() });
+  const stamp = JSON.stringify({ repo: process.env.BEARING_EVAL_REPO, head: realFixtureStamp(), condition, module, history, kit: kitKey() });
   const stampFile = path.join(pristine, ".eval-stamp");
   if (fs.existsSync(stampFile) && fs.readFileSync(stampFile, "utf8") === stamp) return { slot, pristine };
 
-  console.error(`[prepare] ${condition}-real: building slot`);
+  console.error(`[prepare] ${path.basename(slot)}: building slot`);
   for (const d of [slot, pristine]) fs.rmSync(d, { recursive: true, force: true });
-  buildRealFixture(slot);
-  git(slot, "init", "-q", "-b", "main");
+  if (history) {
+    buildRealHistoryFixture(slot); // a clone: the history IS the fixture
+  } else {
+    buildRealFixture(slot);
+    git(slot, "init", "-q", "-b", "main");
+  }
   git(slot, "config", "user.email", "eval@example.invalid");
   git(slot, "config", "user.name", "eval");
   git(slot, "config", "commit.gpgsign", "false");
-  git(slot, "add", "-A");
-  git(slot, "commit", "-qm", "fixture");
+  if (!history) {
+    git(slot, "add", "-A");
+    git(slot, "commit", "-qm", "fixture");
+  }
   const manifest = path.join(slot, ".bearing/manifest.json");
   const recorded = fs.existsSync(manifest) ? JSON.parse(fs.readFileSync(manifest, "utf8")).features ?? [] : [];
-  if (recorded.includes("astgrep")) throw new Error("--repo already records the astgrep module — `off` would not be without it");
+  if (recorded.includes(module)) throw new Error(`--repo already records the ${module} module — \`off\` would not be without it`);
   const kit = path.join(REPO, "lib/kit.mjs");
   const base = ["--no-setup", "--skip-verify"];
   if (fs.existsSync(manifest)) {
-    run(process.execPath, [kit, "update", slot, ...base, ...(condition === "on" ? ["--features", "+astgrep"] : [])], slot);
+    run(process.execPath, [kit, "update", slot, ...base, ...(condition === "on" ? ["--features", `+${module}`] : [])], slot);
   } else {
     run(process.execPath, [kit, "install", slot, "--runtime", "claude", ...base, "--quick",
-      ...(condition === "on" ? ["--features", "+astgrep"] : [])], slot);
+      ...(condition === "on" ? ["--features", `+${module}`] : [])], slot);
   }
   const claudeMd = fs.readFileSync(path.join(slot, "CLAUDE.md"), "utf8");
-  const has = /Searching and rewriting by code shape/.test(claudeMd);
-  if (has !== (condition === "on")) throw new Error(`the ${condition}-real contract ${has ? "carries" : "lacks"} the astgrep section — the slot is invalid`);
+  const has = SECTION[module].test(claudeMd);
+  if (has !== (condition === "on")) throw new Error(`the ${condition}-real contract ${has ? "carries" : "lacks"} the ${module} section — the slot is invalid`);
   git(slot, "add", "-A");
   git(slot, "commit", "-qm", "bearing", "--allow-empty");
   fs.cpSync(slot, pristine, { recursive: true });
@@ -214,6 +238,9 @@ function combine(steps) {
     compactions: sum((s) => s.compactions),
     hookDenials: sum((s) => s.hookDenials),
     astGrepCalls: sum((s) => s.astGrepCalls),
+    knipCalls: sum((s) => s.knipCalls),
+    blameCalls: sum((s) => s.blameCalls),
+    blamePastFormatCalls: sum((s) => s.blamePastFormatCalls),
     skills: steps.flatMap((s) => s.skills ?? []),
     toolErrors: sum((s) => s.toolErrors),
     costUsd: sum((s) => s.costUsd),
@@ -235,9 +262,9 @@ async function main() {
   const tasks = ALL_TASKS.filter((t) => a.tasks.includes(t.id));
   const unknown = a.tasks.filter((id) => !ALL_TASKS.some((t) => t.id === id));
   if (unknown.length) throw new Error(`unknown task(s): ${unknown.join(", ")}`);
-  const variants = [...new Set(tasks.map((t) => t.fixture ?? "base"))];
   const slots = {};
-  for (const c of a.conditions) for (const v of variants) slots[`${c}/${v}`] = prepareSlot(a, c, v);
+  const slotKey = (c, t) => `${c}/${t.fixture ?? "base"}${String(t.fixture ?? "").startsWith("real") ? `/${t.module}` : ""}`;
+  for (const c of a.conditions) for (const t of tasks) slots[slotKey(c, t)] ??= prepareSlot(a, c, t.fixture ?? "base", t.module);
   if (a.prepareOnly) {
     for (const [c, s] of Object.entries(slots)) console.error(`[prepare] ${c}: ${s.pristine}`);
     return;
@@ -249,16 +276,17 @@ async function main() {
       // Alternate the condition order per trial, so neither always runs on a warmer cache.
       const order = trial % 2 ? a.conditions : [...a.conditions].reverse();
       for (const condition of order) {
-        const { slot, pristine } = slots[`${condition}/${task.fixture ?? "base"}`];
+        const { slot, pristine } = slots[slotKey(condition, task)];
         restore(slot, pristine);
         clearSlotSessions(a.slots);
         let row = { at: new Date().toISOString(), model: a.model, condition, task: task.id, module: task.module, trial };
         try {
-          const multi = task.steps.length > 1;
+          const steps = task.steps ?? [task.prompt(slot)];
+          const multi = steps.length > 1;
           const measured = [];
           let session = null;
           let failed = null;
-          for (const prompt of task.steps) {
+          for (const prompt of steps) {
             const res = await agent({
               cwd: slot, prompt, model: a.model, timeoutMs: a.timeoutMin * 60_000, maxBudgetUsd: a.maxBudgetUsd,
               resume: session, persist: multi,

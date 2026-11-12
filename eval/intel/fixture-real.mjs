@@ -239,3 +239,76 @@ export function checkRadixRewrite(pristine, cwd) {
   }
   return { sites: keys.parseIntNoRadix.length, converted, wrongFiles };
 }
+
+// ── The history and knip tasks ──────────────────────────────────────────────
+
+/**
+ * A slot WITH history, for the history task: a clone of the repo at HEAD, its remote removed so
+ * nothing the agent runs can reach the origin. `git archive` (above) carries no history at all.
+ */
+export function buildRealHistoryFixture(slot) {
+  const repo = repoUnderTest();
+  fs.rmSync(slot, { recursive: true, force: true });
+  execFileSync("git", ["clone", "-q", "--no-local", "--no-hardlinks", repo, slot], { maxBuffer: 1 << 30 });
+  execFileSync("git", ["-C", slot, "remote", "remove", "origin"]);
+  const manifest = path.join(repo, ".bearing/manifest.json");
+  if (fs.existsSync(manifest) && !fs.existsSync(path.join(slot, ".bearing/manifest.json"))) {
+    fs.mkdirSync(path.join(slot, ".bearing"), { recursive: true });
+    fs.copyFileSync(manifest, path.join(slot, ".bearing/manifest.json"));
+  }
+}
+
+/** Keys that only a person could write, kept OUTSIDE this repo because they name a private repo's files. */
+export function privateKeys() {
+  const p = process.env.BEARING_EVAL_KEYS ?? path.join(process.env.HOME ?? "", ".cache/bearing-eval/intel/real-keys.json");
+  if (!fs.existsSync(p)) throw new Error(`the knip task needs a hand-verified key at ${p} (see REPORT-REAL.md)`);
+  const k = JSON.parse(fs.readFileSync(p, "utf8"));
+  const head = execFileSync("git", ["-C", repoUnderTest(), "rev-parse", "HEAD"], { encoding: "utf8" }).trim();
+  if (k.head !== head) throw new Error(`the private key was verified at ${k.head.slice(0, 7)}, the repo is at ${head.slice(0, 7)} — re-verify it`);
+  return k;
+}
+
+const FORMAT_SUBJECT = /\b(prettier|format(?:ting)?|reformat|lint --fix|style\()/i;
+const squash = (s) => s.replace(/[\s,;]/g, "");
+
+/**
+ * The history task's key: lines whose plain `git blame` names a REFORMAT commit, each with the commit
+ * that actually wrote it. Found by git, then CHECKED independently of blame (NS-27): the origin
+ * commit's own diff must add that line's content (whitespace and commas ignored, since the reformat
+ * re-wrapped it), and its subject must not itself be a reformat. A line that fails either is dropped.
+ * Picks the first file, newest reformat first, with at least `n` such lines, spaced apart.
+ */
+export function historyKey(dir, n = 4) {
+  const g = (...a) => execFileSync("git", ["-C", dir, ...a], { encoding: "utf8", maxBuffer: 1 << 28 });
+  const fmt = g("log", "--format=%H%x09%s", "-i", "-E", "--grep=prettier|format|reformat|lint --fix|style\\(")
+    .split("\n").filter(Boolean).map((l) => l.split("\t")).filter(([, s]) => FORMAT_SUBJECT.test(s));
+  for (const [fsha] of fmt) {
+    const files = g("show", "--name-only", "--format=", fsha).split("\n")
+      .filter((f) => REAL_SCOPE.some((d) => f.startsWith(`${d}/`)) && /\.[cm]?[jt]sx?$/.test(f) && fs.existsSync(path.join(dir, f)));
+    for (const file of files) {
+      const blame = (extra) => {
+        const out = []; let cur = null;
+        for (const l of g("blame", "--line-porcelain", ...extra, "--", file).split("\n")) {
+          if (/^[0-9a-f]{40} /.test(l)) { cur = { sha: l.slice(0, 40), line: Number(l.split(" ")[2]) }; out.push(cur); }
+          else if (l.startsWith("summary ") && cur) cur.subject = l.slice(8);
+          else if (l.startsWith("\t") && cur) cur.code = l.slice(1);
+        }
+        return out;
+      };
+      const plain = blame([]);
+      const past = blame(["--ignore-rev", fsha]);
+      const picked = [];
+      for (let i = 0; i < plain.length && picked.length < n; i++) {
+        const p = plain[i], o = past[i];
+        if (p.sha !== fsha || !o || o.sha === fsha || FORMAT_SUBJECT.test(o.subject ?? "")) continue;
+        const code = squash(p.code ?? "");
+        if (code.length < 25 || picked.some((q) => Math.abs(q.line - p.line) < 15)) continue;
+        const added = squash(g("show", "--format=", o.sha, "--", file).split("\n").filter((l) => l.startsWith("+")).map((l) => l.slice(1)).join(" "));
+        if (!added.includes(code)) continue; // the origin's own diff must write it
+        picked.push({ line: p.line, origin: o.sha, formatter: fsha });
+      }
+      if (picked.length >= n) return { file, lines: picked };
+    }
+  }
+  return null;
+}
