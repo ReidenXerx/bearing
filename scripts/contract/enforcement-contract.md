@@ -55,7 +55,7 @@ When the user asks you to fan work out — *"use minions"*, *"fan this out"*, *"
 
 **Before changing code whose reason you do not know** — a magic number, an odd guard, a check that looks redundant — or re-proposing something that may have been tried, find the commit that made it so: the message and its PR are the only place the WHY was written down. Load `bearing-history` for the commands; the traps that point at the wrong commit:
 
-- **Plain `git blame` names the formatter.** Use `git blame -w -C -C10`; if it still lands on a reformat, rename or move, blame again from that commit's parent. `-C` alone follows moved code only for blocks of 40+ alphanumeric characters.
+- **Plain `git blame` names the formatter.** Use `git blame -w -C -C10` — but `-w` sees through re-indenting only, not Prettier re-wrapping lines; if blame lands on a reformat, rename or move, run it again with `--ignore-rev <that sha>`. `-C` alone follows moved code only for blocks of 40+ alphanumeric characters.
 - **`git log -S` lists moves too, and `-G` lists reformats** — read each diff before naming the commit that changed the behaviour. `log -L :name:file` finds no TS/JS method; use a regex range.
 - **A shallow clone blames everything to one `^boundary` commit.** Check `git rev-parse --is-shallow-repository` first. Separate "the history says why" from "it only says when".
 

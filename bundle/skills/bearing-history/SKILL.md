@@ -28,10 +28,13 @@ Every trap below was run, not read.
 
 **Blame names the formatter.** A reformat (reindent, Prettier, a lint `--fix`) touches every line,
 so plain `git blame` attributes the line to "style: prettier" — a commit that explains nothing.
-`-w` skips whitespace-only changes; for non-whitespace reformats, `--ignore-revs-file
-.git-blame-ignore-revs` (many repos keep one; read it, never write it uninvited). If blame lands on a
-commit whose message is about formatting, renaming or moving, **that is not the answer — blame
-again from its parent**: `git blame -w <sha>^ -- <file>`.
+`-w` skips whitespace-only changes — and only those. **Prettier re-wraps lines**, which is not a
+whitespace change: on a real repo, 44 of the 45 lines one Prettier commit touched still blamed to
+it with `-w`. So when blame lands on a commit whose message is about formatting, renaming or moving,
+**that is not the answer — look past it**: `git blame --ignore-rev <that sha> -L <a>,<b> <file>`
+(verified: it reached the commit that wrote each of those lines), or blame from its parent,
+`git blame -w <sha>^ -- <file>`. Many repos keep a `.git-blame-ignore-revs` for exactly this —
+`--ignore-revs-file .git-blame-ignore-revs`; read it, never write it uninvited.
 
 **`-C` follows moved code only for blocks of 40+ alphanumeric characters.** A small function moved
 to another file blames to the MOVE, and the move commit looks exactly like the origin. `-C -C`
