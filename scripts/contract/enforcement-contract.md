@@ -40,8 +40,18 @@ When the user asks you to fan work out — *"use minions"*, *"fan this out"*, *"
 
 **Any subagent you spawn executes a decision; it never makes one.** It gathers and returns evidence — `file:line`, verbatim output, the exact query — or applies a change decided in full beforehand and returns what it wrote. You conclude.
 
+<!-- feature: astgrep -->
+## Searching and rewriting by code shape — ast-grep (intel layer)
+
+**When the question is about the SHAPE of code, search the syntax tree, not the text.** *Every `fetch` with no `signal`, every `catch` that swallows, every handler not wrapped in `withAudit`, every call to `x` with three arguments* — and every decided rewrite across many sites. A regex misses the call split over three lines and hits the same words in a comment or a string; `ast-grep` does neither. Text questions stay with grep: a name in a comment, config, a log line, a string. Load `bearing-astgrep` before writing a rule, and before any rewrite.
+
+- **Run it as** `ast-grep run -p '<pattern>' <path>` — or `npx -y -p @ast-grep/cli ast-grep …` where it is not installed (plain `npx @ast-grep/cli` fails). **Leave `-l` out** to search a mixed tree: each file is parsed by its own extension. `-l ts` silently skips every `.tsx`.
+- **A zero is not absence until the pattern has matched something you know is there.** A pattern that does not parse prints `[]` — run without `-l`, with the same exit code as "no matches" and no warning at all. Prove the pattern — and every sub-rule inside a `not:` or `has:` — on one known site first (`--stdin`), and count what grep finds for the same name to explain the difference.
+- **Rewrite in three steps:** `-r` without `-U` only previews the diff — read it; apply with `-U`; then run the search again and show it returns zero.
+
 <!-- feature: tsjs -->
 ## Writing TypeScript/JavaScript (intel layer)
+
 
 **`.bearing/lang/typescript.md`** holds numbered `TS-#` rules for code that type-checks, lints clean and is **still wrong at runtime** — cite the number when one decides a choice, and load the `bearing-tsjs` skill for the full writing/review pass. The ones that cost the most:
 

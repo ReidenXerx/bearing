@@ -4,6 +4,33 @@ All notable changes to `bearing` are documented here.
 
 ## Unreleased — GitNexus becomes opt-in, and nothing blocks your tools any more
 
+### Added — ast-grep: search and rewrite by code shape, with the pattern proven first
+
+A new opt-in module, `astgrep`. When the question is about the shape of code, the agent searches the
+syntax tree instead of writing a regex. Examples: every `fetch` with no `signal`, every `catch` that
+swallows, every handler not wrapped in the audit call. A regex misses a call split over three lines
+and matches the same words in a comment; ast-grep does neither. Text questions stay with grep.
+
+The value is in the traps, because ast-grep does not fail loudly when a pattern is wrong:
+
+- **A pattern that does not parse** returns `[]`. Run without `-l`, which is the way to search a
+  mixed tree, it also exits with the same code as "no matches" and prints no warning. It looks
+  exactly like a clean codebase.
+- **`-l ts` silently skips `.tsx`**, even a file you name.
+- **A `not:` whose inner rule never matches excludes nothing.** `has` and `inside` look one level
+  deep unless given `stopBy: end`.
+
+So the skill makes the agent prove every pattern on a known site before trusting its count.
+Rewrites are previewed, applied, then searched again to show zero remain.
+
+ast-grep comes from `PATH`, or from `npx -y -p @ast-grep/cli ast-grep` on first use. Plain
+`npx @ast-grep/cli` fails. Nothing is added to your `package.json`.
+
+The module is off by default until an eval shows agents use it and do better (NS-23). The test
+suite runs every trap the teaching claims against the latest ast-grep release, so the day one of
+them stops being true, the test fails. Writing that test is how the first trap above was found:
+the skill had said "exits 0 with a warning", which is only true with `-l`.
+
 ### Changed — the north-star reminder is rarer, and after a doc write it is short
 
 The reminder re-sent every north-star every 25 tool calls and after every doc write. Both were
