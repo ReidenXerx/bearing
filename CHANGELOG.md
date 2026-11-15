@@ -4,6 +4,33 @@ All notable changes to `bearing` are documented here.
 
 ## Unreleased — GitNexus becomes opt-in, and nothing blocks your tools any more
 
+### Added — parallel sessions see each other (opt-in, warns, never blocks)
+
+Two windows, a second chat and minions in worktrees all edit one repo blind to each other. With
+`"sessionsWarn": true` (then `bearing update`), each Claude Code session keeps a small record of the
+files it edits under the repository's shared git directory, which every linked worktree resolves to.
+When you edit a file another live session changed in the last `sessionsWindowMinutes` (30), the agent
+is told which session, which worktree and which branch, once per session and file.
+
+- **It never blocks.** Records older than a day are swept, and nothing lands in any working tree.
+- **What was ruled out:**
+  - **Beads**, because `bd init` commits its own agent contract and takes over `core.hooksPath`;
+  - **MCP Agent Mail**, because it needs a server, costs about 17k tokens of tool schemas, has a
+    pre-commit guard that blocks commits, and treats each worktree as a separate project.
+
+### Added — memory stays current: a nudge at milestones, and a weekly one
+
+Project memory is the one layer nothing else keeps current. North-stars change when you approve a
+change; a task-core is rewritten when its edits pile up. Memory is only as fresh as the last time the
+agent thought of it, and the next session trusts it anyway.
+
+- **At a milestone:** after `gh pr merge`, a tag (annotated ones too), `gh release create` or
+  `npm publish`, the agent is asked whether memory still says what is true. It stays silent if memory
+  was written in the last half hour. A merge followed by a tag counts as one milestone.
+- **Weekly:** the session brief adds one line when memory has gone `memoryStaleDays` (7) without a
+  write while commits landed, with both numbers.
+- **The knob:** `memoryNudge: false` silences both. `bearing status` lists it with the others.
+
 ### Added — mergiraf: merge parallel work by syntax tree, and review every resolution
 
 Parallel agents and minion worktrees collide on line conflicts that were never real: both sides only

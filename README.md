@@ -68,7 +68,7 @@ with `npm run bearing:token-benchmark`; [the numbers, and where the graph LOSES]
 **What it won't do:** block a tool, push a workflow on you, or decide when you review, fan out or
 reach for the graph. It speaks up unasked only to keep the agent's grip on your project — a brief at
 session start, the north-stars again as the context grows, a nudge when unsaved work piles up before a
-compaction — and `npx bearing status` lists each one with the knob that turns it off.
+compaction, a reminder to update memory after a merge or release and when it has gone a week stale — and `npx bearing status` lists each one with the knob that turns it off.
 
 **And one thing that isn't a module:** the agent files bug reports against its own tooling, and the kit measures its own rules — it measured its GitNexus gates, found them costing 4–5× for one task's gain, and retired them. → [the receipts](#it-tells-you-when-its-the-problem)
 
@@ -85,6 +85,11 @@ Later, `npx bearing doctor` tells you whether an install is still healthy — a 
 a hook pointing at a file an update deleted, an install older than the package — and the exact command
 that fixes each. `npx bearing doctor ~/Projects --all` checks every install under a folder. It changes
 nothing.
+
+**Several sessions in one repo** — two windows, a second chat, minions in worktrees — can turn on a
+warning (`"sessionsWarn": true` in `.bearing/hooks.json`, then `bearing update`): when another live
+session edited the same file in the last 30 minutes, the agent is told which one and where. It
+never blocks, and nothing lands in any working tree.
 
 `npx bearing status` says what bearing does in a repo: what is always loaded and roughly how many
 tokens, each thing that speaks up without being asked, the knob that turns it off and how often it

@@ -660,6 +660,36 @@ export function memoryPath(root) {
 }
 
 /**
+ * When the project memory was last written: the newest `.md` in the memory directory, since a fact
+ * lives in its own file and the index changes only when a file is added. Bounded — one readdir and a
+ * stat per file — so it is safe on a hook path (NS-7). `newestMs` is null when there is no memory.
+ * @param {string} root
+ */
+export function memoryFreshness(root) {
+  const dir = path.dirname(memoryPath(root));
+  let newestMs = null;
+  try {
+    for (const name of fs.readdirSync(dir)) {
+      if (!name.endsWith('.md')) continue;
+      const m = fs.statSync(path.join(dir, name)).mtimeMs;
+      if (newestMs === null || m > newestMs) newestMs = m;
+    }
+  } catch {
+    /* no memory directory yet */
+  }
+  return { dir, newestMs };
+}
+
+/** "3 days", "5 hours", "12 minutes" — for a line an agent reads, not a timestamp it must parse. */
+export function humanAge(ms) {
+  const m = Math.max(0, Math.round(ms / 60000));
+  if (m < 120) return `${m} minute${m === 1 ? '' : 's'}`;
+  const h = Math.round(m / 60);
+  if (h < 48) return `${h} hours`;
+  return `${Math.round(h / 24)} days`;
+}
+
+/**
  * Clear per-session state ONLY on a genuinely new session. A compaction/resume
  * is the SAME task continuing — clearing there would re-arm nudges already shown.
  * @param {string} [source] Claude SessionStart source: startup|clear|compact|resume

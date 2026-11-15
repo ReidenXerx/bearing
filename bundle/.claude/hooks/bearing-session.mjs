@@ -21,6 +21,33 @@ function coreAge(p) {
   }
 }
 
+/**
+ * The weekly half of the memory nudge (the milestone half is bearing-memory-nudge.mjs). Memory that
+ * has gone `memoryStaleDays` without a write while commits landed is memory the next session will
+ * trust and should not — so say it once, here, with both numbers. Silent when memory is fresh, when
+ * nothing was committed since, when there is no memory, or with `memoryNudge: false`.
+ */
+async function staleMemoryLine() {
+  try {
+    const { loadHookConfig } = await lib("hook-helpers.mjs");
+    const cfg = loadHookConfig(root);
+    const days = Number(cfg.memoryStaleDays);
+    if (cfg.memoryNudge === false || !(days > 0)) return "";
+    const { memoryFreshness, humanAge } = await lib("session-primer.mjs");
+    const { dir, newestMs } = memoryFreshness(root);
+    if (newestMs === null || Date.now() - newestMs < days * 86400000) return "";
+    const { execFileSync } = await import("node:child_process");
+    const since = new Date(newestMs).toISOString();
+    const commits = execFileSync("git", ["-C", root, "rev-list", "--count", `--since=${since}`, "HEAD"], {
+      encoding: "utf8", timeout: 3000, stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+    if (!(Number(commits) > 0)) return "";
+    return `⏳ Your project memory (${dir}) was last written ${humanAge(Date.now() - newestMs)} ago, and ${commits} commit(s) have landed since. Before relying on it, reconcile it: what changed in decisions, state and next steps — update or delete what is no longer true.`;
+  } catch {
+    return ""; // no git, no lib, no memory — the brief must not fail for this (NS-8)
+  }
+}
+
 let raw = "";
 for await (const c of process.stdin) raw += c;
 let input = {};
@@ -104,6 +131,7 @@ if (recovering) {
 } else {
   lines = [
     `Keep your project memory current as you work (${mp}) — it survives compaction + sessions; the transcript does not.`,
+    await staleMemoryLine(),
     // The path is per CHAT and therefore NOT guessable — before this it was one documented file the
     // agent could name from memory. Say it on a fresh start too, or the agent cannot write a
     // task-core proactively at a milestone and only learns where it lives once compaction hits,

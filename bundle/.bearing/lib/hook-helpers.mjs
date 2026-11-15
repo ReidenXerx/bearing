@@ -191,6 +191,15 @@ export function loadHookConfig(root) {
     // After a GitNexus `impact` call, question a LOW verdict built on callers the graph could not
     // resolve. false/0 silences it.
     impactAudit: true,
+    // MEMORY: remind at a milestone (a PR merged, a tag, a release, a publish) and, in the session
+    // brief, when memory has gone `memoryStaleDays` days without a write while commits landed. The
+    // user asked for both (2026-11-15). false/0 silences both.
+    memoryNudge: true,
+    memoryStaleDays: 7,
+    // PARALLEL SESSIONS: warn when another live session edited the same file within this many
+    // minutes. Opt-in (true, then `bearing update`); the hook is registered only while it is on.
+    sessionsWarn: false,
+    sessionsWindowMinutes: 30,
     // Working-tree drift: after this many uncommitted source edits since the index, the staleness
     // report counts the index as drifted. It is REPORTED, never enforced — nothing blocks on it and
     // nothing refreshes because of it (NS-25). 0 disables drift counting. 8, not 3: three dirty
@@ -245,6 +254,10 @@ function applyHookConfigFile(cfg, cfgPath) {
     cfg.consultNudge = onOff(file.consultNudge, cfg.consultNudge);
     cfg.sessionBrief = onOff(file.sessionBrief, cfg.sessionBrief);
     cfg.impactAudit = onOff(file.impactAudit, cfg.impactAudit);
+    cfg.memoryNudge = onOff(file.memoryNudge, cfg.memoryNudge);
+    if (typeof file.memoryStaleDays === "number") cfg.memoryStaleDays = file.memoryStaleDays;
+    cfg.sessionsWarn = onOff(file.sessionsWarn, cfg.sessionsWarn);
+    if (typeof file.sessionsWindowMinutes === "number") cfg.sessionsWindowMinutes = file.sessionsWindowMinutes;
     // A non-empty string only: `"minionModel": ""` or a stray number would otherwise be handed to
     // a spawn as a model name.
     if (typeof file.minionModel === "string" && file.minionModel.trim())
