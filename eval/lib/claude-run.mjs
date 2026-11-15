@@ -23,7 +23,7 @@ export function childEnv() {
  * `compact_boundary`, and the resumed session continues). Off by default: a single-shot task has
  * nothing to resume, and an unpersisted session leaves nothing behind in ~/.claude.
  */
-export function agent({ cwd, prompt, model, mcpConfig, timeoutMs, maxBudgetUsd, resume = null, persist = false }) {
+export function agent({ cwd, prompt, model, mcpConfig, timeoutMs, maxBudgetUsd, resume = null, persist = false, pluginDirs = [], env = {} }) {
   const argv = [
     "-p", prompt,
     "--output-format", "stream-json", "--verbose",
@@ -31,13 +31,14 @@ export function agent({ cwd, prompt, model, mcpConfig, timeoutMs, maxBudgetUsd, 
     "--setting-sources", "project,local",
     "--strict-mcp-config",
     ...(mcpConfig ? ["--mcp-config", mcpConfig] : []),
+    ...pluginDirs.flatMap((d) => ["--plugin-dir", d]),
     "--dangerously-skip-permissions",
     ...(resume ? ["--resume", resume] : []),
     ...(persist || resume ? [] : ["--no-session-persistence"]),
     "--max-budget-usd", String(maxBudgetUsd),
   ];
   return new Promise((resolve) => {
-    const child = spawn("claude", argv, { cwd, env: childEnv(), stdio: ["ignore", "pipe", "pipe"] });
+    const child = spawn("claude", argv, { cwd, env: { ...childEnv(), ...env }, stdio: ["ignore", "pipe", "pipe"] });
     let buf = "";
     let stderr = "";
     const events = [];
@@ -137,6 +138,11 @@ export function measure(events) {
   // because what microscope and minions change is mostly whether, and how much, the agent fans out.
   const subagents = (tools.Agent ?? 0) + (tools.Task ?? 0);
   const compactions = events.filter((e) => e?.type === "system" && e?.subtype === "compact_boundary").length;
+  // What the session STARTED with: its tool names and each MCP server's status. Without it, a tool
+  // that was never called cannot be told apart from a tool that never loaded.
+  const init = events.find((e) => e?.type === "system" && e?.subtype === "init");
+  const initTools = Array.isArray(init?.tools) ? init.tools.map(String) : [];
+  const mcpServers = Array.isArray(init?.mcp_servers) ? init.mcp_servers.map((s) => ({ name: s.name, status: s.status })) : [];
   return {
     tools,
     toolCalls: Object.values(tools).reduce((s, c) => s + c, 0),
@@ -144,6 +150,8 @@ export function measure(events) {
     subagents,
     compactions,
     hookDenials,
+    initTools,
+    mcpServers,
     astGrepCalls,
     knipCalls,
     blameCalls,
