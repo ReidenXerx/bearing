@@ -41,6 +41,8 @@ const labels = {
   northStarAnchors: "North-star re-anchors (mid-session drift guards)",
   impactVerdictsQuestioned: "Impact verdicts questioned (LOW from unresolved callers)",
   consultNudges: "Consult prompts (invent-vs-implement, at first edit)",
+  memoryNudges: "Memory nudges (at a merge, tag, release or publish)",
+  sessionWarnings: "Parallel-session warnings (another session edited the same file)",
   microscopeNudges: "Deep-review nudges (change grew multi-file)",
   graphFailureReports: "GitNexus failure reports filed"
 };

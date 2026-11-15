@@ -63,6 +63,8 @@ A **stealth** install (`--stealth`) writes none of the tracked files: ignores go
 | `bearing-northstar-anchor` | PostToolUse | Re-anchors the agent on the north-stars as the context grows, and on the relevant ones after a doc is written. | `northStarAnchorEvery: 0` |
 | `bearing-taskcore-nudge` | PostToolUse | Asks for a task-core refresh once enough unsaved work has piled up. | `taskCoreEveryEdits: 0` |
 | `bearing-consult-nudge` | PostToolUse | Poses the ask-or-decide test at the first edit. **Off by default**: `consultNudge: true`, then `bearing update`. | `consultNudge: false` |
+| `bearing-memory-nudge` | PostToolUse on Bash | After a merge, tag, release or publish, asks whether project memory still says what is true; the session brief adds the weekly half (memory `memoryStaleDays` old while commits landed). | `memoryNudge: false` |
+| `bearing-sessions` | PostToolUse on edits | Warns when another live session — in this checkout or any worktree — edited the same file recently. Records live under the shared git dir; never blocks. **Off by default**: `sessionsWarn: true`, then `bearing update`. | `sessionsWarn: false` |
 | `bearing-precompact` | PreCompact | Counts the compaction. Says nothing. | — |
 | `bearing-impact-audit` | PostToolUse on `impact` (GitNexus) | Annotates an `impact` result whose caller count may only be a floor. | `impactAudit: false` |
 
