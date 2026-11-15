@@ -228,6 +228,7 @@ function checkModuleDelivery() {
     astgrep: 'bearing-astgrep',
     history: 'bearing-history',
     knip: 'bearing-knip',
+    mergiraf: 'bearing-mergiraf',
   };
   // Modules whose payload is a FILE rather than a skill. Without this the loop below skips them
   // entirely and reports them as fine when nothing landed — the same failure 1.1.2 fixed for

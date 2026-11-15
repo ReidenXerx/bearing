@@ -72,6 +72,15 @@ When the user asks you to fan work out — *"use minions"*, *"fan this out"*, *"
 - **Dependencies are used by name too:** a driver an ORM loads, a `-r` preload, a peer. Grep the package name *with its quote* — `'@nestjs/bull'` is a prefix of `'@nestjs/bullmq'`.
 - **Delete in small batches, then typecheck, test, build and boot** — a DI framework compiles a missing provider and fails at startup.
 
+<!-- feature: mergiraf -->
+## Merging parallel work — mergiraf (intel layer)
+
+**When merging work done in parallel** — minion slices, worktrees, another agent's branch — or when git's conflicts are only "both sides added something here", merge with mergiraf and load `bearing-mergiraf` first. It resolves additions by syntax tree, and it does so **silently**, so:
+
+- **Never let it auto-commit:** `git -c core.attributesFile=<mergiraf languages --gitattributes output> -c merge.mergiraf.name=mergiraf -c merge.mergiraf.driver='mergiraf merge --git %O %A %B -s %S -x %X -y %Y -p %P -l %L' merge --no-commit <branch>` — nothing is configured, nothing is committed.
+- **You review every resolution yourself before committing** — `mergiraf review <id>` for each `Review with:` line it printed. Never delegate that review: whether both sides survived is a decision.
+- **A clean merge is not a correct merge.** Typecheck, test and build after — a rename on one side and a new call to the old name on the other merges without any conflict and does not compile.
+
 <!-- feature: tsjs -->
 ## Writing TypeScript/JavaScript (intel layer)
 
