@@ -4,6 +4,24 @@ All notable changes to `bearing` are documented here.
 
 ## Unreleased — GitNexus becomes opt-in, and nothing blocks your tools any more
 
+### Added — mergiraf: merge parallel work by syntax tree, and review every resolution
+
+Parallel agents and minion worktrees collide on line conflicts that were never real: both sides only
+*added* something (an import, a class member). [mergiraf](https://mergiraf.org) merges by syntax tree
+and keeps both. The opt-in `mergiraf` module teaches the agent to use it safely:
+
+- **Merge per command, with `--no-commit`, configuring nothing.** `git merge` commits mergiraf's
+  resolution at once, and the only trace is one line on stderr.
+- **The main agent reviews every resolution** with `mergiraf review <id>` before committing. Never a
+  subagent, because whether both sides survived is a decision (NS-24).
+- **Then typecheck and test.** A rename on one side and a new call to the old name on the other merges
+  without any conflict and does not compile.
+- **What stays conflicted:** true conflicts, and new top-level statements at the same spot, where order
+  can matter. Unsupported files (`.vue`, `.svelte`, `.css`, `.sql`) get git's line merge.
+- **What the test runs:** every one of these claims, against the latest mergiraf release.
+
+The agent asks before installing the binary.
+
 ### Added — two opt-in tools: git history as evidence, and knip for dead code
 
 Both ship the way ast-grep did: a contract section that says WHEN, a skill that carries the traps,
