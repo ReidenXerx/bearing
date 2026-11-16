@@ -4,6 +4,25 @@ All notable changes to `bearing` are documented here.
 
 ## Unreleased — GitNexus becomes opt-in, and nothing blocks your tools any more
 
+### Added — e2e: narrated demo videos, recorded from the harness and reviewed before sending
+
+When someone asks to see a feature, the agent can record it: `.e2e/tools/demo/` plus the
+`bearing-demo-video` skill. It is the recipe from issue #27, which produced a two-minute stakeholder
+demo on a real project.
+
+- **`narrate.js`** makes the voice first, one measured clip per step (`say` or `espeak-ng`), so the
+  recording paces itself to the voice.
+- **`chrome.js`** draws what headless video lacks: a cursor, captions, `[title]` tooltips, and a
+  sample-data badge that stays on screen for the whole video.
+- **`record.js`** moves, clicks and types like a person and keeps the timeline.
+- **`mux.js`** trims the sign-in dead air and lays each clip at its step (H.264 + AAC).
+- **`review.js`** is the gate: silence just before each clip and speech inside it (it exits 1 on an
+  overlap or a silent step), plus contact sheets to look at.
+
+The skill's rules: no production or real people's data, every write answered locally, and narration
+that describes only what the page actually does. The kit's own test demo broke that last rule once,
+and only watching the video caught it.
+
 ### Added — e2e: `tools/run.js` and `core/safety.js`, the two files projects kept writing themselves
 
 Rechecking the harness against five real projects found the same two files written independently:

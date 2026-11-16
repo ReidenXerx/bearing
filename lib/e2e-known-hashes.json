@@ -4,6 +4,7 @@
   "225c115be7ef9b9ce1a7ef77baab7fca32fa140c4293980e546c6fdb3b3c7f8b",
   "266965e77661aeac8c024fee6c3ab8ccf01313959f8ec1ee33518b959915ef10",
   "5d95a4f72f13bdf1d4b859e1820847702313e3d4991c0b5417ef496db82daafd",
+  "81028b515aaa8f4aac611b7439edd21b611d299dfcd8e285d8faee7b8cca6977",
   "8ac5e4f5801544ed6cda30f7e429959bc5b22b7d5156c5491a9f23fad34572e7",
   "9070c456fa8e3ec91703c343ca1f3fc3bde6f1c54b39fae2427c90e90d7c2715",
   "a8811d98381372f0444552e87c0cc312ed22e4be8f44df38a84d05e4a897790a",
@@ -80,6 +81,21 @@
  ],
  ".e2e/tools/audit-fixtures/traps.js": [
   "d8810c3861dc74247ea5d7c499bdb756ee2568e822bd4cebfb9e9064d83cf539"
+ ],
+ ".e2e/tools/demo/chrome.js": [
+  "a74293e96acf3b13d805b0ab5e62f00d1350d7f12912cda4b10e3ae2bb2a94e0"
+ ],
+ ".e2e/tools/demo/mux.js": [
+  "85c739fd05764ab912cd88b29f2a17fe43e15cb8f90551bb232c356c618636b4"
+ ],
+ ".e2e/tools/demo/narrate.js": [
+  "ba408ae069adf833aedf132e533a79cfbfc021b01f18f2728b72d88d32ea2d27"
+ ],
+ ".e2e/tools/demo/record.js": [
+  "c9b2361ead720748c6555e8e238ad4b585a16529a3d0698e0fbeecee5491ce81"
+ ],
+ ".e2e/tools/demo/review.js": [
+  "8e883c8eb2b079eac79e4b406c9f3358236c90c341ee519eed4aed252b6c0f1e"
  ],
  ".e2e/tools/export-storage.js": [
   "800849f6d04a6da2d4a74325559bb8ebca6745abd70f6040543d6c8ed45690e9"
