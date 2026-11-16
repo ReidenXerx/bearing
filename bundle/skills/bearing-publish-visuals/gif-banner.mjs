@@ -41,14 +41,17 @@ const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const cy = clamp(Math.round(opt("y", 0.5) * sh - ch / 2), 0, sh - ch);
 const cx = clamp(Math.round(opt("x", 0.5) * sw - cw / 2), 0, sw - cw);
 
-const ff = (args) => execFileSync("ffmpeg", ["-nostdin", "-v", "error", "-y", ...args], { stdio: ["ignore", "ignore", "pipe"] });
+const FFMPEG = process.env.FFMPEG || "ffmpeg"; // point at a build with libwebp when the WebP matters
+const ff = (args) => execFileSync(FFMPEG, ["-nostdin", "-v", "error", "-y", ...args], { stdio: ["ignore", "ignore", "pipe"] });
 fs.mkdirSync(path.dirname(path.resolve(outBase)), { recursive: true });
 // Animated WebP needs an encoder many ffmpeg builds lack (Homebrew's has none). Use ffmpeg's if it
 // has one, else libwebp's own gif2webp on the finished GIF, else GIF only — said, not silently.
-const encoders = spawnSync("ffmpeg", ["-hide_banner", "-encoders"], { encoding: "utf8" }).stdout ?? "";
+const encoders = spawnSync(FFMPEG, ["-hide_banner", "-encoders"], { encoding: "utf8" }).stdout ?? "";
 const webpEncoder = /\blibwebp_anim\b/.test(encoders) ? "libwebp_anim" : /\blibwebp\b/.test(encoders) ? "libwebp" : null;
 const gif2webp = spawnSync("sh", ["-c", "command -v gif2webp"]).status === 0;
-if (!webpEncoder && !gif2webp) console.log("  ⚠ no animated-WebP encoder here (ffmpeg libwebp or gif2webp) — writing the GIF only");
+// Which path made the WebP is part of the result: the gif2webp one inherits the GIF's palette.
+const webpPath = webpEncoder ? `webp via ffmpeg ${webpEncoder}` : gif2webp ? "webp via gif2webp (palette-limited — set FFMPEG to a build with libwebp for a direct encode)" : null;
+if (!webpPath) console.log("  ⚠ no animated-WebP encoder here (ffmpeg libwebp or gif2webp) — writing the GIF only");
 const render = (fps, width) => {
   const even = width - (width % 2);
   const base = `crop=${cw}:${ch}:${cx}:${cy},fps=${fps},scale=${even}:-2:flags=lanczos`;
@@ -71,7 +74,7 @@ for (let attempt = 1; attempt <= 7; attempt++) {
   const [g, w] = render(fps, width);
   const mb = (n) => (n / 1048576).toFixed(1);
   if (g <= cap && w <= cap) {
-    console.log(`✓ ${outBase}.gif ${mb(g)} MB${w ? ` · ${outBase}.webp ${mb(w)} MB` : ""} — ${width}px, ${fps} fps. Now LOOK at it: is the action in the strip?`);
+    console.log(`✓ ${outBase}.gif ${mb(g)} MB${w ? ` · ${outBase}.webp ${mb(w)} MB (${webpPath})` : ""} — ${width}px, ${fps} fps. Now LOOK at it: is the action in the strip?`);
     process.exit(0);
   }
   if (fps > 12) fps = Math.max(12, fps - 3);

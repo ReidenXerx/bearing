@@ -79,7 +79,9 @@ try {
   page.on("pageerror", (e) => problems.push(`page error: ${e.message}`));
   page.on("console", (m) => m.type() === "error" && console.error(`  console: ${m.text()}`));
   page.on("requestfailed", (r) => problems.push(`failed to load: ${r.url()}`));
-  page.on("response", (r) => r.status() >= 400 && problems.push(`HTTP ${r.status()}: ${r.url()}`));
+  // A browser's own favicon probe would 404 on this bare server and is not the card's request. Playwright's
+  // headless Chromium does not send one (checked); other browsers may — so it is ignored, untested.
+  page.on("response", (r) => r.status() >= 400 && !/\/favicon\.ico$/.test(new URL(r.url()).pathname) && problems.push(`HTTP ${r.status()}: ${r.url()}`));
   await page.goto(url, { waitUntil: "load" });
   try {
     await page.waitForFunction(() => window.__ready === true, null, { timeout: READY_MS });

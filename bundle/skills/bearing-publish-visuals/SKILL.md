@@ -55,7 +55,9 @@ as a ~400-px thumbnail, a README image at the reader's window width. Design for 
   one word in the accent) → subtitle (what the user gets, ≤ 2 lines) → the visual → stat tiles
   ("from → to" in big type, each with one plain line saying what it means) → footer (small mono:
   the source — files, decision ids, the tool that measured it).
-- **Body text ≥ 22 px at 1600 px wide**; a tile holds ≤ 2 lines; one idea per card.
+- **Body text ≥ 22 px at the SHOWN width** (a 1600-px card in a ~940-px column needs ~22 px there, so
+  larger in the render); a tile holds ≤ 2 lines; one idea per card. Where the host rescales, render
+  at 2× the shown size — but measure the text minimum against what is shown, not what is rendered.
 - **Before/after:** same framing and scale in both panes, plain labels ("WITHOUT" / "WITH <name>").
   Before is plain and muted; after carries the accent and the big number. A bottom strip may state
   the single rule.
@@ -69,11 +71,12 @@ as a ~400-px thumbnail, a README image at the reader's window width. Design for 
   wordmark or logo is cropped from the brand art, never retyped** in a similar font.
 - **Match the weight of the project.** A flagship gets drama; a small utility gets clean, plain type.
   Grand styling on a small thing reads as a joke.
-- **Headers are overlaid by the platform.** Find out where its title, stats and buttons sit (often the
-  bottom ~40% and a corner) and keep everything that matters out of it. Preview by swapping the image
-  in your own browser tab before uploading.
-- **A page is a storefront:** a column of cards, one plain line under each, a link to the long
-  article. Deep dives go in articles, one per theme.
+- **The host draws its own UI over your image.** Find where (a title, stats, buttons, a darkening
+  gradient) and keep everything that matters out of that zone — on a Nexus header it is the bottom
+  ~40% plus the top-right button, which leaves the 5–60% band. Preview by swapping the image's src in
+  your own browser tab before uploading.
+- **A page is images with one plain line each; depth links out** — to articles, docs or a wiki, one
+  per theme — instead of a wall of text around the cards.
 
 ## 4. Build and render — deterministic, then LOOK
 
@@ -117,7 +120,7 @@ A branch URL changes under a page that is already published.
 | Feature card (README, docs, store/mod page) | 1600×900 | JPG q90 |
 | Feed post (square) — *bearing's own, not from this method* | 1200×1200 | PNG/JPG |
 | Section divider | 1600×64 | transparent PNG |
-| Nexus Mods header | 2600×744 (2× of 1300×372) | JPG q90 — content in the 5–60% vertical band, clear of the top-right corner |
+| Nexus Mods header | 2600×744 — rendered at 2× of the 1300×372 it is shown at | JPG q90 — content in the 5–60% vertical band, clear of the top-right corner |
 | Animated banner from footage | ~1000 px wide, 3.5:1, 12–15 fps, 3–8 s | GIF + animated WebP, ≤ 8 MB each |
 
 For footage, `gif-banner.mjs` makes the GIF and the animated WebP together, under the size cap:
@@ -129,12 +132,16 @@ node .bearing/skills/bearing-publish-visuals/gif-banner.mjs clip.mp4 out/banner 
 It crops a 3.5:1 strip centred on `--y` (0..1 of the height), one palette for the whole clip that
 favours what moves, and — over 8 MB — drops fps (to no lower than 12), then width by 15%, and
 gives up after 7 tries with "shorten the clip": cutting length beats cutting quality. `--pingpong`
-hides the loop seam of footage that does not loop by itself. **The crop must keep the ACTION in
+hides the loop seam of footage that does not loop by itself. Where ffmpeg has no WebP encoder it
+falls back to `gif2webp` on the finished GIF and says so — that WebP inherits the GIF's 192-colour
+palette and dither, so it is worse than a direct encode; use an ffmpeg built with libwebp
+(`FFMPEG=/path/to/ffmpeg`) when the WebP matters. **The crop must keep the ACTION in
 frame** — a strip that cut off the hand doing the reload had to be re-cut at full width.
 
 ## 5. Traps — each one went out wrong once
 
-- **It showed the default, not the feature** (a vanilla animation sold as the mod's). → A/B or log proof.
+- **The base product's own behaviour (vanilla) sold as our feature** — the game's own NPC peek animation
+  looked like the mod's lean. → A/B or log proof.
 - **A true value, a false meaning**: "72% → 27%" was a fixed measuring tool, not a user gain.
 - **A count went stale one release later** ("699" became 706). → Counts live in text or badges.
 - **Half-rendered frames**: fallback font on canvas, chart before its data, file:// fetches failing
@@ -164,7 +171,7 @@ frame** — a strip that cut off the hand doing the reload had to be re-cut at f
 4. It shows OUR feature — A/B or log proof when unsure.
 5. Rendered deterministically: `__ready`, fonts awaited, seeded; no broken images, no page errors.
 6. Opened, LOOKED at, and what you saw written down — full size AND at the shown width: nothing
-   cropped, overlapping or wrapped; body text ≥ 22 px at 1600 wide.
+   cropped, overlapping or wrapped; body text ≥ 22 px at the SHOWN width.
 7. Headers keep what matters out of the platform's overlay.
 8. Size limits met; externally hosted URLs pinned to a commit SHA.
 9. No content that does not belong on this page; no third-party assets without provenance.
