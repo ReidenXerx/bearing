@@ -21,6 +21,7 @@ depending on the runtime. A skill ships only with the module that owns it.
 | `bearing-mergiraf` | mergiraf | merging minion slices, worktrees or another agent's branch; conflicts where both sides only added |
 | `bearing-knip` | knip | "what is unused?", before deleting a file, export or dependency believed dead |
 | `bearing-e2e` | e2e | verifying behaviour in a real browser, or taking a screenshot of a view |
+| `bearing-demo-video` | e2e | someone asks to SEE a feature: a narrated walkthrough or demo video, reviewed before it is sent |
 | `bearing-gitnexus` | gitnexus (opt-in) | **only when you ask for it** — "use gitnexus", "use the graph", `/bearing-gitnexus` |
 
 ## GitNexus is opt-in, and you invoke it

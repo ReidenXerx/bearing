@@ -28,6 +28,7 @@ HEADED=1 SLOWMO=250 node .e2e/verify/smoke.js   # watch it happen
 | `tools/sweep-seeds.js` | **works** — shows what a dead run left; deletes only with `--delete`, and never against production |
 | `tools/run.js` | **works** — every verifier, one report, exit 1 if any failed; `ONLY=` to pick, `_`-files skipped, BASE checked ONCE before anything runs |
 | `core/safety.js` | **works, needs your list** — production write guard: `allowlist` (a missed block is worse than a broken run) or `denylist` (blocking ordinary writes breaks the app); aborts, never stubs; gates screenshots of sensitive data |
+| `tools/demo/` | **works** — narrated demo videos: `narrate.js` (voice first, measured), `chrome.js` (cursor, captions, sample-data badge, tooltips), `record.js` (drive paced by the voice), `mux.js`, `review.js` (voice vs picture, contact sheets). Needs ffmpeg and `say`/`espeak-ng`; the `bearing-demo-video` skill is the recipe |
 | `core/env.js` | **works, needs one function** — which backend am I actually talking to, and refuse production without an opt-in |
 | `tools/export-storage.js` | template — paste it in a browser console to capture a session |
 | `core/session.js` | **stub — throws until you write it.** How your app holds a session is the most app-specific thing about it |
