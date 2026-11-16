@@ -10,6 +10,9 @@
  * its own height, and refused if it never says it is ready or an image is broken. Exits 1 if ANY card
  * fails — a generator that prints an error and exits 0 is how a missing card ships (NS-20).
  * Then LOOK at every PNG before committing it (the skill's §1.6).
+ *
+ * One card is not a README card: `social` is the site's Open Graph image. Link previews want exactly
+ * 1200×630 and a small JPEG, so it renders at that size, 1×, to docs/assets/social.jpg.
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -28,9 +31,11 @@ if (!cards.length) {
   process.exit(1);
 }
 fs.mkdirSync(OUT, { recursive: true });
+const SPECIAL = { social: [path.join(ROOT, "docs/assets/social.jpg"), "1200", "630", "88"] };
 let failed = 0;
 for (const name of cards) {
-  const r = spawnSync(process.execPath, [RENDER, path.join(SRC, `${name}.html`), path.join(OUT, `${name}.png`), "1200", "auto", "--scale", "2"], {
+  const args = SPECIAL[name] ?? [path.join(OUT, `${name}.png`), "1200", "auto", "--scale", "2"];
+  const r = spawnSync(process.execPath, [RENDER, path.join(SRC, `${name}.html`), ...args], {
     cwd: ROOT, encoding: "utf8", env: { ...process.env, PLAYWRIGHT_MODULE: process.env.PLAYWRIGHT_MODULE || ROOT },
   });
   if (r.status === 0) console.log(`  ${name}: ${r.stdout.trim().split(" — ")[1]?.split(".")[0] ?? "ok"}`);
@@ -40,4 +45,4 @@ for (const name of cards) {
   }
 }
 if (failed) process.exit(1);
-console.log(`✓ ${cards.length} card(s) → docs/assets/cards/. Now open every one and look.`);
+console.log(`✓ ${cards.length} card(s) → docs/assets/cards/ (social → docs/assets/social.jpg). Now open every one and look.`);
