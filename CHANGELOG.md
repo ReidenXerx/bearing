@@ -4,6 +4,29 @@ All notable changes to `bearing` are documented here.
 
 ## Unreleased — GitNexus becomes opt-in, and nothing blocks your tools any more
 
+### Fixed — the e2e harness you finished is yours: update, module removal and uninstall keep it
+
+`.e2e/` is "a harness you finish yourself", and bearing kept treating every file in it as its own:
+
+- **`update`** overwrote an edited `core/http.js`, with no backup.
+- **`uninstall`** deleted an implemented `core/session.js`, which is the project's auth code, along
+  with every other edit.
+- **Dropping the module** would have done the same.
+
+A `.e2e` file whose content matches no version bearing ever shipped now belongs to the project:
+
+- `update` keeps it and writes bearing's new version beside it as `<file>.bearing-new` (gitignored),
+  and says so.
+- Dropping the module or `uninstall` leaves it in place and removes only that `.bearing-new`.
+- An older bearing version is still updated.
+
+The list of every version comes from git history (`npm run gen:e2e-hashes`). It ships in
+`lib/e2e-known-hashes.json`, so installs that never recorded a hash are classified correctly too. A
+test fails if the list misses a current file.
+
+Found by rechecking the harness against five real projects. Those turned out to own their `.e2e/`
+outright, and `update` already refuses to take over a `.e2e/` it did not create (verified on a clone).
+
 ### Added — parallel sessions see each other (opt-in, warns, never blocks)
 
 Two windows, a second chat and minions in worktrees all edit one repo blind to each other. With
