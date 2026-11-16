@@ -2,7 +2,11 @@
 /**
  * Render one HTML card to an image — and refuse to hand back a half-drawn one.
  *
- *   node render.mjs <card.html> <out.png|out.jpg> <width> <height> [jpegQuality]
+ *   node render.mjs <card.html> <out.png|out.jpg> <width> <height|auto> [jpegQuality] [--scale 2]
+ *
+ * `auto` sizes the image to the page's own height, so a card is never padded or cut. `--scale 2`
+ * renders at twice the pixel density: lay a README card out at the width it is SHOWN (~1200 CSS px)
+ * and it stays sharp on a retina screen, with type measured against what the reader sees.
  *
  * A card is an HTML page. The page says it is finished by setting `window.__ready = true` after its
  * fonts, data and canvases are done; this waits for exactly that and fails if it never comes. Every
@@ -23,15 +27,23 @@ import http from "node:http";
 import path from "node:path";
 import { createRequire } from "node:module";
 
-const [, , cardArg, outArg, wArg, hArg, qArg] = process.argv;
+const scaleAt = process.argv.indexOf("--scale");
+const scale = scaleAt >= 0 ? Number(process.argv[scaleAt + 1]) : 1;
+const positional = process.argv.slice(2).filter((a, i, all) => a !== "--scale" && all[i - 1] !== "--scale");
+const [cardArg, outArg, wArg, hArg, qArg] = positional;
 if (!cardArg || !outArg || !wArg || !hArg) {
-  console.error("usage: node render.mjs <card.html> <out.png|out.jpg> <width> <height> [jpegQuality]");
+  console.error("usage: node render.mjs <card.html> <out.png|out.jpg> <width> <height|auto> [jpegQuality] [--scale 2]");
   process.exit(2);
 }
 const card = path.resolve(cardArg);
 const out = path.resolve(outArg);
 const width = Number(wArg);
-const height = Number(hArg);
+const autoHeight = hArg === "auto";
+let height = autoHeight ? 100 : Number(hArg);
+if (!(width > 0) || !(autoHeight || height > 0) || !(scale > 0)) {
+  console.error(`✗ width, height and scale must be positive numbers (height may be "auto"): ${wArg} ${hArg} ${scale}`);
+  process.exit(2);
+}
 const quality = Number(qArg ?? 90);
 const READY_MS = Number(process.env.RENDER_READY_MS) > 0 ? Number(process.env.RENDER_READY_MS) : 30000;
 if (!fs.existsSync(card)) {
@@ -75,7 +87,7 @@ const { chromium } = await loadPlaywright();
 const browser = await chromium.launch();
 const problems = [];
 try {
-  const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: 1 });
+  const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: scale });
   page.on("pageerror", (e) => problems.push(`page error: ${e.message}`));
   page.on("console", (m) => m.type() === "error" && console.error(`  console: ${m.text()}`));
   page.on("requestfailed", (r) => problems.push(`failed to load: ${r.url()}`));
@@ -91,12 +103,16 @@ try {
   const broken = await page.evaluate(() => [...document.images].filter((i) => !i.complete || i.naturalWidth === 0).map((i) => i.src));
   for (const b of broken) problems.push(`broken image: ${b}`);
   if (problems.length) throw new Error(problems.join("\n  "));
+  if (autoHeight) {
+    height = Math.ceil(await page.evaluate(() => document.documentElement.scrollHeight));
+    await page.setViewportSize({ width, height });
+  }
   const jpeg = /\.jpe?g$/i.test(out);
   fs.mkdirSync(path.dirname(out), { recursive: true });
   // A divider that must be transparent says so; everything else gets the card's own solid background.
   const transparent = !jpeg && (await page.evaluate(() => window.__transparent === true));
   await page.screenshot({ path: out, type: jpeg ? "jpeg" : "png", ...(jpeg ? { quality } : {}), omitBackground: transparent, clip: { x: 0, y: 0, width, height } });
-  console.log(`✓ ${path.relative(process.cwd(), out)} — ${width}×${height}. Now OPEN it and look: at full size, and at the width it will be shown.`);
+  console.log(`✓ ${path.relative(process.cwd(), out)} — ${width * scale}×${height * scale}${scale !== 1 ? ` (${width}×${height} at ${scale}×)` : ""}. Now OPEN it and look: at full size, and at the width it will be shown.`);
 } catch (e) {
   console.error(`✗ ${path.basename(card)} not rendered:\n  ${e.message}`);
   process.exitCode = 1;
