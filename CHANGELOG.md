@@ -2,6 +2,29 @@
 
 All notable changes to `bearing` are documented here.
 
+## 2.0.1 — a backup of bearing's own file is never "your original"
+
+### Fixed — retiring a file could put an old copy of it back
+
+When an update retires a file, or uninstall removes one, bearing puts back the `.bearing-backup` it
+made if it once had to overwrite a file of yours. In a clone whose bearing manifest is not committed,
+an earlier update had backed up bearing's OWN files that way — so the 2.0.0 sweep that retires the
+graph gates "restored your original" for them. Found on a real repo during the 2.0.0 rollout: 19
+retired files came back (the gate hooks, a pre-commit hook, two workflows), and 48 more such backups
+were waiting beside files bearing still ships.
+
+A backup is now judged before it is put back:
+
+- **At a path only bearing ships** — its code, named for it (`bearing-*`, `gitnexus-*`,
+  `.bearing/lib/`, its skills and script helpers): it is an old copy of ours. Deleted, not restored.
+- **At any other path, if it reads like bearing's**: not restored and not deleted — left beside the
+  file, and the update says so, because a file of yours could mention bearing too.
+- **Otherwise** it is your original and is restored, as before.
+
+Install no longer makes a backup of a bearing-only file it finds without a manifest record. The
+north-stars and gold-practices files are never treated as bearing-only: they hold your NS-# and PP-#
+rules.
+
 ## 2.0.0 — GitNexus becomes opt-in, and nothing blocks your tools any more
 
 **Upgrading from npm 1.2.1?** 1.2.2 and 1.3.0 were tagged on GitHub but never published to npm, so
