@@ -1,0 +1,120 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="icon" href="data:,">
+<!-- The site's Open Graph image (docs/index.html → assets/social.jpg). In the SITE's identity, not the README
+     cards': it is what a shared duduphudu.app/bearing link looks like. One claim — the hero line. -->
+<style>
+  @font-face { font-family: ISerif; src: url(fonts/instrument-serif-latin-400-normal.woff2) format("woff2"); }
+  @font-face { font-family: ISans; src: url(fonts/instrument-sans-latin-600-normal.woff2) format("woff2"); font-weight: 600; }
+  @font-face { font-family: Plex; src: url(fonts/ibm-plex-mono-latin-500-normal.woff2) format("woff2"); font-weight: 500; }
+  :root { --ground: #0A1013; --surface: #111A1F; --ink: #E3EAE7; --muted: #8DA0A7; --rule: #21303A; --brass: #E0A458; --true: #4FC2AE; }
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; color: var(--ink);
+    background: radial-gradient(900px 600px at 20% 10%, #13202a 0%, var(--ground) 70%); }
+  .wrap { position: absolute; left: 84px; top: 112px; width: 600px; }
+  .label { font: 500 21px Plex, monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+  .name { font: 400 132px/1 ISerif, serif; letter-spacing: -.01em; margin: 26px 0 26px; }
+  .claim { font: 600 41px/1.16 ISans, sans-serif; color: #c9d4d1; }
+  .claim em { font-style: normal; color: var(--brass); }
+  .url { position: absolute; left: 84px; bottom: 58px; font: 500 22px Plex, monospace; color: var(--muted); }
+  .dial { position: absolute; right: 70px; top: 115px; width: 400px; height: 400px; color: var(--muted); }
+  .dial-face { fill: var(--surface); } .dial-ring { fill: none; stroke: currentColor; opacity: .35; }
+  .dial-letter { font: 500 13px Plex, monospace; fill: var(--ink); opacity: .75; }
+  .needle-north { fill: var(--brass); } .needle-south { fill: currentColor; opacity: .5; }
+</style></head><body>
+<div class="wrap">
+  <div class="label">npx bearing · for coding agents</div>
+  <div class="name">bearing</div>
+  <div class="claim">Your tests catch code that breaks. Nothing catches an agent that has <em>drifted</em>.</div>
+</div>
+<div class="url">duduphudu.app/bearing</div>
+<div class="dial"><svg style="width:100%;height:100%" viewBox="0 0 240 240" role="img" aria-label="A bearing dial: the needle drifts off course, then a north-star pulls it back to true.">
+      <circle class="dial-face" cx="120" cy="120" r="112"/>
+      <circle class="dial-ring" cx="120" cy="120" r="112" stroke-width="1"/>
+      <circle class="dial-ring" cx="120" cy="120" r="86" stroke-width="1"/>
+      <line x1="120.0" y1="16.0" x2="120.0" y2="30.0" stroke="currentColor" stroke-width="2.2" opacity="1"/>
+      <line x1="129.1" y1="16.4" x2="128.6" y2="21.4" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="138.1" y1="17.6" x2="137.2" y2="22.5" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="146.9" y1="19.5" x2="144.6" y2="28.2" stroke="currentColor" stroke-width="1.4" opacity="0.75"/>
+      <line x1="155.6" y1="22.3" x2="153.9" y2="27.0" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="164.0" y1="25.7" x2="161.8" y2="30.3" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="172.0" y1="29.9" x2="167.5" y2="37.7" stroke="currentColor" stroke-width="1.4" opacity="0.75"/>
+      <line x1="179.7" y1="34.8" x2="176.8" y2="38.9" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="186.8" y1="40.3" x2="183.6" y2="44.2" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="193.5" y1="46.5" x2="183.6" y2="56.4" stroke="currentColor" stroke-width="2.2" opacity="1"/>
+      <line x1="199.7" y1="53.2" x2="195.8" y2="56.4" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="205.2" y1="60.3" x2="201.1" y2="63.2" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="210.1" y1="68.0" x2="202.3" y2="72.5" stroke="currentColor" stroke-width="1.4" opacity="0.75"/>
+      <line x1="214.3" y1="76.0" x2="209.7" y2="78.2" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="217.7" y1="84.4" x2="213.0" y2="86.1" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="220.5" y1="93.1" x2="211.8" y2="95.4" stroke="currentColor" stroke-width="1.4" opacity="0.75"/>
+      <line x1="222.4" y1="101.9" x2="217.5" y2="102.8" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="223.6" y1="110.9" x2="218.6" y2="111.4" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="224.0" y1="120.0" x2="210.0" y2="120.0" stroke="currentColor" stroke-width="2.2" opacity="1"/>
+      <line x1="223.6" y1="129.1" x2="218.6" y2="128.6" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="222.4" y1="138.1" x2="217.5" y2="137.2" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="220.5" y1="146.9" x2="211.8" y2="144.6" stroke="currentColor" stroke-width="1.4" opacity="0.75"/>
+      <line x1="217.7" y1="155.6" x2="213.0" y2="153.9" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="214.3" y1="164.0" x2="209.7" y2="161.8" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="210.1" y1="172.0" x2="202.3" y2="167.5" stroke="currentColor" stroke-width="1.4" opacity="0.75"/>
+      <line x1="205.2" y1="179.7" x2="201.1" y2="176.8" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="199.7" y1="186.8" x2="195.8" y2="183.6" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="193.5" y1="193.5" x2="183.6" y2="183.6" stroke="currentColor" stroke-width="2.2" opacity="1"/>
+      <line x1="186.8" y1="199.7" x2="183.6" y2="195.8" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="179.7" y1="205.2" x2="176.8" y2="201.1" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="172.0" y1="210.1" x2="167.5" y2="202.3" stroke="currentColor" stroke-width="1.4" opacity="0.75"/>
+      <line x1="164.0" y1="214.3" x2="161.8" y2="209.7" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="155.6" y1="217.7" x2="153.9" y2="213.0" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="146.9" y1="220.5" x2="144.6" y2="211.8" stroke="currentColor" stroke-width="1.4" opacity="0.75"/>
+      <line x1="138.1" y1="222.4" x2="137.2" y2="217.5" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="129.1" y1="223.6" x2="128.6" y2="218.6" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="120.0" y1="224.0" x2="120.0" y2="210.0" stroke="currentColor" stroke-width="2.2" opacity="1"/>
+      <line x1="110.9" y1="223.6" x2="111.4" y2="218.6" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="101.9" y1="222.4" x2="102.8" y2="217.5" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="93.1" y1="220.5" x2="95.4" y2="211.8" stroke="currentColor" stroke-width="1.4" opacity="0.75"/>
+      <line x1="84.4" y1="217.7" x2="86.1" y2="213.0" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="76.0" y1="214.3" x2="78.2" y2="209.7" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="68.0" y1="210.1" x2="72.5" y2="202.3" stroke="currentColor" stroke-width="1.4" opacity="0.75"/>
+      <line x1="60.3" y1="205.2" x2="63.2" y2="201.1" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="53.2" y1="199.7" x2="56.4" y2="195.8" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="46.5" y1="193.5" x2="56.4" y2="183.6" stroke="currentColor" stroke-width="2.2" opacity="1"/>
+      <line x1="40.3" y1="186.8" x2="44.2" y2="183.6" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="34.8" y1="179.7" x2="38.9" y2="176.8" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="29.9" y1="172.0" x2="37.7" y2="167.5" stroke="currentColor" stroke-width="1.4" opacity="0.75"/>
+      <line x1="25.7" y1="164.0" x2="30.3" y2="161.8" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="22.3" y1="155.6" x2="27.0" y2="153.9" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="19.5" y1="146.9" x2="28.2" y2="144.6" stroke="currentColor" stroke-width="1.4" opacity="0.75"/>
+      <line x1="17.6" y1="138.1" x2="22.5" y2="137.2" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="16.4" y1="129.1" x2="21.4" y2="128.6" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="16.0" y1="120.0" x2="30.0" y2="120.0" stroke="currentColor" stroke-width="2.2" opacity="1"/>
+      <line x1="16.4" y1="110.9" x2="21.4" y2="111.4" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="17.6" y1="101.9" x2="22.5" y2="102.8" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="19.5" y1="93.1" x2="28.2" y2="95.4" stroke="currentColor" stroke-width="1.4" opacity="0.75"/>
+      <line x1="22.3" y1="84.4" x2="27.0" y2="86.1" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="25.7" y1="76.0" x2="30.3" y2="78.2" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="29.9" y1="68.0" x2="37.7" y2="72.5" stroke="currentColor" stroke-width="1.4" opacity="0.75"/>
+      <line x1="34.8" y1="60.3" x2="38.9" y2="63.2" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="40.3" y1="53.2" x2="44.2" y2="56.4" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="46.5" y1="46.5" x2="56.4" y2="56.4" stroke="currentColor" stroke-width="2.2" opacity="1"/>
+      <line x1="53.2" y1="40.3" x2="56.4" y2="44.2" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="60.3" y1="34.8" x2="63.2" y2="38.9" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="68.0" y1="29.9" x2="72.5" y2="37.7" stroke="currentColor" stroke-width="1.4" opacity="0.75"/>
+      <line x1="76.0" y1="25.7" x2="78.2" y2="30.3" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="84.4" y1="22.3" x2="86.1" y2="27.0" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="93.1" y1="19.5" x2="95.4" y2="28.2" stroke="currentColor" stroke-width="1.4" opacity="0.75"/>
+      <line x1="101.9" y1="17.6" x2="102.8" y2="22.5" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <line x1="110.9" y1="16.4" x2="111.4" y2="21.4" stroke="currentColor" stroke-width="0.9" opacity="0.4"/>
+      <text x="120.0" y="46.0" text-anchor="middle" dominant-baseline="central" class="dial-letter">N</text>
+      <text x="194.0" y="120.0" text-anchor="middle" dominant-baseline="central" class="dial-letter">E</text>
+      <text x="120.0" y="194.0" text-anchor="middle" dominant-baseline="central" class="dial-letter">S</text>
+      <text x="46.0" y="120.0" text-anchor="middle" dominant-baseline="central" class="dial-letter">W</text>
+      <g class="lock" style="opacity:1">
+        <path d="M120 22 L123.4 33.2 L134.6 36.6 L123.4 40 L120 51.2 L116.6 40 L105.4 36.6 L116.6 33.2 Z" fill="var(--true)"/>
+      </g>
+      <g class="needle" transform="rotate(22 120 120)">
+        <path d="M120 40 L127 120 L120 128 L113 120 Z" class="needle-north"/>
+        <path d="M120 200 L113 120 L120 112 L127 120 Z" class="needle-south"/>
+      </g>
+      <circle cx="120" cy="120" r="5.5" fill="var(--ground)" stroke="var(--ink)" stroke-width="1.6"/>
+    </svg></div>
+<script type="module">
+  await Promise.all([document.fonts.load('400 132px ISerif'), document.fonts.load('600 41px ISans'), document.fonts.load('500 21px Plex')]);
+  window.__ready = true;
+</script></body></html>
