@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<!-- Render: node .bearing/skills/bearing-publish-visuals/render.mjs card.html out.jpg 1600 900 90 -->
+<style>
+  /* A solid background of its own — never text on transparency (it vanishes in one theme or the other). */
+  html, body { margin: 0; width: 1600px; height: 900px; background: #17171c; color: #ececf1; font-family: system-ui, sans-serif; }
+  .card { box-sizing: border-box; width: 1600px; height: 900px; padding: 72px 88px; display: flex; flex-direction: column; }
+  .kicker { font: 600 22px ui-monospace, monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+  h1 { font-size: 76px; line-height: 1.05; margin: 18px 0 14px; }
+  h1 em { font-style: normal; color: var(--accent); }
+  .sub { font-size: 30px; color: #b9b9c6; max-width: 1150px; }
+  .visual { flex: 1; margin: 40px 0; border-radius: 16px; background: #222229; }
+  .tiles { display: flex; gap: 28px; }
+  .tile { flex: 1; padding: 22px 26px; border-radius: 14px; background: #1f1f26; }
+  .tile b { display: block; font-size: 52px; color: var(--accent); }
+  .tile span { font-size: 22px; color: #b9b9c6; }
+  .source { margin-top: 22px; font: 18px ui-monospace, monospace; color: #7d7d8c; }
+  :root { --accent: #f59e0b; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="kicker">project · area</div>
+  <h1>The one <em>claim</em>, as a sentence</h1>
+  <div class="sub">What the user gets — two lines at most.</div>
+  <div class="visual" id="visual"><!-- the real thing, the mechanism, or the computed chart --></div>
+  <div class="tiles">
+    <div class="tile"><b>12 → 3</b><span>what this number means, in one plain line</span></div>
+  </div>
+  <div class="source">source: path/to/file.ts · measured with &lt;tool&gt;</div>
+</div>
+<script type="module">
+  // Everything the card needs, THEN say so. A fixed sleep screenshots whatever had loaded by then.
+  // const data = await (await fetch('data/numbers.json')).json();   // only works over http
+  await document.fonts.ready;            // canvas text drawn earlier uses the fallback font
+  // window.__transparent = true;        // a divider that must be transparent (PNG output)
+  window.__ready = true;
+</script>
+</body>
+</html>

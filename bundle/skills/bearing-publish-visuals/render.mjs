@@ -91,7 +91,9 @@ try {
   if (problems.length) throw new Error(problems.join("\n  "));
   const jpeg = /\.jpe?g$/i.test(out);
   fs.mkdirSync(path.dirname(out), { recursive: true });
-  await page.screenshot({ path: out, type: jpeg ? "jpeg" : "png", ...(jpeg ? { quality } : {}), clip: { x: 0, y: 0, width, height } });
+  // A divider that must be transparent says so; everything else gets the card's own solid background.
+  const transparent = !jpeg && (await page.evaluate(() => window.__transparent === true));
+  await page.screenshot({ path: out, type: jpeg ? "jpeg" : "png", ...(jpeg ? { quality } : {}), omitBackground: transparent, clip: { x: 0, y: 0, width, height } });
   console.log(`✓ ${path.relative(process.cwd(), out)} — ${width}×${height}. Now OPEN it and look: at full size, and at the width it will be shown.`);
 } catch (e) {
   console.error(`✗ ${path.basename(card)} not rendered:\n  ${e.message}`);

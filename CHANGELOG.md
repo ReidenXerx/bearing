@@ -98,7 +98,16 @@ and readable. It is built from a publisher's method on real mod and product page
   destination, the traps that went out wrong, and an 11-point checklist.
 
 The skill ships `render.mjs`. It serves the card over http, waits for the card's own
-`window.__ready`, and exits 1 on a broken image, a failed request or a page error. Playwright comes
+`window.__ready`, and exits 1 on a broken image, a failed request or a page error. A divider that
+sets `window.__transparent` renders with an alpha channel. It also ships:
+
+- `card-template.html`, which declares the charset and shows the `__ready` handshake;
+- `gif-banner.mjs`, which turns footage into a looping 3.5:1 strip as GIF plus WebP under a size cap.
+  Over the cap it lowers fps first, then width, then says "shorten the clip". WebP comes from
+  ffmpeg's encoder, or libwebp's `gif2webp` where that build has none.
+
+The publisher reviewed the skill. Looking at the output is now a gate next to the claim rule, and a
+measured number about a fixed mechanism is told apart from a count that changes between releases. Playwright comes
 from the project. Writing it caught mojibake that every check had passed (`·` rendered as `Â·`), and
 the test now makes the card check its own text.
 
