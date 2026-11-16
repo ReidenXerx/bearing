@@ -46,7 +46,7 @@ with `npm run bearing:token-benchmark`; [the numbers, and where the graph LOSES]
 
 ## What you get
 
-**Fifteen independent modules. Pick any combination — each works alone, none depends on another.**
+**Sixteen independent modules. Pick any combination — each works alone, none depends on another.**
 | | |
 |---|---|
 | ⚑ **North-stars** | **Stops killed ideas respawning six months later.** Numbered, authoritative claims about what your project *is* — **outranks every other doc**, re-injected as the session runs. |
@@ -62,6 +62,7 @@ with `npm run bearing:token-benchmark`; [the numbers, and where the graph LOSES]
 | 📜 **Git history** | **Finds why code is the way it is before anyone changes it.** The commit and the PR behind a magic number or an odd guard, so a deliberate fix is not removed as noise. The skill carries where git points at the wrong commit: plain blame names the formatter, `-C` follows a moved block only past 40 characters, `log -L` finds no TypeScript method, a shallow clone blames everything to one commit. Opt-in; uses git and `gh`. |
 | 🧹 **knip** | **Finds dead code without deleting live code.** Runs [knip](https://knip.dev) with `npx` and treats its list as candidates: on a real NestJS backend 114 of 191 "unused files" were migrations TypeORM loads by glob. The skill names what makes live code look dead — glob-loaded entities, template `import()`, hand-run scripts, packages loaded by name — and how to tell knip without touching the repo. Opt-in; adds nothing to `package.json`. |
 | 🦒 **mergiraf** | **Merges parallel work by syntax tree — and makes the agent read every resolution.** Two minions add an import and a method to the same class: git conflicts, [mergiraf](https://mergiraf.org) keeps both. It does so silently and `git merge` commits at once, so the skill merges with `--no-commit` and nothing configured, and the main agent — never a subagent — reads each `mergiraf review` before committing, then typechecks: a clean merge is not a correct one. Opt-in; needs the mergiraf binary. |
+| 🖼 **Publish** | **Visuals that publish what you built — and make one true claim.** A feature card, a README hero, a social preview, a release header: each states ONE thing, traceable to code or a measurement, shows *this* feature rather than the platform's default, and survives the size it is read at. Cards are HTML; a bundled renderer waits for the card to say it is finished and fails on a broken image — then the agent looks at the result. From a publisher's method on real mod and product pages. Opt-in; needs Playwright. |
 | 🕸 **GitNexus** | **A code graph you reach for when you ask.** Opt-in: the installer explains it and asks. Say "use gitnexus" in a prompt and one skill loads — scope check, where the graph wins, where its counts are only a floor. No gates, no nudges. Requires the [GitNexus](https://github.com/abhigyanpatwari/GitNexus) MCP server. |
 | 🎭 **E2E** | **Turns "I checked it in the browser" into an exit code.** A harness your agent finishes: working substrate plus the scars, and a way to test a destructive write *without performing it*. Opt-in — it writes `.e2e/` and needs Playwright. |
 
@@ -79,7 +80,7 @@ npx bearing                                    # interactive — explains each m
 npx bearing install . --runtime claude --features northstars,taskcore
 ```
 
-`--runtime` `claude` · `zed` · `codex` · `all`  ·  `--features` `northstars` · `goldpractices` · `taskcore` · `microscope` · `consult` · `minions` · `tsjs` · `frontend` · `react` · `astgrep` · `history` · `knip` · `mergiraf` · `gitnexus` · `e2e` · `all`
+`--runtime` `claude` · `zed` · `codex` · `all`  ·  `--features` `northstars` · `goldpractices` · `taskcore` · `microscope` · `consult` · `minions` · `tsjs` · `frontend` · `react` · `astgrep` · `history` · `knip` · `mergiraf` · `publish` · `gitnexus` · `e2e` · `all`
 
 Later, `npx bearing doctor` tells you whether an install is still healthy — a hook registered twice,
 a hook pointing at a file an update deleted, an install older than the package — and the exact command
@@ -114,6 +115,7 @@ Claude Code** exposes them:
 | Git history — why code is this way | ✅ | ✅ | ✅ |
 | knip — what is really unused | ✅ | ✅ | ✅ |
 | mergiraf — merge by syntax tree, reviewed | ✅ | ✅ | ✅ |
+| Publish — visuals with one true claim | ✅ | ✅ | ✅ |
 | GitNexus — the graph, only when you ask | on ask | on ask | — |
 | E2E — browser verification | ✅ | ✅ | ✅ |
 
