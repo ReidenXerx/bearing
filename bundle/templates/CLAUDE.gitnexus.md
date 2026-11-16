@@ -88,7 +88,7 @@ When the user asks you to fan work out — *"use minions"*, *"fan this out"*, *"
 
 - **One claim per image, written as a sentence first,** traceable to code, a log or a measurement, and agreed by whoever owns the code. Check each number's MEANING at its source; never bake a count that changes between releases into an image.
 - **It must show THIS feature,** not the platform's default behaviour — get an off/on comparison when unsure.
-- **Render it whole, then look at it:** `node .bearing/skills/bearing-publish-visuals/render.mjs <card.html> <out> <w> <h>` waits for the card's `window.__ready`, serves it over http, and exits 1 on a broken image or page error. Then open the output at full size AND at the width it is shown.
+- **Render it whole, then look at it:** `node .bearing/skills/bearing-publish-visuals/render.mjs <card.html> <out> <w> <h|auto> [--scale 2]` waits for the card's `window.__ready`, serves it over http, and exits 1 on a broken image or page error. Then open the output at full size AND at the width it is shown.
 
 <!-- feature: tsjs -->
 ## Writing TypeScript/JavaScript (intel layer)

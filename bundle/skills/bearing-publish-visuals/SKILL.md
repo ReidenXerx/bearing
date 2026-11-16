@@ -87,7 +87,13 @@ shows the `__ready` handshake.
 
 ```bash
 node .bearing/skills/bearing-publish-visuals/render.mjs cards/feature.html out/feature.jpg 1600 900 90
+node .bearing/skills/bearing-publish-visuals/render.mjs cards/readme.html out/readme.png 1200 auto --scale 2
 ```
+
+`auto` takes the page's own height, so a card whose text grew is never cut and never padded with a
+dead band. `--scale 2` renders twice the pixels without changing the layout: lay a README card out at
+about the width it is shown (~1200 CSS px), so text sized there is the size the reader sees, and it
+stays sharp on a retina screen.
 
 The page sets `window.__ready = true` when it is finished; the renderer waits for exactly that,
 serves the folder over http, and **exits 1** on a missing `__ready`, a broken image, a failed request

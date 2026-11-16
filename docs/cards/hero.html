@@ -1,0 +1,31 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="icon" href="data:,"><link rel="stylesheet" href="base.css">
+<style>
+  .panes { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 34px; }
+  .pane { padding: 26px 28px; border-radius: 16px; background: var(--panel); border: 2px solid var(--line); }
+  .pane.with { border-color: var(--good); }
+  .label { font: 600 20px JBM, monospace; letter-spacing: .08em; margin-bottom: 8px; }
+  .without .label { color: var(--bad); } .with .label { color: var(--good); }
+  .step { display: grid; grid-template-columns: 24px 1fr; gap: 12px; margin-top: 16px; }
+  .step .dot { width: 14px; height: 14px; margin-top: 9px; border-radius: 50%; border: 3px solid var(--faint); }
+  .when { font: 600 17px JBM, monospace; color: var(--faint); letter-spacing: .06em; }
+  .what { font-size: 30px; line-height: 1.3; }
+  .without .last .what { color: var(--bad); font-weight: 600; } .without .last .dot { border-color: var(--bad); }
+  .with .last .what { color: var(--good); font-weight: 600; } .with .last .dot { border-color: var(--good); }
+</style></head><body>
+<div class="card">
+  <div class="kicker">The failure bearing exists for</div>
+  <h1>Your tests catch code that breaks.<br>Nothing catches an agent that has <em>drifted</em>.</h1>
+  <div class="panes">
+    <div class="pane without"><div class="label">WITHOUT</div>
+      <div class="step"><div class="dot"></div><div><div class="when">MARCH</div><div class="what">A design doc is written, then abandoned.</div></div></div>
+      <div class="step"><div class="dot"></div><div><div class="when">TODAY</div><div class="what">The agent reads it and re&#8209;proposes the idea you measured and killed.</div></div></div>
+      <div class="step last"><div class="dot"></div><div><div class="when">THREE DAYS LATER</div><div class="what">You find out.</div></div></div>
+    </div>
+    <div class="pane with"><div class="label">WITH BEARING</div>
+      <div class="step"><div class="dot"></div><div><div class="when">ONCE</div><div class="what">You record it as a north&#8209;star: <code>NS&#8209;9</code>, measured and rejected.</div></div></div>
+      <div class="step"><div class="dot"></div><div><div class="when">TODAY</div><div class="what">The north&#8209;star outranks the abandoned doc.</div></div></div>
+      <div class="step last"><div class="dot"></div><div><div class="when">ONE LINE LATER</div><div class="what">Caught, cited, not re&#8209;proposed.</div></div></div>
+    </div>
+  </div>
+</div>
+<script type="module" src="ready.js"></script></body></html>
