@@ -4,6 +4,26 @@ All notable changes to `bearing` are documented here.
 
 ## Unreleased — GitNexus becomes opt-in, and nothing blocks your tools any more
 
+### Added — e2e: `tools/run.js` and `core/safety.js`, the two files projects kept writing themselves
+
+Rechecking the harness against five real projects found the same two files written independently:
+
+- **`tools/run.js`** (in three projects) runs every verifier, reports once and exits 1 if any failed.
+  - `ONLY=a,b` picks verifiers by name. `_`-prefixed scratch files are skipped, and each verifier
+    has a timeout.
+  - It checks `BASE` once before anything runs. A missing backend used to produce eight identical
+    failures that buried the one real finding.
+- **`core/safety.js`** (in two projects) is a production write guard. The two projects built it in
+  opposite ways, and both were right, so the kit ships both modes and makes you choose:
+  - `allowlist` blocks every write you did not check at the backend. Use it when one missed block is
+    worse than a broken run (money, messages).
+  - `denylist` blocks only `DELETE` and irreversible paths. Use it when blocking ordinary writes
+    breaks the app (a token refresh is a POST).
+  - Blocked requests are aborted, never stubbed: a faked 200 lets a verifier "prove" a write that
+    never happened. The skill carries the rule that names lie about danger (`POST …/test-stake`
+    placed a real order).
+  - `shotsAllowed` keeps screenshots of sensitive production data off.
+
 ### Fixed — the e2e harness you finished is yours: update, module removal and uninstall keep it
 
 `.e2e/` is "a harness you finish yourself", and bearing kept treating every file in it as its own:

@@ -20,6 +20,8 @@ module — every entry is a green run over a real failure.
 | user wants to SEE a page | `shots.take(page, '<view-key>')`, then read the png |
 | a fix needs proving, not describing | a verifier that FAILS before the fix and passes after (NS-9) |
 | the app is not running / no session | `skip(name, why)` — never a `check` that is a skip in disguise |
+| run everything / a subset | `node .e2e/tools/run.js` (`ONLY=a,b`) — it checks BASE once first, so a dead backend is one line, not N identical failures |
+| the run points at PRODUCTION | `armWrites(context, { production, mode })` from `core/safety.js` — **choose the mode**: `allowlist` when one missed block is worse than a broken run (money, messages); `denylist` when blocking ordinary writes breaks the app (token refresh is a POST). Allowlist a path only after reading what it does in the backend — names lie. Gate screenshots of sensitive data with `shotsAllowed` |
 
 Not for unit-testable logic. A browser is the slowest way to test a pure function.
 
