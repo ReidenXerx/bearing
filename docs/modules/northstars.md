@@ -31,13 +31,9 @@ agent, on this codebase:
 > while the shipped config always passed a number — so the fix could not run, and did not, for two
 > releases.*
 
-## 💭 Memory — kept true, not just kept
+## 💭 Memory
 
-In Claude Code, the north-stars module also asks one question at the moments memory goes stale: after a merge, a
-tag, a release or a publish, the agent is asked whether its project memory still says what is true.
-In the session brief, a memory file that is a week or more old with commits since gets the same
-question. It never writes memory itself. Turn it off with `"memoryNudge": false` in
-`.bearing/hooks.json`, then `bearing update`; `npx bearing status` shows how often it fired.
+The north-stars module also keeps the agent's memory true — see [memory maintenance](memory.md).
 
 ---
 
