@@ -2,7 +2,15 @@
 
 All notable changes to `bearing` are documented here.
 
-## Unreleased — GitNexus becomes opt-in, and nothing blocks your tools any more
+## 2.0.0 — GitNexus becomes opt-in, and nothing blocks your tools any more
+
+**Upgrading from npm 1.2.1?** 1.2.2 and 1.3.0 were tagged on GitHub but never published to npm, so
+this is the first npm release since 1.2.1 and carries both — their entries are below this one.
+`bearing update` changes what bearing does in an installed repo: it strips the graph gates, the
+GitNexus module stops being part of a default install, microscope and minions run only when you ask,
+and nothing refreshes the index on its own. The CLI's commands and flags stay compatible. New since
+1.3.0: memory maintenance, `bearing status` and `bearing doctor`, and five modules — ast-grep (on by
+default), git history, knip, mergiraf and publish.
 
 ### Added — e2e: narrated demo videos, recorded from the harness and reviewed before sending
 

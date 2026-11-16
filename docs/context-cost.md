@@ -1,6 +1,6 @@
 # What bearing costs your context
 
-Measured on fresh installs into an empty repo, bearing 1.3.0, counted the way `npx bearing status`
+Measured on fresh installs into an empty repo, bearing 2.0.0, counted the way `npx bearing status`
 counts: characters ÷ 4. That is an estimate, not a tokenizer.
 
 **Every session, before you type anything:**

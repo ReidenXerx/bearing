@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/bearing-mark.svg" alt="bearing" width="72">
+<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/v2.0.0/docs/assets/bearing-mark.svg" alt="bearing" width="72">
 
 # bearing
 
@@ -25,13 +25,13 @@ npx bearing
 **[duduphudu.app/bearing](https://duduphudu.app/bearing/)** — what it does, what it costs, and where it fails
 
 
-<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/cards/hero.png" alt="Your tests catch code that breaks; nothing catches an agent that has drifted. Without bearing: a design doc is abandoned in March, the agent re-proposes the idea you measured and killed, and you find out three days later. With bearing: you record it once as a north-star, NS-9, measured and rejected; the north-star outranks the abandoned doc, and the idea is caught, cited and not re-proposed." width="100%">
+<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/v2.0.0/docs/assets/cards/hero.png" alt="Your tests catch code that breaks; nothing catches an agent that has drifted. Without bearing: a design doc is abandoned in March, the agent re-proposes the idea you measured and killed, and you find out three days later. With bearing: you record it once as a north-star, NS-9, measured and rejected; the north-star outranks the abandoned doc, and the idea is caught, cited and not re-proposed." width="100%">
 
 A drifted agent doesn't crash. It reads a doc you abandoned in March, re-proposes the feature you
 already measured and killed, and writes a convincing paragraph about it. You nod. You find out three
 days later. That failure has a name — **losing your bearings**.
 
-<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/cards/memory.png" alt="Your agent keeps its own memory true. At session start, when memory is a week old and commits have landed since, it reconciles memory before trusting it. While it works, when edits pile up, it saves the task-core again. At a milestone — a PR merged, a tag, a release, a publish — it checks whether memory still says what is true. After compaction it reads the task-core and memory back first. bearing asks; the agent writes; every prompt has a knob." width="100%">
+<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/v2.0.0/docs/assets/cards/memory.png" alt="Your agent keeps its own memory true. At session start, when memory is a week old and commits have landed since, it reconciles memory before trusting it. While it works, when edits pile up, it saves the task-core again. At a milestone — a PR merged, a tag, a release, a publish — it checks whether memory still says what is true. After compaction it reads the task-core and memory back first. bearing asks; the agent writes; every prompt has a knob." width="100%">
 
 **And it keeps its own memory true.** The next session starts from memory, not from this transcript —
 so the agent is asked to maintain it at the four moments it goes stale, and writes it itself.
@@ -41,23 +41,23 @@ so the agent is asked to maintain it at the four moments it goes stale, and writ
 
 Sixteen modules, each independent: pick any combination. Seven are on by default; the rest you add.
 
-<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/cards/anchors.png" alt="Always on: north-stars outrank every stale doc; gold practices are rules earned from real defects, cited by number; the task-core is a per-chat save-state written before compaction." width="100%">
+<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/v2.0.0/docs/assets/cards/anchors.png" alt="Always on: north-stars outrank every stale doc; gold practices are rules earned from real defects, cited by number; the task-core is a per-chat save-state written before compaction." width="100%">
 
 **Always on, and the reason it exists.** [North-stars](https://github.com/ReidenXerx/bearing/blob/main/docs/modules/northstars.md) · [gold practices](https://github.com/ReidenXerx/bearing/blob/main/docs/modules/northstars.md) · [task-core](https://github.com/ReidenXerx/bearing/blob/main/docs/modules/taskcore.md)
 
-<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/cards/onask.png" alt="On your command: microscope this starts a domain-expert review panel whose findings must survive refutation; fan this out starts subagents that return citations, never verdicts; consult asks only what the repo cannot answer and confirms before anything irreversible." width="100%">
+<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/v2.0.0/docs/assets/cards/onask.png" alt="On your command: microscope this starts a domain-expert review panel whose findings must survive refutation; fan this out starts subagents that return citations, never verdicts; consult asks only what the repo cannot answer and confirms before anything irreversible." width="100%">
 
 **Nothing here starts on its own.** [Microscope](https://github.com/ReidenXerx/bearing/blob/main/docs/modules/microscope.md) · [minions](https://github.com/ReidenXerx/bearing/blob/main/docs/modules/minions.md) (gathering, and applying a decided change) · [consult](https://github.com/ReidenXerx/bearing/blob/main/docs/modules/consult.md)
 
-<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/cards/tools.png" alt="Each tool ships with its traps: ast-grep searches by code shape and proves its pattern first; git history finds why code is this way past the formatter commit; knip lists unused code as candidates only; mergiraf merges by syntax tree and the agent reads every resolution." width="100%">
+<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/v2.0.0/docs/assets/cards/tools.png" alt="Each tool ships with its traps: ast-grep searches by code shape and proves its pattern first; git history finds why code is this way past the formatter commit; knip lists unused code as candidates only; mergiraf merges by syntax tree and the agent reads every resolution." width="100%">
 
 **ast-grep is on by default; the other three are opt-in.** None adds anything to your `package.json`. [ast-grep](https://github.com/ReidenXerx/bearing/blob/main/docs/modules/astgrep.md) · [Git history](https://github.com/ReidenXerx/bearing/blob/main/docs/modules/history.md) · [knip](https://github.com/ReidenXerx/bearing/blob/main/docs/modules/knip.md) · [mergiraf](https://github.com/ReidenXerx/bearing/blob/main/docs/modules/mergiraf.md)
 
-<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/cards/rules.png" alt="Code that compiles and is still wrong: TS/JS rules for as, unions and ||; frontend rules for near-duplicate components and shared-component edits; React rules for form fields." width="100%">
+<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/v2.0.0/docs/assets/cards/rules.png" alt="Code that compiles and is still wrong: TS/JS rules for as, unions and ||; frontend rules for near-duplicate components and shared-component edits; React rules for form fields." width="100%">
 
 **Opt-in, for the stack you have.** [TypeScript / JavaScript](https://github.com/ReidenXerx/bearing/blob/main/docs/modules/tsjs.md) · [Frontend](https://github.com/ReidenXerx/bearing/blob/main/docs/modules/frontend.md) · [React](https://github.com/ReidenXerx/bearing/blob/main/docs/modules/react.md)
 
-<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/cards/kits.png" alt="Opt-in kits: E2E turns I checked it in the browser into an exit code and records narrated demos; Publish makes visuals with one true claim, looked at before they ship; GitNexus is a code graph used only when you ask." width="100%">
+<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/v2.0.0/docs/assets/cards/kits.png" alt="Opt-in kits: E2E turns I checked it in the browser into an exit code and records narrated demos; Publish makes visuals with one true claim, looked at before they ship; GitNexus is a code graph used only when you ask." width="100%">
 
 **Each one asks before it installs anything heavier.** [E2E harness](https://github.com/ReidenXerx/bearing/blob/main/docs/modules/e2e.md) (Playwright) · [Publish](https://github.com/ReidenXerx/bearing/blob/main/docs/modules/publish.md) (Playwright) · [GitNexus](https://github.com/ReidenXerx/bearing/blob/main/docs/modules/gitnexus.md) (its CLI and MCP server)
 
@@ -69,14 +69,14 @@ the knob that turns it off.
 
 ## Measured, not asserted
 
-<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/cards/receipts.png" alt="Receipts: bearing's own graph gates cost 4 to 5 times as much per solved task over 180 runs, so they were retired; 9 of 9 runs used ast-grep once a skill carried its traps, on a real 650-file repo; 0 of 6 runs deleted live code with the knip module and 2 of 6 without it; across 107 runs, five code-intelligence setups did not beat grep at 650 files." width="100%">
+<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/v2.0.0/docs/assets/cards/receipts.png" alt="Receipts: bearing's own graph gates cost 4 to 5 times as much per solved task over 180 runs, so they were retired; 9 of 9 runs used ast-grep once a skill carried its traps, on a real 650-file repo; 0 of 6 runs deleted live code with the knip module and 2 of 6 without it; across 107 runs, five code-intelligence setups did not beat grep at 650 files." width="100%">
 
 Every number traces to a report with a hand-checked answer key:
 [gates](https://github.com/ReidenXerx/bearing/blob/main/eval/teaching/REPORT.md) · [ast-grep](https://github.com/ReidenXerx/bearing/blob/main/eval/intel/REPORT-REAL.md) ·
 [knip](https://github.com/ReidenXerx/bearing/blob/main/eval/intel/REPORT-TOOLS.md) · [code intelligence](https://github.com/ReidenXerx/bearing/blob/main/eval/codeintel/REPORT.md).
 Nothing leaves your repo; there is no telemetry.
 
-<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/cards/cost.png" alt="About 3,900 tokens a session by default, 2 percent of a 200k window; about 7,400 with every module; about 24,600 if you add GitNexus and your client loads its tool schemas up front." width="100%">
+<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/v2.0.0/docs/assets/cards/cost.png" alt="About 3,900 tokens a session by default, 2 percent of a 200k window; about 7,400 with every module; about 24,600 if you add GitNexus and your client loads its tool schemas up front." width="100%">
 
 Skill bodies load only when used. [The numbers, and the claim this page used to make and dropped](https://github.com/ReidenXerx/bearing/blob/main/docs/context-cost.md).
 
