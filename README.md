@@ -7,8 +7,8 @@
 **Your tests catch code that breaks. Nothing catches an agent that has drifted about what the code *means*.**
 
 A toolbelt for developers who already work with coding agents: north-stars that outrank stale docs,
-a task-core that survives compaction, ast-grep with the traps that make it lie, review and fan-out
-when you ask for them. **You decide when.**
+memory the agent keeps true, a task-core that survives compaction, ast-grep with the traps that make
+it lie, review and fan-out when you ask for them. **You decide when.**
 
 [![npm](https://img.shields.io/npm/v/bearing?color=3987e5)](https://www.npmjs.com/package/bearing)
 [![npm downloads](https://img.shields.io/npm/dt/bearing?color=3987e5)](https://www.npmjs.com/package/bearing)
@@ -31,13 +31,19 @@ A drifted agent doesn't crash. It reads a doc you abandoned in March, re-propose
 already measured and killed, and writes a convincing paragraph about it. You nod. You find out three
 days later. That failure has a name — **losing your bearings**.
 
+<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/cards/memory.png" alt="Your agent keeps its own memory true. At session start, when memory is a week old and commits have landed since, it reconciles memory before trusting it. While it works, when edits pile up, it saves the task-core again. At a milestone — a PR merged, a tag, a release, a publish — it checks whether memory still says what is true. After compaction it reads the task-core and memory back first. bearing asks; the agent writes; every prompt has a knob." width="100%">
+
+**And it keeps its own memory true.** The next session starts from memory, not from this transcript —
+so the agent is asked to maintain it at the four moments it goes stale, and writes it itself.
+[How, and the knobs](https://github.com/ReidenXerx/bearing/blob/main/docs/modules/memory.md)
+
 ## What you get
 
 Sixteen modules, each independent: pick any combination. Seven are on by default; the rest you add.
 
-<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/cards/anchors.png" alt="Always on: north-stars outrank every stale doc; gold practices are rules earned from real defects, cited by number; the task-core is a per-chat save-state written before compaction; after a merge or a release the agent is asked whether its memory is still true." width="100%">
+<img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/cards/anchors.png" alt="Always on: north-stars outrank every stale doc; gold practices are rules earned from real defects, cited by number; the task-core is a per-chat save-state written before compaction." width="100%">
 
-**Always on, and the reason it exists.** [North-stars](https://github.com/ReidenXerx/bearing/blob/main/docs/modules/northstars.md) (with the memory check) · [gold practices](https://github.com/ReidenXerx/bearing/blob/main/docs/modules/northstars.md) · [task-core](https://github.com/ReidenXerx/bearing/blob/main/docs/modules/taskcore.md)
+**Always on, and the reason it exists.** [North-stars](https://github.com/ReidenXerx/bearing/blob/main/docs/modules/northstars.md) · [gold practices](https://github.com/ReidenXerx/bearing/blob/main/docs/modules/northstars.md) · [task-core](https://github.com/ReidenXerx/bearing/blob/main/docs/modules/taskcore.md)
 
 <img src="https://raw.githubusercontent.com/ReidenXerx/bearing/main/docs/assets/cards/onask.png" alt="On your command: microscope this starts a domain-expert review panel whose findings must survive refutation; fan this out starts subagents that return citations, never verdicts; consult asks only what the repo cannot answer and confirms before anything irreversible." width="100%">
 
