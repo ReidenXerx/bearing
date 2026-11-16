@@ -80,6 +80,37 @@ is told which session, which worktree and which branch, once per session and fil
   - **MCP Agent Mail**, because it needs a server, costs about 17k tokens of tool schemas, has a
     pre-commit guard that blocks commits, and treats each worktree as a separate project.
 
+### Added — `publish`: visuals that make one true claim
+
+When the agent makes the images that publish what you built (a feature card, a README hero, a social
+preview, a release or store header, a chart), the `bearing-publish-visuals` skill keeps them honest
+and readable. It is built from a publisher's method on real mod and product pages:
+
+- **One claim per image, written first.** It must trace to code, a log or a measurement, and the
+  code's owner must agree it can be claimed.
+- **Numbers carry their meaning,** checked at the source. No count that changes between releases goes
+  into an image.
+- **It shows THIS feature,** with an off/on comparison when unsure. A banner of the platform's default
+  behaviour was the worst card that went out.
+- **What to show, in order of preference:** the real thing, then the mechanism rebuilt, then numbers
+  computed from the code's own constants.
+- **Layout and checklist:** a layout for the size it is read at, sizes that worked for each
+  destination, the traps that went out wrong, and an 11-point checklist.
+
+The skill ships `render.mjs`. It serves the card over http, waits for the card's own
+`window.__ready`, and exits 1 on a broken image, a failed request or a page error. A divider that
+sets `window.__transparent` renders with an alpha channel. It also ships:
+
+- `card-template.html`, which declares the charset and shows the `__ready` handshake;
+- `gif-banner.mjs`, which turns footage into a looping 3.5:1 strip as GIF plus WebP under a size cap.
+  Over the cap it lowers fps first, then width, then says "shorten the clip". WebP comes from
+  ffmpeg's encoder, or libwebp's `gif2webp` where that build has none.
+
+The publisher reviewed the skill. Looking at the output is now a gate next to the claim rule, and a
+measured number about a fixed mechanism is told apart from a count that changes between releases. Playwright comes
+from the project. Writing it caught mojibake that every check had passed (`·` rendered as `Â·`), and
+the test now makes the card check its own text.
+
 ### Added — memory stays current: a nudge at milestones, and a weekly one
 
 Project memory is the one layer nothing else keeps current. North-stars change when you approve a
