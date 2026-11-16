@@ -1,6 +1,6 @@
 {
   "name": "bearing",
-  "version": "1.3.0",
+  "version": "2.0.0",
   "description": "Your tests catch code that breaks; nothing catches an agent that has drifted about what the code means. A toolbelt for developers who already work with coding agents: north-stars that outrank stale docs, memory kept true, a task-core that survives compaction, ast-grep with its traps, review when you ask. No gates. Claude Code, Zed, Codex.",
   "type": "module",
   "private": false,
@@ -13,9 +13,9 @@
     "url": "https://github.com/ReidenXerx/bearing/issues"
   },
   "bin": {
-    "bearing": "./bin/cli.mjs",
-    "bearing-update": "./bin/cli.mjs",
-    "bearing-uninstall": "./bin/cli.mjs"
+    "bearing": "bin/cli.mjs",
+    "bearing-update": "bin/cli.mjs",
+    "bearing-uninstall": "bin/cli.mjs"
   },
   "engines": {
     "node": ">=22.9.0"

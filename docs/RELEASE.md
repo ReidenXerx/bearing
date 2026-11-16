@@ -95,6 +95,9 @@ In a real target repo after update:
 ## 7. Docs
 
 - [ ] `README.md` quick start matches actual CLI flags.
+- [ ] README image URLs point at the NEW tag (`raw.githubusercontent.com/ReidenXerx/bearing/vX.Y.Z/…`):
+      npm freezes the README at publish, so an image on `main` changes under an old package page.
+      Regenerate cards first (`npm run gen:cards`), look at each, then pin.
 - [ ] `docs/QUICKSTART.md` daily commands are current.
 - [ ] `docs/SKILLS.md` lists every canonical skill in `bundle/skills`.
 - [ ] `docs/ZED.md` matches what an install writes to `.zed/settings.json` (no agent profile).
