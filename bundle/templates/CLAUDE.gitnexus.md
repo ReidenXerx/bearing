@@ -81,6 +81,15 @@ When the user asks you to fan work out — *"use minions"*, *"fan this out"*, *"
 - **You review every resolution yourself before committing** — `mergiraf review <id>` for each `Review with:` line it printed. Never delegate that review: whether both sides survived is a decision.
 - **A clean merge is not a correct merge.** Typecheck, test and build after — a rename on one side and a new call to the old name on the other merges without any conflict and does not compile.
 
+<!-- feature: publish -->
+## Publishing what you built — visuals (intel layer)
+
+**Before you make or publish an image that states something** — a feature card, a README hero, a social preview, a release or store header, a chart — load `bearing-publish-visuals`. An image is read as proof and seen small:
+
+- **One claim per image, written as a sentence first,** traceable to code, a log or a measurement, and agreed by whoever owns the code. Check each number's MEANING at its source; never bake a count that changes between releases into an image.
+- **It must show THIS feature,** not the platform's default behaviour — get an off/on comparison when unsure.
+- **Render it whole, then look at it:** `node .bearing/skills/bearing-publish-visuals/render.mjs <card.html> <out> <w> <h>` waits for the card's `window.__ready`, serves it over http, and exits 1 on a broken image or page error. Then open the output at full size AND at the width it is shown.
+
 <!-- feature: tsjs -->
 ## Writing TypeScript/JavaScript (intel layer)
 
