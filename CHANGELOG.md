@@ -2,6 +2,14 @@
 
 All notable changes to `bearing` are documented here.
 
+## 2.0.5 — parallel edits no longer erase each other's record
+
+- **The parallel-session warning lost about one edit in five** when one chat edited several files at
+  once (Copilot, on the enter-front-end rollout PR). Each hook read the chat's record, added its file
+  and wrote the whole record back, so the last writer dropped the others' files and a later overlap
+  on them went unwarned. Measured with 20 simultaneous edits: 16 of 20 overlaps warned before, 20 of
+  20 now. Each edit now writes its own marker, which no other edit rewrites.
+
 ## 2.0.4 — a first update on an old clone finishes the job
 
 2.0.3 committed the install record, but a repo installed before it has none in git, so its first update

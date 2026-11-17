@@ -14,6 +14,7 @@
 // in any working tree. Resolving it reads the `.git` file and `commondir` — no `git` spawn on a hook
 // that runs after every edit (NS-7). It WARNS, once per other session and file, and never blocks (NS-5).
 // Opt-in: `sessionsWarn: true`, then `bearing update` (registered only while on — OPT_IN_HOOKS).
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
@@ -98,6 +99,18 @@ const read = (p) => {
   }
 };
 
+// WHICH FILES A CHAT EDITED live one marker per file under `<chat>.d/`, not inside the shared record.
+// Parallel edits in one chat each read that record, added their file and renamed it back — the last
+// rename dropped the other edit's file, so a later overlap on it was never warned (NS-18's lost
+// update). A marker is written whole by the one edit it describes, so no edit can erase another's.
+// `files` stays in the record for hooks from older versions still reading it.
+const markerDir = (chat) => path.join(store, `${chat}.d`);
+const markerName = (r) => createHash("sha1").update(r).digest("hex").slice(0, 16);
+const editedAt = (chat, record) => {
+  const m = read(path.join(markerDir(chat), markerName(rel)));
+  return Math.max(Number(record?.files?.[rel]) || 0, m?.rel === rel ? Number(m.at) || 0 : 0);
+};
+
 const self = read(mine) ?? { files: {}, warned: {} };
 self.chat = me;
 self.worktree = root;
@@ -117,17 +130,21 @@ try {
 for (const name of entries) {
   if (!name.endsWith(".json") || name === `${me}.json`) continue;
   const p = path.join(store, name);
+  const chat = name.slice(0, -".json".length);
   const other = read(p);
   if (!other || !(now - Number(other.updatedAt) < windowMs)) {
     // A record nobody has touched in a day is a closed chat; sweep it so the store stays small.
     try {
-      if (!other || now - Number(other.updatedAt) > 24 * 60 * MIN) fs.rmSync(p, { force: true });
+      if (!other || now - Number(other.updatedAt) > 24 * 60 * MIN) {
+        fs.rmSync(p, { force: true });
+        fs.rmSync(markerDir(chat), { recursive: true, force: true });
+      }
     } catch {
       /* best effort */
     }
     continue;
   }
-  const at = Number(other.files?.[rel]);
+  const at = editedAt(chat, other);
   const key = `${other.chat}:${rel}`;
   if (at && now - at < windowMs && !self.warned[key]) {
     self.warned[key] = now;
@@ -136,7 +153,10 @@ for (const name of entries) {
 }
 
 try {
-  fs.mkdirSync(store, { recursive: true });
+  fs.mkdirSync(markerDir(me), { recursive: true });
+  const marker = path.join(markerDir(me), markerName(rel));
+  fs.writeFileSync(`${marker}.${process.pid}.tmp`, JSON.stringify({ rel, at: now }));
+  fs.renameSync(`${marker}.${process.pid}.tmp`, marker);
   const tmp = `${mine}.${process.pid}.tmp`;
   fs.writeFileSync(tmp, JSON.stringify(self));
   fs.renameSync(tmp, mine);
