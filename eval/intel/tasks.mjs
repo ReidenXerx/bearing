@@ -80,7 +80,8 @@ export async function load(url, ctx, next) {
     });
     return "import {" + out.join(",") + "} from " + q + spec + q;
   });
-  return { ...r, source };
+  // Node 22.9 accepts only bytes back from a load hook; later 22.x also take a string.
+  return source === String(r.source) ? r : { ...r, source: Buffer.from(source) };
 }`;
 const RESOLVE_TS = `data:text/javascript,${encodeURIComponent(
   `import { register } from "node:module"; register(${JSON.stringify("data:text/javascript," + encodeURIComponent(RESOLVE_HOOK))}); register(${JSON.stringify("data:text/javascript," + encodeURIComponent(TYPE_IMPORT_HOOK))});`,
