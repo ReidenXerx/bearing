@@ -2,6 +2,49 @@
 
 All notable changes to `bearing` are documented here.
 
+## 2.0.4 — a first update on an old clone finishes the job
+
+2.0.3 committed the install record, but a repo installed before it has none in git, so its first update
+on a clone still works from what is on disk. Rolling 2.0.3 out to real team repos showed two things that
+path could not see.
+
+### Fixed — retired files were left behind, for good
+
+With no record, nothing told the update which files bearing had installed, so it retired none: the 2.0
+gate hooks, their libs and two CI workflows that still run (`gitnexus-ci.yml`,
+`bearing-index-cache.yml`) stayed — and the record that update committed did not list them, so no later
+update would remove them either. On a clone of an install with no record, a tracked file is now retired
+when its path is one only bearing ships and the bundle no longer ships it at all — or, for the few
+retired paths whose name says nothing (`.githooks/pre-commit`, `scripts/install-git-hooks.sh`), when its
+bytes match a version bearing published. The skills the GitNexus indexer generates are never touched, and
+a file is never removed merely because its module was not detected. Measured on a real pre-2.0 team repo:
+43 of the 45 files bearing had retired there, and nothing else.
+
+### Fixed — the runtime was inferred as Claude-only
+
+Zed's skill links are gitignored, so a clone of a `--runtime all` install looked Claude-only, and the
+committed record then said so to every teammate. A clone now reads what is committed: bearing's block in
+`AGENTS.md` (the whole of what Codex installs) and bearing's server in `.zed/settings.json`.
+
+### Fixed — from GitHub Copilot's reviews of the rollout PRs
+
+- **minion review could land an out-of-scope file.** git quotes a path with special or non-ASCII
+  characters (`"a/src/caf\303\251.js"`), the scope parser skipped those headers, and `--land` applied
+  the file unchecked. Quoted paths are now read, and a patch with any header that cannot be read is
+  rejected.
+- **The north-star re-anchor could still double**, when a parallel call had decided against the old
+  baseline; the claim is now keyed to the baseline the decision was made on.
+- **Doc-write anchors postponed the full anchor** on the call-count schedule (token cadence off, or an
+  unreadable transcript) — indefinitely, with a doc written every few calls. They keep their own count.
+- **`core.hooksPath=.githooks` outlived the hook on every teammate's clone**, silencing their own
+  `.git/hooks`: the file went away by `git pull`, and only the machine that removed it unset the setting.
+  Any update now releases it once `.githooks/` is gone.
+- **Parallel subagents were one session** to the parallel-session warning, so their overlapping edits
+  were never flagged; they are told apart by `agent_id`.
+- **GitNexus's own `<!-- gitnexus:start -->` block** — "MUST run impact before editing any symbol" —
+  stayed in committed AGENTS.md / CLAUDE.md wherever it was committed before the stabilizer existed,
+  so a fresh checkout still carried the mandate bearing retired. Updates now strip it (not in stealth).
+
 ## 2.0.3 — the install record travels with the repo
 
 A review of 2.0.2 (six review lenses, 41 findings, each reproduced in a throwaway repo) found that most

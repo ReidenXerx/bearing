@@ -82,7 +82,12 @@ const MIN = 60 * 1000;
 const windowMs = (Number(cfg.sessionsWindowMinutes) > 0 ? Number(cfg.sessionsWindowMinutes) : 30) * MIN;
 const now = Date.now();
 const store = path.join(dirs.common, "bearing-sessions");
-const me = sp.sessionKey(input.transcript_path);
+// A subagent's call carries its PARENT's transcript_path, so keyed on that alone, parallel subagents
+// (and the parent) were one session: each overwrote the same record and skipped it as its own, so
+// overlapping edits between them were never warned about. Its `agent_id` tells them apart — bounded
+// and filesystem-safe; the main chat's key is unchanged.
+const agent = String(input.agent_id ?? "").replace(/[^\w.-]/g, "").slice(0, 40);
+const me = sp.sessionKey(input.transcript_path) + (agent ? `--${agent}` : "");
 const mine = path.join(store, `${me}.json`);
 
 const read = (p) => {

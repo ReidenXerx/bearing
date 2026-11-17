@@ -1,0 +1,36 @@
+{
+  "_comment": "Git blob hashes of every version bearing ever shipped at these non-namespaced paths, now retired. A tracked file here is bearing's only if its bytes match one (kit.mjs, record-less retirement). Regenerate from git history if a path is added.",
+  ".githooks/pre-commit": [
+    "2dc38a021b5b477caea93c1d18e8468bb746dfdd",
+    "4cce9ef455606e00d07a96c5e91374e05f24a7b9",
+    "4d552619764afb9d1794b10106af6d6e66f8501e",
+    "7306f8018492b9d25b41bf94b9ccd98afed97149",
+    "75fa1a82a2a8c759418cda0a19c05115c2ac8974",
+    "8d1b8684c8144297618bfe198eb21c05052cd770",
+    "955853a:bundle/.githooks/pre-commit",
+    "cdd03c3e3ebdd29262eecdbeb8fc45473c20e374",
+    "d1eec2cb078874a8acbdbe00ad4994263554937b",
+    "d3a3f3f4b5f6d56e9b6dad20356e5419ec644efc",
+    "e719d756d64f1a97b49eb12e3ea4e6dee4894948"
+  ],
+  "scripts/install-git-hooks.sh": [
+    "0b093e57b7d4a8f6755472c74eaeba425087c5c2",
+    "202707c107a41f302b76dcf6126720863fc4135a",
+    "6b3e31987116477e46169476dd407e9cbf608065",
+    "7a57fd4898853224f64b75a47f7aefbf14e4fe50",
+    "955853a:bundle/scripts/install-git-hooks.sh",
+    "a1d4f4dd6a2e53b6273b562e2f96f6cc1d897827",
+    "ff14298624b7a4e5bad16710e653a10875dd564e"
+  ],
+  "scripts/pack-bearing-teaching.sh": [
+    "0bd19fcc4fe300e01d694f3d50627141ec355408",
+    "4715f1a1bccbb332af3ff6c485bc1cf5d879fa3a",
+    "51eeedd23e5109933328dec00f62a4d30f5f6059",
+    "6da2149e394427e0784bb71012f0504038ac24f6",
+    "8199fda2c15c628697482c9cf13c8ef46a98baae",
+    "9e1915b7b6bdb6181a6962624279cb676717497c",
+    "f20d95a5295538d3b29fd777a4a0595d6346d6c4",
+    "f4613d6e85cdbd4604aaf99a6b78984f958ef1b6",
+    "f7e5316:bundle/scripts/pack-bearing-teaching.sh"
+  ]
+}

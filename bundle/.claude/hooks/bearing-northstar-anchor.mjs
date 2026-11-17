@@ -74,6 +74,11 @@ const wroteDoc = /^(Write|Edit|NotebookEdit)$/.test(tool) && /\.(md|mdx|txt)$/i.
 
 const key = input.transcript_path;
 const n = bumpNorthStarCounter(root, false, key);
+// DOC WRITES KEEP THEIR OWN COUNT. They used to reset the counter that schedules the FULL anchor, so
+// where that schedule is the call count (token cadence off, or an unreadable transcript) a doc write
+// every few calls postponed the full list indefinitely — unrelated north-stars never came back.
+const docKey = `${key || "shared"}.doc`;
+const nDoc = bumpNorthStarCounter(root, false, docKey);
 
 // WHEN TO RE-SEND THEM ALL: when enough has been added to the context to bury them. That is a
 // size, and the transcript records the size on every turn; it does not record the window, and this
@@ -83,6 +88,7 @@ const n = bumpNorthStarCounter(root, false, key);
 const everyTokens = Number(config.northStarAnchorEveryTokens);
 const ctx = everyTokens > 0 ? transcriptContextTokens(key) : null;
 let due;
+let dueBase = null; // the baseline this decision was made against — the claim below is keyed to it
 if (ctx === null) {
   due = n >= every; // no readable size — this runtime, an older transcript format, no transcript
 } else {
@@ -94,6 +100,7 @@ if (ctx === null) {
     due = false;
   } else {
     due = ctx - base >= everyTokens;
+    dueBase = base;
   }
 }
 
@@ -102,7 +109,7 @@ if (ctx === null) {
 // used to pay an anchor once per file while the previous copy was still in the window, so a low
 // call count since the last anchor of either kind means the claims are still present.
 const DOC_DEBOUNCE = 5;
-if (!due && !(wroteDoc && n >= DOC_DEBOUNCE)) process.exit(0);
+if (!due && !(wroteDoc && nDoc >= DOC_DEBOUNCE)) process.exit(0);
 
 // The re-anchor carries the CLAIM of every north-star, not its evidence. A rich proposition
 // ("rejected BECAUSE <mechanism> <numbers> <citation>") is right for reading the file, but
@@ -151,7 +158,7 @@ if (!due) {
   // Debounces the next doc write. With a readable context size the full anchor runs on its own
   // clock and is untouched; on the call-count fallback this restarts that count too, which only
   // delays the full list by the few calls since the relevant part of it was shown.
-  bumpNorthStarCounter(root, true, key);
+  bumpNorthStarCounter(root, true, docKey); // the doc debounce only — never the full schedule
   bumpScore(root, "northStarAnchors");
   process.exit(0);
 }
@@ -162,12 +169,16 @@ if (!due) {
 // see the claim and stay silent. An exclusive create is atomic, unlike the counter files.
 if (ctx !== null) {
   const claimPrefix = `.bearing-anchor-claim-${sp.sessionKey ? sp.sessionKey(key) : key}-`;
-  const claim = path.join(root, ".bearing", `${claimPrefix}${northStarBaseline(root, key) ?? 0}`);
+  // Keyed to the baseline the decision was MADE on, not re-read here: a call that decided "due" against
+  // the old baseline would otherwise claim the new one another call had just written, and fire again.
+  const claim = path.join(root, ".bearing", `${claimPrefix}${dueBase ?? 0}`);
   try {
     fs.writeFileSync(claim, "", { flag: "wx" });
   } catch {
     process.exit(0); // another call of this turn already re-anchored — or the dir is unwritable (NS-8)
   }
+  // …and if the baseline moved while this call was deciding, a full anchor already went out for it.
+  if (dueBase !== null && northStarBaseline(root, key) !== dueBase) process.exit(0);
   try {
     for (const f of fs.readdirSync(path.join(root, ".bearing")).filter((n) => n.startsWith(claimPrefix))) {
       if (path.join(root, ".bearing", f) !== claim) fs.rmSync(path.join(root, ".bearing", f), { force: true });
@@ -206,5 +217,6 @@ emitContext(
 );
 
 bumpNorthStarCounter(root, true, key); // reset THIS chat's window
+bumpNorthStarCounter(root, true, docKey); // a full anchor also shows every doc-relevant claim
 if (ctx !== null) setNorthStarBaseline(root, key, ctx);
 bumpScore(root, "northStarAnchors");
