@@ -1,0 +1,10 @@
+{"commit":"aac7515d","symbol":"shouldIgnorePath","rows":[
+ ["config/ignore-service.ts",1,1],
+ ["group/extractors/elixir-workspace-extractor.ts",2,1],
+ ["group/extractors/go-workspace-extractor.ts",2,1],
+ ["group/extractors/java-workspace-extractor.ts",2,1],
+ ["group/extractors/node-workspace-extractor.ts",2,1],
+ ["group/extractors/python-workspace-extractor.ts",2,1],
+ ["group/extractors/rust-workspace-extractor.ts",2,1],
+ ["wiki/generator.ts",2,2]],
+ "impact":{"callers":0,"risk":"UNKNOWN","epistemic":"lower-bound"}}

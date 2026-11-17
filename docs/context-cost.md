@@ -18,13 +18,9 @@ description. `npx bearing status` prints the contract share for your own install
 connected, with or without bearing. A client that defers MCP schemas until they are searched for —
 Claude Code can — does not pay them up front.
 
-**What used to be here.** The contract was once ~10,300 tokens, most of it graph rules every session
-paid for; they moved into the opt-in `bearing-gitnexus` skill when the gates were retired (NS-25).
-An earlier version of this page also claimed the graph answers *"what breaks if I change this?"* for
-3–13× fewer tokens than grep. A later benchmark — five code-intelligence setups against grep, 107 runs
-on a 650-file backend with a hand-checked answer key — found that nothing beat grep at that size, so
-that claim is gone ([the report](../eval/codeintel/REPORT.md)). On a much larger repo the graph may
-still pay for itself; measure it there with `npm run bearing:token-benchmark` (GitNexus module).
+**Whether the graph pays for itself** depends on the repo: at ~650 files grep answered as well
+([the benchmark](../eval/codeintel/REPORT.md)). On a much larger repo, measure it on yours with
+`npm run bearing:token-benchmark` (GitNexus module).
 
 ---
 

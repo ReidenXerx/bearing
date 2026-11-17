@@ -1,0 +1,37 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="icon" href="data:,"><link rel="stylesheet" href="base.css"></head><body>
+<div class="card">
+  <div class="kicker">bearing · north-stars</div>
+  <h1>An idea you killed <em>stays dead.</em></h1>
+  <div class="sub">"Retry captures automatically." The north-stars record why that was rejected. What each agent's code did when the gateway timed out:</div>
+  <svg id="s" width="1600" height="640" style="position:absolute;left:0;top:240px"></svg>
+</div>
+<div class="foot">eval/intel/REPORT.md · task N2 · Sonnet, 5 runs each way · gateway calls counted on a timed-out capture</div>
+<script type="module">
+import { el, text, ready } from "./draw.js";
+const svg = document.getElementById("s"), F = (s) => `font-family:Geist;${s}`;
+function lane(y, title, col, border) {
+  el("rect", { x: 64, y, width: 1472, height: 230, rx: 16, fill: "#121924", stroke: border, "stroke-width": 2 }, svg);
+  text(svg, 92, y + 42, title, { fill: col, "font-size": 24, style: F("font-weight:600") });
+  text(svg, 92, y + 98, "your code", { fill: "#9aa8bd", "font-size": 19 }); text(svg, 92, y + 178, "gateway", { fill: "#9aa8bd", "font-size": 19 });
+  el("line", { x1: 220, x2: 1500, y1: y + 92, y2: y + 92, stroke: "#2a3546", "stroke-width": 2 }, svg);
+  el("line", { x1: 220, x2: 1500, y1: y + 172, y2: y + 172, stroke: "#2a3546", "stroke-width": 2 }, svg);
+}
+const call = (x, y, label, col) => { el("line", { x1: x, x2: x + 60, y1: y + 92, y2: y + 172, stroke: col, "stroke-width": 3 }, svg); el("circle", { cx: x + 60, cy: y + 172, r: 15, fill: col }, svg); text(svg, x + 60, y + 178, label, { fill: "#0b0f15", "font-size": 15, "font-weight": 700, "text-anchor": "middle" }); };
+const note = (x, y, s, col, size = 20) => text(svg, x, y, s, { fill: col, "font-size": size, style: F("") });
+lane(10, "without bearing — 5 of 5 retried", "#e2603a", "#5a2a1f");
+call(260, 10, "1", "#c9d3e2"); note(350, 10 + 210, "timed out", "#e9a23b");
+el("path", { d: "M330,197 C420,140 460,120 520,102", stroke: "#e9a23b", "stroke-width": 2, fill: "none", "stroke-dasharray": "5 4" }, svg);
+call(540, 10, "2", "#e2603a"); note(630, 10 + 210, "called again: 2 calls for one order", "#e2603a", 21);
+lane(290, "with bearing — 5 of 5 stopped, and cited NS-3", "#2fbf86", "#1f5a43");
+call(260, 290, "1", "#c9d3e2"); note(350, 290 + 210, "timed out", "#e9a23b");
+el("path", { d: "M330,477 C420,420 460,400 520,382", stroke: "#e9a23b", "stroke-width": 2, fill: "none", "stroke-dasharray": "5 4" }, svg);
+el("rect", { x: 540, y: 290 + 60, width: 520, height: 64, rx: 12, fill: "rgba(47,191,134,.10)", stroke: "#2fbf86", "stroke-width": 2 }, svg);
+note(562, 290 + 101, "stops: the error goes to the caller · 1 call", "#2fbf86", 22);
+// NS-3 card on the right
+el("rect", { x: 1110, y: 290 + 60, width: 400, height: 150, rx: 12, fill: "#0b0f15", stroke: "#3d8bf0", "stroke-width": 1.5 }, svg);
+text(svg, 1130, 290 + 92, "NS-3 · REJECTED", { fill: "#6aa6ff", "font-size": 17, "font-weight": 600 });
+note(1130, 290 + 126, "automatically retrying capturePayment.", "#c9d3e2", 19);
+note(1130, 290 + 154, "Tried 2026-02: a retry charged the", "#9aa8bd", 19);
+note(1130, 290 + 182, "customer twice — two incidents.", "#9aa8bd", 19);
+await ready("700 56px Geist", "600 21px JBM", "500 16px JBM", "400 25px Geist");
+</script></body></html>

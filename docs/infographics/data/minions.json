@@ -1,0 +1,62 @@
+[
+ {
+  "desc": "Sweep root files for stale refs",
+  "ts": "2026-11-09T17:19:35.227Z"
+ },
+ {
+  "desc": "Sweep docs for stale refs",
+  "ts": "2026-11-09T17:19:51.059Z",
+  "done": "2026-11-09T17:21:35.972Z",
+  "found": 82,
+  "checked": 1,
+  "missed": 1
+ },
+ {
+  "desc": "Sweep skills/templates for stale refs",
+  "ts": "2026-11-09T17:20:06.566Z",
+  "done": "2026-11-09T17:21:54.082Z",
+  "found": 81,
+  "checked": 1,
+  "missed": 1
+ },
+ {
+  "desc": "Sweep bundle/.bearing for stale refs",
+  "ts": "2026-11-09T17:20:21.610Z",
+  "done": "2026-11-09T17:22:16.379Z",
+  "found": 122,
+  "checked": 1,
+  "missed": 1
+ },
+ {
+  "desc": "Sweep bundle scripts/hooks for stale refs",
+  "ts": "2026-11-09T17:20:35.783Z",
+  "done": "2026-11-09T17:22:49.702Z",
+  "found": 130,
+  "checked": 1,
+  "missed": 1
+ },
+ {
+  "desc": "Sweep lib + repo scripts for stale refs",
+  "ts": "2026-11-09T17:20:49.638Z",
+  "done": "2026-11-09T17:24:15.943Z",
+  "found": 157,
+  "checked": 1,
+  "missed": 1
+ },
+ {
+  "desc": "Sweep test file for obsolete tests",
+  "ts": "2026-11-09T17:21:00.381Z",
+  "done": "2026-11-09T17:23:36.826Z",
+  "found": 179,
+  "checked": 1,
+  "missed": 1
+ },
+ {
+  "desc": "Find orphan files repo-wide",
+  "ts": "2026-11-09T17:21:10.142Z",
+  "done": "2026-11-09T17:21:32.408Z",
+  "found": 15,
+  "checked": 1,
+  "missed": 1
+ }
+]

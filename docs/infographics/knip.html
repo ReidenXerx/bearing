@@ -1,0 +1,33 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="icon" href="data:,"><link rel="stylesheet" href="base.css">
+<style>
+  .grp { position: absolute; padding: 24px 30px; }
+  .row { display: grid; grid-template-columns: 150px 1fr; align-items: center; height: 54px; }
+  .row .lab { font: 500 17px JBM, monospace; color: var(--faint); }
+  .sq { display: inline-block; width: 34px; height: 34px; border-radius: 6px; margin-right: 6px; vertical-align: middle; }
+  .dead { background: #f07a3a; } .live { background: #e23a3a; box-shadow: 0 0 0 3px #ff9b9b inset; position: relative; }
+  .live::after { content: "✕"; position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font: 700 20px Geist; }
+  .gt { font-weight: 700; font-size: 28px; margin-bottom: 10px; }
+  .gt span { font: 500 19px Geist; color: var(--dim); margin-left: 10px; }
+  .key { display: flex; gap: 30px; font-size: 21px; color: var(--dim); align-items: center; }
+</style></head><body>
+<div class="card">
+  <div class="kicker">bearing · knip</div>
+  <h1>Same task, 12 runs. <em style="color:#e23a3a">Two broke the app.</em></h1>
+  <div class="sub">"Delete every file nothing uses." Each square is a file a run deleted, in a real ~650-file NestJS backend. Every run found all 8 dead files — the difference is what else went.</div>
+  <div class="panel grp" style="left:64px;top:262px;width:716px;height:470px"><div class="gt">Without the module <span>agents run knip alone</span></div><div id="off"></div></div>
+  <div class="panel grp" style="left:820px;top:262px;width:716px;height:470px;border-color:#2fbf86"><div class="gt" style="color:#2fbf86">With the module <span>knip + the skill's traps</span></div><div id="on"></div></div>
+  <div class="key" style="position:absolute;left:64px;top:756px"><span><i class="sq dead"></i>a dead file, rightly deleted</span><span><i class="sq live"></i>a live file deleted — the app breaks</span><span style="margin-left:auto;color:#eaf0f8;font-weight:600;font-size:24px"><span style="color:#e23a3a">3</span> live files → <span style="color:#2fbf86">0</span></span></div>
+</div>
+<div class="foot">eval/intel/REPORT-TOOLS.md · task U1 · 3 runs per model per condition · answer key checked by hand, never written by knip</div>
+<script type="module">
+import { ready } from "./draw.js";
+const runs = { off: [["Sonnet", [0, 1, 0]], ["Haiku", [0, 2, 0]]], on: [["Sonnet", [0, 0, 0]], ["Haiku", [0, 0, 0]]] };
+for (const side of ["off", "on"]) {
+  let html = "";
+  for (const [model, live] of runs[side]) live.forEach((n, i) => {
+    html += `<div class="row"><div class="lab">${model} · run ${i + 1}</div><div>${'<i class="sq dead"></i>'.repeat(8)}${'<i class="sq live"></i>'.repeat(n)}</div></div>`;
+  });
+  document.getElementById(side).innerHTML = html;
+}
+await ready("700 56px Geist", "600 21px JBM", "500 16px JBM", "400 25px Geist");
+</script></body></html>

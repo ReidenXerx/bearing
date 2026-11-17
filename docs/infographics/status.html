@@ -1,0 +1,49 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="icon" href="data:,"><link rel="stylesheet" href="base.css">
+<style> .term { position:absolute; left:64px; top:250px; width:1010px; height:600px; background:#06090d; border:1.5px solid #243042; border-radius:14px; overflow:hidden; }
+ .bar { height:34px; background:#111823; display:flex; gap:8px; align-items:center; padding:0 14px; } .bar i { width:12px; height:12px; border-radius:50%; background:#2c3a50; }
+ pre { margin:0; padding:12px 18px; font: 500 12.6px/1.45 JBM, monospace; color:#b8c4d6; white-space:pre; }
+ .hl { color:#eaf0f8; } .c { position:absolute; left:1110px; width:426px; }
+ .c b { display:block; font-size:24px; } .c span { display:block; font-size:20px; color:var(--dim); line-height:1.3; margin-top:4px; } </style></head><body>
+<div class="card">
+  <div class="kicker">bearing · status</div>
+  <h1>Everything it does unasked — <em>and the knob for each.</em></h1>
+  <div class="sub">The real output of <code style="font:600 .92em JBM;color:#eaf0f8">npx bearing status</code> on a fresh default install.</div>
+  <div class="term"><div class="bar"><i></i><i></i><i></i></div><pre id="out"></pre></div>
+  <svg id="lines" width="1600" height="900" style="position:absolute;left:0;top:0;pointer-events:none"></svg>
+  <div class="c" style="top:300px"><b style="color:#3d8bf0" id="tok">tokens</b><span>always loaded — the contract, counted on this install</span></div>
+  <div class="c" style="top:430px"><b style="color:#e9a23b">Each prompt, when it fires</b><span>and the setting that turns it off, printed beside it</span></div>
+  <div class="c" style="top:580px"><b style="color:#2fbf86">fired 0× in 30 days</b><span>counted, per prompt — a fresh install has fired nothing yet</span></div>
+  <div class="c" style="top:720px"><b style="color:#6aa6ff">On ask</b><span>the skills that run only when you name them</span></div>
+</div>
+<div class="foot">bearing 2.0.2 · npx bearing status · fresh repo, default modules · output unedited, path line omitted</div>
+<script type="module">
+import { el, ready } from "./draw.js";
+const raw = await (await fetch("data/status.txt")).text();
+// Soft-wrap like a terminal: a long line continues under its own value column, nothing cut.
+const W = 126;
+const wrap = (l) => {
+  if (l.length <= W) return [l];
+  const m = /(\S)(\s{2,})\S/.exec(l.trimStart() === l ? l : l.replace(/^\s+/, (w) => "\u0000".repeat(w.length)));
+  const indent = " ".repeat(m ? m.index + 1 + m[2].length : 4);
+  const out = []; let rest = l;
+  while (rest.length > W) { let cut = rest.lastIndexOf(" ", W); if (cut <= indent.length) cut = W; out.push(rest.slice(0, cut)); rest = indent + rest.slice(cut).trimStart(); }
+  out.push(rest); return out;
+};
+const lines = raw.split("\n").slice(1).filter((l, i, a) => !(l === "" && a[i - 1] === "")).flatMap(wrap);
+const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+document.getElementById("out").innerHTML = lines.map((l) => esc(l)
+  .replace(/(≈ ?[\d,]+ tokens)/, '<span style="color:#3d8bf0;font-weight:600">$1</span>')
+  .replace(/(fired \d+× in 30 days)/, '<span style="color:#2fbf86">$1</span>')
+  .replace(/^(  [✓·] [a-z -]+?)(\s{2,})/, '<span class="hl">$1</span>$2')
+  .replace(/(\w+: (true|false|\d+) \(off: [^)]+\))/, '<span style="color:#e9a23b">$1</span>')).join("\n");
+// leader lines from callouts to the matching terminal lines
+document.getElementById("tok").textContent = (raw.match(/≈ ?([\d,]+) tokens/) ?? [, "?"])[1].replace(/^/, "≈") + " tokens";
+const pre = document.getElementById("out"), lh = 12.6 * 1.45, top0 = 250 + 34 + 12;
+const find = (re) => lines.findIndex((l) => re.test(l));
+const svg = document.getElementById("lines");
+for (const [re, cy, col] of [[/tokens/, 316, "#3d8bf0"], [/memoryNudge/, 446, "#e9a23b"], [/fired 0× in 30 days/, 596, "#2fbf86"], [/bearing-astgrep/, 736, "#6aa6ff"]]) {
+  const i = find(re); if (i < 0) continue; const y = top0 + i * lh + lh / 2;
+  el("path", { d: `M1060,${y} C1085,${y} 1080,${cy} 1102,${cy}`, stroke: col, "stroke-width": 2, fill: "none" }, svg); el("circle", { cx: 1060, cy: y, r: 4, fill: col }, svg);
+}
+await ready("700 56px Geist", "600 21px JBM", "500 16px JBM", "400 25px Geist");
+</script></body></html>

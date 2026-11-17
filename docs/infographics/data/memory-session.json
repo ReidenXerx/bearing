@@ -1,0 +1,56 @@
+{
+ "calls": 80,
+ "events": [
+  {
+   "call": 0,
+   "hook": "session",
+   "kind": "start"
+  },
+  {
+   "call": 18,
+   "hook": "northstar-anchor",
+   "kind": "Read"
+  },
+  {
+   "call": 35,
+   "hook": "northstar-anchor",
+   "kind": "Edit"
+  },
+  {
+   "call": 37,
+   "hook": "taskcore-nudge",
+   "kind": "Edit"
+  },
+  {
+   "call": 48,
+   "hook": "memory-nudge",
+   "kind": "Bash"
+  },
+  {
+   "call": 52,
+   "hook": "northstar-anchor",
+   "kind": "Edit"
+  },
+  {
+   "call": 60,
+   "hook": "session",
+   "kind": "compact"
+  },
+  {
+   "call": 69,
+   "hook": "northstar-anchor",
+   "kind": "Read"
+  },
+  {
+   "call": 76,
+   "hook": "taskcore-nudge",
+   "kind": "Edit"
+  }
+ ],
+ "quotes": {
+  "0": "\u23f3 Your project memory was last written 10 days ago, and 4 commit(s) have landed since.",
+  "37": "\u00b7 25 edits since your TASK-CORE was last written (there isn't one yet).",
+  "48": "\u00b7 Milestone \u2014 a PR merged. Your project memory was last written 10 days ago.",
+  "60": "Context was COMPACTED \u2014 the task CONTINUES. RECOVER from your project memory: reconcile it with reality NOW and fill gaps \u2014 decisions, requirements, open bugs, user intent, key file:line."
+ }
+}
