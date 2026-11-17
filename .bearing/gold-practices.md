@@ -316,3 +316,11 @@ project rather than this one, it belongs upstream — say so and it can be promo
   `npm pack --dry-run | grep <file>` — the tarball is the only claim that matters (NS-20). *Scar:
   the seeded `northstars.md` — the entire point of the 1.2.1 release — was staged as "nothing to
   commit" and would have shipped a release that fixed nothing.*
+
+- **PP-9** — **CI runs the MINIMUM Node (`engines`: 22.9.0); a green run on your newer Node is not
+  evidence for it.** Node's module-hook API tightened and loosened across 22.x: a `load` hook that
+  returned `source` as a string worked on 22.18 and 22.22 and threw
+  `ERR_INVALID_RETURN_PROPERTY_VALUE` on 22.9, failing every check that loads TypeScript. Anything
+  touching `node:module` hooks, type stripping or other `--experimental-*` behaviour: run it under
+  `~/.nvm/versions/node/v22.9.0/bin/node` before pushing (NS-21). *Scar: 301/301 locally, 6 failures
+  in CI, on a PR that only meant to change the eval harness.*
