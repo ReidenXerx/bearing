@@ -1,0 +1,31 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="icon" href="data:,"><link rel="stylesheet" href="base.css"></head><body>
+<div class="card">
+  <div class="kicker">bearing · north-stars</div>
+  <h1>A stale doc can't overrule <em>your decision.</em></h1>
+  <div class="sub">An old doc says the fee is 2.9% of the gross. A north-star, decided later, says the net. Ten agents were asked to write the fee.</div>
+  <svg id="s" width="1600" height="640" style="position:absolute;left:0;top:240px"></svg>
+</div>
+<div class="foot">eval/intel/REPORT.md · task N1 · Sonnet, 5 runs each way · each dot = the fee one agent's code returned</div>
+<script type="module">
+import { el, text, ready } from "./draw.js";
+const svg = document.getElementById("s"), F = (s) => `font-family:Geist;${s}`;
+// the receipt
+el("rect", { x: 64, y: 20, width: 420, height: 560, rx: 16, fill: "#121924", stroke: "#243042", "stroke-width": 1.5 }, svg);
+text(svg, 92, 66, "ORDER", { fill: "#5f6e86", "font-size": 16, "letter-spacing": "2" });
+const rows = [["subtotal", "100.00", 120], ["discount", "− 20.00", 180], ["net", "80.00", 260]];
+for (const [k, v, y] of rows) { text(svg, 92, y, k, { fill: "#9aa8bd", "font-size": 26, style: F("") }); text(svg, 456, y, v, { fill: "#eaf0f8", "font-size": 30, "text-anchor": "end", style: F("font-weight:600") }); }
+el("line", { x1: 92, x2: 456, y1: 214, y2: 214, stroke: "#3a4a63", "stroke-width": 2 }, svg);
+// the two rules
+const rule = (y, col, src, what) => { el("rect", { x: 92, y, width: 364, height: 112, rx: 12, fill: "none", stroke: col, "stroke-width": 2, "stroke-dasharray": col === "#e2603a" ? "6 5" : "0" }, svg); text(svg, 112, y + 38, src, { fill: col, "font-size": 18, "font-weight": 600 }); text(svg, 112, y + 76, what, { fill: "#c9d3e2", "font-size": 23, style: F("") }); };
+rule(310, "#e2603a", "docs/FEES.md · stale", "2.9% of the subtotal");
+rule(446, "#3d8bf0", "NS-1 · the decision", "2.9% of the net");
+// the number line
+const X = (c) => 640 + ((c - 200) / 120) * 860;
+el("line", { x1: X(200), x2: X(320), y1: 470, y2: 470, stroke: "#3a4a63", "stroke-width": 2 }, svg);
+for (const c of [200, 232, 260, 290, 320]) { el("line", { x1: X(c), x2: X(c), y1: 462, y2: 478, stroke: "#5f6e86" }, svg); text(svg, X(c), 505, (c / 100).toFixed(2), { fill: c === 232 || c === 290 ? "#eaf0f8" : "#5f6e86", "font-size": 20, "text-anchor": "middle" }); }
+text(svg, X(260), 545, "the fee the code returned", { fill: "#5f6e86", "font-size": 17, "text-anchor": "middle" });
+const lane = (y, label, col, c, filled) => { text(svg, 640, y - 46, label, { fill: col, "font-size": 22, style: F("font-weight:600") }); for (let i = 0; i < 5; i++) { const cy = y - i * 0; const cx = X(c) + (i - 2) * 30; filled ? el("circle", { cx, cy: y, r: 12, fill: col }, svg) : el("circle", { cx, cy: y, r: 12, fill: "none", stroke: col, "stroke-width": 3.5 }, svg); } el("line", { x1: X(c), x2: X(c), y1: y + 18, y2: 455, stroke: col, "stroke-width": 1.5, "stroke-dasharray": "3 4" }, svg); };
+lane(130, "without bearing — 5 of 5 followed the stale doc", "#e2603a", 290, false);
+lane(300, "with bearing — 5 of 5 followed NS-1, and said why", "#2fbf86", 232, true);
+await ready("700 56px Geist", "600 21px JBM", "500 16px JBM", "400 25px Geist");
+</script></body></html>

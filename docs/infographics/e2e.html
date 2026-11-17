@@ -1,0 +1,48 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="icon" href="data:,"><link rel="stylesheet" href="base.css"></head><body>
+<div class="card">
+  <div class="kicker">bearing · e2e · how it works</div>
+  <h1>The Delete is clicked. <em>It never reaches the server.</em></h1>
+  <div class="sub">Checking a destructive button on shared data: the harness stops the write inside the browser, records exactly what was sent, and answers it locally.</div>
+  <svg id="s" width="1600" height="600" style="position:absolute;left:0;top:250px"></svg>
+</div>
+<div class="foot">a real run · headless Chromium · the app's own request log · sha256 of the shared data file before and after</div>
+<script type="module">
+import { el, text, ready } from "./draw.js";
+const svg = document.getElementById("s"), F = "font-family:Geist";
+const lanes = [["BROWSER", "headless Chromium"], ["blockWrites", "inside the page"], ["SERVER", "its request log"]];
+const Y = (i) => 40 + i * 140, X0 = 330;
+lanes.forEach(([a, b], i) => {
+  el("rect", { x: 64, y: Y(i) - 10, width: 1472, height: 110, rx: 14, fill: i === 1 ? "rgba(61,139,240,.07)" : "#0e141d", stroke: i === 1 ? "#3d8bf0" : "#1d2633", "stroke-width": 1.5 }, svg);
+  text(svg, 92, Y(i) + 34, a, { fill: i === 1 ? "#8fbaff" : "#eaf0f8", "font-size": 21, "font-weight": 600 });
+  text(svg, 92, Y(i) + 62, b, { fill: "#7f8da3", "font-size": 16, style: F });
+});
+const step = (x, label, mid, toServer, col) => {
+  el("rect", { x: x - 105, y: Y(0) + 12, width: 210, height: 64, rx: 10, fill: "#121924", stroke: col, "stroke-width": 1.5 }, svg);
+  text(svg, x, Y(0) + 40, label[0], { fill: "#eaf0f8", "font-size": 18, "text-anchor": "middle", style: F + ";font-weight:600" });
+  text(svg, x, Y(0) + 64, label[1], { fill: "#9aa8bd", "font-size": 15, "text-anchor": "middle" });
+  if (toServer) {
+    el("line", { x1: x, x2: x, y1: Y(0) + 78, y2: Y(2) + 14, stroke: "#5f6e86", "stroke-width": 2, "marker-end": "url(#a)" }, svg);
+    el("rect", { x: x - 105, y: Y(2) + 16, width: 210, height: 58, rx: 10, fill: "#121924", stroke: "#3a4a63" }, svg);
+    text(svg, x, Y(2) + 51, mid, { fill: "#c9d3e2", "font-size": 16, "text-anchor": "middle" });
+  } else {
+    el("line", { x1: x, x2: x, y1: Y(0) + 78, y2: Y(1) + 12, stroke: "#e5484d", "stroke-width": 2.5 }, svg);
+    el("rect", { x: x - 190, y: Y(1) + 12, width: 380, height: 74, rx: 10, fill: "#121924", stroke: "#3d8bf0", "stroke-width": 2 }, svg);
+    text(svg, x, Y(1) + 40, "stopped · recorded · answered 204", { fill: "#8fbaff", "font-size": 16, "text-anchor": "middle", "font-weight": 600 });
+    text(svg, x, Y(1) + 66, mid, { fill: "#eaf0f8", "font-size": 15, "text-anchor": "middle" });
+    el("line", { x1: x - 60, x2: x + 60, y1: Y(2) + 45, y2: Y(2) + 45, stroke: "#3a4a63", "stroke-width": 2, "stroke-dasharray": "6 6" }, svg);
+    text(svg, x, Y(2) + 76, "nothing arrives", { fill: "#7f8da3", "font-size": 16, "text-anchor": "middle", style: F + ";font-style:italic" });
+  }
+};
+const defs = el("defs", {}, svg); const m = el("marker", { id: "a", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto" }, defs); el("path", { d: "M0,0 L10,5 L0,10 z", fill: "#5f6e86" }, m);
+step(X0 + 120, ["load the page", "1"], "GET /", true, "#3a4a63");
+step(X0 + 400, ["list invoices", "2"], "GET /api/invoices", true, "#3a4a63");
+step(X0 + 760, ["click Delete · INV-002", "3"], "DELETE /api/invoices/INV-002", false, "#e5484d");
+step(X0 + 1080, ["list re-renders", "4"], "GET /api/invoices", true, "#3a4a63");
+// data file
+el("rect", { x: 64, y: 470, width: 1472, height: 92, rx: 14, fill: "rgba(47,191,134,.07)", stroke: "#2fbf86", "stroke-width": 1.5 }, svg);
+text(svg, 92, 506, "data/invoices.json — the team's shared data", { fill: "#eaf0f8", "font-size": 21, style: F + ";font-weight:600" });
+text(svg, 92, 540, "sha256 before  7763ecc0…55f89", { fill: "#9aa8bd", "font-size": 18 });
+text(svg, 560, 540, "after  7763ecc0…55f89", { fill: "#2fbf86", "font-size": 18, "font-weight": 600 });
+text(svg, 1508, 524, "3 invoices before · 3 after", { fill: "#2fbf86", "font-size": 20, "text-anchor": "end", style: F + ";font-weight:600" });
+await ready("700 56px Geist", "600 21px JBM", "500 16px JBM", "400 25px Geist");
+</script></body></html>

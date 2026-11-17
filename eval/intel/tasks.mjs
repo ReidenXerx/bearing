@@ -53,8 +53,37 @@ const RESOLVE_HOOK = `export async function resolve(spec, ctx, next) {
     throw e;
   }
 }`;
+/**
+ * Import an interface without `type` — `import { User } from "./types.ts"` — and tsc accepts it (it
+ * elides the import), but Node's type stripping keeps it and the module fails to link. Grading would
+ * then score an import style, not the behaviour (found by the microscope review of the rules round).
+ * So a relative import of a name its target declares ONLY as an interface or type alias becomes
+ * `import { type User }`. A name used as a value still fails, as it does under tsc.
+ */
+const TYPE_IMPORT_HOOK = String.raw`import fs from "node:fs";
+import { fileURLToPath } from "node:url";
+export async function load(url, ctx, next) {
+  const r = await next(url, ctx);
+  if (r.format !== "module-typescript" || !r.source) return r;
+  const source = String(r.source).replace(/import\s*\{([^}]*)\}\s*from\s*(["'])(\.{1,2}\/[^"']+)\2/g, (all, names, q, spec) => {
+    let target;
+    for (const s of [spec, spec + ".ts", spec + "/index.ts"]) {
+      try { const p = fileURLToPath(new URL(s, url)); if (fs.statSync(p).isFile()) { target = fs.readFileSync(p, "utf8"); break; } } catch {}
+    }
+    if (!target) return all;
+    const out = names.split(",").map((n) => {
+      if (/^\s*type\s/.test(n) || !n.trim()) return n;
+      const name = n.trim().split(/\s+as\s+/)[0];
+      const typeOnly = new RegExp("export\\s+(interface|type)\\s+" + name + "\\b").test(target)
+        && !new RegExp("export\\s+(const|let|var|function|class|enum)\\s+" + name + "\\b").test(target);
+      return typeOnly ? n.replace(name, "type " + name) : n;
+    });
+    return "import {" + out.join(",") + "} from " + q + spec + q;
+  });
+  return { ...r, source };
+}`;
 const RESOLVE_TS = `data:text/javascript,${encodeURIComponent(
-  `import { register } from "node:module"; register(${JSON.stringify("data:text/javascript," + encodeURIComponent(RESOLVE_HOOK))});`,
+  `import { register } from "node:module"; register(${JSON.stringify("data:text/javascript," + encodeURIComponent(RESOLVE_HOOK))}); register(${JSON.stringify("data:text/javascript," + encodeURIComponent(TYPE_IMPORT_HOOK))});`,
 )}`;
 
 const exists = (cwd, rel) => fs.existsSync(path.join(cwd, rel));

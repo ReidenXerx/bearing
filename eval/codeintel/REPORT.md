@@ -7,6 +7,8 @@ than grep, and which one is right when it is used?
 committed here: the targets live in a hand-verified key outside this repository, the prompts are
 built at run time, and raw rows stay in `~/.cache/bearing-eval/codeintel/`.
 
+![Every run as a dot: pass or fail by tool, round 1 free to choose and round 2 forced to use the tool. Made to use the tool, it got more wrong.](scatter.png)
+
 **Conditions** (`eval/codeintel/run.mjs`). Each condition gets the same `git archive` slot and the same
 prompt, plus one neutral line naming its tool, under `--strict-mcp-config`:
 

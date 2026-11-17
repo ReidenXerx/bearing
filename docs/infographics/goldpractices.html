@@ -1,0 +1,18 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="icon" href="data:,"><link rel="stylesheet" href="base.css">
+<style> .row { display:grid; grid-template-columns: 96px 1fr; gap: 18px; align-items:center; margin-bottom: 15px; }
+ .id { font: 600 22px JBM, monospace; color: #f2c94c; text-align:right; } .bar { height: 46px; border-radius: 8px; background: linear-gradient(90deg,#c99a2e,#f2c94c); display:flex; align-items:center; padding: 0 14px; font: 600 20px JBM; color:#1a1406; min-width: 46px; }
+ .lab { font-size: 22px; color: var(--ink); margin-left: 16px; white-space: nowrap; } </style></head><body>
+<div class="card">
+  <div class="kicker">bearing · gold practices</div>
+  <h1>The rules your agent <em style="color:#f2c94c">actually reaches for.</em></h1>
+  <div class="sub">Numbered rules from real defects, shipped into every install. Here is how often the agent cited each one, in its own replies, across three real projects.</div>
+  <div class="panel" style="left:64px;top:262px;width:1472px;height:560px;padding:34px 40px" id="bars"></div>
+</div>
+<div class="foot">agent replies in 18 Claude Code transcripts across 3 projects · each bar = times that GP-# was cited · rule text from .bearing/gold-practices.md</div>
+<script type="module">
+import { ready } from "./draw.js";
+const rows = [["GP-2", 19, "A test that has never failed has never been tested."], ["GP-7", 15, "Verify the probe before believing the result."], ["GP-4", 6, "A fixture chosen for convenience tests the case that cannot fail."], ["GP-1", 4, "Executed, or unverified."], ["GP-14", 3, "Establish a contract from the thing that defines it."], ["GP-8", 1, "Every line you print is a claim."], ["GP-16", 1, "The same fix in N places is one implementation."], ["GP-20", 1, "An instrument that sees a subset reports success in the shape of the whole."]];
+const max = 19, W = 520;
+document.getElementById("bars").innerHTML = rows.map(([id, n, t]) => `<div class="row"><div class="id">${id}</div><div style="display:flex;align-items:center"><div class="bar" style="width:${Math.max(46, (n / max) * W)}px">${n}</div><div class="lab">${t}</div></div></div>`).join("");
+await ready("700 56px Geist", "600 21px JBM", "500 16px JBM", "400 25px Geist");
+</script></body></html>

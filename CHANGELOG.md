@@ -2,6 +2,35 @@
 
 All notable changes to `bearing` are documented here.
 
+## 2.0.2 — every module, drawn from a real run
+
+### Fixed — `bearing status` printed one knob under another's description
+
+The north-star line read "every 40000 tokens of context growth (northStarAnchorEveryTokens)" over a
+knob line showing only `northStarAnchorEvery: 25`. Both knobs are real: the token cadence, and the
+call count that turns the reminder off and is the cadence wherever the context size cannot be read.
+The line now names both, with the value each one has.
+
+### Fixed — the memory nudge's sentence
+
+"Your project memory (…) is last written 10 days ago" now reads "was last written".
+
+### Changed — the README and the site
+
+One infographic per module, each drawn from a real run or a with-and-without comparison, its source
+printed at its foot (`docs/infographics/`, rendered by `npm run gen:cards`). The text cards and the
+"receipts" section are gone; the evals behind the pictures stay in `eval/`.
+
+### Evals
+
+- `eval/intel/REPORT-RULES.md` — the rule modules over three rounds, the third an ablation: the
+  task's rule alone against the other rules as a placebo. `tsjs` and `frontend` change the outcome in
+  the case each is written for, and the placebo changes nothing; `react` changes structure, with no
+  defect measured without it.
+- `eval/intel/REPORT-TOOLS2.md` — mergiraf, e2e and publish, with and without: no difference.
+- `eval/intel/graders.selftest.mjs` — every grader of these rounds against solutions of known
+  verdict, including the ones a review used to break the first graders.
+
 ## 2.0.1 — a backup of bearing's own file is never "your original"
 
 ### Fixed — retiring a file could put an old copy of it back

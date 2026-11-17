@@ -36,9 +36,12 @@ import { INVOKED_TASKS } from "./tasks-invoked.mjs";
 import { REAL_TASKS, REAL_TASKS_TOOLS } from "./tasks-real.mjs";
 import { buildRealFixture, buildRealHistoryFixture, realFixtureStamp } from "./fixture-real.mjs";
 import { TASKS } from "./tasks.mjs";
+import { RULES_TASKS, RULES_HARD_TASKS, TOOLS2_TASKS } from "./tasks-rules.mjs";
+import { buildMergeRepo, assertConflicts, e2eAppFiles, publishFiles } from "./fixture-tools2.mjs";
+import { rulesFiles, rulesHardFiles } from "./fixture-rules.mjs";
 import { agent, measure } from "../lib/claude-run.mjs";
 
-const ALL_TASKS = [...TASKS, ...HARD_TASKS, ...INVOKED_TASKS, ...REAL_TASKS, ...REAL_TASKS_TOOLS];
+const ALL_TASKS = [...TASKS, ...HARD_TASKS, ...INVOKED_TASKS, ...REAL_TASKS, ...REAL_TASKS_TOOLS, ...RULES_TASKS, ...RULES_HARD_TASKS, ...TOOLS2_TASKS];
 // Ids select tasks, so a repeated one runs a task nobody asked for: the knip task was first named
 // K1, which the base round already uses, and `--tasks tools` prepared that round's slots too.
 {
@@ -68,7 +71,7 @@ function args(argv) {
     if (argv[i] === "--conditions") a.conditions = v().split(",");
     else if (argv[i] === "--tasks") {
       const t = v();
-      a.tasks = t === "all" ? a.tasks : t === "hard" ? HARD_TASKS.map((x) => x.id) : t === "invoked" ? INVOKED_TASKS.map((x) => x.id) : t === "real" ? REAL_TASKS.map((x) => x.id) : t === "tools" ? REAL_TASKS_TOOLS.map((x) => x.id) : t.split(",");
+      a.tasks = t === "all" ? a.tasks : t === "hard" ? HARD_TASKS.map((x) => x.id) : t === "invoked" ? INVOKED_TASKS.map((x) => x.id) : t === "real" ? REAL_TASKS.map((x) => x.id) : t === "tools" ? REAL_TASKS_TOOLS.map((x) => x.id) : t === "rules" ? RULES_TASKS.map((x) => x.id) : t === "rules-hard" ? RULES_HARD_TASKS.map((x) => x.id) : t === "tools2" ? TOOLS2_TASKS.map((x) => x.id) : t.split(",");
     }
     else if (argv[i] === "--trials") a.trials = Math.max(1, Number(v()) || 1);
     else if (argv[i] === "--model") a.model = v();
@@ -106,6 +109,7 @@ function kitKey() {
 function prepareSlot(a, condition, variant = "base", module = "astgrep") {
   if (variant === "real") return prepareRealSlot(a, condition, module, false);
   if (variant === "real-history") return prepareRealSlot(a, condition, module, true);
+  if (variant === "rules" || variant === "rules-hard" || variant === "merge" || variant === "e2e-app" || variant === "publish-app") return prepareRulesSlot(a, condition, variant, module);
   const slot = path.join(a.slots, variant === "base" ? condition : `${condition}-${variant}`);
   const pristine = `${slot}.pristine`;
   const stamp = JSON.stringify({
@@ -139,6 +143,83 @@ function prepareSlot(a, condition, variant = "base", module = "astgrep") {
     git(slot, "add", "-A");
     git(slot, "commit", "-qm", "bearing");
   }
+  fs.cpSync(slot, pristine, { recursive: true });
+  fs.writeFileSync(stampFile, stamp);
+  return { slot, pristine };
+}
+
+/**
+ * The RULES round's slot: fixture-rules.mjs, and bearing's default install in BOTH conditions — `on`
+ * adds the three rule modules. Without the default kit in `off`, the round would measure "bearing vs
+ * nothing" and credit the rules with whatever the contract's other sections did.
+ */
+const RULES_MODULES = ["tsjs", "frontend", "react"];
+const RULES_SECTION = { tsjs: /^## Writing TypeScript\/JavaScript/m, frontend: /^## Writing UI/m, react: /^## React forms/m, mergiraf: /^## Merging parallel work/m, publish: /^## Publishing what you built/m };
+const VARIANT_MODULES = { rules: RULES_MODULES, "rules-hard": RULES_MODULES, merge: ["mergiraf"], "e2e-app": ["e2e"], "publish-app": ["publish"] };
+/**
+ * The modules a condition adds on top of the default kit. `only` and `placebo` are the ablation of a
+ * multi-module variant: the task's own module alone, and the OTHER modules without it — so a win can
+ * be credited to the rule and not to "more instruction text" (microscope review of the rules round).
+ */
+function addedModules(condition, variant, module) {
+  const all = VARIANT_MODULES[variant];
+  if (condition === "off") return [];
+  if (condition === "on") return all;
+  if (condition === "only") return [module];
+  if (condition === "placebo") return all.filter((m) => m !== module);
+  throw new Error(`unknown condition ${condition}`);
+}
+function prepareRulesSlot(a, condition, variant = "rules", module) {
+  const filesOf = variant === "rules-hard" ? rulesHardFiles : variant === "e2e-app" ? e2eAppFiles : variant === "publish-app" ? publishFiles : rulesFiles;
+  // The kit names the repo after the slot's directory (starter north-stars heading), and the agent sees
+  // its cwd — so neither may say which arm it is in. Same basename in both, an opaque parent.
+  const mods = addedModules(condition, variant, module);
+  const arm = createHash("sha256").update(`${condition}/${variant}/${mods.join(",")}`).digest("hex").slice(0, 10);
+  const slot = path.join(a.slots, arm, variant);
+  const pristine = path.join(a.slots, arm, `${variant}.pristine`);
+  const fixtureKey = variant === "merge" ? fs.readFileSync(path.join(HERE, "fixture-tools2.mjs"), "utf8") : JSON.stringify(filesOf());
+  const base = ["northstars", "goldpractices", "taskcore", "microscope", "consult", "minions", "astgrep"];
+  const features = [...base, ...mods];
+  // The feature list is part of the stamp: editing it here must rebuild the slot, not reuse it.
+  const stamp = JSON.stringify({ fixture: createHash("sha256").update(fixtureKey).digest("hex"), condition, features, kit: kitKey() });
+  const stampFile = path.join(pristine, ".eval-stamp");
+  if (fs.existsSync(stampFile) && fs.readFileSync(stampFile, "utf8") === stamp) return { slot, pristine };
+  console.error(`[prepare] ${condition}-${variant}: building slot`);
+  for (const d of [slot, pristine]) fs.rmSync(d, { recursive: true, force: true });
+  fs.mkdirSync(slot, { recursive: true });
+  if (variant === "merge") {
+    buildMergeRepo(slot);
+    assertConflicts(slot);
+  } else {
+    for (const [rel, content] of filesOf()) {
+      fs.mkdirSync(path.dirname(path.join(slot, rel)), { recursive: true });
+      fs.writeFileSync(path.join(slot, rel), content);
+    }
+    git(slot, "init", "-q", "-b", "main");
+    git(slot, "add", "-A");
+    git(slot, "commit", "-qm", "fixture");
+  }
+  git(slot, "config", "user.email", "eval@example.invalid");
+  git(slot, "config", "user.name", "eval");
+  git(slot, "config", "commit.gpgsign", "false");
+  run(process.execPath, [path.join(REPO, "lib/kit.mjs"), "install", slot, "--runtime", "claude", "--features", features.join(","),
+    "--no-setup", "--skip-verify", "--no-prettierignore"], slot);
+  const claudeMd = fs.readFileSync(path.join(slot, "CLAUDE.md"), "utf8");
+  // Both conditions get Playwright from this repo, so the only difference is the module.
+  if (variant === "publish-app") fs.symlinkSync(path.join(REPO, "node_modules"), path.join(slot, "node_modules"));
+  if (variant === "e2e-app") {
+    fs.symlinkSync(path.join(REPO, "node_modules"), path.join(slot, "node_modules"));
+    const e2e = mods.includes("e2e");
+    if (e2e) fs.symlinkSync(path.join(REPO, "node_modules"), path.join(slot, ".e2e", "node_modules"));
+    if (fs.existsSync(path.join(slot, ".e2e/core/http.js")) !== e2e) throw new Error(`the ${condition}-e2e-app slot ${e2e ? "lacks" : "carries"} the .e2e harness — the slot is invalid`);
+  }
+  // Every module the variant COULD add is checked: present exactly when this condition adds it.
+  for (const m of VARIANT_MODULES[variant].filter((x) => RULES_SECTION[x])) {
+    const has = RULES_SECTION[m].test(claudeMd);
+    if (has !== mods.includes(m)) throw new Error(`the ${condition}-${variant} contract ${has ? "carries" : "lacks"} the ${m} section — the slot is invalid`);
+  }
+  git(slot, "add", "-A");
+  git(slot, "commit", "-qm", "bearing");
   fs.cpSync(slot, pristine, { recursive: true });
   fs.writeFileSync(stampFile, stamp);
   return { slot, pristine };
@@ -263,7 +344,7 @@ async function main() {
   const unknown = a.tasks.filter((id) => !ALL_TASKS.some((t) => t.id === id));
   if (unknown.length) throw new Error(`unknown task(s): ${unknown.join(", ")}`);
   const slots = {};
-  const slotKey = (c, t) => `${c}/${t.fixture ?? "base"}${String(t.fixture ?? "").startsWith("real") ? `/${t.module}` : ""}`;
+  const slotKey = (c, t) => `${c}/${t.fixture ?? "base"}${String(t.fixture ?? "").startsWith("real") || c === "only" || c === "placebo" ? `/${t.module}` : ""}`;
   for (const c of a.conditions) for (const t of tasks) slots[slotKey(c, t)] ??= prepareSlot(a, c, t.fixture ?? "base", t.module);
   if (a.prepareOnly) {
     for (const [c, s] of Object.entries(slots)) console.error(`[prepare] ${c}: ${s.pristine}`);

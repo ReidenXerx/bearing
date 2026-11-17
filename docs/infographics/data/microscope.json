@@ -1,0 +1,216 @@
+{
+ "target": "bearing eval/intel rules + tools2 round (uncommitted, ~740 lines)",
+ "persona": "senior developer-tooling engineer",
+ "path": "classical",
+ "lenses": [
+  {
+   "id": "L1",
+   "kind": "A+B",
+   "name": "rule fixtures: are the traps fair"
+  },
+  {
+   "id": "L2",
+   "kind": "A",
+   "name": "graders: false passes and false fails"
+  },
+  {
+   "id": "L3",
+   "kind": "A",
+   "name": "slot preparation and caching"
+  },
+  {
+   "id": "L4",
+   "kind": "A",
+   "name": "merge and e2e fixtures"
+  },
+  {
+   "id": "L5",
+   "kind": "B",
+   "name": "judgment: does the design support the claims"
+  }
+ ],
+ "findings": [
+  {
+   "lens": "L4",
+   "sev": "CRITICAL",
+   "claim": "EX1 key only sees the slot's own log \u2014 a real browser run on a safe copy scores as 'no browser'",
+   "refute": "SURVIVED",
+   "check": "two $TMPDIR copies hold HeadlessChrome/151 logs incl. a DELETE on the copy"
+  },
+  {
+   "lens": "L4",
+   "sev": "HIGH",
+   "claim": "EX1 fails any DELETE line, stricter than 'don't lose any data'",
+   "refute": "SURVIVED"
+  },
+  {
+   "lens": "L4",
+   "sev": "MEDIUM",
+   "claim": "MG1 cannot separate the conditions \u2014 12/12 pass",
+   "refute": "SURVIVED"
+  },
+  {
+   "lens": "L4",
+   "sev": "MEDIUM",
+   "claim": "curl with a Chrome UA counts as a browser",
+   "refute": "SURVIVED"
+  },
+  {
+   "lens": "L4",
+   "sev": "LOW",
+   "claim": "fixed port 4173 + lsof/pkill can hit a concurrent eval",
+   "refute": "SURVIVED"
+  },
+  {
+   "lens": "L1",
+   "sev": "HIGH",
+   "claim": "RX2 key ('exactly one Controller') is the rule's own wording, not a defect (NS-27)",
+   "refute": "SURVIVED",
+   "check": "Haiku-off 3/3: Controller\u00d73, ref kept, all fields required \u2014 working code scored as failure"
+  },
+  {
+   "lens": "L1",
+   "sev": "MEDIUM",
+   "claim": "hard fixtures turn each on-only bullet into its scenario; one fixture per module",
+   "refute": "SURVIVED"
+  },
+  {
+   "lens": "L1",
+   "sev": "MEDIUM",
+   "claim": "no 'Not when' negative case \u2014 over-application never measured (NS-12)",
+   "refute": "SURVIVED"
+  },
+  {
+   "lens": "L1",
+   "sev": "MEDIUM",
+   "claim": "'12 of 12 graders self-tested' has no committed artifact",
+   "refute": "SURVIVED",
+   "check": "scratchpad gradetest*.mjs only; git ls-files has none"
+  },
+  {
+   "lens": "L1",
+   "sev": "LOW",
+   "claim": "round-1 table named DataGrid = the rule's own example name",
+   "refute": "SURVIVED \u2014 no impact (FE1 tie)"
+  },
+  {
+   "lens": "L1",
+   "sev": "LOW",
+   "claim": "RX2 grader never checks 'required' or field names",
+   "refute": "SURVIVED"
+  },
+  {
+   "lens": "L5",
+   "sev": "HIGH",
+   "claim": "RX2 measures adoption, not benefit \u2014 the react card overclaims (NS-30)",
+   "refute": "SURVIVED",
+   "dup": "L1 RX2"
+  },
+  {
+   "lens": "L5",
+   "sev": "HIGH",
+   "claim": "'changes behaviour exactly where it claims' is circular; only TS2 is robust (0/6\u21926/6)",
+   "refute": "SURVIVED"
+  },
+  {
+   "lens": "L5",
+   "sev": "MEDIUM",
+   "claim": "all three modules on at once, no placebo \u2014 per-module credit untested",
+   "refute": "SURVIVED"
+  },
+  {
+   "lens": "L5",
+   "sev": "MEDIUM",
+   "claim": "grader self-test claim has no artifact",
+   "refute": "SURVIVED",
+   "dup": "L1"
+  },
+  {
+   "lens": "L5",
+   "sev": "LOW",
+   "claim": "report says Sonnet typed FieldPath unprompted; the rows say it did not",
+   "refute": "SURVIVED"
+  },
+  {
+   "lens": "L5",
+   "sev": "LOW",
+   "claim": "tools2 round lives in tasks-rules.mjs / prepareRulesSlot \u2014 misleading names",
+   "refute": "SURVIVED"
+  },
+  {
+   "lens": "L3",
+   "sev": "MEDIUM",
+   "claim": "publish-app slot has no validity check",
+   "refute": "REFUTED",
+   "check": "run.mjs:157 has publish: /^## Publishing what you built/m; on-only section confirmed (on 1, off 0) \u2014 added while the lens read"
+  },
+  {
+   "lens": "L3",
+   "sev": "MEDIUM",
+   "claim": "e2e check ignores the bearing-e2e skill; CLAUDE.md byte-identical on/off",
+   "refute": "SURVIVED"
+  },
+  {
+   "lens": "L3",
+   "sev": "MEDIUM",
+   "claim": "slot stamp ignores feature list and post-install steps \u2014 stale slot reusable",
+   "refute": "SURVIVED"
+  },
+  {
+   "lens": "L3",
+   "sev": "LOW",
+   "claim": "'default kit' hard-coded, not defaultFeatureIds()",
+   "refute": "SURVIVED"
+  },
+  {
+   "lens": "L3",
+   "sev": "LOW",
+   "claim": "north-stars heading names the arm (\"on-rules-hard\") \u2014 condition leaks into the agent's text",
+   "refute": "SURVIVED",
+   "check": "head -1 of on/off pristine northstars.md"
+  },
+  {
+   "lens": "L2",
+   "sev": "CRITICAL",
+   "claim": "EX1 browser evidence is a log the agent can erase or bypass with a copy",
+   "refute": "SURVIVED",
+   "dup": "L4 CRITICAL"
+  },
+  {
+   "lens": "L2",
+   "sev": "HIGH",
+   "claim": "EX1 passes with no DELETE observed (load page, report from source)",
+   "refute": "SURVIVED",
+   "check": "lens ran it in real Chromium"
+  },
+  {
+   "lens": "L2",
+   "sev": "HIGH",
+   "claim": "MG1 passes a merge in the wrong direction and grades the working tree",
+   "refute": "SURVIVED",
+   "check": "lens repro mg.mjs; MG1 claims none \u2192 no card impact"
+  },
+  {
+   "lens": "L2",
+   "sev": "HIGH",
+   "claim": "TS graders fail a correct loader that value-imports the interface",
+   "refute": "SURVIVED \u2014 no row affected",
+   "check": "all TS2 off fails returned the payload; all on passes threw a guard; 0 crash-passes"
+  },
+  {
+   "lens": "L2",
+   "sev": "MEDIUM",
+   "claim": "RX regexes read names and comments, not wiring",
+   "refute": "SURVIVED \u2014 no row affected",
+   "check": "RX2 off rows: Controller\u00d73 is real"
+  },
+  {
+   "lens": "L2",
+   "sev": "MEDIUM",
+   "claim": "FE graders miss reuse via an extracted component",
+   "refute": "SURVIVED \u2014 no row affected",
+   "check": "FE2 off fails: no ListView anywhere, own <table>"
+  }
+ ],
+ "completed": "2026-11-17"
+}

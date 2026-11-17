@@ -1,0 +1,35 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="icon" href="data:,"><link rel="stylesheet" href="base.css"></head><body>
+<div class="card">
+  <div class="kicker">bearing · gitnexus · opt-in · how it works</div>
+  <h1>The graph is a lead. <em>The skill checks it.</em></h1>
+  <div class="sub">"What calls shouldIgnorePath?" in GitNexus's own repo, at one commit: three probes, every call site they found. The skill reads the graph's own caveat, then confirms with a text search.</div>
+  <svg id="s" width="1600" height="600" style="position:absolute;left:0;top:250px"></svg>
+</div>
+<div class="foot">GitNexus repository at aac7515d, its own index · impact upstream · cypher CALLS edges · git grep, tests excluded</div>
+<script type="module">
+import { el, text, ready } from "./draw.js";
+const d = await (await fetch("data/gitnexus.json")).json();
+const svg = document.getElementById("s"), F = "font-family:Geist";
+const cols = [
+  ["impact", "0 callers", "flagged a lower bound", "#e5484d"],
+  ["cypher, same index", `${d.rows.reduce((a, r) => a + r[2], 0)} callers`, "functions with a CALLS edge", "#e9a23b"],
+  ["git grep", `${d.rows.reduce((a, r) => a + r[1], 0)} call sites`, `in ${d.rows.length} files`, "#2fbf86"],
+];
+const CX = [830, 1080, 1330], RY = (i) => 120 + i * 50;
+cols.forEach(([h, n, sub, col], j) => {
+  text(svg, CX[j], 18, h, { fill: "#9aa8bd", "font-size": 16, "text-anchor": "middle" });
+  text(svg, CX[j], 56, n, { fill: col, "font-size": 30, "text-anchor": "middle", style: F + ";font-weight:700" });
+  text(svg, CX[j], 82, sub, { fill: "#7f8da3", "font-size": 15, "text-anchor": "middle" });
+});
+d.rows.forEach(([file, sites, callers], i) => {
+  const y = RY(i);
+  el("line", { x1: 64, x2: 1536, y1: y + 22, y2: y + 22, stroke: "#161e2a" }, svg);
+  text(svg, 64, y + 6, file, { fill: "#c9d3e2", "font-size": 17 });
+  // impact: nothing found — hollow marks where the sites are
+  for (let k = 0; k < sites; k++) el("circle", { cx: CX[0] - (sites - 1) * 13 + k * 26, cy: y, r: 9, fill: "none", stroke: "#3a4a63", "stroke-width": 2, "stroke-dasharray": "3 3" }, svg);
+  for (let k = 0; k < callers; k++) el("circle", { cx: CX[1] - (callers - 1) * 13 + k * 26, cy: y, r: 10, fill: "#e9a23b" }, svg);
+  for (let k = 0; k < sites; k++) el("circle", { cx: CX[2] - (sites - 1) * 13 + k * 26, cy: y, r: 10, fill: "#2fbf86" }, svg);
+});
+text(svg, 64, 548, "impact's own note: \"Absence of edges is not evidence the symbol is unused … Confirm with a text search.\"", { fill: "#e9a23b", "font-size": 18, style: F + ";font-style:italic" });
+await ready("700 56px Geist", "600 21px JBM", "500 16px JBM", "400 25px Geist");
+</script></body></html>

@@ -91,9 +91,9 @@ try {
   /* no scorecard → nothing to count */
 }
 
-const age = mem.newestMs ? `last written ${sp.humanAge(now - mem.newestMs)} ago` : "not written yet";
+const age = mem.newestMs ? `was last written ${sp.humanAge(now - mem.newestMs)} ago` : "is not written yet";
 emitContext(
-  `· Milestone — ${hit[1]}. Your project memory (${mem.dir}) is ${age}. The next session starts ` +
+  `· Milestone — ${hit[1]}. Your project memory (${mem.dir}) ${age}. The next session starts ` +
     "from that memory, not from this transcript: if this changed the project's state, a decision, what " +
     "is next or what you learned about how the user works, update it now — one fact per file, the " +
     "index line in MEMORY.md, stale entries corrected or deleted. Nothing changed? Then nothing to write.",

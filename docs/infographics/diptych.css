@@ -1,0 +1,24 @@
+.pane { position:absolute; top:232px; width:716px; height:500px; border-radius:16px; overflow:hidden; display:flex; flex-direction:column; }
+.pane.off { left:64px; background:#0c1016; border:2px solid #2a3240; }
+.pane.on { left:820px; background:#08121a; border:2px solid #3d8bf0; box-shadow:0 0 40px rgba(61,139,240,.15); }
+.ph { padding:14px 22px; font:600 17px JBM, monospace; letter-spacing:.1em; text-transform:uppercase; border-bottom:1.5px solid #1d2633; }
+.off .ph { color:#7f8da3; } .on .ph { color:#6aa6ff; }
+pre.code { flex:1; margin:0; padding:14px 22px; font:500 17px/1.48 JBM, monospace; font-variant-ligatures:none; font-feature-settings:"liga" 0, "calt" 0; color:#c4cedc; white-space:pre-wrap; overflow:hidden; }
+.off pre.code { color:#8e99ab; }
+pre.code .el { color:#5f6e86; font-style:italic; } pre.code .cm { color:#e9a23b; } pre.code .hl { background:rgba(61,139,240,.22); border-radius:4px; color:#fff; }
+.res { padding:14px 22px; font:600 21px Geist, sans-serif; border-top:1.5px solid #1d2633; }
+.off .res { color:#e2603a; background:rgba(226,96,58,.08); } .on .res { color:#2fbf86; background:rgba(47,191,134,.08); }
+.trials { position:absolute; left:64px; right:64px; top:756px; display:flex; gap:44px; align-items:center; font-size:21px; color:var(--dim); }
+.trials b { color:var(--ink); font-weight:600; margin-right:10px; }
+.dot { display:inline-block; width:20px; height:20px; border-radius:50%; margin-right:6px; vertical-align:-3px; }
+.dot.p { background:#2fbf86; } .dot.f { background:transparent; border:3px solid #e2603a; width:20px; height:20px; box-sizing:border-box; }
+.prose pre.code { font: 400 22px/1.45 Geist, sans-serif; white-space: pre-wrap; }
+.prose pre.code b { color:#eaf0f8; font-weight:600; } .prose .off pre.code b { color:#b4bfcf; }
+.prose pre.code code { font: 500 .86em JBM, monospace; color:#eaf0f8; background:rgba(255,255,255,.06); padding:1px 5px; border-radius:4px; } .prose .off pre.code code { color:#b4bfcf; }
+
+.trials .arm { display:flex; align-items:center; gap:4px; font-size:18px; }
+.trials .arm em { font-style:normal; color:#7f8da3; margin:0 6px 0 14px; } .trials .arm em.key { color:#8fbaff; font-weight:600; }
+.trials .arm .dot { width:16px; height:16px; margin-right:3px; }
+.trials { gap:28px; } .trials .arm { font-size:17px; white-space:nowrap; } .trials .arm em { margin:0 5px 0 12px; white-space:nowrap; }
+.dot.n1 { background:#3d8bf0; } .dot.n0 { background:transparent; border:3px solid #5f6e86; box-sizing:border-box; }
+.off .res.ok { color:#c9d3e2; background:rgba(255,255,255,.03); }

@@ -1,0 +1,30 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="icon" href="data:,"><link rel="stylesheet" href="base.css"></head><body>
+<div class="card">
+  <div class="kicker">bearing · git history · how it works</div>
+  <h1>Blame names the formatter. <em>It looks past it.</em></h1>
+  <div class="sub">Why does this guard exist? Three ways to ask git — and which commit each one names.</div>
+  <svg id="s" width="1600" height="640" style="position:absolute;left:0;top:236px"></svg>
+</div>
+<div class="foot">a real repo, git 2.56.1 · line 2 of src/capture.ts · the method the history skill teaches, run as shown</div>
+<script type="module">
+import { el, text, ready } from "./draw.js";
+const svg = document.getElementById("s"), F = "font-family:Geist";
+el("rect", { x: 64, y: 0, width: 1472, height: 218, rx: 16, fill: "#121924", stroke: "#243042", "stroke-width": 1.5 }, svg);
+text(svg, 92, 36, "THE FILE'S HISTORY", { fill: "#5f6e86", "font-size": 16, "letter-spacing": "2" });
+el("line", { x1: 150, x2: 1450, y1: 96, y2: 96, stroke: "#3a4a63", "stroke-width": 3 }, svg);
+const commits = [[230, "7f6d203", "Jan 12", "payments: capture an order", "#5f6e86"], [760, "27dadea", "Feb 10", "never capture an order twice (#142)", "#2fbf86"], [1290, "decdc35", "Mar 2", "style: prettier", "#e2603a"]];
+const at = {};
+for (const [x, sha, date, subj, col] of commits) { at[sha] = x; el("circle", { cx: x, cy: 96, r: 14, fill: col }, svg); text(svg, x, 62, `${sha} · ${date}`, { fill: "#9aa8bd", "font-size": 17, "text-anchor": "middle" }); text(svg, x, 140, subj, { fill: "#eaf0f8", "font-size": 22, "text-anchor": "middle", style: F }); }
+text(svg, at["27dadea"], 176, "“the gateway had applied the first one, so two customers were charged twice”", { fill: "#2fbf86", "font-size": 18, "text-anchor": "middle", style: F + ";font-style:italic" });
+text(svg, at["decdc35"], 176, "re-wraps the line, explains nothing", { fill: "#e2603a", "font-size": 18, "text-anchor": "middle", style: F + ";font-style:italic" });
+const probes = [["git blame -L 2,2 src/capture.ts", "decdc35", "#e2603a", "✗ the formatter"], ["git blame -w -L 2,2 src/capture.ts", "decdc35", "#e2603a", "✗ still the formatter: Prettier re-wrapped it, -w skips whitespace only"], ["git blame --ignore-rev decdc35 -L 2,2 src/capture.ts", "27dadea", "#2fbf86", "✓ the commit that wrote it, and why"]];
+probes.forEach(([cmd, hit, col, verdict], k) => {
+  const y = 290 + k * 112;
+  el("rect", { x: 64, y: y - 38, width: 1472, height: 92, rx: 14, fill: k === 2 ? "rgba(47,191,134,.08)" : "#0e141d", stroke: k === 2 ? "#2fbf86" : "#243042", "stroke-width": 1.5 }, svg);
+  text(svg, 92, y - 2, "$ " + cmd, { fill: "#c9d3e2", "font-size": 21 });
+  text(svg, 92, y + 32, verdict, { fill: col, "font-size": 20, style: F + ";font-weight:600" });
+  el("path", { d: `M1170,${y - 6} C1250,${y - 6} ${at[hit]},${200 + (2 - k) * 4} ${at[hit]},${112}`, stroke: col, "stroke-width": 2, fill: "none", "stroke-dasharray": k === 2 ? "0" : "5 4", opacity: .8 }, svg);
+  text(svg, 1160, y, `→ ${hit}`, { fill: col, "font-size": 21, "text-anchor": "end", "font-weight": 600 });
+});
+await ready("700 56px Geist", "600 21px JBM", "500 16px JBM", "400 25px Geist");
+</script></body></html>

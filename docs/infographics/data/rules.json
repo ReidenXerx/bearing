@@ -1,0 +1,237 @@
+{
+ "ts": {
+  "off": "export async function loadInvoice(id: string): Promise<Invoice> {\n  return request(`/invoices/${encodeURIComponent(id)}`);\n}",
+  "on": "function isInvoice(value: unknown): value is Invoice {\n  \u2026  checks number, customer, totalCents\n}\n\nexport async function loadInvoice(id: string): Promise<Invoice> {\n  // `request` is typed Promise<any>; hold it as unknown until the guard runs (TS-2).\n  const data: unknown = await request(`/invoices/${encodeURIComponent(id)}`);\n  if (!isInvoice(data)) {\n    throw new Error(`invoice ${id}: unexpected response shape from legacy service`);\n  }\n  return data;\n}",
+  "offRes": "payload without totalCents \u2192 returned as an Invoice. totalCents: undefined",
+  "onRes": "payload without totalCents \u2192 threw: unexpected response shape",
+  "trials": {
+   "Sonnet": {
+    "off": [
+     false,
+     false,
+     false
+    ],
+    "on": [
+     true,
+     true,
+     true
+    ]
+   },
+   "Haiku": {
+    "off": [
+     false,
+     false,
+     false
+    ],
+    "on": [
+     true,
+     true,
+     true
+    ]
+   }
+  },
+  "arms": {
+   "Sonnet": {
+    "off": [
+     false,
+     false,
+     false
+    ],
+    "placebo": [
+     false,
+     false,
+     false
+    ],
+    "only": [
+     true,
+     true,
+     true
+    ],
+    "on": [
+     true,
+     true,
+     true
+    ]
+   },
+   "Haiku": {
+    "off": [
+     false,
+     false,
+     false
+    ],
+    "placebo": [
+     false,
+     false,
+     false
+    ],
+    "only": [
+     true,
+     true,
+     true
+    ],
+    "on": [
+     true,
+     true,
+     false
+    ]
+   }
+  }
+ },
+ "fe": {
+  "off": "export function PayoutsPage() {\n  const payouts = usePayouts();\n  return (\n    <section>\n      <h1>Payouts</h1>\n      <table>\n        \u2026  <thead>, 3 <th>, <tbody>, 3 <td> by hand\n      </table>\n    </section>\n  );\n}",
+  "on": "import { ListView } from \"../components/layout/ListView.tsx\";\n\nexport function PayoutsPage() {\n  return (\n    <ListView\n      items={usePayouts()}\n      keyOf={(p) => p.id}\n      fields={[\n        { label: \"Date\", value: (p) => p.date },\n        { label: \"Amount\", value: (p) => (p.amountCents / 100).toFixed(2), numeric: true },\n        { label: \"Status\", value: (p) => p.status },\n      ]}\n    />\n  );\n}\n",
+  "offRes": "a second table, written by hand",
+  "onRes": "the shared ListView, found in src/components/layout/",
+  "trials": {
+   "Sonnet": {
+    "off": [
+     false,
+     false,
+     false
+    ],
+    "on": [
+     true,
+     true,
+     true
+    ]
+   },
+   "Haiku": {
+    "off": [
+     true,
+     false,
+     true
+    ],
+    "on": [
+     true,
+     true,
+     true
+    ]
+   }
+  },
+  "arms": {
+   "Sonnet": {
+    "off": [
+     false,
+     false,
+     false
+    ],
+    "placebo": [
+     false,
+     false,
+     false
+    ],
+    "only": [
+     true,
+     true,
+     true
+    ],
+    "on": [
+     true,
+     true,
+     true
+    ]
+   },
+   "Haiku": {
+    "off": [
+     true,
+     true,
+     false
+    ],
+    "placebo": [
+     true,
+     false,
+     true
+    ],
+    "only": [
+     true,
+     true,
+     true
+    ],
+    "on": [
+     true,
+     true,
+     true
+    ]
+   }
+  }
+ },
+ "rx": {
+  "off": "      <Controller\n        name=\"phone\"\n        control={control}\n        rules={{ required: \"Phone is required\" }}\n        render={({ field, fieldState }) => (\n          <PhoneInput\n            name={field.name}\n            ref={field.ref}\n            value={field.value}\n            onChange={field.onChange}\n            onBlur={field.onBlur}\n            error={fieldState.error?.message}\n          />\n        )}\n      \u2026  the same block again for mobile, and for fax",
+  "on": "// Owns its Controller so callers pass only name + control (REACT-1).\n// `name` is typed against the form shape, so a misspelt field fails to compile (REACT-2).\nfunction PhoneField({ name, control, requiredMessage }: {\n  name: FieldPath<ContactValues>;\n  \u2026\n        <PhoneInput {...field} error={fieldState.error?.message} />\n  \u2026\n      <PhoneField name=\"phone\" control={control} requiredMessage=\"Phone is required\" />\n      <PhoneField name=\"mobile\" control={control} requiredMessage=\"Mobile is required\" />\n      <PhoneField name=\"fax\" control={control} requiredMessage=\"Fax is required\" />",
+  "offRes": "works \u00b7 the Controller wiring written 3 times",
+  "onRes": "works \u00b7 written once, used at 3 call sites",
+  "strip": "<span><b>Sonnet</b><i class=\"dot n1\"></i><i class=\"dot n1\"></i><i class=\"dot n1\"></i> \u2192 <i class=\"dot n1\"></i><i class=\"dot n1\"></i><i class=\"dot n1\"></i></span><span><b>Haiku</b><i class=\"dot n0\"></i><i class=\"dot n0\"></i><i class=\"dot n0\"></i> \u2192 <i class=\"dot n1\"></i><i class=\"dot n1\"></i><i class=\"dot n1\"></i></span><span style=\"margin-left:auto\"><i class=\"dot n1\"></i>one field component \u00b7 every version worked, 12 of 12</span>"
+ },
+ "ns1": {
+  "off": "It follows `docs/FEES.md`: the fee is 2.9% of the gross amount, which is the sum of `qty * unitCents` over the lines. The discount is ignored, as the doc says.\n\u2026\nThe doc's example (10,000 cents gross, 2,000 cents discount) gives 290 cents, which is 2.90.",
+  "on": "**The conflict:**\n- **`docs/FEES.md`:** says 2.9% of the gross, before discounts.\n- **NS-1:** says platform fees are computed on the net amount (subtotal minus discounts), never the gross.\n- **Which one I followed:** NS-1 outranks other docs, so I treated FEES.md as stale. With that example the function returns 2.32, not 2.90.",
+  "offRes": "fee on 100.00 less a 20.00 discount = 2.90: charged on the gross",
+  "onRes": "= 2.32 on the net, and it flagged the stale doc",
+  "trials": {
+   "Sonnet": {
+    "off": [
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    "on": [
+     true,
+     true,
+     true,
+     true,
+     true
+    ]
+   }
+  }
+ },
+ "ns2": {
+  "off": "`capturePayment` in `src/payments/capture.ts` now retries when the gateway throws `TransientGatewayError`. It makes at most 3 attempts in total.\n\u2026\nI didn't check whether `gw.capture` is safe to repeat for the same `orderId`",
+  "on": "\u2026\nIn 2026-02 the gateway sometimes applied a capture that had timed out on our side, so a retry charged the customer twice. That caused two incidents.\n- **Why `TransientGatewayError` is the risky case:** a timeout or hiccup is exactly when the gateway may have applied the capture anyway. Retrying on it is the same double-charge scenario NS-3 recorded.\n\u2026\n1. **Do nothing for now (my recommendation).**",
+  "offRes": "a timed-out capture is retried: the gateway is called twice",
+  "onRes": "called once, and it said why: NS-3",
+  "trials": {
+   "Sonnet": {
+    "off": [
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    "on": [
+     true,
+     true,
+     true,
+     true,
+     true
+    ]
+   }
+  }
+ },
+ "c2": {
+  "off": "- **Locale:** It formats with `Intl.NumberFormat` in `en-US`. I picked that locale myself, so tell me if the UI needs a different one or a locale parameter.\n\u2026\n- `formatAmount(123456, \"USD\")` gives `$1,234.56`.\n- `formatAmount(500, \"JPY\")` gives `\u00a5500`.",
+  "on": "- **Format:** it follows `docs/STYLE.md`. The output is the currency code, a space, then the amount with that currency's minor digits from `src/money/currencies.ts`.\n\u2026\n  - `formatAmount(123456, \"EUR\")` gives `EUR 1234.56`.\n  - `formatAmount(500, \"JPY\")` gives `JPY 500`.",
+  "offRes": "\u20ac1,234.56: a format it invented",
+  "onRes": "EUR 1234.56: the format docs/STYLE.md sets",
+  "trials": {
+   "Sonnet": {
+    "off": [
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    "on": [
+     true,
+     true,
+     true,
+     true,
+     true
+    ]
+   }
+  }
+ }
+}

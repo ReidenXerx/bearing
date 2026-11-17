@@ -1,0 +1,25 @@
+~/code/shop
+  bearing 2.0.2 · runtime claude · northstars, goldpractices, taskcore, microscope, consult, minions, astgrep
+
+Always loaded
+  CLAUDE.md: bearing's block ≈ 2,914 tokens (characters ÷ 4)
+
+Speaks up without being asked
+  ✓ session brief             each session start, and the recovery steps after a compaction
+                              sessionBrief: true (off: false)
+  ✓ north-star reminder       every 40000 tokens of context growth (every 25 tool calls where the size cannot be read), and the relevant ones after a doc write
+                              northStarAnchorEveryTokens: 40000 · northStarAnchorEvery: 25 (off: 0) · fired 0× in 30 days
+  ✓ task-core nudge           after 25 edits since this chat's task-core was written
+                              taskCoreEveryEdits: 25 (off: 0) · fired 0× in 30 days
+  · consult prompt            off
+                              consultNudge: false (off: false) · fired 0× in 30 days
+                              to turn on: "consultNudge": true, then bearing update
+  ✓ memory nudge              after a merge, tag, release or publish; and in the brief when memory is 7+ days old with commits since
+                              memoryNudge: true (off: false) · fired 0× in 30 days
+  · parallel-session warning  off
+                              sessionsWarn: false (off: false) · fired 0× in 30 days
+                              to turn on: "sessionsWarn": true, then bearing update
+  Knobs go in .bearing/hooks.json (team, committed) or .bearing/hooks.local.json (this machine, wins).
+
+On ask — name it in a prompt, or /<skill> in Claude Code
+  bearing-astgrep · bearing-consult · bearing-invasive-minions · bearing-microscope · bearing-minions · bearing-northstars · bearing-pr · bearing-taskcore

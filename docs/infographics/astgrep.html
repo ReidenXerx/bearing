@@ -1,0 +1,27 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="icon" href="data:,"><link rel="stylesheet" href="base.css">
+<style> .pat { font: 600 24px JBM, monospace; padding: 10px 16px; border-radius: 10px; background: #0b111a; border: 1.5px solid var(--line); display: inline-block; }
+ .term { position:absolute; font: 500 19px JBM, monospace; line-height: 1.5; background:#070a0f; border:1.5px solid var(--line); border-radius: 12px; padding: 14px 20px; } </style></head><body>
+<div class="card">
+  <div class="kicker">bearing · ast-grep</div>
+  <h1>A broken pattern looks <em>exactly</em> like a clean codebase.</h1>
+  <div class="sub">ast-grep searches the syntax tree. Give it a pattern that does not parse and it searches nothing — then answers like a search that found nothing.</div>
+  <div class="panel" style="left:64px;top:252px;width:716px;height:430px;padding:22px 26px"><div class="plabel">the pattern parses</div><div style="margin-top:10px" class="pat">fetch($URL, $$$OPTS)</div><svg id="good" width="660" height="300"></svg></div>
+  <div class="panel" style="left:820px;top:252px;width:716px;height:430px;padding:22px 26px;border-color:#5a2a1f"><div class="plabel" style="color:#e2603a">the pattern does not parse</div><div style="margin-top:10px" class="pat">fetch($URL, { method: $M</div><svg id="bad" width="660" height="300"></svg></div>
+  <div class="term" style="left:64px;top:700px;width:1472px"><span style="color:#5f6e86">$ ast-grep run -p '<span style="color:#e2603a">fetch($URL, { method: $M</span>' order.ts</span>&nbsp;&nbsp;→ <b style="color:#eaf0f8">[]</b> · exit 1 · stderr empty<br><span style="color:#5f6e86">$ ast-grep run -p '<span style="color:#3d8bf0">fetch($URL, $$$OPTS)</span>' no-fetch.ts</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ <b style="color:#eaf0f8">[]</b> · exit 1 · stderr empty &nbsp;<span style="color:#e9a23b">← identical. the skill proves a pattern on a known site first.</span></div>
+</div>
+<div class="foot">ast-grep 0.51.3 · trees from --debug-query=ast · both runs reproduced on the sample shown, exit codes and output captured as printed</div>
+<script type="module">
+import { el, text, ready } from "./draw.js";
+function tree(svg, nodes, col) { // nodes: [depth, label, x]
+  const pos = nodes.map(([d, lab, x]) => ({ d, lab, x, y: 36 + d * 52 }));
+  pos.forEach((p, i) => { const parent = [...pos.slice(0, i)].reverse().find((q) => q.d === p.d - 1); if (parent) el("path", { d: `M${parent.x},${parent.y + 16} C${parent.x},${p.y - 20} ${p.x},${parent.y + 30} ${p.x},${p.y - 16}`, stroke: "#3a4a63", "stroke-width": 2, fill: "none" }, svg); });
+  for (const p of pos) { const w = p.lab.length * 11.5 + 26, hot = p.lab === "ERROR" || p.lab.startsWith("call_expression");
+    el("rect", { x: p.x - w / 2, y: p.y - 16, width: w, height: 32, rx: 8, fill: p.lab === "ERROR" ? "#e2603a" : hot ? col : "#1b2535", stroke: hot ? "none" : "#2c3a50" }, svg);
+    text(svg, p.x, p.y + 6, p.lab, { fill: hot ? "#0b0f15" : "#c9d3e2", "font-size": 18, "font-weight": 600, "text-anchor": "middle" }); }
+}
+tree(document.getElementById("good"), [[0, "program", 330], [1, "expression_statement", 330], [2, "call_expression", 330], [3, "identifier", 170], [3, "arguments", 470], [4, "identifier", 400], [4, "identifier", 560]], "#3d8bf0");
+const g = document.getElementById("good"); text(g, 20, 296, "→ 1 match · order.ts line 2", { fill: "#2fbf86", "font-size": 21, "font-weight": 600 });
+tree(document.getElementById("bad"), [[0, "ERROR", 330], [1, "identifier", 100], [1, "identifier", 270], [1, "pair", 480], [2, "property_identifier", 400], [2, "identifier", 580]], "#e2603a");
+const b = document.getElementById("bad"); text(b, 20, 296, "→ no call_expression to match: 0 matches", { fill: "#e2603a", "font-size": 21, "font-weight": 600 });
+await ready("700 56px Geist", "600 21px JBM", "500 16px JBM", "400 25px Geist");
+</script></body></html>

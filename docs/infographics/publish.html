@@ -1,0 +1,43 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="icon" href="data:,"><link rel="stylesheet" href="base.css">
+<style>
+ .shot { position:absolute; left:64px; top:250px; width:960px; height:540px; border-radius:12px; border:1.5px solid #243042; overflow:hidden; }
+ .shot img { width:100%; height:100%; display:block; }
+ .pin { position:absolute; width:36px; height:36px; border-radius:50%; background:#3d8bf0; color:#0b0f15; font:700 20px Geist; display:flex; align-items:center; justify-content:center; box-shadow:0 0 0 4px rgba(11,15,21,.85); }
+ .notes { position:absolute; left:1064px; top:250px; width:472px; }
+ .note { display:flex; gap:14px; margin-bottom:18px; font-size:21px; line-height:1.3; color:#e8edf5; }
+ .note .pin { position:static; flex:none; width:32px; height:32px; font-size:18px; }
+ .note small { display:block; color:#9aa8bd; font:500 16px JBM; margin-top:4px; }
+ .term { position:absolute; left:1064px; top:560px; width:472px; height:230px; border-radius:12px; background:#070a0f; border:1.5px solid #6b2a2c; padding:16px 18px; box-sizing:border-box; font:500 15.5px/1.5 JBM; color:#c9d3e2; }
+ .term .h { font:600 14px JBM; letter-spacing:.12em; color:#e5484d; margin-bottom:8px; }
+ .term .err { color:#ff8a8f; } .term .dim { color:#7f8da3; }
+</style></head><body>
+<div class="card">
+  <div class="kicker">bearing · publish · how it works</div>
+  <h1>Every figure from a file. <em>Nothing half-drawn ships.</em></h1>
+  <div class="sub">Asked for "a compelling README card", an agent with the module rendered this. The renderer waits for the card to say it is finished.</div>
+  <div class="shot"><img src="data/pu1-on.png"></div>
+  <div class="pin" style="left:46px;top:276px">1</div>
+  <div class="pin" style="left:46px;top:374px">2</div>
+  <div class="pin" style="left:46px;top:668px">3</div>
+  <div class="pin" style="left:46px;top:732px">4</div>
+  <div class="notes">
+    <div class="note"><div class="pin">1</div><div>A kicker, then one claim with one accent word</div></div>
+    <div class="note"><div class="pin">2</div><div>A subtitle under two lines</div></div>
+    <div class="note"><div class="pin">3</div><div>Every figure is in the docs<small>50,000 rows · UTF-8 with a BOM · report order</small></div></div>
+    <div class="note"><div class="pin">4</div><div>The source, printed on the card</div></div>
+  </div>
+  <div class="term">
+    <div class="h">A CARD THAT NEVER FINISHES DRAWING</div>
+    <div><span class="dim">$</span> render.mjs card.html card.png</div>
+    <div class="err">✗ card.html not rendered:</div>
+    <div class="err">&nbsp;&nbsp;the card never set window.__ready</div>
+    <div class="err">&nbsp;&nbsp;= true within 30000 ms</div>
+    <div style="margin-top:10px">exit 1 <span class="dim">·</span> no PNG written</div>
+  </div>
+</div>
+<div class="foot">a real card from a one-line ask, every figure checked against docs/FEATURES.md · the refusal is the renderer's real output</div>
+<script type="module">
+import { ready } from "./draw.js";
+await new Promise((r) => { const i = document.querySelector(".shot img"); i.complete ? r() : (i.onload = r); });
+await ready("700 56px Geist", "600 21px JBM", "500 16px JBM", "400 25px Geist");
+</script></body></html>

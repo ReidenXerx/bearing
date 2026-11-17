@@ -1,0 +1,49 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="icon" href="data:,"><link rel="stylesheet" href="base.css">
+<style> .q { position:absolute; width:340px; padding:12px 16px; border-radius:12px; background:#121924; border:1.5px solid #2c3a50; font-size:18px; line-height:1.35; color:#e8edf5; }
+ .q b { display:block; font:600 14px JBM; letter-spacing:.08em; margin-bottom:6px; } </style></head><body>
+<div class="card">
+  <div class="kicker">bearing · memory · how it works</div>
+  <h1>It speaks up when memory <em>goes stale.</em></h1>
+  <div class="sub">80 tool calls through the real hooks of a default install. Every mark is a moment the agent was told something; every other call stayed silent.</div>
+  <svg id="s" width="1600" height="300" style="position:absolute;left:0;top:226px;overflow:visible"></svg>
+  <div id="qs"></div>
+</div>
+<div class="foot">a default install, its real hooks driven through a scripted session · quotes verbatim, file paths removed</div>
+<script type="module">
+import { el, text, ready } from "./draw.js";
+const d = await (await fetch("data/memory-session.json")).json();
+const svg = document.getElementById("s"), F = "font-family:Geist";
+const L = 300, R = 1520, X = (c) => L + (c / d.calls) * (R - L);
+const lanes = [["session", "session brief", "#3d8bf0"], ["memory-nudge", "memory nudge", "#e9a23b"], ["taskcore-nudge", "task-core nudge", "#2fbf86"], ["northstar-anchor", "north-star reminder", "#5f6e86"]];
+const LY = (i) => 70 + i * 50;
+// call strip: what the agent was doing
+for (let c = 1; c <= d.calls; c++) {
+  const k = c === 48 || c === 74 ? "#e9a23b" : c % 3 === 0 ? "#2c3a50" : "#3a4a63";
+  el("rect", { x: X(c) - 5, y: 14, width: 10, height: c === 48 || c === 74 ? 26 : 16, y: c === 48 || c === 74 ? 10 : 20, rx: 2, fill: k }, svg);
+}
+text(svg, 64, 34, "tool calls", { fill: "#7f8da3", "font-size": 17, style: F });
+text(svg, X(48), 4, "PR merged", { fill: "#e9a23b", "font-size": 15, "text-anchor": "middle" });
+text(svg, X(74), 4, "tag cut", { fill: "#e9a23b", "font-size": 15, "text-anchor": "middle" });
+el("line", { x1: X(60), x2: X(60), y1: 0, y2: 260, stroke: "#e5484d", "stroke-dasharray": "6 5", "stroke-width": 2 }, svg);
+text(svg, X(60) + 8, 4, "context compacted", { fill: "#e5484d", "font-size": 15 });
+lanes.forEach(([h, name, col], i) => {
+  el("line", { x1: L, x2: R, y1: LY(i), y2: LY(i), stroke: "#1d2633", "stroke-width": 2 }, svg);
+  text(svg, 64, LY(i) + 6, name, { fill: i === 3 ? "#7f8da3" : "#eaf0f8", "font-size": 19, style: F + ";font-weight:600" });
+  for (const ev of d.events.filter((e) => e.hook === h)) el("circle", { cx: X(ev.call), cy: LY(i), r: i === 3 ? 8 : 12, fill: col }, svg);
+});
+// the debounced tag: asked at the merge, quiet at the tag
+el("circle", { cx: X(74), cy: LY(1), r: 12, fill: "none", stroke: "#e9a23b", "stroke-width": 2.5, "stroke-dasharray": "4 3" }, svg);
+text(svg, X(74), LY(1) + 32, "quiet: asked at the merge", { fill: "#9aa8bd", "font-size": 14, "text-anchor": "middle" });
+for (let c = 0; c <= 80; c += 20) text(svg, X(c), 266, String(c), { fill: "#5f6e86", "font-size": 14, "text-anchor": "middle" });
+// verbatim quotes, each tied to its mark
+const Q = [["0", "AT SESSION START", "#3d8bf0", 0], ["37", "AFTER 25 EDITS", "#2fbf86", 2], ["48", "AT THE MERGE", "#e9a23b", 1], ["60", "AFTER COMPACTION", "#3d8bf0", 0]];
+const qs = document.getElementById("qs");
+Q.forEach(([c, label, col, lane], i) => {
+  const left = 64 + i * 372, top = 590;
+  qs.insertAdjacentHTML("beforeend", `<div class="q" style="left:${left}px;top:${top}px;border-color:${col}"><b style="color:${col}">CALL ${c} · ${label}</b>${d.quotes[c].replace(/&/g, "&amp;").replace(/</g, "&lt;")}</div>`);
+  el("path", { d: `M${X(+c)},${LY(lane) + 14} C${X(+c)},${260} ${left + 170},${300} ${left + 170},${348}`, stroke: col, "stroke-width": 1.5, fill: "none", opacity: .7 }, svg);
+});
+svg.setAttribute("height", 400);
+svg.innerHTML = `<g transform="translate(0,26)">${svg.innerHTML}</g>`;
+await ready("700 56px Geist", "600 21px JBM", "500 16px JBM", "400 25px Geist");
+</script></body></html>

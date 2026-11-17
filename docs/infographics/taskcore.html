@@ -1,0 +1,37 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="icon" href="data:,"><link rel="stylesheet" href="base.css"></head><body>
+<div class="card">
+  <div class="kicker">bearing · task-core</div>
+  <h1>Wiped six times. <em>Saved before every one.</em></h1>
+  <div class="sub">One real 10-day session: the context fills, compaction throws the transcript away, and the task-core had already been written each time.</div>
+  <div class="panel" style="left:64px;top:262px;width:1080px;height:560px"><svg id="chart" width="1080" height="560"></svg></div>
+  <div class="panel" style="left:1168px;top:262px;width:368px;height:560px;padding:26px 28px" id="side"></div>
+</div>
+<div class="foot">this session's own transcript, Nov 6–16 · context = tokens sent each turn · events from the hooks' output, one per turn</div>
+<script type="module">
+import { el, text, fmtK, ready } from "./draw.js";
+const d = await (await fetch("data/session.json")).json();
+const svg = document.getElementById("chart");
+const L = 70, R = 1050, T = 46, B = 330, W = R - L, H = B - T, X = (i) => L + (i / d.n) * W, Y = (c) => B - (c / 1e6) * H;
+text(svg, 28, 30, "CONTEXT, TOKENS", { fill: "#5f6e86", "font-size": 15, "letter-spacing": "2" });
+for (const v of [0, 250e3, 500e3, 750e3, 1e6]) { el("line", { x1: L, x2: R, y1: Y(v), y2: Y(v), stroke: "#1d2736" }, svg); text(svg, L - 10, Y(v) + 5, v ? fmtK(v) : "0", { fill: "#5f6e86", "font-size": 15, "text-anchor": "end" }); }
+// area + line of the real context size
+const pts = d.series.map(([i, c]) => `${X(i).toFixed(1)},${Y(c).toFixed(1)}`);
+el("path", { d: `M${X(0)},${B} L${pts.join(" L")} L${X(d.n)},${B} Z`, fill: "rgba(61,139,240,.13)" }, svg);
+el("path", { d: `M${pts.join(" L")}`, fill: "none", stroke: "#3d8bf0", "stroke-width": 2 }, svg);
+// compactions: the wipe
+d.compactions.forEach((c, k) => { el("line", { x1: X(c), x2: X(c), y1: T - 6, y2: B, stroke: "#e2603a", "stroke-width": 2, "stroke-dasharray": "5 4" }, svg); el("circle", { cx: X(c), cy: T - 14, r: 13, fill: "#e2603a" }, svg); text(svg, X(c), T - 9, String(k + 1), { fill: "#0b0f15", "font-size": 15, "font-weight": 600, "text-anchor": "middle" }); });
+// event lanes
+const lanes = [["task-core saved", "taskcore_write", "#2fbf86", 7], ["task-core nudge", "taskcore_nudge", "#e9a23b", 6], ["north-star re-anchor", "anchor", "#6aa6ff", 2.4], ["PR merged", "merge", "#c9d3e2", 4]];
+lanes.forEach(([name, key, col, r], k) => { const y = 382 + k * 40; text(svg, L - 10, y + 5, name, { fill: col, "font-size": 15, "text-anchor": "end", opacity: 0 }); el("line", { x1: L, x2: R, y1: y, y2: y, stroke: "#1a2331" }, svg);
+  for (const i of d.events[key] ?? []) key === "anchor" ? el("rect", { x: X(i) - 1, y: y - 9, width: 2, height: 18, fill: col, opacity: .75 }, svg) : el("circle", { cx: X(i), cy: y, r, fill: col }, svg);
+  text(svg, R, y - 12, name, { fill: col, "font-size": 15, "text-anchor": "end" }); });
+let lastX = -999; for (const [i, day] of d.days) { if (X(i) - lastX < 70) continue; lastX = X(i); text(svg, X(i), 548, day.replace("11-", "Nov "), { fill: "#5f6e86", "font-size": 13, "text-anchor": "start" }); el("line", { x1: X(i), x2: X(i), y1: B, y2: B + 6, stroke: "#5f6e86" }, svg); }
+const n = (k) => (d.events[k] ?? []).length;
+document.getElementById("side").innerHTML = `
+  <div class="plabel">One session, counted</div>
+  <div class="tile" style="margin-top:22px"><div class="n" style="color:#e2603a">6</div><div class="t">compactions — the transcript summarised away</div></div>
+  <div class="tile" style="margin-top:26px"><div class="n" style="color:#2fbf86">6 <small>of</small> 6</div><div class="t">had a fresh task-core — 2 turns before the wipe, four times</div></div>
+  <div class="tile" style="margin-top:26px"><div class="n" style="color:#e9a23b">${n("taskcore_nudge")} <small>→</small> <span style="color:#2fbf86">${n("taskcore_write")}</span></div><div class="t">nudges, then saves — it wrote more often than it was asked</div></div>`;
+await Promise.all([...document.images].map((i) => i.decode()));
+await ready("700 56px Geist", "600 21px JBM", "500 16px JBM", "400 25px Geist");
+</script></body></html>

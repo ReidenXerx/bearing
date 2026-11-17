@@ -1,0 +1,30 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="icon" href="data:,"><link rel="stylesheet" href="base.css">
+<style>
+ .spec { position:absolute; left:64px; right:64px; top:250px; padding:18px 26px; border-radius:14px; background:#0b111a; border:1.5px solid #3d8bf0; }
+ .spec .src { font:600 17px JBM, monospace; color:#6aa6ff; letter-spacing:.06em; } .spec .r { font-size:23px; color:#c9d3e2; margin-top:6px; }
+ .ui { position:absolute; top:400px; width:716px; height:400px; border-radius:16px; background:#f4f6f9; overflow:hidden; color:#1b2330; }
+ .ui.off { left:64px; } .ui.on { left:820px; }
+ .ui .bar { height:46px; display:flex; align-items:center; padding:0 22px; font:600 17px JBM, monospace; letter-spacing:.08em; color:#fff; }
+ .off .bar { background:#b8472a; } .on .bar { background:#1f8a62; }
+ .ui table { width:100%; border-collapse:collapse; font-size:24px; }
+ .ui td { padding:20px 26px; border-bottom:1px solid #dde3ea; } .ui td:first-child { font:500 19px JBM, monospace; color:#4a5566; } .ui td.amt { text-align:right; font:600 30px JBM, monospace; }
+ .off td.amt { color:#b8472a; } .on td.amt { color:#13704d; }
+ .ui .runs { padding:16px 26px; font-size:19px; color:#4a5566; }
+</style></head><body>
+<div class="card">
+  <div class="kicker">bearing · consult</div>
+  <h1>If the repo has the answer, <em>it reads it.</em></h1>
+  <div class="sub">"Add formatAmount(cents, currency)." The style doc already says how. The amounts each agent's code printed:</div>
+  <div class="spec"><div class="src">docs/STYLE.md · already in the repo</div><div class="r">ISO currency code, one space, then the amount — no symbols, no thousands separators.</div></div>
+  <div class="ui off"><div class="bar">WITHOUT BEARING · 5 OF 5 INVENTED A FORMAT</div><table id="off"></table><div class="runs">"I picked that locale myself, so tell me if the UI needs a different one …"</div></div>
+  <div class="ui on"><div class="bar">WITH BEARING · 5 OF 5 FOLLOWED THE DOC</div><table id="on"></table><div class="runs">"It follows docs/STYLE.md."</div></div>
+</div>
+<div class="foot">eval/intel/REPORT.md · task C2 · Sonnet, 5 runs each way · the calls the grader made, and what each agent's code returned</div>
+<script type="module">
+import { ready } from "./draw.js";
+const items = ['formatAmount(123456, "EUR")', 'formatAmount(500, "JPY")', 'formatAmount(-5, "USD")'];
+const off = ["€1,234.56", "¥500", "-$0.05"], on = ["EUR 1234.56", "JPY 500", "-USD 0.05"];
+const rows = (vals) => items.map((n, i) => `<tr><td>${n}</td><td class="amt">${vals[i]}</td></tr>`).join("");
+document.getElementById("off").innerHTML = rows(off); document.getElementById("on").innerHTML = rows(on);
+await ready("700 56px Geist", "600 21px JBM", "500 16px JBM", "400 25px Geist");
+</script></body></html>

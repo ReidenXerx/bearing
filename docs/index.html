@@ -30,7 +30,7 @@
   "@type": "SoftwareApplication",
   "name": "bearing",
   "url": "https://duduphudu.app/bearing/",
-  "description": "Your tests catch code that breaks. Nothing catches an agent that has drifted about what the code means. A toolbelt for developers who already work with coding agents: north-stars that outrank docs, memory the agent keeps true, a task-core that survives compaction, ast-grep with its traps, review by an expert in your domain when you ask — no gates, and every rule measured.",
+  "description": "Your tests catch code that breaks. Nothing catches an agent that has drifted about what the code means. A toolbelt for developers who already work with coding agents: north-stars that outrank docs, memory the agent keeps true, a task-core that survives compaction, ast-grep with its traps, review by an expert in your domain when you ask — no gates.",
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "macOS, Linux, Windows",
   "license": "https://opensource.org/license/isc-license-txt",
@@ -301,13 +301,13 @@
   .matrix td.ask { font: 500 11px/1.5 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--brass); }
   .matrix thead th:not(:first-child) { text-align: center; }
 
-  /* receipts stats */
-  .stats { display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; margin-top: 26px; }
-  @media (min-width: 640px) { .stats { grid-template-columns: repeat(4, 1fr); } }
-  .stat { background: var(--surface); padding: 20px; }
-  .stat > b { display: block; font: 400 2.1rem/1 var(--display); color: var(--brass); }
-  .stat > span { display: block; margin-top: 8px; font-size: .9rem; color: var(--muted); }
-  .stat > span b { color: var(--ink); }
+  /* real-run gallery */
+  .runs { display: grid; gap: 22px; margin-top: 26px; }
+  @media (min-width: 900px) { .runs { grid-template-columns: repeat(2, 1fr); } }
+  .run { display: block; color: var(--muted); text-decoration: none; }
+  .run img { display: block; width: 100%; height: auto; border-radius: 6px; border: 1px solid var(--rule); }
+  .run span { display: block; margin-top: 8px; font-size: .9rem; }
+  .run:hover img { border-color: var(--brass); }
 
   .note { font-size: .88rem; color: var(--muted); }
   .footer { border-top: 1px solid var(--rule); padding-top: 26px; margin-top: 46px; display: flex; flex-wrap: wrap; gap: 14px 26px; justify-content: space-between; align-items: baseline; font-size: .9rem; color: var(--muted); }
@@ -347,7 +347,7 @@
     <a href="#instruments">Modules</a>
     <a href="#northstars">North-stars</a>
     <a href="#cost">What it costs</a>
-    <a href="#receipts">Receipts</a>
+    <a href="#runs">On a real run</a>
     <a href="#install">Install</a>
     <a href="https://github.com/ReidenXerx/bearing">GitHub</a>
   </nav>
@@ -643,6 +643,33 @@
   </div>
 </section>
 
+<section id="runs">
+  <p class="label">On a real run</p>
+  <h2>Every module, drawn from a run you can check</h2>
+  <p class="section-lede">Each picture is one real run or one with-and-without comparison; its source is printed at its foot. Each opens the module's page.</p>
+  <div class="runs">
+    <a class="run" href="https://github.com/ReidenXerx/bearing/blob/main/docs/modules/memory.md"><img src="assets/cards/memory.png" alt="The real hooks of a default install, driven through 80 tool calls: what the agent is told, and when." width="1600" height="900" loading="lazy" decoding="async"><span>The real hooks of a default install, driven through 80 tool calls: what the agent is told, and when.</span></a>
+    <a class="run" href="https://github.com/ReidenXerx/bearing/blob/main/docs/modules/northstars.md"><img src="assets/cards/northstars-stale.png" alt="A stale doc says the fee is on the gross; the north-star says the net. Five agents each way." width="1600" height="900" loading="lazy" decoding="async"><span>A stale doc says the fee is on the gross; the north-star says the net. Five agents each way.</span></a>
+    <a class="run" href="https://github.com/ReidenXerx/bearing/blob/main/docs/modules/northstars.md"><img src="assets/cards/northstars-graveyard.png" alt="An idea you rejected stays rejected: what each agent's code did when the gateway timed out." width="1600" height="900" loading="lazy" decoding="async"><span>An idea you rejected stays rejected: what each agent's code did when the gateway timed out.</span></a>
+    <a class="run" href="https://github.com/ReidenXerx/bearing/blob/main/docs/modules/northstars.md"><img src="assets/cards/goldpractices.png" alt="The rules agents reached for, counted in 18 real transcripts." width="1600" height="900" loading="lazy" decoding="async"><span>The rules agents reached for, counted in 18 real transcripts.</span></a>
+    <a class="run" href="https://github.com/ReidenXerx/bearing/blob/main/docs/modules/taskcore.md"><img src="assets/cards/taskcore.png" alt="One real 10-day session: six compactions, the task-core saved before every one." width="1600" height="900" loading="lazy" decoding="async"><span>One real 10-day session: six compactions, the task-core saved before every one.</span></a>
+    <a class="run" href="https://github.com/ReidenXerx/bearing/blob/main/docs/modules/microscope.md"><img src="assets/cards/microscope.png" alt="A real review: 28 findings, one disproved, three found twice, 24 ranked." width="1600" height="900" loading="lazy" decoding="async"><span>A real review: 28 findings, one disproved, three found twice, 24 ranked.</span></a>
+    <a class="run" href="https://github.com/ReidenXerx/bearing/blob/main/docs/modules/minions.md"><img src="assets/cards/minions.png" alt="Eight subagents, eight slices at once — citations back, never verdicts." width="1600" height="900" loading="lazy" decoding="async"><span>Eight subagents, eight slices at once — citations back, never verdicts.</span></a>
+    <a class="run" href="https://github.com/ReidenXerx/bearing/blob/main/docs/modules/consult.md"><img src="assets/cards/consult.png" alt="The repo already said how to format money; with bearing the agent read it." width="1600" height="900" loading="lazy" decoding="async"><span>The repo already said how to format money; with bearing the agent read it.</span></a>
+    <a class="run" href="https://github.com/ReidenXerx/bearing/blob/main/docs/modules/astgrep.md"><img src="assets/cards/astgrep.png" alt="A pattern that does not parse looks exactly like a clean codebase — so it is proven first." width="1600" height="900" loading="lazy" decoding="async"><span>A pattern that does not parse looks exactly like a clean codebase — so it is proven first.</span></a>
+    <a class="run" href="https://github.com/ReidenXerx/bearing/blob/main/docs/modules/history.md"><img src="assets/cards/history.png" alt="Blame names the formatter; the skill looks past it to the commit that wrote the line." width="1600" height="900" loading="lazy" decoding="async"><span>Blame names the formatter; the skill looks past it to the commit that wrote the line.</span></a>
+    <a class="run" href="https://github.com/ReidenXerx/bearing/blob/main/docs/modules/knip.md"><img src="assets/cards/knip.png" alt="The same delete-unused task, 12 runs: three live files deleted without the module, none with it." width="1600" height="900" loading="lazy" decoding="async"><span>The same delete-unused task, 12 runs: three live files deleted without the module, none with it.</span></a>
+    <a class="run" href="https://github.com/ReidenXerx/bearing/blob/main/docs/modules/mergiraf.md"><img src="assets/cards/mergiraf.png" alt="Git stops on two conflicts; mergiraf merges by syntax tree; the agent reads every resolution." width="1600" height="900" loading="lazy" decoding="async"><span>Git stops on two conflicts; mergiraf merges by syntax tree; the agent reads every resolution.</span></a>
+    <a class="run" href="https://github.com/ReidenXerx/bearing/blob/main/docs/modules/tsjs.md"><img src="assets/cards/tsjs.png" alt="A client typed any: without the rule the bad response passed; with it, it was checked." width="1600" height="900" loading="lazy" decoding="async"><span>A client typed any: without the rule the bad response passed; with it, it was checked.</span></a>
+    <a class="run" href="https://github.com/ReidenXerx/bearing/blob/main/docs/modules/frontend.md"><img src="assets/cards/frontend.png" alt="The shared table lived elsewhere under another name; with the rule the agent reused it." width="1600" height="900" loading="lazy" decoding="async"><span>The shared table lived elsewhere under another name; with the rule the agent reused it.</span></a>
+    <a class="run" href="https://github.com/ReidenXerx/bearing/blob/main/docs/modules/react.md"><img src="assets/cards/react.png" alt="Three fields, one owner of the wiring — both versions work." width="1600" height="900" loading="lazy" decoding="async"><span>Three fields, one owner of the wiring — both versions work.</span></a>
+    <a class="run" href="https://github.com/ReidenXerx/bearing/blob/main/docs/modules/e2e.md"><img src="assets/cards/e2e.png" alt="A Delete button verified in a real browser; the shared data never changed." width="1600" height="900" loading="lazy" decoding="async"><span>A Delete button verified in a real browser; the shared data never changed.</span></a>
+    <a class="run" href="https://github.com/ReidenXerx/bearing/blob/main/docs/modules/publish.md"><img src="assets/cards/publish.png" alt="A card made from a one-line ask, every figure from a file; a half-drawn card refused." width="1600" height="900" loading="lazy" decoding="async"><span>A card made from a one-line ask, every figure from a file; a half-drawn card refused.</span></a>
+    <a class="run" href="https://github.com/ReidenXerx/bearing/blob/main/docs/modules/gitnexus.md"><img src="assets/cards/gitnexus.png" alt="The graph said 0 callers and flagged it; grep found 15 call sites." width="1600" height="900" loading="lazy" decoding="async"><span>The graph said 0 callers and flagged it; grep found 15 call sites.</span></a>
+    <a class="run" href="https://github.com/ReidenXerx/bearing/blob/main/docs/modules/memory.md"><img src="assets/cards/status.png" alt="npx bearing status: everything bearing does unasked, and the knob for each." width="1600" height="900" loading="lazy" decoding="async"><span>npx bearing status: everything bearing does unasked, and the knob for each.</span></a>
+  </div>
+</section>
+
 <section id="northstars">
   <p class="label">North-stars</p>
   <h2>Falsifiable, or it's decoration</h2>
@@ -672,7 +699,7 @@
 
 <section id="cost">
   <p class="label">The honest number</p>
-  <h2>What it costs your context — measured, not guessed</h2>
+  <h2>What it costs your context</h2>
   <p class="section-lede">bearing's share is fixed per session: <b>about 3,900 tokens by default</b> — the contract block plus each skill's one-line description. A skill's body loads only when it is used. The biggest possible line isn't bearing's at all: GitNexus's tool schemas, there only if you install it, and only up front if your client loads them that way.</p>
 
   <figure class="gauge">
@@ -706,30 +733,14 @@
           <tr><th scope="row">GitNexus MCP schemas (17 tools)</th><td class="num">—</td><td class="num">—</td><td class="num">+~17,200</td></tr>
         </tbody>
       </table>
-      <p class="note" style="margin-top: 12px;">Fresh installs, counted the way <code>npx bearing status</code> counts: characters ÷ 4 — an estimate. Claude Code can defer MCP schemas until they are searched for. The contract used to be ~10,300 tokens, most of it graph rules every session paid for.</p>
+      <p class="note" style="margin-top: 12px;">Fresh installs, counted the way <code>npx bearing status</code> counts: characters ÷ 4 — an estimate. Claude Code can defer MCP schemas until they are searched for.</p>
     </div>
     <div>
-      <h3>A claim this page used to make, and dropped</h3>
-      <p class="section-lede">It said the graph answers <i>"what breaks if I change this?"</i> for 3–13× fewer tokens than grep. A later benchmark — five code-intelligence setups against grep, 107 runs on a 650-file backend with a hand-checked answer key — found that <b>nothing beat grep at that size</b>. So the claim is gone. On a much larger repo the graph may still pay for itself: <code>npm run bearing:token-benchmark</code> measures it on yours, losses included.</p>
-      <p class="note"><a href="https://github.com/ReidenXerx/bearing/blob/main/docs/context-cost.md">The numbers</a> · <a href="https://github.com/ReidenXerx/bearing/blob/main/eval/codeintel/REPORT.md">the benchmark</a></p>
+      <p class="note"><a href="https://github.com/ReidenXerx/bearing/blob/main/docs/context-cost.md">How it is counted</a> · <b>Nothing leaves your repo. There is no telemetry endpoint.</b></p>
     </div>
   </div>
 </section>
 
-<section id="receipts">
-  <p class="label">Receipts</p>
-  <h2>Measured — then kept or removed</h2>
-  <p class="section-lede">A tool that steers your agent should show you when it was wrong to — and stop. bearing measured its own rules against answer keys checked by hand, never written by the tool under test, and acted on what it found.</p>
-
-  <div class="stats">
-    <div class="stat"><b>4–5×</b><span>the cost per solved task of bearing's <b>own</b> graph gates, over 180 runs — so they were retired</span></div>
-    <div class="stat"><b>9 / 9</b><span>runs used ast-grep once a skill carried its traps, on a real 650-file repo</span></div>
-    <div class="stat"><b>0 vs 2</b><span>runs of 6 deleted live code: none with the knip module, two without it</span></div>
-    <div class="stat"><b>107</b><span>runs pitted five code-intelligence setups against grep; none beat grep at 650 files</span></div>
-  </div>
-
-  <p class="note" style="margin-top: 16px;"><a href="https://github.com/ReidenXerx/bearing/blob/main/eval/teaching/REPORT.md">gates</a> · <a href="https://github.com/ReidenXerx/bearing/blob/main/eval/intel/REPORT-REAL.md">ast-grep</a> · <a href="https://github.com/ReidenXerx/bearing/blob/main/eval/intel/REPORT-TOOLS.md">knip</a> · <a href="https://github.com/ReidenXerx/bearing/blob/main/eval/codeintel/REPORT.md">code intelligence</a> · <b>Nothing leaves your repo. There is no telemetry endpoint.</b></p>
-</section>
 
 <section id="runtimes">
   <p class="label">Where it fires by itself</p>
@@ -804,7 +815,7 @@ $ npx bearing doctor        <span class="dim"># is the install healthy</span></p
       <a href="https://github.com/ReidenXerx/bearing/blob/main/docs/ZED.md">Zed + local models</a>
       <a href="https://github.com/ReidenXerx/bearing/blob/main/CHANGELOG.md">Changelog</a>
     </div>
-    <p class="note" style="margin-top: 12px;">ISC · built by <a href="https://duduphudu.app/">DuduPhudu</a> · v2.0.1</p>
+    <p class="note" style="margin-top: 12px;">ISC · built by <a href="https://duduphudu.app/">DuduPhudu</a> · v2.0.2</p>
   </div>
   <p class="note" style="max-width: 34ch;">Nothing here phones home. Every number on this page traces to a report in the repo.</p>
 </footer>

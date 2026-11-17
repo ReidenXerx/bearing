@@ -1,0 +1,37 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="icon" href="data:,"><link rel="stylesheet" href="base.css"></head><body>
+<div class="card">
+  <div class="kicker">bearing · minions · how it works</div>
+  <h1>Eight slices at once. <em>Citations back, never verdicts.</em></h1>
+  <div class="sub">A real fan-out: "find every stale reference to what was removed", split by folder. Each minion returns FOUND file:line, what it CHECKED, what it MISSED — the main agent decides.</div>
+  <svg id="s" width="1600" height="620" style="position:absolute;left:0;top:250px"></svg>
+</div>
+<div class="foot">this repo's own session, Nov 9 · 8 Sonnet minions · times as launched and returned · FOUND = cited lines in each report</div>
+<script type="module">
+import { el, text, ready } from "./draw.js";
+const rows = await (await fetch("data/minions.json")).json();
+const svg = document.getElementById("s"), F = "font-family:Geist";
+const t = (s) => new Date(s).getTime(), t0 = t("2026-11-09T17:19:00Z"), t1 = t("2026-11-09T17:25:00Z");
+const L = 470, R = 1180, X = (s) => L + ((t(s) - t0) / (t1 - t0)) * (R - L);
+// main agent
+el("rect", { x: 64, y: 230, width: 150, height: 90, rx: 14, fill: "#3d8bf0" }, svg);
+text(svg, 139, 268, "main", { fill: "#0b0f15", "font-size": 22, "text-anchor": "middle", style: F + ";font-weight:700" });
+text(svg, 139, 296, "agent", { fill: "#0b0f15", "font-size": 22, "text-anchor": "middle", style: F + ";font-weight:700" });
+for (let m = 0; m <= 6; m++) { const x = L + (m / 6) * (R - L); el("line", { x1: x, x2: x, y1: 0, y2: 540, stroke: "#1a2331" }, svg); text(svg, x, 572, `17:${String(19 + m).padStart(2, "0")}`, { fill: "#5f6e86", "font-size": 15, "text-anchor": "middle" }); }
+rows.forEach((r, k) => {
+  const y = 20 + k * 66;
+  el("path", { d: `M214,275 C300,275 300,${y + 22} 380,${y + 22}`, stroke: "#2c3a50", "stroke-width": 1.5, fill: "none" }, svg);
+  text(svg, 455, y + 28, r.desc.replace(/^Sweep /, "").replace(/ for stale refs$/, ""), { fill: "#c9d3e2", "font-size": 18, "text-anchor": "end", style: F });
+  if (r.done) {
+    el("rect", { x: X(r.ts), y: y + 6, width: Math.max(8, X(r.done) - X(r.ts)), height: 32, rx: 7, fill: "#6d5bd0", opacity: .85 }, svg);
+    el("circle", { cx: X(r.done), cy: y + 22, r: 6, fill: "#eaf0f8" }, svg);
+    text(svg, R + 30, y + 28, `FOUND ${r.found}`, { fill: "#eaf0f8", "font-size": 18, "font-weight": 600 });
+    text(svg, R + 160, y + 28, `CHECKED ${r.checked} · MISSED ${r.missed}`, { fill: "#9aa8bd", "font-size": 16 });
+  } else {
+    el("rect", { x: X(r.ts), y: y + 6, width: 60, height: 32, rx: 7, fill: "none", stroke: "#5f6e86", "stroke-dasharray": "4 4" }, svg);
+    text(svg, X(r.ts) + 76, y + 28, "report not kept in the transcript", { fill: "#5f6e86", "font-size": 16 });
+  }
+});
+const total = rows.reduce((a, r) => a + (r.found || 0), 0);
+text(svg, R + 30, 556, `${total} cited lines → one decision`, { fill: "#3d8bf0", "font-size": 19, "font-weight": 600 });
+await ready("700 56px Geist", "600 21px JBM", "500 16px JBM", "400 25px Geist");
+</script></body></html>

@@ -25,7 +25,7 @@ So the four gates hold, plus two: the transformation is **decided in full** befo
 minion works **isolated** — its own git worktree, or a patch file — so nothing it writes reaches your
 tree until your agent has reviewed that slice. `node .bearing/lib/minion-review.mjs` does the
 mechanical half: it rejects a slice that touched a file outside its list, or no longer applies
-because another slice already changed the same lines. That used to be a silent lost update. Whether
+because another slice already changed the same lines. Whether
 every hunk matches the brief stays your agent's call, and only then does the slice land, uncommitted
 and reversible on its own.
 

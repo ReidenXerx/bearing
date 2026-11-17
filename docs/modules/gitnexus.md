@@ -4,7 +4,7 @@
 
 **Opt-in, and you invoke it.** It is not in the default install: the installer explains what it is, what it costs (the `gitnexus` CLI, an index build, a local MCP server) and when it helps, and asks. Once installed, nothing pushes the agent towards it — no gates, no nudges, no always-on instructions. Ask for it in a prompt ("use gitnexus to find what this diff affects") and the `bearing-gitnexus` skill loads: check scope first (the index is one checkout at one commit), where the graph wins, and where its counts are only a floor.
 
-It used to be graph-first by force: hooks that blocked greps and reads. A 180-run eval on a fixture with hand-verified answers measured it at 4–5× the cost per solved task for one task's gain, and a teaching-moments replacement almost never fired — so both were retired ([the report](../../eval/teaching/REPORT.md)). On a large repo, for the questions text search answers badly, the graph still earns its keep; that is what the skill is for.
+On a large repo, for the questions text search answers badly, the graph earns its keep; that is what the skill is for.
 
 **A coverage limit presented as a fact is the failure this is built to survive.** `impact` can return zero callers for a function wired to a live route, because calls through factories and DI seams don't always resolve. So the contract is asymmetric, and the agent is told so:
 
