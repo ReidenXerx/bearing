@@ -61,7 +61,8 @@ npx -y -p @ast-grep/cli ast-grep run -p 'fetch($$$ARGS)' src   # not installed �
 - Avoid the `sg` alias: on Linux `sg` is `setgroups`, and ast-grep itself now marks it deprecated.
 - **Leave `-l` out on a mixed tree.** Each file is parsed by its own extension, so one run covers
   `.ts`, `.tsx`, `.js` and `.jsx`. **`-l ts` skips every `.tsx` file**, even one you name
-  explicitly, and says nothing. Use `-l` only with `--stdin` or `--inline-rules`, which need it.
+  explicitly, and says nothing. Use `-l` only with `--stdin`, which needs it. (An inline rule names
+  its language in its own `language:` key; `scan` does not accept `-l` at all.)
 - `--json=compact` gives one array of matches (`file`, `range.start.line` 0-based, `text`,
   `metaVariables`). The `=` is required.
 
@@ -73,17 +74,19 @@ on its own: `fetch(` is not, and neither is a bare object key.
 
 **Exit codes do not tell you the pattern was right:**
 
-| What happened | `run` exit | stdout | stderr |
-| --- | --- | --- | --- |
-| Matches | 0 | the matches | — |
-| Valid pattern, no matches | **1** | `[]` | — |
-| Pattern that does not parse (`fetch(`), **no `-l`** | **1** | `[]` | **nothing** |
-| Pattern that does not parse, with `-l ts` | **0** | `[]` | a warning |
-| Several statements in one pattern | 8 | — | an error |
+| What happened | `run` exit | stdout (plain) | stdout (`--json`) | stderr |
+| --- | --- | --- | --- | --- |
+| Matches | 0 | the matches | the matches | — |
+| Valid pattern, no matches | **1** | nothing | `[]` | — |
+| Pattern that does not parse (`fetch(`), **no `-l`** | **1** | nothing | `[]` | **nothing** |
+| Several statements in one pattern (`a(); b();`), **no `-l`** | **1** | nothing | `[]` | **nothing** |
+| Pattern that does not parse, with `-l ts` | **0** | nothing | `[]` | a warning |
+| Several statements in one pattern, with `-l ts` | 8 | — | — | an error |
 
-`scan` exits 0 on no matches. Read the third row twice: run the way section 2 recommends — no
-`-l` — a broken pattern is **byte-for-byte identical** to a clean codebase. No exit code, no
-warning. The positive control below is not extra care; it is the only signal there is.
+`scan` exits 0 on no matches. Read the third and fourth rows twice: run the way section 2
+recommends — no `-l` — a broken pattern is **byte-for-byte identical** to a clean codebase. No exit
+code, no warning, and no `[]` either unless you asked for `--json`. The positive control below is
+not extra care; it is the only signal there is.
 
 **The ritual:**
 

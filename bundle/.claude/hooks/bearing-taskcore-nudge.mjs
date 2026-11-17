@@ -36,6 +36,13 @@ try {
   /* empty */
 }
 
+// A SUBAGENT's tool call reaches this hook with the PARENT's transcript_path, so every per-chat key
+// below would be the parent's: its re-anchor delivered into a subagent, its once-per-chat budget
+// spent there, a subagent told to rewrite the parent's task-core. Claude Code marks those calls with
+// `agent_id` (hooks docs, "Subagents and hooks"). A subagent executes a decided task (NS-24); the
+// parent's save-state and cadence are not its to consume. Absent field → the main chat, unchanged.
+if (input.agent_id) process.exit(0);
+
 const tool = input.tool_name || "";
 // Only tools that CHANGE the repo. A Read or a Grep produces nothing that a compaction could lose.
 const EDITS = new Set(["Write", "Edit", "NotebookEdit"]);
@@ -72,7 +79,6 @@ try {
 const every = Number(config.taskCoreEveryEdits);
 if (!(every > 0)) process.exit(0); // 0 disables
 
-const STATE = path.join(root, ".bearing/.bearing-taskcore-edits.json");
 
 function read() {
   try {
@@ -93,6 +99,10 @@ function write(s) {
 
 const key = sp.sessionKey(input.transcript_path);
 const corePath = sp.taskCorePath(root, key);
+// ONE COUNTER PER CHAT, like the core it counts toward. A single repo-wide file summed every chat's
+// edits and reset them all when any chat wrote its own core — so chat B was told "25 edits since your
+// TASK-CORE" after one edit, and a chat with no core at all could be kept silent forever.
+const STATE = path.join(root, ".bearing", `.bearing-taskcore-edits-${key}.json`);
 let coreAt = 0;
 try {
   coreAt = fs.statSync(corePath).mtimeMs;

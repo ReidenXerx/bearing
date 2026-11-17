@@ -95,7 +95,7 @@ npx bearing update /path/to/your-repo --full             # also rebuild the GitN
 
 `update` reads the runtime and modules from the manifest, so you only pass them to **change** them. It defaults to `--quick` (no re-index). **Migration runs on every update**: anything an older version installed and this one retired — hooks, libs, skills and their links, npm scripts, the pre-commit index refresh and its CI workflows — is removed, and a second update changes nothing.
 
-> **Fresh clone of an already-installed repo?** The manifest (`.bearing/manifest.json`) is **gitignored**, so it isn't in a new clone — `update` stops with *"Not installed. Run install first."* That's expected: run **`npx bearing install /path/to/repo --no-setup`** instead. Install is idempotent — it re-materializes the current bundle and rewrites the manifest without touching your code.
+> **Fresh clone of an already-installed repo?** Just run `update`. The install record (`.bearing/manifest.json`) is committed, so a clone has it, and an update that changes nothing leaves the repo exactly as it was. A repo installed before 2.0.3 never committed it: `update` then reads the modules from what is on disk and writes the record, which you commit once.
 
 Update every installed repo under a folder:
 

@@ -10,7 +10,8 @@ stops with a conflict. mergiraf parses the base and both sides with tree-sitter,
 additions, and keeps both — no markers. That is most of the conflicts parallel work produces.
 
 The risk: **it resolves silently.** `git merge` commits the resolution at once, and the only trace is
-one `INFO` line on stderr. A resolution nobody read is a decision nobody made. So the rule of this
+one `INFO` line on stderr — and **none at all** in a file where any conflict remained: mergiraf still
+resolves that file's other conflicts by syntax tree, prints nothing about them, and stores no review case. A resolution nobody read is a decision nobody made. So the rule of this
 skill: **every resolution is reviewed by you — the main agent — before it is committed.** Never hand
 that review to a subagent: judging whether both sides' intent survived is a decision (NS-24).
 
@@ -39,8 +40,18 @@ git -c core.attributesFile="$A" -c merge.mergiraf.name=mergiraf \
 ## 3. Review — every resolution, before committing
 
 ```bash
-grep -o 'mergiraf review [^ ]*' /tmp/merge.log   # one id per file it resolved
+grep -o 'mergiraf review [^ ]*' /tmp/merge.log   # one id per file it resolved COMPLETELY
 mergiraf review <id>
+```
+
+**A file that still has markers got no `Review with:` line** — yet mergiraf may have resolved its other
+conflicts. The markers you see are not everything git would have stopped on. Recreate git's own view
+and compare, before resolving the rest by hand:
+
+```bash
+cp src/a.ts /tmp/a.ts.mergiraf                    # mergiraf's version, partial
+git checkout --conflict=diff3 src/a.ts             # git's markers, for EVERY conflict in the file
+diff /tmp/a.ts.mergiraf src/a.ts                   # what mergiraf resolved without saying so
 ```
 
 The diff shows **what plain git would have left** (the conflict markers) against **what mergiraf

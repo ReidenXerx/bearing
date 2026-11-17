@@ -324,3 +324,12 @@ project rather than this one, it belongs upstream — say so and it can be promo
   touching `node:module` hooks, type stripping or other `--experimental-*` behaviour: run it under
   `~/.nvm/versions/node/v22.9.0/bin/node` before pushing (NS-21). *Scar: 301/301 locally, 6 failures
   in CI, on a PR that only meant to change the eval harness.*
+
+- **PP-10** — **This machine has tools CI does not: `gitnexus` on PATH, Playwright and Chromium.** A
+  fallback that DETECTS a tool hides a broken lookup wherever the tool is installed — 2.0.3 moved
+  `gitnexusCmd` to the local manifest half, the reader still looked in the old file, detection found
+  `gitnexus` here and every local test passed; CI reverted the scripts to npx. Before pushing a change
+  to how something is resolved, run its test with the tool hidden (a temp bin dir holding only
+  node/npm/npx, prepended to a PATH without the nvm dir — removing that dir removes node too). A test
+  that needs a browser must SKIP with its reason where there is none, never pass without rendering.
+  *Scar: two red CI runs on a PR whose 323 local tests were green.*

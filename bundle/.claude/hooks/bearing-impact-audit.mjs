@@ -36,6 +36,15 @@ if (!/impact/i.test(tool)) process.exit(0);
 function responseText(res) {
   if (!res) return "";
   if (typeof res === "string") return res;
+  // MCP CONTENT BLOCKS — `[{type:"text",text:"{\"impactedCount\": 0,…}"}]`, bare or under `.content`.
+  // Stringifying those escapes every quote inside the text, so no pattern below could match and
+  // the audit stayed silent on exactly the zero-caller LOW verdict it exists to question. Take the
+  // text out first; the shape is the MCP server's, not documented by the host, so accept both.
+  const blocks = Array.isArray(res) ? res : Array.isArray(res?.content) ? res.content : null;
+  if (blocks) {
+    const texts = blocks.filter((b) => b && typeof b.text === "string").map((b) => b.text);
+    if (texts.length) return texts.join("\n");
+  }
   try {
     return JSON.stringify(res);
   } catch {

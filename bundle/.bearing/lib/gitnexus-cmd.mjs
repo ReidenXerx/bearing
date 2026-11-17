@@ -17,8 +17,12 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
-/** Manifest locations, newest first — order matters, the first readable one wins. */
-const MANIFESTS = ['.bearing/manifest.json', '.gitnexus/agent-kit-manifest.json'];
+/**
+ * Manifest locations, newest first — order matters, the first readable one wins. The binary is a
+ * fact about THIS machine, so since 2.0.3 it lives in the gitignored local half; the committed record
+ * and the legacy path still carry it for installs that predate the split.
+ */
+const MANIFESTS = ['.bearing/manifest.local.json', '.bearing/manifest.json', '.gitnexus/agent-kit-manifest.json'];
 
 /** @param {string} root @returns {string|null} the recorded command, if any */
 function recordedCmd(root) {

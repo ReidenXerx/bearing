@@ -46,7 +46,7 @@ Only Claude Code exposes tool-interception hooks, so only there do the nudges fi
 | `.bearing/skills/` | The canonical skill store, symlinked into `.claude/skills/` and/or `.agents/skills/`. | per module |
 | `.bearing/lib/` | The libraries the hooks and scripts load. | per module |
 | `.bearing/hooks.json` | Team-shared hook tuning. Seeded once; `hooks.local.json` overrides it per machine. | core |
-| `.bearing/manifest.json` | What was installed, so update and uninstall touch only that. Gitignored. | core |
+| `.bearing/manifest.json` | What was installed, so update and uninstall touch only that. **Committed** — every clone and teammate needs it, or each one guesses ownership from disk. Its per-machine half (`manifest.local.json`: last run, resolved gitnexus binary, backups) is gitignored. | core |
 | `.claude/settings.json` | The hook registrations (Claude Code). Your own hooks in it are kept. | core |
 | `.mcp.json`, `.zed/settings.json` | The gitnexus MCP server. A committed command or transport is kept. | gitnexus |
 | `scripts/`, `bearing:*` npm scripts | Health, verify, refresh, PR helpers. | gitnexus |

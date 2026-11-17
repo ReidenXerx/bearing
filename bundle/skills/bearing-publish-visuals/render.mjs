@@ -102,6 +102,11 @@ try {
   }
   const broken = await page.evaluate(() => [...document.images].filter((i) => !i.complete || i.naturalWidth === 0).map((i) => i.src));
   for (const b of broken) problems.push(`broken image: ${b}`);
+  // WIDER THAN THE SHOT. `auto` protects the height, nothing protected the width: the template is
+  // laid out at 1600 px, the README example renders at 1200, and the right 400 px were cut off with
+  // a ✓ and exit 0 — a half-shown card, which is exactly what this script exists to refuse.
+  const wide = Math.ceil(await page.evaluate(() => document.documentElement.scrollWidth));
+  if (wide > width + 1) problems.push(`the card is ${wide} px wide but is being rendered at ${width} — its right side would be cut off; render at ${wide} or lay it out at ${width}`);
   if (problems.length) throw new Error(problems.join("\n  "));
   if (autoHeight) {
     height = Math.ceil(await page.evaluate(() => document.documentElement.scrollHeight));

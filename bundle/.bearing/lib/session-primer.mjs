@@ -653,10 +653,21 @@ const MEMORY_FILE = 'MEMORY.md';
  * Lives outside the repo, so it is never committed/gitignored.
  * @param {string} root project root (absolute)
  */
-export function memoryPath(root) {
+export function memoryPath(root, transcriptPath) {
+  // The hook is HANDED the answer: its transcript sits in Claude Code's own project directory, so
+  // the memory folder is beside it — no name to reconstruct. Reconstructing it with only "/" → "-"
+  // pointed every repo whose path holds a "." (~/.cache/…, github.com/…) at a folder Claude Code
+  // never loads: the stale-memory line never fired, and the milestone nudge always said "not written".
   const home = process.env.HOME || os.homedir();
-  const slug = path.resolve(root).replace(/\//g, '-');
-  return path.join(home, '.claude', 'projects', slug, 'memory', MEMORY_FILE);
+  const projects = path.join(home, '.claude', 'projects');
+  if (typeof transcriptPath === 'string' && path.resolve(transcriptPath).startsWith(projects + path.sep)) {
+    const rel = path.relative(projects, path.resolve(transcriptPath)).split(path.sep)[0];
+    if (rel) return path.join(projects, rel, 'memory', MEMORY_FILE);
+  }
+  // No transcript (another runtime, or a caller outside a hook): Claude Code turns "/" and "." —
+  // every character outside [A-Za-z0-9_-] — into "-" (observed: `/.cache` → `--cache`, `_` kept).
+  const slug = path.resolve(root).replace(/[^A-Za-z0-9_-]/g, '-');
+  return path.join(projects, slug, 'memory', MEMORY_FILE);
 }
 
 /**
@@ -665,8 +676,8 @@ export function memoryPath(root) {
  * stat per file — so it is safe on a hook path (NS-7). `newestMs` is null when there is no memory.
  * @param {string} root
  */
-export function memoryFreshness(root) {
-  const dir = path.dirname(memoryPath(root));
+export function memoryFreshness(root, transcriptPath) {
+  const dir = path.dirname(memoryPath(root, transcriptPath));
   let newestMs = null;
   try {
     for (const name of fs.readdirSync(dir)) {

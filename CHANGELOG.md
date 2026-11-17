@@ -2,6 +2,90 @@
 
 All notable changes to `bearing` are documented here.
 
+## 2.0.3 — the install record travels with the repo
+
+A review of 2.0.2 (six review lenses, 41 findings, each reproduced in a throwaway repo) found that most
+of what went wrong on teammates' machines had one cause. bearing's record of which files it owns
+(`.bearing/manifest.json`) was gitignored, so every clone had to guess from the files on disk — and
+guessed wrong in ways that changed shared files.
+
+### Changed — `.bearing/manifest.json` is committed
+
+The ownership record (files, modules, runtime, MCP transport, and which `.gitignore`, `.e2e/`,
+`package.json` and `domain.json` bearing created) is now tracked; only what is true of one machine —
+when it last ran, the gitnexus binary it resolved, its test order, its backups — stays local, in the
+gitignored `.bearing/manifest.local.json`. It carries no timestamp, so an update that changes nothing
+leaves it byte-identical. **On your next `bearing update` it appears as a new file: commit it.** Stealth
+installs keep both halves local, as before.
+
+### Fixed — what a teammate's update did to a shared repo
+
+On a clone with no committed record (every repo before this release):
+
+- **GitNexus was installed uninvited** whenever the repo had any `.mcp.json` — a team's own Linear or
+  Sentry server was read as the module: 42 npm scripts and an MCP entry written into shared files.
+  Now only a GitNexus entry, or GitNexus's own lib, counts.
+- **e2e was dropped**: bearing's own committed `.e2e/` was read as the user's, so the update deleted
+  the e2e skills and removed `.e2e/storage*.json` — the session-token ignore — from `.gitignore`.
+  Ownership is now taken from the record, or recognised by content when there is none.
+- **Gold practices was added** to repos that had declined it — on clones, and on every update of any
+  2.x install that chose north-stars without it. The 1.1.x migration that pairs the two now applies
+  only to records written before 1.2.0.
+- Bearing's own files were backed up as "your existing file" — byte-identical copies, now skipped.
+- `bearing status` said "no bearing install" while its hooks were registered and firing.
+
+### Fixed — your files
+
+- **`uninstall` deleted `.bearing/gold-practices.md` with the project's own `PP-#` rules** — in stealth,
+  unrecoverably. Uninstall and declining the module now both keep the PP half in place and remove only
+  bearing's block; turning the module back on adopts the rules again.
+- **Settings with comments or trailing commas were replaced wholesale** (`.claude/settings.json`,
+  Zed's settings, `.mcp.json`): a team's `permissions.allow`, Zed's `tab_size` — gone, no backup.
+  They are now read as JSONC and merged, with the original kept as `.bearing-backup`; a file that does
+  not parse even as JSONC is left untouched, reported, and the run exits 1.
+- An invalid `package.json` aborted install halfway, leaving hooks wired and no record; it is now
+  refused before anything is written.
+- Stealth wrote a tracked `.vscode/settings.json`; it now never writes a file git tracks.
+- `update` overwrote keys you added to `.vscode/settings.json`; bearing now sets only its three `npm.*`
+  keys, and `uninstall` removes only those.
+- `uninstall` deleted a `.bearing/domain.json` you wrote before installing; it now removes only its own.
+
+### Fixed — hooks
+
+- **Subagents' tool calls arrive with the parent's chat id**, so the parent's north-star re-anchor,
+  its consult budget and its task-core nudge were spent inside subagents — one could be told to rewrite
+  the parent's task-core. Calls that carry `agent_id` now leave all of that alone.
+- The task-core edit counter was one per repo, not per chat, so parallel chats were nudged on each
+  other's edits.
+- The memory folder was computed with only `/` → `-`; for any path containing a `.` the stale-memory
+  line never fired and the milestone nudge always said "not written yet". It is now taken from the
+  transcript's own folder.
+- Parallel tool calls crossing the token threshold sent the full north-star re-anchor up to four times
+  in one turn; now once.
+- The impact audit was silent on MCP results given as content blocks.
+
+### Fixed — exit codes and printed claims
+
+- `update` and `update-all` exited 0 when a post-check or a repo failed; a mistyped `--mcp` value
+  silently became stdio and rewrote a committed `.mcp.json`.
+- `bearing doctor` called a repo healthy when `.claude/settings.json` or `hooks.local.json` did not
+  parse; it now fails that check.
+- `bearing status`: the north-star reminder is shown as silent until `northstars.md` has an NS-# line;
+  the memory and parallel-session lines reflect the knobs the hooks actually honour; the
+  always-loaded estimate includes the skill descriptions (about a third more).
+- On Zed and Codex, the always-loaded contract said a hook re-anchors and nudges; those runtimes have
+  no hooks, and it now says so.
+- `update-all` now reaches worktrees under a repo's `.worktrees/`.
+
+### Fixed — skill text
+
+- ast-grep: a multi-statement pattern fails as silently as a broken one when run without `-l`, and the
+  plain output prints nothing — `[]` only with `--json`.
+- mergiraf: in a file where any conflict remains, it still resolves the others and says nothing about
+  them; the skill now shows how to see what it did (`git checkout --conflict=diff3`).
+- publish: the renderer now refuses a card wider than the width it is rendered at, instead of cropping
+  it with a ✓.
+
 ## 2.0.2 — every module, drawn from a real run
 
 ### Fixed — `bearing status` printed one knob under another's description
