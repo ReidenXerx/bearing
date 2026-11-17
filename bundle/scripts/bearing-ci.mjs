@@ -260,9 +260,9 @@ function render({ diff, detected, radius, struct, indexed, indexNote }) {
 /**
  * Did this repo opt in?
  *
- * READ FROM hooks.json, NOT THE MANIFEST. `.bearing/manifest.json` is gitignored by design, so it
- * does not exist in a CI checkout — a setting stored there reads as `false` on every run and the
- * feature silently never fires. `.bearing/hooks.json` is tracked and team-shared, which is also the
+ * READ FROM hooks.json, NOT THE MANIFEST. Before 2.0.3 the manifest was gitignored, so it did not
+ * exist in a CI checkout — a setting stored there read as `false` on every run and the feature
+ * silently never fired; and the machine half where test order still lives is gitignored today. `.bearing/hooks.json` is tracked and team-shared, which is also the
  * right home for it on the merits: whether CI spends time on this is a decision for the repo, not
  * for whichever machine happened to run the installer.
  */
