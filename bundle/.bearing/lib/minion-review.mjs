@@ -70,14 +70,55 @@ export function slicePatch(root, slice) {
   return d.ok ? { kind: "branch", patch: d.out } : { error: d.err };
 }
 
-/** Repo-relative paths a unified diff touches (both sides of a rename). @param {string} patch */
+/** Undo git's C-style quoting of a path ("a/caf\303\251.js" → a/café.js). @param {string} q */
+function unquoteGitPath(q) {
+  const bytes = [];
+  for (let i = 1; i < q.length - 1; i++) {
+    const c = q[i];
+    if (c !== "\\") {
+      bytes.push(...Buffer.from(c, "utf8"));
+      continue;
+    }
+    const n = q[++i];
+    if (/[0-7]/.test(n)) {
+      bytes.push(parseInt(q.slice(i, i + 3), 8));
+      i += 2;
+    } else bytes.push({ n: 10, t: 9, r: 13, '"': 34, "\\": 92, a: 7, b: 8, f: 12, v: 11 }[n] ?? n.charCodeAt(0));
+  }
+  return Buffer.from(bytes).toString("utf8");
+}
+
+/**
+ * Repo-relative paths a unified diff touches (both sides of a rename).
+ *
+ * git QUOTES a path with special or non-ASCII characters — `diff --git "a/src/caf\303\251.js" "b/…"`
+ * — and the unquoted-only pattern skipped those headers, so a quoted out-of-scope file never reached
+ * the allowlist and `--land` applied it (fail closed is NS-8's rule for exactly this kind of gate).
+ * Every header is now read, quoted or not, and `unparsed` counts any that still cannot be — the
+ * caller rejects a slice with one rather than checking a partial list.
+ * @param {string} patch @returns {string[] & { unparsed?: number }}
+ */
 export function patchFiles(patch) {
   const files = new Set();
-  for (const m of patch.matchAll(/^diff --git a\/(.+?) b\/(.+)$/gm)) {
-    files.add(m[1]);
-    files.add(m[2]);
+  let unparsed = 0;
+  const tok = String.raw`("(?:[^"\\]|\\.)*"|\S+)`;
+  const header = new RegExp(`^diff --git ${tok} ${tok}$`);
+  for (const line of patch.split("\n")) {
+    if (!line.startsWith("diff --git ")) continue;
+    // Unquoted names may contain spaces (git quotes only special characters), so a header with no
+    // quote falls back to the lazy split it always used.
+    const m = line.includes('"') ? line.match(header) : line.match(/^diff --git (a\/.+?) (b\/.+)$/);
+    const sides = m ? [m[1], m[2]].map((t) => (t.startsWith('"') ? unquoteGitPath(t) : t)) : [];
+    if (sides.length !== 2 || !sides[0].startsWith("a/") || !sides[1].startsWith("b/")) {
+      unparsed++;
+      continue;
+    }
+    files.add(sides[0].slice(2));
+    files.add(sides[1].slice(2));
   }
-  return [...files];
+  const out = [...files];
+  out.unparsed = unparsed;
+  return out;
 }
 
 /** @param {string} file @param {string[]} allow */
@@ -98,6 +139,12 @@ export function reviewSlice(root, slice, { allow = [] } = {}) {
   const { patch, kind } = got;
   const files = patchFiles(patch);
   const hunks = (patch.match(/^@@ /gm) ?? []).length;
+  if (!files.length && files.unparsed) {
+    return {
+      verdict: "reject", kind, files, outOfScope: [], applies: null, hunks, patch,
+      reasons: [`${files.unparsed} file header(s) in the patch could not be read, so its scope cannot be checked`],
+    };
+  }
   if (!files.length) {
     return {
       verdict: "empty", kind, files, outOfScope: [], applies: null, hunks, patch,
@@ -105,6 +152,9 @@ export function reviewSlice(root, slice, { allow = [] } = {}) {
     };
   }
   const reasons = [];
+  if (files.unparsed) {
+    reasons.push(`${files.unparsed} file header(s) in the patch could not be read, so its scope cannot be checked`);
+  }
   // No --allow means nothing is in scope. A review that cannot say what the slice was FOR cannot
   // say it stayed inside it, so it must not pass by default.
   const outOfScope = files.filter((f) => !allowed(f, allow));
