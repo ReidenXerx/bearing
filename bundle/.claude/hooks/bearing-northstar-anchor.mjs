@@ -10,6 +10,7 @@
 //   • the FEW that a doc/markdown file just written is about — the moment conclusions crystallize,
 //     which is exactly when a drifted premise gets written down and becomes "settled".
 // Inert when the repo has no .bearing/northstars.md.
+import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -22,6 +23,13 @@ try {
   /* empty */
 }
 
+// A SUBAGENT's tool call reaches this hook with the PARENT's transcript_path, so every per-chat key
+// below would be the parent's: its re-anchor delivered into a subagent, its once-per-chat budget
+// spent there, a subagent told to rewrite the parent's task-core. Claude Code marks those calls with
+// `agent_id` (hooks docs, "Subagents and hooks"). A subagent executes a decided task (NS-24); the
+// parent's save-state and cadence are not its to consume. Absent field → the main chat, unchanged.
+if (input.agent_id) process.exit(0);
+
 const root = process.env.CLAUDE_PROJECT_DIR || input.cwd || process.cwd();
 
 const lib = (rel) => import(pathToFileURL(path.join(root, ".bearing/lib", rel)).href);
@@ -30,10 +38,13 @@ const lib = (rel) => import(pathToFileURL(path.join(root, ".bearing/lib", rel)).
 // here. A non-zero PreToolUse exit DENIES the call, so all five guards failing at once blocked Grep,
 // Read, Edit, Bash and MCP simultaneously, explained by a raw Node stack trace. A false deny is
 // worse than a missed gate (NS-5); with no libs there is no verdict to give, so give none.
-let loadHookConfig, emitContext;
+let loadHookConfig, emitContext, sp;
 try {
   ({ loadHookConfig } = await lib("hook-helpers.mjs"));
   ({ emitContext } = await lib("claude-emit.mjs"));
+  // Inside the same fail-open block: a partial lib copy (the case the comment above describes) made
+  // this import throw ERR_MODULE_NOT_FOUND and print an error on every tool call.
+  sp = await lib("session-primer.mjs");
 } catch {
   process.exit(0);
 }
@@ -46,7 +57,7 @@ const {
   northStarBaseline,
   setNorthStarBaseline,
   relevantNorthStars,
-} = await lib("session-primer.mjs");
+} = sp;
 
 if (!northStarsExists(root)) process.exit(0); // feature is opt-in per repo
 
@@ -143,6 +154,27 @@ if (!due) {
   bumpNorthStarCounter(root, true, key);
   bumpScore(root, "northStarAnchors");
   process.exit(0);
+}
+
+// ONE FULL ANCHOR PER THRESHOLD. Parallel tool calls that cross it together each read the same
+// baseline, so each sent the whole list — 3-4 identical anchors in one turn, which NS-18 had said
+// could only make it late. The first to create this chat's claim for THIS baseline speaks; the rest
+// see the claim and stay silent. An exclusive create is atomic, unlike the counter files.
+if (ctx !== null) {
+  const claimPrefix = `.bearing-anchor-claim-${sp.sessionKey ? sp.sessionKey(key) : key}-`;
+  const claim = path.join(root, ".bearing", `${claimPrefix}${northStarBaseline(root, key) ?? 0}`);
+  try {
+    fs.writeFileSync(claim, "", { flag: "wx" });
+  } catch {
+    process.exit(0); // another call of this turn already re-anchored — or the dir is unwritable (NS-8)
+  }
+  try {
+    for (const f of fs.readdirSync(path.join(root, ".bearing")).filter((n) => n.startsWith(claimPrefix))) {
+      if (path.join(root, ".bearing", f) !== claim) fs.rmSync(path.join(root, ".bearing", f), { force: true });
+    }
+  } catch {
+    /* an old claim left behind costs a few bytes, never a tool call */
+  }
 }
 
 const shown = all.slice(0, MAX_LINES).map(clip);

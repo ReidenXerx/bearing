@@ -30,6 +30,13 @@ try {
   /* empty */
 }
 
+// A SUBAGENT's tool call reaches this hook with the PARENT's transcript_path, so every per-chat key
+// below would be the parent's: its re-anchor delivered into a subagent, its once-per-chat budget
+// spent there, a subagent told to rewrite the parent's task-core. Claude Code marks those calls with
+// `agent_id` (hooks docs, "Subagents and hooks"). A subagent executes a decided task (NS-24); the
+// parent's save-state and cadence are not its to consume. Absent field → the main chat, unchanged.
+if (input.agent_id) process.exit(0);
+
 const tool = input.tool_name || "";
 // The transition we care about: the agent has stopped reading and started changing the repo.
 const IMPLEMENTS = new Set(["Write", "Edit", "MultiEdit", "NotebookEdit"]);

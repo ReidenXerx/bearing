@@ -1,6 +1,6 @@
 {
   "name": "bearing",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "Your tests catch code that breaks; nothing catches an agent that has drifted about what the code means. A toolbelt for developers who already work with coding agents: north-stars that outrank stale docs, memory kept true, a task-core that survives compaction, ast-grep with its traps, review when you ask. No gates. Claude Code, Zed, Codex.",
   "type": "module",
   "private": false,

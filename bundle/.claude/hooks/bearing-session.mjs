@@ -33,8 +33,8 @@ async function staleMemoryLine() {
     const cfg = loadHookConfig(root);
     const days = Number(cfg.memoryStaleDays);
     if (cfg.memoryNudge === false || !(days > 0)) return "";
-    const { memoryFreshness, humanAge } = await lib("session-primer.mjs");
-    const { dir, newestMs } = memoryFreshness(root);
+    const { memoryFreshness, humanAge, bumpScore } = await lib("session-primer.mjs");
+    const { dir, newestMs } = memoryFreshness(root, input.transcript_path);
     if (newestMs === null || Date.now() - newestMs < days * 86400000) return "";
     const { execFileSync } = await import("node:child_process");
     const since = new Date(newestMs).toISOString();
@@ -42,6 +42,13 @@ async function staleMemoryLine() {
       encoding: "utf8", timeout: 3000, stdio: ["ignore", "pipe", "ignore"],
     }).trim();
     if (!(Number(commits) > 0)) return "";
+    // Counted as the memory nudge firing: `bearing status` said "fired 0×" right after this line
+    // had been shown, because only the milestone half ever counted itself (NS-20).
+    try {
+      bumpScore(root, "memoryNudges");
+    } catch {
+      /* no scorecard — the line still goes out */
+    }
     return `⏳ Your project memory (${dir}) was last written ${humanAge(Date.now() - newestMs)} ago, and ${commits} commit(s) have landed since. Before relying on it, reconcile it: what changed in decisions, state and next steps — update or delete what is no longer true.`;
   } catch {
     return ""; // no git, no lib, no memory — the brief must not fail for this (NS-8)
@@ -91,7 +98,7 @@ if (!recovering) {
 // scope, and a diagnosis of the gates. GitNexus is now opt-in and used when the user asks for it
 // (NS-25): the bearing-gitnexus skill checks scope and staleness itself, at the moment it is used,
 // rather than every session paying for lines most sessions never act on.
-const mp = memoryPath(root); // Claude Code's native project memory
+const mp = memoryPath(root, input.transcript_path); // Claude Code's native project memory
 
 // NORTH-STARS come FIRST on every session type (fresh, compact, resume). They're the project's
 // fixed points — the semantic anchor that outranks every other doc — so they must be in the window
@@ -112,7 +119,7 @@ const nsLine = nsClaims
 
 let lines;
 if (recovering) {
-  const hasMem = existsSync(memoryPath(root));
+  const hasMem = existsSync(memoryPath(root, input.transcript_path));
   // Per CHAT, not per repo: several sessions run in one repository and a single file meant they
   // overwrote each other, so a recovery could reconstruct from a DIFFERENT chat's task.
   const key = sessionKey(input.transcript_path);
