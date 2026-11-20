@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<!-- SHAPE: to-scale blocks — what something costs or weighs (SKILL.md §2). The whole (a context window,
+     a bundle, a budget) is one rectangle; each part is a rectangle whose AREA is its measured size.
+     A part too small to see is the point — label it, never inflate it.
+     Render: node .bearing/skills/bearing-publish-visuals/render.mjs blocks.html out.jpg 1600 900 90 -->
+<style>
+  :root { --bg: #0b0f15; --ink: #eaf0f8; --dim: #9aa8bd; --faint: #5f6e86; --accent: #3d8bf0; }
+  html, body { margin: 0; width: 1600px; height: 900px; overflow: hidden; background: var(--bg); color: var(--ink); font-family: system-ui, sans-serif; }
+  .card { position: absolute; inset: 0; padding: 52px 64px 0; }
+  .kicker { font: 600 21px ui-monospace, monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+  h1 { font-size: 56px; line-height: 1.04; letter-spacing: -.02em; margin: 12px 0 10px; }
+  h1 em { font-style: normal; color: var(--accent); }
+  .sub { font-size: 25px; line-height: 1.35; color: var(--dim); max-width: 1440px; }
+  .foot { position: absolute; left: 64px; right: 64px; bottom: 26px; font: 500 16px ui-monospace, monospace; color: var(--faint); }
+  svg text { font-family: ui-monospace, monospace; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="kicker">project · area · cost</div>
+  <h1>The whole thing is <em>this small.</em></h1>
+  <div class="sub">Drawn to scale by area. What the reader gets, in one line.</div>
+  <svg id="s" width="1600" height="580" style="position:absolute;left:0;top:220px"></svg>
+</div>
+<div class="foot">measured: where, how, with which tool · area ∝ size</div>
+<script type="module">
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); parent.appendChild(e); return e; };
+  const text = (parent, x, y, s, attrs = {}) => { const t = el("text", { x, y, ...attrs }, parent); t.textContent = s; return t; };
+
+  // REPLACE with the measurement: const d = await (await fetch("data/sizes.json")).json();
+  const d = { whole: { name: "200k-token window", size: 200000 }, parts: [
+    { name: "always loaded", size: 2400, color: "#3d8bf0" },
+    { name: "one skill, when loaded", size: 3100, color: "#6d5bd0" },
+  ] };
+
+  const svg = document.getElementById("s");
+  const fmtK = (n) => (n >= 1000 ? `${(n / 1000).toFixed(n < 10000 ? 1 : 0)}k` : String(n));
+  const X0 = 64, Y0 = 30, H = 470, W = 1472;   // the whole
+  el("rect", { x: X0, y: Y0, width: W, height: H, rx: 14, fill: "#10161f", stroke: "#2c3a50", "stroke-width": 2 }, svg);
+  text(svg, X0 + 22, Y0 + 40, `${d.whole.name} · ${fmtK(d.whole.size)}`, { fill: "#9aa8bd", "font-size": 20 });
+  // each part: a square of the same aspect as nothing in particular — AREA is what scales
+  let x = X0 + 22;
+  const yBase = Y0 + H - 22;
+  d.parts.forEach((p) => {
+    const side = Math.sqrt((p.size / d.whole.size) * W * H);
+    el("rect", { x, y: yBase - side, width: side, height: side, rx: 3, fill: p.color }, svg);
+    text(svg, x + side + 14, yBase - side + 16, `${p.name} · ${fmtK(p.size)}`, { fill: "#eaf0f8", "font-size": 19 });
+    text(svg, x + side + 14, yBase - side + 42, `${((p.size / d.whole.size) * 100).toFixed(1)}% of the whole`, { fill: "#9aa8bd", "font-size": 16 });
+    x += side + 360;
+  });
+
+  await document.fonts.ready;
+  window.__ready = true;
+</script>
+</body>
+</html>

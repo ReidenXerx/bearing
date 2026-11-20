@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<!-- SHAPE: diptych — a change in outcome, WITHOUT vs WITH (SKILL.md §2). Both panes hold the REAL
+     artifact (the code or reply each run produced, verbatim), the same framing and scale; the outcome
+     sits under each; a strip of dots shows every trial, not just the one you picked.
+     Render: node .bearing/skills/bearing-publish-visuals/render.mjs diptych.html out.jpg 1600 900 90 -->
+<style>
+  :root { --bg: #0b0f15; --ink: #eaf0f8; --dim: #9aa8bd; --faint: #5f6e86; --line: #243042; --accent: #3d8bf0; --bad: #e2603a; --good: #2fbf86; }
+  html, body { margin: 0; width: 1600px; height: 900px; overflow: hidden; background: var(--bg); color: var(--ink); font-family: system-ui, sans-serif; }
+  .card { position: absolute; inset: 0; padding: 52px 64px 0; }
+  .kicker { font: 600 21px ui-monospace, monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+  h1 { font-size: 56px; line-height: 1.04; letter-spacing: -.02em; margin: 12px 0 10px; }
+  h1 em { font-style: normal; color: var(--accent); }
+  .sub { font-size: 25px; line-height: 1.35; color: var(--dim); }
+  .panes { position: absolute; left: 64px; right: 64px; top: 232px; height: 500px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+  .pane { display: flex; flex-direction: column; border-radius: 18px; border: 1.5px solid var(--line); background: #10161f; overflow: hidden; }
+  .pane.on { border-color: var(--accent); box-shadow: 0 0 40px rgba(61,139,240,.18); }
+  .label { padding: 16px 22px; font: 600 17px ui-monospace, monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); border-bottom: 1px solid var(--line); }
+  .on .label { color: var(--accent); }
+  pre { flex: 1; margin: 0; padding: 18px 22px; font: 500 17.5px/1.45 ui-monospace, monospace; white-space: pre-wrap; color: #dfe6f0; }
+  pre .hl { background: #1c3150; border-radius: 4px; }
+  .res { padding: 14px 22px; font-size: 23px; font-weight: 600; }
+  .off .res { color: var(--bad); background: #1c1416; }
+  .on .res { color: var(--good); background: #0f1d1a; }
+  .trials { position: absolute; left: 64px; right: 64px; top: 756px; display: flex; gap: 40px; align-items: center; font-size: 19px; color: var(--dim); }
+  .trials b { color: var(--ink); margin-right: 10px; }
+  .dot { display: inline-block; width: 15px; height: 15px; border-radius: 50%; margin-left: 6px; vertical-align: -2px; }
+  .dot.p { background: var(--good); } .dot.f { border: 3px solid var(--bad); box-sizing: border-box; }
+  .foot { position: absolute; left: 64px; right: 64px; bottom: 26px; font: 500 16px ui-monospace, monospace; color: var(--faint); }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="kicker">project · area</div>
+  <h1>Same task, same input — <em>a different outcome.</em></h1>
+  <div class="sub">What changed for the reader, in one line. The two panes are the proof.</div>
+</div>
+<div class="panes">
+  <div class="pane off"><div class="label">without the feature</div><pre></pre><div class="res"></div></div>
+  <div class="pane on"><div class="label">with the feature</div><pre></pre><div class="res"></div></div>
+</div>
+<div class="trials"></div>
+<div class="foot">the runs: where, which model, how many per arm · code verbatim from the runs</div>
+<script type="module">
+  // REPLACE with the real runs: const d = await (await fetch("data/runs.json")).json();
+  // off/on = the artifact each arm produced, verbatim; trials = true (right) / false (wrong) per run.
+  const d = {
+    off: "export function total(items) {\n  return items.reduce((a, i) => a + i.price, 0);\n}",
+    on: "export function total(items) {\n  const cents = (i) => Math.round(i.price * 100);\n  return items.reduce((a, i) => a + cents(i), 0) / 100;\n}",
+    offRes: "0.1 + 0.2 → 0.30000000000000004",
+    onRes: "0.1 + 0.2 → 0.3",
+    hl: ["Math.round(i.price * 100)"],
+    trials: { "Model A": { off: [false, false, false], on: [true, true, true] }, "Model B": { off: [false, true, false], on: [true, true, true] } },
+  };
+  const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  const fmt = (src) => d.hl.reduce((x, h) => x.split(esc(h)).join(`<span class="hl">${esc(h)}</span>`), esc(src));
+  document.querySelector(".off pre").innerHTML = fmt(d.off);
+  document.querySelector(".on pre").innerHTML = fmt(d.on);
+  document.querySelector(".off .res").textContent = "→ " + d.offRes;
+  document.querySelector(".on .res").textContent = "→ " + d.onRes;
+  const dots = (a) => a.map((p) => `<i class="dot ${p ? "p" : "f"}"></i>`).join("");
+  document.querySelector(".trials").innerHTML = Object.entries(d.trials).map(([m, t]) => `<span><b>${esc(m)}</b>${dots(t.off)} → ${dots(t.on)}</span>`).join("") +
+    `<span style="margin-left:auto"><i class="dot p"></i> right <i class="dot f" style="margin-left:16px"></i> wrong · without → with</span>`;
+
+  await document.fonts.ready;
+  window.__ready = true;
+</script>
+</body>
+</html>

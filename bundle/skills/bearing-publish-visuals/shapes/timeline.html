@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<!-- SHAPE: timeline — what happens across a session (SKILL.md §2). The session is one line on a REAL
+     axis (time, tokens, tool calls); each event is a mark at its real position, its kind as its colour.
+     Pairs that matter (a save before each wipe) read as pairs without a word.
+     Render: node .bearing/skills/bearing-publish-visuals/render.mjs timeline.html out.jpg 1600 900 90 -->
+<style>
+  :root { --bg: #0b0f15; --ink: #eaf0f8; --dim: #9aa8bd; --faint: #5f6e86; --accent: #3d8bf0; }
+  html, body { margin: 0; width: 1600px; height: 900px; overflow: hidden; background: var(--bg); color: var(--ink); font-family: system-ui, sans-serif; }
+  .card { position: absolute; inset: 0; padding: 52px 64px 0; }
+  .kicker { font: 600 21px ui-monospace, monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+  h1 { font-size: 56px; line-height: 1.04; letter-spacing: -.02em; margin: 12px 0 10px; }
+  h1 em { font-style: normal; color: var(--accent); }
+  .sub { font-size: 25px; line-height: 1.35; color: var(--dim); max-width: 1440px; }
+  .foot { position: absolute; left: 64px; right: 64px; bottom: 26px; font: 500 16px ui-monospace, monospace; color: var(--faint); }
+  svg text { font-family: ui-monospace, monospace; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="kicker">project · area · one session</div>
+  <h1>Wiped three times. <em>Saved before every one.</em></h1>
+  <div class="sub">What the reader gets, in two lines at most. The marks on the line say the rest.</div>
+  <svg id="s" width="1600" height="560" style="position:absolute;left:0;top:250px"></svg>
+</div>
+<div class="foot">the session: where, when, which runtime · axis = tool calls · every event from its log</div>
+<script type="module">
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); parent.appendChild(e); return e; };
+  const text = (parent, x, y, s, attrs = {}) => { const t = el("text", { x, y, ...attrs }, parent); t.textContent = s; return t; };
+
+  // REPLACE with the real log: const d = await (await fetch("data/session.json")).json();
+  // at = position on the axis (here: tool-call number); kind picks the colour and the row.
+  const d = { length: 420, events: [
+    { at: 40, kind: "nudge" }, { at: 96, kind: "save" }, { at: 104, kind: "wipe" },
+    { at: 170, kind: "nudge" }, { at: 228, kind: "save" }, { at: 236, kind: "wipe" },
+    { at: 300, kind: "nudge" }, { at: 352, kind: "save" }, { at: 361, kind: "wipe" },
+  ] };
+
+  const svg = document.getElementById("s");
+  const KIND = {   // one colour per kind, and the row it sits on: above the line, on it, below it
+    save: { c: "#2fbf86", dy: -70, label: "saved" },
+    wipe: { c: "#e2603a", dy: 70, label: "context wiped" },
+    nudge: { c: "#e9a23b", dy: -140, label: "reminder" },
+  };
+  const L = 120, R = 1480, Y = 230, X = (at) => L + (at / d.length) * (R - L);
+  el("line", { x1: L, x2: R, y1: Y, y2: Y, stroke: "#3a4a63", "stroke-width": 4, "stroke-linecap": "round" }, svg);
+  for (let n = 0; n <= d.length; n += 100) {
+    el("line", { x1: X(n), x2: X(n), y1: Y - 8, y2: Y + 8, stroke: "#3a4a63", "stroke-width": 2 }, svg);
+    text(svg, X(n), Y + 130, String(n), { fill: "#5f6e86", "font-size": 15, "text-anchor": "middle" });
+  }
+  text(svg, R, Y + 160, "tool calls →", { fill: "#5f6e86", "font-size": 15, "text-anchor": "end" });
+  for (const e of d.events) {
+    const k = KIND[e.kind], x = X(e.at);
+    el("line", { x1: x, x2: x, y1: Y, y2: Y + k.dy, stroke: k.c, "stroke-width": 2, opacity: .6 }, svg);
+    el("circle", { cx: x, cy: Y + k.dy, r: 12, fill: k.c }, svg);
+  }
+  // legend: one entry per kind, with its real count
+  Object.entries(KIND).forEach(([kind, k], n) => {
+    const c = d.events.filter((e) => e.kind === kind).length, x = 64 + n * 300;
+    el("circle", { cx: x + 10, cy: 500, r: 10, fill: k.c }, svg);
+    text(svg, x + 30, 506, `${k.label} × ${c}`, { fill: "#9aa8bd", "font-size": 18 });
+  });
+
+  await document.fonts.ready;
+  window.__ready = true;
+</script>
+</body>
+</html>
