@@ -8,7 +8,9 @@ All notable changes to `bearing` are documented here.
   a card an infographic. Covering the text must leave a picture that still makes the claim. Every
   mark is one item from a real run, drawn from its exported data. The picture fills at least 60% of
   the card. Its shape comes from what the thing does: a funnel, swimlanes, a with/without diptych, a
-  timeline or a to-scale block. The card template is now a funnel drawn from data instead of text tiles.
+  timeline or a to-scale block. Each shape ships a template that renders as it is, with placeholder
+  data marked to replace: `card-template.html` (the funnel, which replaces the old text tiles) and
+  `shapes/swimlanes.html`, `diptych.html`, `timeline.html`, `blocks.html`.
 
 ## 2.0.5 — parallel edits no longer erase each other's record
 

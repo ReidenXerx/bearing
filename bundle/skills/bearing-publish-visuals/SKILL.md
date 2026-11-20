@@ -61,15 +61,15 @@ decoration, it is a slide — redraw it.
    disproved). Every encoding that is not obvious gets a small legend inside the card.
 4. **Pick the shape from what the thing DOES, not from a layout you like:**
 
-| What it does | Shape | Example that worked |
-| --- | --- | --- |
-| Turns many inputs into fewer, checked outputs | **Flow / funnel**: a dot per item grouped by source, a gate per check labelled `n → m` and why, then what reaches the reader, ranked, top items named | Microscope: 5 lenses → refute 28→27 → dedupe 27→24 → ranked report |
-| Runs work in parallel | **Swimlanes on a real time axis**: a bar per worker from its start to its end, its result at the end of its lane | Minions: 8 lanes, 17:19–17:25, `FOUND n` per lane, total → one decision |
-| Changes an outcome (with vs without) | **Diptych of the real artifact**: the same code or reply WITHOUT / WITH, the outcome under each, then a strip of trial dots per arm | TS/JS: an `any` returned as-is vs guarded; ● per run |
-| Acts on events across a session | **Timeline with event marks**: the session as a line, each event a mark at its real position | Task-core: six wipes, a save before each one |
-| Costs or weighs something | **Proportional bars or blocks from real sizes** (bytes, tokens, ms) | Context cost: a 200k window drawn to scale, bearing's share by area, measured on fresh installs |
-| Has a structure | **The real tree or graph**, exported and laid out | — |
-| Is a UI | **The real screenshot**, or a mock laid out from the code with made-up content | A panel drawn from its own `main.js` |
+| What it does | Shape | Example that worked | Start from |
+| --- | --- | --- | --- |
+| Turns many inputs into fewer, checked outputs | **Flow / funnel**: a dot per item grouped by source, a gate per check labelled `n → m` and why, then what reaches the reader, ranked, top items named | Microscope: 5 lenses → refute 28→27 → dedupe 27→24 → ranked report | `card-template.html` |
+| Runs work in parallel | **Swimlanes on a real time axis**: a bar per worker from its start to its end, its result at the end of its lane | Minions: 8 lanes, 17:19–17:25, `FOUND n` per lane, total → one decision | `shapes/swimlanes.html` |
+| Changes an outcome (with vs without) | **Diptych of the real artifact**: the same code or reply WITHOUT / WITH, the outcome under each, then a strip of trial dots per arm | TS/JS: an `any` returned as-is vs guarded; ● per run | `shapes/diptych.html` |
+| Acts on events across a session | **Timeline with event marks**: the session as a line, each event a mark at its real position | Task-core: six wipes, a save before each one | `shapes/timeline.html` |
+| Costs or weighs something | **Proportional bars or blocks from real sizes** (bytes, tokens, ms) | Context cost: a 200k window drawn to scale, bearing's share by area, measured on fresh installs | `shapes/blocks.html` |
+| Has a structure | **The real tree or graph**, exported and laid out | — | — |
+| Is a UI | **The real screenshot**, or a mock laid out from the code with made-up content | A panel drawn from its own `main.js` | — |
 
 5. **Before drawing, write down: which run, which file holds its data, and what ONE mark is.** If
    there is no run yet, get one: run the tool once on a real repo and export what it produced. If
@@ -132,8 +132,10 @@ Cards are HTML/CSS (canvas, SVG or three.js inside when needed), rendered to an 
 project: one HTML page per card, a shared stylesheet, a small shared `draw.js` (an `el()` that makes an
 SVG element, a `text()`, a `ready()` that awaits the fonts and sets `__ready`), and `data/*.json`
 exported from the real run. Start from `.bearing/skills/bearing-publish-visuals/card-template.html` —
-a funnel drawn from data, with the charset, the helpers, a legend and the `__ready` handshake. Keep
-its shape of code (data in, one mark per item out) and replace the funnel with the shape from §2.
+a funnel drawn from data, with the charset, the helpers, a legend and the `__ready` handshake — or
+from the shape in `shapes/` that §2's table names (swimlanes, diptych, timeline, blocks). Each one
+renders as it is, with placeholder data marked `REPLACE`; swap in the real run's export and keep the
+shape of code: data in, one mark per item out.
 
 ```bash
 node .bearing/skills/bearing-publish-visuals/render.mjs cards/feature.html out/feature.jpg 1600 900 90

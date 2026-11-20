@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<!-- SHAPE: swimlanes — work that runs in parallel (SKILL.md §2). One lane = one worker; its bar runs
+     from its REAL start to its REAL end; its result sits at the end of the lane.
+     Render: node .bearing/skills/bearing-publish-visuals/render.mjs swimlanes.html out.jpg 1600 900 90 -->
+<style>
+  :root { --bg: #0b0f15; --ink: #eaf0f8; --dim: #9aa8bd; --faint: #5f6e86; --accent: #3d8bf0; }
+  html, body { margin: 0; width: 1600px; height: 900px; overflow: hidden; background: var(--bg); color: var(--ink); font-family: system-ui, sans-serif; }
+  .card { position: absolute; inset: 0; padding: 52px 64px 0; }
+  .kicker { font: 600 21px ui-monospace, monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+  h1 { font-size: 56px; line-height: 1.04; letter-spacing: -.02em; margin: 12px 0 10px; }
+  h1 em { font-style: normal; color: var(--accent); }
+  .sub { font-size: 25px; line-height: 1.35; color: var(--dim); max-width: 1440px; }
+  .foot { position: absolute; left: 64px; right: 64px; bottom: 26px; font: 500 16px ui-monospace, monospace; color: var(--faint); }
+  svg text { font-family: ui-monospace, monospace; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="kicker">project · area · how it works</div>
+  <h1>Six at once. <em>One answer back.</em></h1>
+  <div class="sub">What the reader gets, in two lines at most. The lanes say the rest.</div>
+  <svg id="s" width="1600" height="580" style="position:absolute;left:0;top:240px"></svg>
+</div>
+<div class="foot">the run: where, when, which tool or model · one lane = one worker, drawn at its real times</div>
+<script type="module">
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); parent.appendChild(e); return e; };
+  const text = (parent, x, y, s, attrs = {}) => { const t = el("text", { x, y, ...attrs }, parent); t.textContent = s; return t; };
+
+  // REPLACE with the real run: const lanes = await (await fetch("data/run.json")).json();
+  // start/end as ISO times from the log; result = what each worker returned (null = no report kept).
+  const lanes = [
+    { name: "src/api", start: "2026-01-01T10:00:05Z", end: "2026-01-01T10:02:40Z", result: 7 },
+    { name: "src/ui", start: "2026-01-01T10:00:06Z", end: "2026-01-01T10:03:55Z", result: 12 },
+    { name: "src/db", start: "2026-01-01T10:00:08Z", end: "2026-01-01T10:01:30Z", result: 2 },
+    { name: "scripts", start: "2026-01-01T10:00:09Z", end: "2026-01-01T10:02:05Z", result: 0 },
+    { name: "docs", start: "2026-01-01T10:00:10Z", end: "2026-01-01T10:04:20Z", result: 5 },
+    { name: "tests", start: "2026-01-01T10:00:12Z", end: null, result: null },
+  ];
+
+  const svg = document.getElementById("s");
+  const t = (s) => new Date(s).getTime();
+  const T0 = t("2026-01-01T10:00:00Z"), T1 = t("2026-01-01T10:05:00Z"), MIN = 5;   // the axis spans the real run
+  const L = 470, R = 1180, X = (s) => L + ((t(s) - T0) / (T1 - T0)) * (R - L);
+  // the one that sent the work out
+  el("rect", { x: 64, y: 190, width: 150, height: 90, rx: 14, fill: "#3d8bf0" }, svg);
+  text(svg, 139, 243, "main", { fill: "#0b0f15", "font-size": 24, "text-anchor": "middle", "font-weight": 700 });
+  for (let m = 0; m <= MIN; m++) {
+    const x = L + (m / MIN) * (R - L);
+    el("line", { x1: x, x2: x, y1: 0, y2: 470, stroke: "#1a2331" }, svg);
+    text(svg, x, 500, `+${m} min`, { fill: "#5f6e86", "font-size": 15, "text-anchor": "middle" });
+  }
+  lanes.forEach((r, k) => {
+    const y = 20 + k * 76;
+    el("path", { d: `M214,235 C300,235 300,${y + 22} 380,${y + 22}`, stroke: "#2c3a50", "stroke-width": 1.5, fill: "none" }, svg);
+    text(svg, 455, y + 28, r.name, { fill: "#c9d3e2", "font-size": 19, "text-anchor": "end" });
+    if (r.end) {
+      el("rect", { x: X(r.start), y: y + 6, width: Math.max(8, X(r.end) - X(r.start)), height: 32, rx: 7, fill: "#6d5bd0", opacity: .85 }, svg);
+      el("circle", { cx: X(r.end), cy: y + 22, r: 6, fill: "#eaf0f8" }, svg);
+      text(svg, R + 30, y + 28, `FOUND ${r.result}`, { fill: "#eaf0f8", "font-size": 19, "font-weight": 600 });
+    } else {   // a worker that never reported is shown, not hidden — silence is not "nothing found"
+      el("rect", { x: X(r.start), y: y + 6, width: 60, height: 32, rx: 7, fill: "none", stroke: "#5f6e86", "stroke-dasharray": "4 4" }, svg);
+      text(svg, X(r.start) + 76, y + 28, "no report", { fill: "#5f6e86", "font-size": 17 });
+    }
+  });
+  const total = lanes.reduce((a, r) => a + (r.result ?? 0), 0);
+  text(svg, R + 30, 470, `${total} found → one decision`, { fill: "#3d8bf0", "font-size": 20, "font-weight": 600 });
+
+  await document.fonts.ready;
+  window.__ready = true;
+</script>
+</body>
+</html>
