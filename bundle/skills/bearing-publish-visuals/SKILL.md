@@ -1,15 +1,16 @@
 ---
 name: bearing-publish-visuals
-description: "Design the visuals that publish what you built — feature cards, a README hero, a social preview, a release or mod-page header, a before/after or a chart — so each one makes ONE claim that is true, readable at the size it is shown, and rendered whole. Use when asked to make a card, banner, infographic, hero image, social preview, release graphic or store/mod page visuals, or before publishing any image that states a number or a capability. Examples: \"make a card for this feature\", \"design a README hero\", \"we need a social preview\", \"make release visuals\", \"turn these numbers into an infographic\", \"is this banner OK to publish?\"."
+description: "Design the visuals that publish what you built — feature cards, a README hero, a social preview, a release or mod-page header, a before/after or a chart — so each one makes ONE claim that is true, readable at the size it is shown, and rendered whole — drawn as an infographic from a real run (every mark a data point: a funnel, swimlanes, a with/without diptych, a timeline), never a slide of sentences in boxes. Use when asked to make a card, banner, infographic, hero image, social preview, release graphic or store/mod page visuals, or before publishing any image that states a number or a capability. Examples: \"make a card for this feature\", \"design a README hero\", \"we need a social preview\", \"make release visuals\", \"turn these numbers into an infographic\", \"is this banner OK to publish?\"."
 ---
 
 # Publishing visuals — one true claim per image
 
 An image on a release page is a claim with the authority of a screenshot. Readers believe it more
 than the text under it, and they see it at a fraction of the size you designed it. So the craft is
-mostly discipline: what the image may claim, whether it shows THIS feature, and whether it survives
-the size it is read at. Every rule below was learned on a real publish (mod pages, product pages,
-READMEs) — the traps in §5 each went out wrong once.
+mostly discipline: what the image may claim, whether it shows THIS feature, whether the PICTURE makes
+the claim (an infographic drawn from real data, not a slide of sentences in boxes — §2), and whether
+it survives the size it is read at. Every rule below was learned on a real publish (mod pages,
+product pages, READMEs) — the traps in §6 each went out wrong once.
 
 ## 1. The claim comes first
 
@@ -26,14 +27,60 @@ READMEs) — the traps in §5 each went out wrong once.
 5. **Measured numbers are the value of a card — volatile ones are not.** A number measured about a
    FIXED mechanism belongs on the card (*"leans 15°"*, *"16.4 vs 16.5 ms per frame"*). A COUNT that
    changes between releases (things shipped, versions, test totals) never goes in the image — it is
-   wrong one release later; put it in the page text or a generated badge (§4). A DEFAULT that may be
+   wrong one release later; put it in the page text or a generated badge (§5). A DEFAULT that may be
    retuned goes in the caption text, not the picture (a "0.1% → 2%" default lives under the card).
+   Counts INSIDE one recorded run are fixed and belong in its picture (*"28 findings → 27 survived
+   the refutation"*), as long as the footer names that run — what goes stale is a project total.
 6. **The second gate is your own eyes. Render, OPEN the image, write down what you see — then fix.**
    Looking caught more defects than every automated check together: a crop through the action, a
    label on the subject, the subject hiding the feature, mojibake that every check passed. A render
    nobody looked at is not finished, however green its checks.
 
-## 2. What to show — in this order of preference
+## 2. An infographic, not a slide
+
+The default an agent reaches for is a slide: a headline, then rounded boxes that each hold a sentence
+— a row per feature, an icon-title-blurb grid, "tiles" whose big number is a word. That is a
+presentation slide, not an infographic, and it proves nothing: the reader has to trust the text, and
+at the shown size the text is all they get. A card built that way was rejected on sight ("PowerPoint
+from 20 years ago") and every card in the set was redrawn from real runs.
+
+**The test: cover the headline, the subtitle and the footer. Does the picture alone still make the
+claim?** A funnel of dots that shrinks at each gate says "only what survives reaches you" with no
+words at all. Five boxes of prose say nothing once the prose is hidden. If covering the text leaves
+decoration, it is a slide — redraw it.
+
+1. **Every mark is a data point.** Each dot, bar, segment, node or line is one counted thing from a
+   real run or measurement: a finding, a minion, a trial, a commit, a token. The data lives in
+   `data/*.json` exported from the run, and code draws the marks from it — never placed by hand. Ten
+   things → ten marks. A mark that stands for nothing is decoration; delete it.
+2. **The picture is most of the card — at least 60% of its area.** Text inside it is labels of a few
+   words (a lens name, a gate's `28 → 27`, a time axis), never sentences. A sentence that has to be
+   there goes in the subtitle or under one highlighted item.
+3. **One visual channel per meaning, kept across the whole set.** Position = stage or time, colour =
+   class or outcome (severity, pass/fail), fill vs ring vs ✗ = state (found / found twice /
+   disproved). Every encoding that is not obvious gets a small legend inside the card.
+4. **Pick the shape from what the thing DOES, not from a layout you like:**
+
+| What it does | Shape | Example that worked |
+| --- | --- | --- |
+| Turns many inputs into fewer, checked outputs | **Flow / funnel**: a dot per item grouped by source, a gate per check labelled `n → m` and why, then what reaches the reader, ranked, top items named | Microscope: 5 lenses → refute 28→27 → dedupe 27→24 → ranked report |
+| Runs work in parallel | **Swimlanes on a real time axis**: a bar per worker from its start to its end, its result at the end of its lane | Minions: 8 lanes, 17:19–17:25, `FOUND n` per lane, total → one decision |
+| Changes an outcome (with vs without) | **Diptych of the real artifact**: the same code or reply WITHOUT / WITH, the outcome under each, then a strip of trial dots per arm | TS/JS: an `any` returned as-is vs guarded; ● per run |
+| Acts on events across a session | **Timeline with event marks**: the session as a line, each event a mark at its real position | Task-core: six wipes, a save before each one |
+| Costs or weighs something | **Proportional bars or blocks from real sizes** (bytes, tokens, ms) | Context cost: a 200k window drawn to scale, bearing's share by area, measured on fresh installs |
+| Has a structure | **The real tree or graph**, exported and laid out | — |
+| Is a UI | **The real screenshot**, or a mock laid out from the code with made-up content | A panel drawn from its own `main.js` |
+
+5. **Before drawing, write down: which run, which file holds its data, and what ONE mark is.** If
+   there is no run yet, get one: run the tool once on a real repo and export what it produced. If
+   none is possible, that card is a mechanism rebuilt from the code (§3.2) — it is never a text slide.
+6. **The headline is read off the picture.** It states what the picture shows (*"Five lenses. Only
+   what survives reaches you."*), with the result in the accent colour. The footer names the run:
+   where, when, which model or tool, what one mark is.
+7. **A set looks like one set:** a shared stylesheet, shared draw helpers, the same palette, kicker,
+   legend style and footer across every card. Build it as a folder (§5), not as one-off pages.
+
+## 3. What to show — in this order of preference
 
 1. **The real thing.** A real screenshot or clip; real geometry or data exported from the project and
    drawn (a mesh coloured by a measured quantity, the actual output). The card is its own proof.
@@ -46,15 +93,16 @@ behaviour, sold as the feature is the most damaging card there is. When unsure, 
 off vs on) or a log line proving the feature ran in that clip. Film or capture it the way it actually
 runs (a first-person feature filmed in third person shows the default).
 
-## 3. Layout — readable at the size it is SHOWN
+## 4. Layout — readable at the size it is SHOWN
 
 A card is designed large and shown small: a 1600-px card in a ~940-px page column, a social preview
 as a ~400-px thumbnail, a README image at the reader's window width. Design for the shown size.
 
 - **Top to bottom:** kicker (project · area, small mono, accent colour) → headline (the one claim,
-  one word in the accent) → subtitle (what the user gets, ≤ 2 lines) → the visual → stat tiles
-  ("from → to" in big type, each with one plain line saying what it means) → footer (small mono:
-  the source — files, decision ids, the tool that measured it).
+  the result in the accent) → subtitle (what the user gets, ≤ 2 lines) → the visual, ≥ 60% of the
+  card (§2) → stat tiles ONLY where a number the picture shows must be read exactly ("from → to" in
+  big type, one plain line each) → footer (small mono: the run or source — files, decision ids, the
+  tool that measured it).
 - **Body text ≥ 22 px at the SHOWN width** (a 1600-px card in a ~940-px column needs ~22 px there, so
   larger in the render); a tile holds ≤ 2 lines; one idea per card. Where the host rescales, render
   at 2× the shown size — but measure the text minimum against what is shown, not what is rendered.
@@ -78,12 +126,14 @@ as a ~400-px thumbnail, a README image at the reader's window width. Design for 
 - **A page is images with one plain line each; depth links out** — to articles, docs or a wiki, one
   per theme — instead of a wall of text around the cards.
 
-## 4. Build and render — deterministic, then LOOK
+## 5. Build and render — deterministic, then LOOK
 
 Cards are HTML/CSS (canvas, SVG or three.js inside when needed), rendered to an image. One folder per
-project: one HTML page per card, a shared stylesheet, and `data/*.json` exported from the real assets.
-Start from `.bearing/skills/bearing-publish-visuals/card-template.html` — it declares the charset and
-shows the `__ready` handshake.
+project: one HTML page per card, a shared stylesheet, a small shared `draw.js` (an `el()` that makes an
+SVG element, a `text()`, a `ready()` that awaits the fonts and sets `__ready`), and `data/*.json`
+exported from the real run. Start from `.bearing/skills/bearing-publish-visuals/card-template.html` —
+a funnel drawn from data, with the charset, the helpers, a legend and the `__ready` handshake. Keep
+its shape of code (data in, one mark per item out) and replace the funnel with the shape from §2.
 
 ```bash
 node .bearing/skills/bearing-publish-visuals/render.mjs cards/feature.html out/feature.jpg 1600 900 90
@@ -144,11 +194,14 @@ palette and dither, so it is worse than a direct encode; use an ffmpeg built wit
 (`FFMPEG=/path/to/ffmpeg`) when the WebP matters. **The crop must keep the ACTION in
 frame** — a strip that cut off the hand doing the reload had to be re-cut at full width.
 
-## 5. Traps — each one went out wrong once
+## 6. Traps — each one went out wrong once
 
 - **The base product's own behaviour (vanilla) sold as our feature** — the game's own NPC peek animation
   looked like the mod's lean. → A/B or log proof.
 - **A true value, a false meaning**: "72% → 27%" was a fixed measuring tool, not a user gain.
+- **A slide shipped as an infographic**: a headline over rows of rounded boxes, each holding a
+  sentence, was rejected as "PowerPoint from 20 years ago" — covering the text left nothing. → §2:
+  every mark a data point from a real run, the picture ≥ 60% of the card.
 - **A count went stale one release later** ("699" became 706). → Counts live in text or badges.
 - **Half-rendered frames**: fallback font on canvas, chart before its data, file:// fetches failing
   silently, a different random layout on every render. → `__ready`, fonts, http, seeds.
@@ -167,20 +220,22 @@ frame** — a strip that cut off the hand doing the reload had to be re-cut at f
 - **Platform quirks**: on a fresh page the first upload may become the header (upload the header
   first); a gallery may not reorder (upload new, repoint, hide old); closing the tab aborts uploads.
 
-## 6. Before you publish — the checklist
+## 7. Before you publish — the checklist
 
-1. One claim per image, written down, traceable to code, a log, a changelog or a measurement — and
+1. Cover the headline, subtitle and footer: the picture alone still makes the claim. Every mark is
+   drawn from `data/*.json` exported from a real run; no box of prose stands in for a picture.
+2. One claim per image, written down, traceable to code, a log, a changelog or a measurement — and
    the owner agreed it may be claimed.
-2. Every number's meaning checked at its source, printed with its context, and not a count that
+3. Every number's meaning checked at its source, printed with its context, and not a count that
    changes between releases.
-3. Nothing unconfirmed shown; no "tested"/"untested" wording.
-4. It shows OUR feature — A/B or log proof when unsure.
-5. Rendered deterministically: `__ready`, fonts awaited, seeded; no broken images, no page errors.
-6. Opened, LOOKED at, and what you saw written down — full size AND at the shown width: nothing
+4. Nothing unconfirmed shown; no "tested"/"untested" wording.
+5. It shows OUR feature — A/B or log proof when unsure.
+6. Rendered deterministically: `__ready`, fonts awaited, seeded; no broken images, no page errors.
+7. Opened, LOOKED at, and what you saw written down — full size AND at the shown width: nothing
    cropped, overlapping or wrapped; body text ≥ 22 px at the SHOWN width.
-7. Headers keep what matters out of the platform's overlay.
-8. Size limits met; externally hosted URLs pinned to a commit SHA.
-9. No content that does not belong on this page; no third-party assets without provenance.
-10. After publishing, open the PUBLIC page as a visitor sees it: count the images that loaded, look at
+8. Headers keep what matters out of the platform's overlay.
+9. Size limits met; externally hosted URLs pinned to a commit SHA.
+10. No content that does not belong on this page; no third-party assets without provenance.
+11. After publishing, open the PUBLIC page as a visitor sees it: count the images that loaded, look at
     a screenshot. An upload that went through is not a page that renders.
-11. The page text describes each card in the same words the card uses.
+12. The page text describes each card in the same words the card uses.

@@ -6,36 +6,73 @@
 <!-- Render: node .bearing/skills/bearing-publish-visuals/render.mjs card.html out.jpg 1600 900 90 -->
 <style>
   /* A solid background of its own — never text on transparency (it vanishes in one theme or the other). */
-  html, body { margin: 0; width: 1600px; height: 900px; background: #17171c; color: #ececf1; font-family: system-ui, sans-serif; }
-  .card { box-sizing: border-box; width: 1600px; height: 900px; padding: 72px 88px; display: flex; flex-direction: column; }
-  .kicker { font: 600 22px ui-monospace, monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
-  h1 { font-size: 76px; line-height: 1.05; margin: 18px 0 14px; }
+  :root { --bg: #0b0f15; --ink: #eaf0f8; --dim: #9aa8bd; --faint: #5f6e86; --line: #2c3a50; --accent: #3d8bf0; }
+  html, body { margin: 0; width: 1600px; height: 900px; overflow: hidden; background: var(--bg); color: var(--ink); font-family: system-ui, sans-serif; }
+  .card { position: absolute; inset: 0; padding: 52px 64px 0; }
+  .kicker { font: 600 21px ui-monospace, monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+  h1 { font-size: 56px; line-height: 1.04; letter-spacing: -.02em; margin: 12px 0 10px; }
   h1 em { font-style: normal; color: var(--accent); }
-  .sub { font-size: 30px; color: #b9b9c6; max-width: 1150px; }
-  .visual { flex: 1; margin: 40px 0; border-radius: 16px; background: #222229; }
-  .tiles { display: flex; gap: 28px; }
-  .tile { flex: 1; padding: 22px 26px; border-radius: 14px; background: #1f1f26; }
-  .tile b { display: block; font-size: 52px; color: var(--accent); }
-  .tile span { font-size: 22px; color: #b9b9c6; }
-  .source { margin-top: 22px; font: 18px ui-monospace, monospace; color: #7d7d8c; }
-  :root { --accent: #f59e0b; }
+  .sub { font-size: 25px; line-height: 1.35; color: var(--dim); max-width: 1440px; }
+  .foot { position: absolute; left: 64px; right: 64px; bottom: 26px; font: 500 16px ui-monospace, monospace; color: var(--faint); }
+  svg text { font-family: ui-monospace, monospace; }
 </style>
 </head>
 <body>
+<!-- An INFOGRAPHIC, not a slide (SKILL.md §2): the picture is ≥ 60% of the card and every mark is one
+     item from a real run. Cover the h1, .sub and .foot — the picture alone must still make the claim.
+     This one is a funnel (many inputs → fewer, checked outputs); swap in the shape your thing has. -->
 <div class="card">
-  <div class="kicker">project · area</div>
-  <h1>The one <em>claim</em>, as a sentence</h1>
-  <div class="sub">What the user gets — two lines at most.</div>
-  <div class="visual" id="visual"><!-- the real thing, the mechanism, or the computed chart --></div>
-  <div class="tiles">
-    <div class="tile"><b>12 → 3</b><span>what this number means, in one plain line</span></div>
-  </div>
-  <div class="source">source: path/to/file.ts · measured with &lt;tool&gt;</div>
+  <div class="kicker">project · area · how it works</div>
+  <h1>Many in. <em>Only what passes reaches you.</em></h1>
+  <div class="sub">What the reader gets, in two lines at most. The picture says the rest.</div>
+  <svg id="s" width="1600" height="560" style="position:absolute;left:0;top:250px"></svg>
 </div>
+<div class="foot">the run: where, when, which tool or model · one dot = one item</div>
 <script type="module">
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); parent.appendChild(e); return e; };
+  const text = (parent, x, y, s, attrs = {}) => { const t = el("text", { x, y, ...attrs }, parent); t.textContent = s; return t; };
+
+  // REPLACE with the real run's export: const d = await (await fetch("data/run.json")).json();
+  // (fetch works only over http — render.mjs serves the folder.) Placeholder items, one per mark:
+  const d = { items: [
+    { src: "Source A", cls: "high", pass: true }, { src: "Source A", cls: "low", pass: true }, { src: "Source A", cls: "mid", pass: false },
+    { src: "Source B", cls: "high", pass: true }, { src: "Source B", cls: "mid", pass: true },
+    { src: "Source C", cls: "mid", pass: true }, { src: "Source C", cls: "low", pass: false }, { src: "Source C", cls: "low", pass: true },
+  ] };
+
+  const svg = document.getElementById("s");
+  const COLOR = { high: "#f08a3c", mid: "#e9c46a", low: "#5f6e86" };   // one channel = one meaning, kept across the set
+  const RANK = { high: 0, mid: 1, low: 2 };
+  const GX = 900, GY = 230;
+  const sources = [...new Set(d.items.map((i) => i.src))];
+  [[64, "SOURCE"], [GX - 40, "CHECK"], [1110, "WHAT REACHES YOU"]].forEach(([x, t]) => text(svg, x, 14, t, { fill: "#5f6e86", "font-size": 15, "letter-spacing": "2" }));
+  sources.forEach((src, r) => {
+    const y = 70 + r * 110, row = d.items.filter((i) => i.src === src);
+    text(svg, 64, y + 7, src, { fill: "#eaf0f8", "font-size": 22, style: "font-family:system-ui;font-weight:600" });
+    row.forEach((i, k) => {
+      el("circle", { cx: 360 + k * 40, cy: y, r: 13, fill: i.pass ? COLOR[i.cls] : "#0b0f15", stroke: COLOR[i.cls], "stroke-width": 3 }, svg);
+      if (!i.pass) text(svg, 360 + k * 40, y + 6, "✗", { fill: COLOR[i.cls], "font-size": 18, "text-anchor": "middle" });
+    });
+    el("path", { d: `M${360 + row.length * 40},${y} C${GX - 140},${y} ${GX - 100},${GY} ${GX - 20},${GY}`, stroke: "#2c3a50", "stroke-width": 2, fill: "none" }, svg);
+  });
+  const passed = d.items.filter((i) => i.pass).sort((a, b) => RANK[a.cls] - RANK[b.cls]);   // what reaches the reader, ranked
+  el("rect", { x: GX - 20, y: GY - 90, width: 40, height: 180, rx: 10, fill: "#121924", stroke: "#3a4a63", "stroke-width": 1.5 }, svg);
+  text(svg, GX, GY - 106, `${d.items.length} → ${passed.length}`, { fill: "#eaf0f8", "font-size": 26, "text-anchor": "middle", "font-weight": 700 });
+  text(svg, GX, GY + 120, `${d.items.length - passed.length} failed the check`, { fill: "#9aa8bd", "font-size": 16, "text-anchor": "middle" });
+  el("line", { x1: GX + 20, x2: 1100, y1: GY, y2: GY, stroke: "#2c3a50", "stroke-width": 2 }, svg);
+  passed.forEach((i, k) => el("circle", { cx: 1124 + k * 40, cy: GY, r: 13, fill: COLOR[i.cls] }, svg));
+  text(svg, 1110, GY + 44, "high · mid · low, ranked", { fill: "#7f8da3", "font-size": 15 });
+  // legend: every encoding that is not obvious
+  Object.entries(COLOR).forEach(([k, c], n) => { el("circle", { cx: 560 + n * 120, cy: 520, r: 10, fill: c }, svg); text(svg, 580 + n * 120, 526, k, { fill: "#9aa8bd", "font-size": 17 }); });
+  [[64, true, "an item"], [230, false, "failed the check"]].forEach(([x, ok, t]) => {
+    el("circle", { cx: x + 10, cy: 520, r: 10, fill: ok ? "#e9c46a" : "#0b0f15", stroke: "#e9c46a", "stroke-width": 3 }, svg);
+    if (!ok) text(svg, x + 10, 526, "✗", { fill: "#e9c46a", "font-size": 15, "text-anchor": "middle" });
+    text(svg, x + 30, 526, t, { fill: "#9aa8bd", "font-size": 17 });
+  });
+
   // Everything the card needs, THEN say so. A fixed sleep screenshots whatever had loaded by then.
-  // const data = await (await fetch('data/numbers.json')).json();   // only works over http
-  await document.fonts.ready;            // canvas text drawn earlier uses the fallback font
+  await document.fonts.ready;            // canvas/SVG text drawn earlier uses the fallback font
   // window.__transparent = true;        // a divider that must be transparent (PNG output)
   window.__ready = true;
 </script>
